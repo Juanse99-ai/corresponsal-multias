@@ -55,9 +55,9 @@ export type Database = {
         Relationships: [];
       };
       corr_deudas: {
-        Row: { id: string; persona: string; monto: number; concepto: string | null; descripcion: string | null; fecha: string; created_by: string | null; created_at: string };
-        Insert: { id?: string; persona: string; monto: number; concepto?: string | null; descripcion?: string | null; fecha?: string; created_by?: string | null; created_at?: string };
-        Update: { id?: string; persona?: string; monto?: number; concepto?: string | null; descripcion?: string | null; fecha?: string; created_by?: string | null; created_at?: string };
+        Row: { id: string; persona: string; monto: number; concepto: string | null; descripcion: string | null; medio: string; fecha: string; created_by: string | null; created_at: string };
+        Insert: { id?: string; persona: string; monto: number; concepto?: string | null; descripcion?: string | null; medio?: string; fecha?: string; created_by?: string | null; created_at?: string };
+        Update: { id?: string; persona?: string; monto?: number; concepto?: string | null; descripcion?: string | null; medio?: string; fecha?: string; created_by?: string | null; created_at?: string };
         Relationships: [];
       };
       corr_abonos: {

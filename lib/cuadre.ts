@@ -30,22 +30,13 @@ export const CUADRE_VACIO: CuadreValores = {
 };
 
 /**
- * Suma de todo lo que deberia "explicar" la tirilla.
- * Igual que el Excel (CIERRE): SALDO FINAL = TIRILLA - SUMA(SR LUIS .. RET REAL),
- * donde RET REAL tambien se resta (va dentro de la suma).
- * EFECTIVO (Excel) = efectivo_consignaciones + retiros_cash.
+ * Saldo ELECTRONICO: la tirilla de Bancolombia se explica solo con lo que paso
+ * por el banco -> Sr. Luis + consignaciones a Nequi/Bancolombia + prestamos por
+ * TRANSFERENCIA. El efectivo, los retiros y los prestamos en efectivo NO van
+ * aqui: son caja y se verifican en el arqueo (no en el saldo).
  */
 export function sumaComponentes(v: CuadreValores): number {
-  return (
-    v.sr_luis +
-    v.efectivo_consignaciones +
-    v.retiros_cash +
-    v.compensado +
-    v.nequis +
-    v.bancolombia +
-    v.prestamos_consignaciones +
-    v.ret_real
-  );
+  return v.sr_luis + v.nequis + v.bancolombia + v.prestamos_consignaciones;
 }
 
 /**
@@ -86,20 +77,20 @@ export function efectivoParaCuadrar(v: CuadreValores): number {
 
 export interface ArqueoValores {
   fondo_caja: number;
-  efectivo_consignaciones: number; // efectivo que entro
-  ret_real: number; // retiros pagados
+  consignaciones_cash: number; // efectivo que ENTRO por consignaciones (Nequi + Bancolombia pagadas en efectivo)
+  ret_real: number; // retiros pagados en efectivo
+  prestamos_efectivo: number; // prestamos dados en efectivo
   compensado: number; // efectivo llevado al banco
-  prestamos_consignaciones: number; // prestamos en efectivo
 }
 
 /** Efectivo que deberia quedar fisicamente en la caja al cerrar. */
 export function efectivoEsperadoCaja(a: ArqueoValores): number {
   return (
     a.fondo_caja +
-    a.efectivo_consignaciones -
+    a.consignaciones_cash -
     a.ret_real -
-    a.compensado -
-    a.prestamos_consignaciones
+    a.prestamos_efectivo -
+    a.compensado
   );
 }
 
@@ -115,12 +106,8 @@ export interface TermLine {
 export function cuadreBreakdown(v: CuadreValores): TermLine[] {
   return [
     { key: "sr_luis", label: "Sr. Luis", value: v.sr_luis, sign: 1, hint: "Consignaciones de Luis del dia" },
-    { key: "efectivo_consignaciones", label: "Efectivo (consignaciones)", value: v.efectivo_consignaciones, sign: 1, hint: "Efectivo de clientes externos" },
-    { key: "retiros_cash", label: "Retiros en cash", value: v.retiros_cash, sign: 1, hint: "Retiros entregados en efectivo" },
-    { key: "compensado", label: "Compensado", value: v.compensado, sign: 1, hint: "Saldo de Luis arrastrado de ayer" },
     { key: "nequis", label: "Nequis", value: v.nequis, sign: 1 },
     { key: "bancolombia", label: "Bancolombia", value: v.bancolombia, sign: 1 },
-    { key: "prestamos_consignaciones", label: "Prestamos / consignaciones", value: v.prestamos_consignaciones, sign: 1 },
-    { key: "ret_real", label: "Retiros reales", value: v.ret_real, sign: 1, hint: "Parte de la suma" },
+    { key: "prestamos_consignaciones", label: "Prestamos por transferencia", value: v.prestamos_consignaciones, sign: 1 },
   ];
 }

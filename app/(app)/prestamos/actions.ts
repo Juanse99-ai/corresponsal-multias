@@ -68,6 +68,7 @@ const prestamoDiaSchema = z.object({
   persona: z.string().trim().min(1).max(60),
   concepto: z.string().trim().max(60).nullable().optional(),
   monto: z.number().int().positive(),
+  medio: z.enum(["efectivo", "transferencia"]).optional(),
   pagado: z.boolean().optional(),
 });
 
@@ -84,6 +85,7 @@ export async function registrarPrestamoDia(raw: unknown): Promise<{ ok: boolean;
       persona: p.data.persona,
       monto: p.data.monto,
       concepto: p.data.concepto?.trim() || null,
+      medio: p.data.medio ?? "efectivo",
       fecha: p.data.fecha,
       created_by: session.id,
     })

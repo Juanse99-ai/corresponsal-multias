@@ -12,7 +12,6 @@ import {
   ArrowUpRight,
   Lock,
   LockOpen,
-  Coins,
   ArrowClockwise,
 } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
@@ -27,7 +26,6 @@ import {
   computeSaldoFinal,
   sumaComponentes,
   isDescuadre,
-  efectivoParaCuadrar,
   efectivoEsperadoCaja,
   type EstadoCuadre,
 } from "@/lib/cuadre";
@@ -58,7 +56,8 @@ interface Props {
   soportesCount: number;
   movCount: number;
   prestamosCount: number;
-  prestamosDiaTotal: number;
+  prestamosTransferDia: number;
+  prestamosEfectivoDia: number;
   movTotales: { consignacion_nequi: number; consignacion_bancolombia: number; retiro: number };
 }
 
@@ -72,7 +71,8 @@ export function CuadreEditor({
   soportesCount,
   movCount,
   prestamosCount,
-  prestamosDiaTotal,
+  prestamosTransferDia,
+  prestamosEfectivoDia,
   movTotales,
 }: Props) {
   const router = useRouter();
@@ -102,7 +102,7 @@ export function CuadreEditor({
       nequis: movTotales.consignacion_nequi,
       bancolombia: movTotales.consignacion_bancolombia,
       ret_real: movTotales.retiro,
-      prestamos_consignaciones: prestamosDiaTotal,
+      prestamos_consignaciones: prestamosTransferDia,
     }));
   }
 
@@ -110,30 +110,29 @@ export function CuadreEditor({
   const saldo = useMemo(() => computeSaldoFinal(valores), [valores]);
   const suma = useMemo(() => sumaComponentes(valores), [valores]);
   const descuadre = isDescuadre(saldo);
-  const efectivoNecesario = useMemo(() => efectivoParaCuadrar(valores), [valores]);
+  // Efectivo que entró por consignaciones (Nequi + Bancolombia, pagadas en efectivo).
+  const consignacionesCash = vals.nequis + vals.bancolombia;
   const esperadoCaja = useMemo(
     () =>
       efectivoEsperadoCaja({
         fondo_caja: vals.fondo_caja,
-        efectivo_consignaciones: vals.efectivo_consignaciones,
+        consignaciones_cash: vals.nequis + vals.bancolombia,
         ret_real: vals.ret_real,
+        prestamos_efectivo: prestamosEfectivoDia,
         compensado: vals.compensado,
-        prestamos_consignaciones: vals.prestamos_consignaciones,
       }),
-    [vals],
+    [vals, prestamosEfectivoDia],
   );
   const diferenciaCaja = vals.efectivo_contado - esperadoCaja;
   // Anti-tamper: un dia cerrado solo lo edita el admin.
   const locked = inicial.estado === "cerrado" && !isAdmin;
 
+  // El saldo final cuadra SOLO lo electrónico (lo que pasó por Bancolombia).
   const lineas = [
     { label: "Sr. Luis", value: srLuis },
-    { label: "Efectivo (consignaciones)", value: vals.efectivo_consignaciones },
-    { label: "Compensado", value: vals.compensado },
     { label: "Nequis", value: vals.nequis },
     { label: "Bancolombia", value: vals.bancolombia },
-    { label: "Préstamos / consig.", value: vals.prestamos_consignaciones },
-    { label: "Retiros", value: vals.ret_real },
+    { label: "Préstamos por transferencia", value: vals.prestamos_consignaciones },
   ];
 
   function onGuardar(nuevoEstado?: EstadoCuadre) {
@@ -241,37 +240,23 @@ export function CuadreEditor({
           </button>
         )}
 
-        {/* Desglose */}
+        {/* Desglose electrónico (lo que pasó por Bancolombia) */}
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Campo label="Efectivo (consignaciones)" id="efectivo_consignaciones">
-            <MoneyInput id="efectivo_consignaciones" value={vals.efectivo_consignaciones} onValueChange={set("efectivo_consignaciones")} />
+          <Campo label="Nequis" id="nequis_e">
+            <MoneyInput id="nequis_e" value={vals.nequis} onValueChange={set("nequis")} />
+          </Campo>
+          <Campo label="Bancolombia" id="bancolombia_e">
+            <MoneyInput id="bancolombia_e" value={vals.bancolombia} onValueChange={set("bancolombia")} />
+          </Campo>
+          <Campo label="Préstamos por transferencia" id="prestamos_consignaciones" hint="Los que diste por transferencia">
+            <MoneyInput id="prestamos_consignaciones" value={vals.prestamos_consignaciones} onValueChange={set("prestamos_consignaciones")} />
           </Campo>
           <Campo label="Compensado" id="compensado" hint="Efectivo propio que llevas al banco">
             <MoneyInput id="compensado" value={vals.compensado} onValueChange={set("compensado")} />
           </Campo>
-          <Campo label="Nequis" id="nequis">
-            <MoneyInput id="nequis" value={vals.nequis} onValueChange={set("nequis")} />
-          </Campo>
-          <Campo label="Bancolombia" id="bancolombia">
-            <MoneyInput id="bancolombia" value={vals.bancolombia} onValueChange={set("bancolombia")} />
-          </Campo>
-          <Campo label="Préstamos / consignaciones" id="prestamos_consignaciones">
-            <MoneyInput id="prestamos_consignaciones" value={vals.prestamos_consignaciones} onValueChange={set("prestamos_consignaciones")} />
-          </Campo>
-          <Campo label="Retiros" id="ret_real">
+          <Campo label="Retiros" id="ret_real" hint="Efectivo que sale">
             <MoneyInput id="ret_real" value={vals.ret_real} onValueChange={set("ret_real")} />
           </Campo>
-        </div>
-
-        {/* Indicador: efectivo necesario para cuadrar */}
-        <div className="mt-4 flex items-center justify-between rounded-[--radius-card] border border-accent/25 bg-accent-soft/50 px-4 py-3">
-          <div className="flex items-center gap-2 text-[0.82rem] text-muted">
-            <Coins size={15} weight="fill" className="text-accent" />
-            Para cuadrar, el efectivo debería sumar
-          </div>
-          <span className="tnum text-[0.95rem] font-semibold text-accent-strong">
-            {formatCOP(efectivoNecesario)}
-          </span>
         </div>
 
         {/* Arqueo de caja física */}
@@ -288,10 +273,26 @@ export function CuadreEditor({
               <MoneyInput id="efectivo_contado" value={vals.efectivo_contado} onValueChange={set("efectivo_contado")} />
             </Campo>
           </div>
-          <div className="mt-3 flex flex-col divide-y divide-line text-sm">
+          <div className="mt-3 flex flex-col divide-y divide-line text-[0.82rem]">
             <div className="flex items-center justify-between py-2">
-              <span className="text-muted">Esperado en caja</span>
-              <span className="tnum text-text">{formatCOP(esperadoCaja)}</span>
+              <span className="text-muted">Efectivo que entró (consignaciones)</span>
+              <span className="tnum text-text">{formatCOP(consignacionesCash)}</span>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-muted">− Retiros</span>
+              <span className="tnum text-text">{formatCOP(vals.ret_real)}</span>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-muted">− Préstamos en efectivo</span>
+              <span className="tnum text-text">{formatCOP(prestamosEfectivoDia)}</span>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-muted">− Compensado (al banco)</span>
+              <span className="tnum text-text">{formatCOP(vals.compensado)}</span>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="font-medium text-text">Esperado en caja</span>
+              <span className="tnum font-medium text-text">{formatCOP(esperadoCaja)}</span>
             </div>
             <div className="flex items-center justify-between py-2">
               <span className="font-medium text-text">Diferencia</span>
@@ -302,7 +303,7 @@ export function CuadreEditor({
             </div>
           </div>
           <p className="mt-1 text-[0.68rem] leading-relaxed text-faint">
-            Esperado = fondo + efectivo que entró − retiros − compensado (banco) − préstamos.
+            El efectivo que entró = Nequis + Bancolombia (los clientes pagan en efectivo).
           </p>
         </div>
 

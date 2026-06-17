@@ -30,6 +30,7 @@ export function PrestamosDia({
   const [persona, setPersona] = useState("");
   const [concepto, setConcepto] = useState("");
   const [monto, setMonto] = useState(0);
+  const [medio, setMedio] = useState<"efectivo" | "transferencia">("efectivo");
   const [pagado, setPagado] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,12 +56,14 @@ export function PrestamosDia({
         persona: persona.trim(),
         concepto: concepto.trim() || null,
         monto,
+        medio,
         pagado,
       });
       if (res.ok) {
         setPersona("");
         setConcepto("");
         setMonto(0);
+        setMedio("efectivo");
         setPagado(false);
         router.refresh();
       } else {
@@ -144,6 +147,30 @@ export function PrestamosDia({
                 {pagado ? "Sí, devuelto hoy" : "Sigue pendiente"}
               </button>
             </div>
+          </div>
+
+          <div className="mt-4 flex flex-col gap-2">
+            <Label>¿Cómo se lo diste?</Label>
+            <div className="flex gap-2">
+              {(["efectivo", "transferencia"] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setMedio(m)}
+                  className={cn(
+                    "flex-1 rounded-[--radius-card] border px-3 py-2.5 text-[0.82rem] font-medium transition-colors",
+                    medio === m
+                      ? "border-accent/40 bg-accent-soft text-accent-strong"
+                      : "border-line-strong text-muted hover:text-text",
+                  )}
+                >
+                  {m === "efectivo" ? "Efectivo" : "Transferencia"}
+                </button>
+              ))}
+            </div>
+            <p className="text-[0.7rem] text-faint">
+              Transferencia entra al cuadre (tirilla); efectivo va a la caja (arqueo).
+            </p>
           </div>
 
           {error && (
