@@ -10,6 +10,7 @@ const deudaSchema = z.object({
   monto: z.number().int().positive(),
   concepto: z.string().max(60).nullable().optional(),
   descripcion: z.string().max(200).nullable().optional(),
+  medio: z.enum(["efectivo", "transferencia"]).optional(),
   fecha: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/)
@@ -27,6 +28,7 @@ export async function crearDeuda(raw: unknown): Promise<{ ok: boolean; error?: s
     monto: p.data.monto,
     concepto: p.data.concepto?.trim() || null,
     descripcion: p.data.descripcion?.trim() || null,
+    medio: p.data.medio ?? "transferencia",
     fecha: p.data.fecha,
     created_by: session.id,
   });
