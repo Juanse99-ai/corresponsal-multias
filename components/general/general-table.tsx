@@ -26,7 +26,7 @@ export function GeneralTable({ entries }: { entries: GeneralRow[] }) {
       Efectivo: e.efectivo,
       Nequis: e.nequis,
       Monedas: e.monedas,
-      "Deudas terceros": e.deudas_terceros,
+      "Deudas de terceros": e.deudas_terceros,
       "Saldo total": computeSaldoTotal(e),
     }));
     const ws = XLSX.utils.json_to_sheet(rows);
