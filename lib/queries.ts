@@ -261,6 +261,18 @@ export function totalPrestamosPendientes(rows: DeudaConSaldo[]): number {
   return rows.reduce((s, d) => s + d.saldo, 0);
 }
 
+/** Saldos pendientes separados por medio: transferencia (va en la tirilla) vs efectivo (va en el arqueo). */
+export function prestamosPendientesPorMedio(rows: DeudaConSaldo[]): { transferencia: number; efectivo: number } {
+  let transferencia = 0;
+  let efectivo = 0;
+  for (const d of rows) {
+    if (d.saldo <= 0) continue;
+    if (d.medio === "transferencia") transferencia += d.saldo;
+    else efectivo += d.saldo;
+  }
+  return { transferencia, efectivo };
+}
+
 // ===== Resumen para el header (avisos + buscador) =====
 export interface HeaderResumen {
   cuadreHoy: { estado: string; saldo_final: number } | null;

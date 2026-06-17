@@ -7,7 +7,7 @@ import {
   getMovimientos,
   totalesMovimientos,
   getPrestamosDia,
-  totalPrestamosPendientes,
+  prestamosPendientesPorMedio,
   sumMontos,
 } from "@/lib/queries";
 import { getSessionProfile } from "@/lib/auth";
@@ -39,7 +39,7 @@ export default async function CuadrePage({
   const srLuis = sumMontos(consignaciones);
   const isAdmin = profile?.rol === "admin";
   const tot = totalesMovimientos(movimientos);
-  const prestamosPendientes = totalPrestamosPendientes(prestamos);
+  const prestamosMedio = prestamosPendientesPorMedio(prestamos);
 
   const inicial = cuadre
     ? {
@@ -62,7 +62,7 @@ export default async function CuadrePage({
         retiros_cash: 0,
         nequis: tot.consignacion_nequi,
         bancolombia: tot.consignacion_bancolombia,
-        prestamos_consignaciones: prestamosPendientes,
+        prestamos_consignaciones: prestamosMedio.transferencia,
         ret_real: tot.retiro,
         compensado: 0,
         fondo_caja: 0,
@@ -84,7 +84,8 @@ export default async function CuadrePage({
         soportesCount={soportes.length}
         movCount={tot.cantidad}
         prestamosCount={prestamos.length}
-        prestamosDiaTotal={prestamosPendientes}
+        prestamosTransferDia={prestamosMedio.transferencia}
+        prestamosEfectivoDia={prestamosMedio.efectivo}
         movTotales={{
           consignacion_nequi: tot.consignacion_nequi,
           consignacion_bancolombia: tot.consignacion_bancolombia,
