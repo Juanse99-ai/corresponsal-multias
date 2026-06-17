@@ -36,6 +36,17 @@ export async function guardarCuadre(raw: unknown): Promise<GuardarCuadreResult> 
 
   const sb = await createClient();
 
+  // Anti-tamper (servidor): un dia CERRADO solo lo puede editar/reabrir un admin.
+  // El candado de la pantalla no basta; aqui se rechaza de verdad.
+  const { data: existente } = await sb
+    .from("corr_cuadres")
+    .select("estado")
+    .eq("fecha", v.fecha)
+    .maybeSingle();
+  if (existente?.estado === "cerrado" && session.rol !== "admin") {
+    return { ok: false, error: "El día está cerrado. Solo Juan puede reabrirlo para editar." };
+  }
+
   // sr_luis autoritativo: suma de consignaciones de Luis de ese dia.
   // saldo de Luis = compensaciones - consignaciones (se arrastra como compensado).
   const [{ data: cons }, { data: comp }] = await Promise.all([
