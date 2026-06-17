@@ -1,0 +1,36 @@
+# DESIGN.md — Corresponsal · Multidiagnósticos AS
+
+Registro: **product** (app de operación interna). Escena que fija el tema: Ivana operando
+todo el día desde un PC en un local iluminado, leyendo cifras de plata → **tema claro**.
+
+## Paleta (del logo: azul + rojo + blanco)
+
+Definida en OKLCH, neutros entintados al azul (`app/globals.css`).
+
+| Rol | Token | Uso |
+|---|---|---|
+| Lienzo | `--bg` claro frío | fondo de página |
+| Superficie | `--surface` (~blanco) | tarjetas |
+| Inputs | `--surface-2` | campos |
+| Borde | `--line` / `--line-strong` | bordes sólidos suaves |
+| Texto | `--text` azul marino oscuro (no negro) | cuerpo |
+| Acento | `--accent` **azul royal del logo** | botones, links, activo |
+| Éxito | `--success` verde | cuadrado / a favor |
+| Peligro | `--danger` **rojo del logo** | descuadre / negativos |
+| Riel | `--nav-*` **azul marino** | barra lateral (no negra) |
+
+Estrategia de color: **restrained-committed** — neutros claros + azul como acento, rojo solo
+para estado negativo, verde solo para "cuadrado". El riel lateral azul marino da el contraste
+"riel oscuro / lienzo claro" sin usar negro.
+
+## Reglas
+- Nunca `#000`/`#fff`; todo entintado al azul.
+- Sombras suaves tintadas al azul (no negro duro).
+- Tipografía Geist (sans) + Geist Mono (cifras, clase `.tnum`).
+- Sin grano. Halo ambiental azul muy sutil.
+- Marca: cuadro azul con pulso (diagnóstico) blanco y pico rojo — guiño al logo.
+- Motion: GSAP solo en login; Framer Motion en el resto. Ease-out, sin rebote.
+
+## Anti-slop
+- Nada de negro puro ni "fintech navy+gold" (era el tema viejo).
+- Sin gradient-text, sin glassmorphism decorativo, sin bordes laterales de color.
