@@ -33,21 +33,21 @@ export type Database = {
       corr_cuadres: {
         Row: {
           id: string; fecha: string; total_tirilla: number; efectivo_consignaciones: number;
-          retiros_cash: number; nequis: number; bancolombia: number; prestamos_consignaciones: number; ret_real: number;
+          retiros_cash: number; nequis: number; bancolombia: number; recaudos: number; prestamos_consignaciones: number; ret_real: number;
           compensado: number; sr_luis: number; saldo_final: number; saldo_luis_cierre: number;
           fondo_caja: number; efectivo_contado: number;
           estado: string; nota: string | null; created_by: string | null; created_at: string; updated_at: string;
         };
         Insert: {
           id?: string; fecha: string; total_tirilla?: number; efectivo_consignaciones?: number;
-          retiros_cash?: number; nequis?: number; bancolombia?: number; prestamos_consignaciones?: number; ret_real?: number;
+          retiros_cash?: number; nequis?: number; bancolombia?: number; recaudos?: number; prestamos_consignaciones?: number; ret_real?: number;
           compensado?: number; sr_luis?: number; saldo_final?: number; saldo_luis_cierre?: number;
           fondo_caja?: number; efectivo_contado?: number;
           estado?: string; nota?: string | null; created_by?: string | null; created_at?: string; updated_at?: string;
         };
         Update: {
           id?: string; fecha?: string; total_tirilla?: number; efectivo_consignaciones?: number;
-          retiros_cash?: number; nequis?: number; bancolombia?: number; prestamos_consignaciones?: number; ret_real?: number;
+          retiros_cash?: number; nequis?: number; bancolombia?: number; recaudos?: number; prestamos_consignaciones?: number; ret_real?: number;
           compensado?: number; sr_luis?: number; saldo_final?: number; saldo_luis_cierre?: number;
           fondo_caja?: number; efectivo_contado?: number;
           estado?: string; nota?: string | null; created_by?: string | null; created_at?: string; updated_at?: string;
@@ -85,9 +85,9 @@ export type Database = {
         Relationships: [];
       };
       corr_movimientos: {
-        Row: { id: string; fecha: string; tipo: string; monto: number; hora: string | null; cliente: string | null; created_by: string | null; created_at: string };
-        Insert: { id?: string; fecha?: string; tipo: string; monto: number; hora?: string | null; cliente?: string | null; created_by?: string | null; created_at?: string };
-        Update: { id?: string; fecha?: string; tipo?: string; monto?: number; hora?: string | null; cliente?: string | null; created_by?: string | null; created_at?: string };
+        Row: { id: string; fecha: string; tipo: string; monto: number; hora: string | null; cliente: string | null; convenio: string | null; created_by: string | null; created_at: string };
+        Insert: { id?: string; fecha?: string; tipo: string; monto: number; hora?: string | null; cliente?: string | null; convenio?: string | null; created_by?: string | null; created_at?: string };
+        Update: { id?: string; fecha?: string; tipo?: string; monto?: number; hora?: string | null; cliente?: string | null; convenio?: string | null; created_by?: string | null; created_at?: string };
         Relationships: [];
       };
       corr_audit_log: {

@@ -37,6 +37,7 @@ interface Inicial {
   retiros_cash: number;
   nequis: number;
   bancolombia: number;
+  recaudos: number;
   prestamos_consignaciones: number;
   ret_real: number;
   compensado: number;
@@ -58,7 +59,7 @@ interface Props {
   prestamosCount: number;
   prestamosTransferDia: number;
   prestamosEfectivoDia: number;
-  movTotales: { consignacion_nequi: number; consignacion_bancolombia: number; retiro: number };
+  movTotales: { consignacion_nequi: number; consignacion_bancolombia: number; retiro: number; recaudo: number };
 }
 
 export function CuadreEditor({
@@ -85,6 +86,7 @@ export function CuadreEditor({
     retiros_cash: inicial.retiros_cash,
     nequis: inicial.nequis,
     bancolombia: inicial.bancolombia,
+    recaudos: inicial.recaudos,
     prestamos_consignaciones: inicial.prestamos_consignaciones,
     ret_real: inicial.ret_real,
     compensado: inicial.compensado,
@@ -101,6 +103,7 @@ export function CuadreEditor({
       ...s,
       nequis: movTotales.consignacion_nequi,
       bancolombia: movTotales.consignacion_bancolombia,
+      recaudos: movTotales.recaudo,
       ret_real: movTotales.retiro,
       prestamos_consignaciones: prestamosTransferDia,
     }));
@@ -111,12 +114,12 @@ export function CuadreEditor({
   const suma = useMemo(() => sumaComponentes(valores), [valores]);
   const descuadre = isDescuadre(saldo);
   // Efectivo que entró por consignaciones (Nequi + Bancolombia, pagadas en efectivo).
-  const consignacionesCash = vals.nequis + vals.bancolombia;
+  const consignacionesCash = vals.nequis + vals.bancolombia + vals.recaudos;
   const esperadoCaja = useMemo(
     () =>
       efectivoEsperadoCaja({
         fondo_caja: vals.fondo_caja,
-        consignaciones_cash: vals.nequis + vals.bancolombia,
+        consignaciones_cash: vals.nequis + vals.bancolombia + vals.recaudos,
         ret_real: vals.ret_real,
         prestamos_efectivo: prestamosEfectivoDia,
         compensado: vals.compensado,
@@ -132,6 +135,7 @@ export function CuadreEditor({
     { label: "Sr. Luis", value: srLuis },
     { label: "Nequis", value: vals.nequis },
     { label: "Bancolombia", value: vals.bancolombia },
+    { label: "Recaudos", value: vals.recaudos },
     { label: "Préstamos por transferencia", value: vals.prestamos_consignaciones },
   ];
 
@@ -247,6 +251,9 @@ export function CuadreEditor({
           </Campo>
           <Campo label="Bancolombia" id="bancolombia_e">
             <MoneyInput id="bancolombia_e" value={vals.bancolombia} onValueChange={set("bancolombia")} />
+          </Campo>
+          <Campo label="Recaudos" id="recaudos_e" hint="Pagos de convenios">
+            <MoneyInput id="recaudos_e" value={vals.recaudos} onValueChange={set("recaudos")} />
           </Campo>
           <Campo label="Préstamos por transferencia" id="prestamos_consignaciones" hint="Los que diste por transferencia">
             <MoneyInput id="prestamos_consignaciones" value={vals.prestamos_consignaciones} onValueChange={set("prestamos_consignaciones")} />
