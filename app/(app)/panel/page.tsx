@@ -32,10 +32,24 @@ export default async function PanelPage() {
   const personas = agruparPorPersona(deudas);
   const totalPendiente = personas.reduce((s, p) => s + p.saldo, 0);
 
+  const distribucion = cuadreHoy
+    ? [
+        { label: "Sr. Luis", value: srLuisHoy },
+        { label: "Efectivo", value: cuadreHoy.efectivo_consignaciones + cuadreHoy.retiros_cash },
+        { label: "Nequis", value: cuadreHoy.nequis },
+        { label: "Bancolombia", value: cuadreHoy.bancolombia },
+        { label: "Préstamos", value: cuadreHoy.prestamos_consignaciones },
+        { label: "Compensado", value: cuadreHoy.compensado },
+        { label: "Retiros", value: cuadreHoy.ret_real },
+      ]
+    : [];
+
   const data: PanelData = {
     nombre: profile.nombre,
     rol: profile.rol,
     cuadreHoy: cuadreHoy ? { estado: cuadreHoy.estado, saldo_final: cuadreHoy.saldo_final } : null,
+    tirillaHoy: cuadreHoy ? cuadreHoy.total_tirilla : 0,
+    distribucion,
     srLuisHoy,
     consignacionesHoyCount: consignacionesHoy.length,
     saldoLuisAcumulado,
