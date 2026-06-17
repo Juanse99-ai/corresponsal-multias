@@ -129,12 +129,11 @@ export function CuadreEditor({
   const lineas = [
     { label: "Sr. Luis", value: srLuis },
     { label: "Efectivo (consignaciones)", value: vals.efectivo_consignaciones },
-    { label: "Retiros en cash", value: vals.retiros_cash },
     { label: "Compensado", value: vals.compensado },
     { label: "Nequis", value: vals.nequis },
     { label: "Bancolombia", value: vals.bancolombia },
     { label: "Préstamos / consig.", value: vals.prestamos_consignaciones },
-    { label: "Retiros reales", value: vals.ret_real },
+    { label: "Retiros", value: vals.ret_real },
   ];
 
   function onGuardar(nuevoEstado?: EstadoCuadre) {
@@ -247,9 +246,6 @@ export function CuadreEditor({
           <Campo label="Efectivo (consignaciones)" id="efectivo_consignaciones">
             <MoneyInput id="efectivo_consignaciones" value={vals.efectivo_consignaciones} onValueChange={set("efectivo_consignaciones")} />
           </Campo>
-          <Campo label="Retiros en cash" id="retiros_cash">
-            <MoneyInput id="retiros_cash" value={vals.retiros_cash} onValueChange={set("retiros_cash")} />
-          </Campo>
           <Campo label="Compensado" id="compensado" hint="Efectivo propio que llevas al banco">
             <MoneyInput id="compensado" value={vals.compensado} onValueChange={set("compensado")} />
           </Campo>
@@ -262,7 +258,7 @@ export function CuadreEditor({
           <Campo label="Préstamos / consignaciones" id="prestamos_consignaciones">
             <MoneyInput id="prestamos_consignaciones" value={vals.prestamos_consignaciones} onValueChange={set("prestamos_consignaciones")} />
           </Campo>
-          <Campo label="Retiros reales" id="ret_real">
+          <Campo label="Retiros" id="ret_real">
             <MoneyInput id="ret_real" value={vals.ret_real} onValueChange={set("ret_real")} />
           </Campo>
         </div>

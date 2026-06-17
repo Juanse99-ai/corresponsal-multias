@@ -111,23 +111,6 @@ export function AppShell({
         <UserCard profile={profile} />
       </aside>
 
-      {/* Botón flotante para reabrir el menú en escritorio */}
-      <AnimatePresence>
-        {collapsed && (
-          <motion.button
-            initial={{ opacity: 0, scale: 0.85, x: -10 }}
-            animate={{ opacity: 1, scale: 1, x: 0 }}
-            exit={{ opacity: 0, scale: 0.85, x: -10 }}
-            transition={{ type: "spring", stiffness: 380, damping: 26 }}
-            onClick={() => setCollapsed(false)}
-            title="Mostrar menú"
-            className="fixed left-4 top-4 z-40 hidden h-11 w-11 items-center justify-center rounded-xl border border-line bg-surface text-text shadow-[0_10px_28px_-12px_oklch(0.4_0.07_258/0.4)] lg:flex"
-          >
-            <Hamburger open={false} />
-          </motion.button>
-        )}
-      </AnimatePresence>
-
       {/* ===== Barra superior móvil ===== */}
       <header className="sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-line bg-bg/85 px-3 py-2.5 backdrop-blur-xl lg:hidden">
         <button
@@ -199,7 +182,7 @@ export function AppShell({
           collapsed ? "lg:pl-0" : "lg:pl-[248px]",
         )}
       >
-        <TopHeader resumen={resumen} isAdmin={isAdmin} />
+        <TopHeader resumen={resumen} isAdmin={isAdmin} collapsed={collapsed} onExpand={() => setCollapsed(false)} />
         <div className="mx-auto w-full max-w-[1200px] px-4 pb-16 pt-6 sm:px-6 lg:px-8 lg:pb-16 lg:pt-7">
           {children}
         </div>
