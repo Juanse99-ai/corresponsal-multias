@@ -1,0 +1,270 @@
+"use client";
+
+import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { HandCoins, Plus, Trash, Check, Clock, Warning, CheckCircle } from "@phosphor-icons/react/dist/ssr";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { MoneyInput } from "@/components/ui/money-input";
+import { AnimatedMoney } from "@/components/ui/animated-number";
+import { cn } from "@/lib/utils";
+import { formatCOP, formatHoraISO } from "@/lib/format";
+import type { DeudaConSaldo } from "@/lib/queries";
+import { registrarPrestamoDia, marcarPrestamoPagado, eliminarDeuda } from "@/app/(app)/prestamos/actions";
+
+export function PrestamosDia({
+  fecha,
+  prestamos,
+  isAdmin,
+}: {
+  fecha: string;
+  prestamos: DeudaConSaldo[];
+  isAdmin: boolean;
+}) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [persona, setPersona] = useState("");
+  const [concepto, setConcepto] = useState("");
+  const [monto, setMonto] = useState(0);
+  const [pagado, setPagado] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { pendiente, prestado, devuelto } = useMemo(() => {
+    let pendiente = 0;
+    let prestado = 0;
+    let devuelto = 0;
+    for (const p of prestamos) {
+      pendiente += p.saldo;
+      prestado += p.monto;
+      devuelto += p.abonado;
+    }
+    return { pendiente, prestado, devuelto };
+  }, [prestamos]);
+
+  function registrar() {
+    if (!persona.trim()) return setError("Escribe a quién es el préstamo.");
+    if (monto <= 0) return setError("Ingresa un monto mayor a cero.");
+    setError(null);
+    startTransition(async () => {
+      const res = await registrarPrestamoDia({
+        fecha,
+        persona: persona.trim(),
+        concepto: concepto.trim() || null,
+        monto,
+        pagado,
+      });
+      if (res.ok) {
+        setPersona("");
+        setConcepto("");
+        setMonto(0);
+        setPagado(false);
+        router.refresh();
+      } else {
+        setError(res.error ?? "No se pudo registrar.");
+      }
+    });
+  }
+
+  function pagar(d: DeudaConSaldo) {
+    startTransition(async () => {
+      await marcarPrestamoPagado({ deuda_id: d.id, monto: d.saldo });
+      router.refresh();
+    });
+  }
+
+  function borrar(id: string) {
+    startTransition(async () => {
+      await eliminarDeuda(id);
+      router.refresh();
+    });
+  }
+
+  return (
+    <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_400px] lg:items-start">
+      {/* Registro + lista */}
+      <div className="flex flex-col gap-5">
+        <Card className="p-5 sm:p-6">
+          <div className="flex items-center gap-2">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-soft text-accent-strong">
+              <HandCoins size={15} weight="bold" />
+            </span>
+            <h2 className="text-[0.95rem] font-semibold tracking-tight text-text">Préstamos del día</h2>
+          </div>
+          <p className="mt-1 text-sm text-muted">
+            Quedan en Préstamos con su saldo. Si ya te lo devolvió, márcalo y se salda de una.
+          </p>
+
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="pr-persona">A quién</Label>
+              <Input
+                id="pr-persona"
+                value={persona}
+                onChange={(e) => setPersona(e.target.value)}
+                placeholder="Nombre de la persona"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="pr-concepto">Concepto</Label>
+              <Input
+                id="pr-concepto"
+                value={concepto}
+                onChange={(e) => setConcepto(e.target.value)}
+                placeholder="Préstamo personal, adelanto…"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="pr-monto">Monto</Label>
+              <MoneyInput id="pr-monto" value={monto} onValueChange={setMonto} />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label>¿Ya lo devolvió?</Label>
+              <button
+                type="button"
+                onClick={() => setPagado((v) => !v)}
+                className={cn(
+                  "flex h-[2.75rem] items-center gap-2.5 rounded-[--radius-card] border px-3.5 text-[0.85rem] transition-colors",
+                  pagado
+                    ? "border-success/40 bg-success-soft text-success"
+                    : "border-line-strong text-muted hover:text-text",
+                )}
+              >
+                <span
+                  className={cn(
+                    "flex h-4 w-4 items-center justify-center rounded border transition-colors",
+                    pagado ? "border-success bg-success text-white" : "border-line-strong",
+                  )}
+                >
+                  {pagado && <Check size={11} weight="bold" />}
+                </span>
+                {pagado ? "Sí, devuelto hoy" : "Sigue pendiente"}
+              </button>
+            </div>
+          </div>
+
+          {error && (
+            <div className="mt-4 flex items-center gap-2 rounded-[--radius-card] border border-danger/30 bg-danger-soft px-3.5 py-2.5 text-[0.82rem] text-danger">
+              <Warning size={15} weight="fill" />
+              {error}
+            </div>
+          )}
+
+          <Button onClick={registrar} disabled={pending} className="mt-5 w-full sm:w-auto">
+            <Plus size={18} weight="bold" />
+            {pending ? "Registrando…" : "Registrar préstamo"}
+          </Button>
+        </Card>
+
+        <Card className="p-5 sm:p-6">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-[0.95rem] font-semibold tracking-tight text-text">Préstamos de hoy</h3>
+            <span className="text-[0.72rem] text-faint">{prestamos.length}</span>
+          </div>
+
+          {prestamos.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 rounded-[1rem] border border-dashed border-line-strong py-12 text-center">
+              <HandCoins size={20} className="text-faint" />
+              <p className="text-sm text-muted">Aún no hay préstamos registrados.</p>
+            </div>
+          ) : (
+            <ul className="flex flex-col divide-y divide-line">
+              <AnimatePresence initial={false}>
+                {prestamos.map((d) => {
+                  const saldado = d.saldo === 0;
+                  return (
+                    <motion.li
+                      key={d.id}
+                      layout
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ type: "spring", stiffness: 320, damping: 30 }}
+                      className="flex items-center justify-between gap-3 py-2.5"
+                    >
+                      <div className="flex min-w-0 items-center gap-3">
+                        <div
+                          className={cn(
+                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
+                            saldado ? "bg-success-soft text-success" : "bg-accent-soft text-accent-strong",
+                          )}
+                        >
+                          {saldado ? <CheckCircle size={16} weight="bold" /> : <HandCoins size={15} weight="bold" />}
+                        </div>
+                        <div className="min-w-0 leading-tight">
+                          <p className="tnum text-[0.92rem] font-medium text-text">{formatCOP(d.monto)}</p>
+                          <p className="flex items-center gap-1.5 truncate text-[0.7rem] text-faint">
+                            <span className="truncate text-muted">{d.persona}</span>
+                            {d.concepto && <span className="truncate">· {d.concepto}</span>}
+                            <Clock size={10} />
+                            {formatHoraISO(d.created_at)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-2">
+                        {saldado ? (
+                          <Badge tone="success">Devuelto</Badge>
+                        ) : (
+                          <>
+                            {d.abonado > 0 && (
+                              <span className="tnum hidden text-[0.7rem] text-faint sm:inline">
+                                queda {formatCOP(d.saldo)}
+                              </span>
+                            )}
+                            <button
+                              onClick={() => pagar(d)}
+                              disabled={pending}
+                              className="rounded-full border border-success/30 bg-success-soft px-2.5 py-1 text-[0.72rem] font-medium text-success transition-colors hover:bg-success/15 disabled:opacity-40"
+                            >
+                              Marcar devuelto
+                            </button>
+                          </>
+                        )}
+                        {isAdmin && (
+                          <button
+                            onClick={() => borrar(d.id)}
+                            disabled={pending}
+                            className="flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
+                            title="Eliminar"
+                          >
+                            <Trash size={15} />
+                          </button>
+                        )}
+                      </div>
+                    </motion.li>
+                  );
+                })}
+              </AnimatePresence>
+            </ul>
+          )}
+        </Card>
+      </div>
+
+      {/* Total pendiente */}
+      <div className="flex flex-col gap-4 lg:sticky lg:top-8">
+        <Card className="p-5 sm:p-6">
+          <p className="text-[0.78rem] font-medium uppercase tracking-wide text-faint">Pendiente del día</p>
+          <p className="tnum mt-1 text-[1.9rem] font-semibold tracking-tight text-text">
+            <AnimatedMoney value={pendiente} />
+          </p>
+          <div className="mt-4 flex flex-col divide-y divide-line text-[0.82rem]">
+            <div className="flex items-center justify-between py-2">
+              <span className="text-muted">Prestado</span>
+              <span className="tnum font-medium text-text">{formatCOP(prestado)}</span>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <span className="text-muted">Devuelto hoy</span>
+              <span className="tnum font-medium text-success">{formatCOP(devuelto)}</span>
+            </div>
+          </div>
+          <p className="mt-3 rounded-[--radius-card] bg-accent-soft/40 px-3 py-2 text-[0.74rem] text-muted">
+            El pendiente pasa solo al campo <span className="font-medium text-accent-strong">Préstamos</span> del cuadre.
+          </p>
+        </Card>
+      </div>
+    </div>
+  );
+}

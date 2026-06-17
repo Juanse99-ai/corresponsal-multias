@@ -85,6 +85,20 @@ export function formatHora(time: string | null | undefined): string {
   return time.slice(0, 5);
 }
 
+/** ISO timestamp -> "03:45 p. m." (solo la hora) en hora de Colombia. */
+export function formatHoraISO(iso: string | null | undefined): string {
+  if (!iso) return "";
+  try {
+    return new Intl.DateTimeFormat("es-CO", {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "America/Bogota",
+    }).format(new Date(iso));
+  } catch {
+    return "";
+  }
+}
+
 /** ISO timestamp -> "17 jun, 03:45" en hora de Colombia. */
 export function formatFechaHora(iso: string): string {
   try {

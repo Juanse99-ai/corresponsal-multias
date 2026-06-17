@@ -6,6 +6,8 @@ import {
   getSoportes,
   getMovimientos,
   totalesMovimientos,
+  getPrestamosDia,
+  totalPrestamosPendientes,
   sumMontos,
 } from "@/lib/queries";
 import { getSessionProfile } from "@/lib/auth";
@@ -26,16 +28,18 @@ export default async function CuadrePage({
   const sp = await searchParams;
   const fecha = sp.fecha && ISO.test(sp.fecha) ? sp.fecha : hoyISO();
 
-  const [cuadre, consignaciones, soportes, movimientos, profile] = await Promise.all([
+  const [cuadre, consignaciones, soportes, movimientos, prestamos, profile] = await Promise.all([
     getCuadre(fecha),
     getConsignacionesLuis(fecha),
     getSoportes(fecha),
     getMovimientos(fecha),
+    getPrestamosDia(fecha),
     getSessionProfile(),
   ]);
   const srLuis = sumMontos(consignaciones);
   const isAdmin = profile?.rol === "admin";
   const tot = totalesMovimientos(movimientos);
+  const prestamosPendientes = totalPrestamosPendientes(prestamos);
 
   const inicial = cuadre
     ? {
@@ -58,7 +62,7 @@ export default async function CuadrePage({
         retiros_cash: 0,
         nequis: tot.consignacion_nequi,
         bancolombia: tot.consignacion_bancolombia,
-        prestamos_consignaciones: 0,
+        prestamos_consignaciones: prestamosPendientes,
         ret_real: tot.retiro,
         compensado: 0,
         fondo_caja: 0,
@@ -79,6 +83,8 @@ export default async function CuadrePage({
         isAdmin={isAdmin}
         soportesCount={soportes.length}
         movCount={tot.cantidad}
+        prestamosCount={prestamos.length}
+        prestamosDiaTotal={prestamosPendientes}
         movTotales={{
           consignacion_nequi: tot.consignacion_nequi,
           consignacion_bancolombia: tot.consignacion_bancolombia,

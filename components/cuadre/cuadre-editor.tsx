@@ -57,6 +57,8 @@ interface Props {
   isAdmin: boolean;
   soportesCount: number;
   movCount: number;
+  prestamosCount: number;
+  prestamosDiaTotal: number;
   movTotales: { consignacion_nequi: number; consignacion_bancolombia: number; retiro: number };
 }
 
@@ -69,6 +71,8 @@ export function CuadreEditor({
   isAdmin,
   soportesCount,
   movCount,
+  prestamosCount,
+  prestamosDiaTotal,
   movTotales,
 }: Props) {
   const router = useRouter();
@@ -98,6 +102,7 @@ export function CuadreEditor({
       nequis: movTotales.consignacion_nequi,
       bancolombia: movTotales.consignacion_bancolombia,
       ret_real: movTotales.retiro,
+      prestamos_consignaciones: prestamosDiaTotal,
     }));
   }
 
@@ -216,7 +221,7 @@ export function CuadreEditor({
           </div>
         </Link>
 
-        {movCount > 0 && (
+        {(movCount > 0 || prestamosCount > 0) && (
           <button
             type="button"
             onClick={traerDeMovimientos}
@@ -224,7 +229,14 @@ export function CuadreEditor({
           >
             <span className="flex items-center gap-2 text-muted">
               <ArrowClockwise size={14} className="text-accent" />
-              Traer totales de {movCount} movimiento{movCount === 1 ? "" : "s"} del día
+              Traer totales de{" "}
+              {[
+                movCount > 0 ? `${movCount} movimiento${movCount === 1 ? "" : "s"}` : null,
+                prestamosCount > 0 ? `${prestamosCount} préstamo${prestamosCount === 1 ? "" : "s"}` : null,
+              ]
+                .filter(Boolean)
+                .join(" y ")}{" "}
+              del día
             </span>
             <span className="font-medium text-accent-strong">Aplicar</span>
           </button>

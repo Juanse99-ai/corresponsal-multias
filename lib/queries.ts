@@ -230,6 +230,37 @@ export async function getDeudasConSaldo(): Promise<DeudaConSaldo[]> {
   });
 }
 
+/** Préstamos (deudas) registrados en una fecha, con su saldo pendiente. */
+export async function getPrestamosDia(fecha: string): Promise<DeudaConSaldo[]> {
+  const sb = await createClient();
+  const { data: deudas } = await sb
+    .from("corr_deudas")
+    .select("*")
+    .eq("fecha", fecha)
+    .order("created_at", { ascending: false });
+  const rows = deudas ?? [];
+  if (rows.length === 0) return [];
+
+  const ids = rows.map((d) => d.id);
+  const { data: abonos } = await sb.from("corr_abonos").select("*").in("deuda_id", ids);
+  const porDeuda = new Map<string, AbonoRow[]>();
+  for (const a of abonos ?? []) {
+    const arr = porDeuda.get(a.deuda_id) ?? [];
+    arr.push(a);
+    porDeuda.set(a.deuda_id, arr);
+  }
+  return rows.map((d) => {
+    const ab = porDeuda.get(d.id) ?? [];
+    const abonado = ab.reduce((s, x) => s + x.monto, 0);
+    return { ...d, abonos: ab, abonado, saldo: Math.max(0, d.monto - abonado) };
+  });
+}
+
+/** Suma de saldos pendientes (lo que de verdad afecta la caja del día). */
+export function totalPrestamosPendientes(rows: DeudaConSaldo[]): number {
+  return rows.reduce((s, d) => s + d.saldo, 0);
+}
+
 // ===== Bitácora de auditoría (admin) =====
 export interface AuditEntry extends AuditRow {
   actorNombre: string;

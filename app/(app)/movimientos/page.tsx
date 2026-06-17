@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { hoyISO, formatFechaLarga } from "@/lib/format";
-import { getMovimientos } from "@/lib/queries";
+import { getMovimientos, getPrestamosDia } from "@/lib/queries";
+import { getSessionProfile } from "@/lib/auth";
 import { MovimientosManager } from "@/components/movimientos/movimientos-manager";
+import { PrestamosDia } from "@/components/movimientos/prestamos-dia";
 import { PageHeader } from "@/components/shell/page-header";
 
 export const metadata: Metadata = { title: "Movimientos · Corresponsal" };
@@ -15,12 +17,17 @@ export default async function MovimientosPage({
 }) {
   const sp = await searchParams;
   const fecha = sp.fecha && ISO.test(sp.fecha) ? sp.fecha : hoyISO();
-  const movimientos = await getMovimientos(fecha);
+  const [movimientos, prestamos, profile] = await Promise.all([
+    getMovimientos(fecha),
+    getPrestamosDia(fecha),
+    getSessionProfile(),
+  ]);
 
   return (
     <div>
       <PageHeader title="Movimientos del día" subtitle={formatFechaLarga(fecha)} />
       <MovimientosManager fecha={fecha} movimientos={movimientos} />
+      <PrestamosDia fecha={fecha} prestamos={prestamos} isAdmin={profile?.rol === "admin"} />
     </div>
   );
 }
