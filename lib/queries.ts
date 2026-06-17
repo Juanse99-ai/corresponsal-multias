@@ -9,12 +9,44 @@ import type {
   GeneralRow,
   MovPropioRow,
   AuditRow,
+  MovimientoRow,
 } from "@/lib/database.types";
 
 export const SOPORTES_BUCKET = "corr-soportes";
 
 export function sumMontos(rows: { monto: number }[]): number {
   return rows.reduce((s, r) => s + r.monto, 0);
+}
+
+// ===== Libro de movimientos del dia =====
+export async function getMovimientos(fecha: string): Promise<MovimientoRow[]> {
+  const sb = await createClient();
+  const { data } = await sb
+    .from("corr_movimientos")
+    .select("*")
+    .eq("fecha", fecha)
+    .order("hora", { ascending: true, nullsFirst: false })
+    .order("created_at", { ascending: true });
+  return data ?? [];
+}
+
+export interface MovimientosTotales {
+  consignacion: number;
+  retiro: number;
+  nequi: number;
+  bancolombia: number;
+  cantidad: number;
+}
+
+export function totalesMovimientos(rows: MovimientoRow[]): MovimientosTotales {
+  const t: MovimientosTotales = { consignacion: 0, retiro: 0, nequi: 0, bancolombia: 0, cantidad: rows.length };
+  for (const r of rows) {
+    if (r.tipo === "consignacion") t.consignacion += r.monto;
+    else if (r.tipo === "retiro") t.retiro += r.monto;
+    else if (r.tipo === "nequi") t.nequi += r.monto;
+    else if (r.tipo === "bancolombia") t.bancolombia += r.monto;
+  }
+  return t;
 }
 
 export async function getConsignacionesLuis(fecha: string): Promise<ConsignacionLuisRow[]> {
