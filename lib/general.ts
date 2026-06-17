@@ -1,5 +1,7 @@
 // Control general del corresponsal (snapshot diario). Logica pura.
-// SALDO TOTAL = (saldo_luis + saldo_cristian) - (cupo + efectivo + nequis + monedas + deudas_terceros)
+// Las deudas DE terceros (lo que Juan, el taller u otros le deben al corresponsal)
+// son plata a favor del corresponsal, por eso SUMAN igual que los saldos.
+// SALDO TOTAL = (saldo_luis + saldo_cristian + deudas_terceros) - (cupo + efectivo + nequis + monedas)
 
 export interface GeneralValores {
   saldo_luis: number;
@@ -14,7 +16,8 @@ export interface GeneralValores {
 export function computeSaldoTotal(v: GeneralValores): number {
   return (
     v.saldo_luis +
-    v.saldo_cristian -
-    (v.cupo_disponible + v.efectivo + v.nequis + v.monedas + v.deudas_terceros)
+    v.saldo_cristian +
+    v.deudas_terceros -
+    (v.cupo_disponible + v.efectivo + v.nequis + v.monedas)
   );
 }

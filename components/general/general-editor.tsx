@@ -78,7 +78,7 @@ export function GeneralEditor({
     <div className="grid gap-5 lg:grid-cols-[1fr_380px] lg:items-start">
       <Card className="p-5 sm:p-6">
         <h2 className="text-[0.95rem] font-semibold tracking-tight text-text">Balance del día</h2>
-        <p className="text-sm text-muted">Saldos a favor menos lo disponible y las deudas.</p>
+        <p className="text-sm text-muted">Saldos a favor (incluidas las deudas de terceros) menos lo disponible.</p>
 
         <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Campo label="Saldo Luis" id="saldo_luis">
@@ -109,8 +109,9 @@ export function GeneralEditor({
           <Campo label="Monedas" id="monedas">
             <MoneyInput id="monedas" value={vals.monedas} onValueChange={set("monedas")} />
           </Campo>
-          <Campo label="Deudas a terceros" id="deudas_terceros">
+          <Campo label="Deudas de terceros" id="deudas_terceros">
             <MoneyInput id="deudas_terceros" value={vals.deudas_terceros} onValueChange={set("deudas_terceros")} />
+            <p className="mt-1 text-[0.7rem] text-faint">Lo que te deben a ti (Juan, taller, otros). Suma a favor.</p>
           </Campo>
         </div>
 
@@ -135,7 +136,7 @@ export function GeneralEditor({
             <AnimatedMoney value={total} />
           </p>
           <p className="mt-2 text-[0.82rem] text-muted">
-            (Luis + Cristian) − (cupo + efectivo + nequis + monedas + deudas). Debería ser bajo.
+            (Luis + Cristian + deudas de terceros) − (cupo + efectivo + nequis + monedas). Debería ser bajo.
           </p>
         </Card>
 
