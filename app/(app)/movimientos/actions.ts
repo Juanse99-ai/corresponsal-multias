@@ -7,7 +7,7 @@ import { requireSession } from "@/lib/auth";
 
 const addSchema = z.object({
   fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  tipo: z.enum(["consignacion_nequi", "consignacion_bancolombia", "retiro"]),
+  tipo: z.enum(["consignacion_nequi", "consignacion_bancolombia", "retiro", "recaudo"]),
   monto: z.number().int().positive(),
   hora: z
     .string()
@@ -15,6 +15,7 @@ const addSchema = z.object({
     .nullable()
     .optional(),
   cliente: z.string().max(120).nullable().optional(),
+  convenio: z.string().max(60).nullable().optional(),
 });
 
 export async function agregarMovimiento(raw: unknown): Promise<{ ok: boolean; error?: string }> {
@@ -29,6 +30,7 @@ export async function agregarMovimiento(raw: unknown): Promise<{ ok: boolean; er
     monto: p.data.monto,
     hora: p.data.hora ?? null,
     cliente: p.data.cliente?.trim() || null,
+    convenio: p.data.convenio?.trim() || null,
     created_by: session.id,
   });
   if (error) return { ok: false, error: "No se pudo registrar el movimiento." };

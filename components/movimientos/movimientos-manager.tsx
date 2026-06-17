@@ -12,6 +12,7 @@ import {
   ArrowUp,
   DeviceMobile,
   Bank,
+  Receipt,
   Warning,
   ArrowRight,
 } from "@phosphor-icons/react/dist/ssr";
@@ -27,11 +28,12 @@ import { formatCOP, formatHora } from "@/lib/format";
 import type { MovimientoRow } from "@/lib/database.types";
 import { agregarMovimiento, eliminarMovimiento } from "@/app/(app)/movimientos/actions";
 
-type Tipo = "consignacion_nequi" | "consignacion_bancolombia" | "retiro";
+type Tipo = "consignacion_nequi" | "consignacion_bancolombia" | "recaudo" | "retiro";
 
 const TIPOS: Record<Tipo, { label: string; corto: string; icon: Icon; salida: boolean }> = {
   consignacion_nequi: { label: "Consignación a Nequi", corto: "a Nequi", icon: DeviceMobile, salida: false },
   consignacion_bancolombia: { label: "Consignación a Bancolombia", corto: "a Bancolombia", icon: Bank, salida: false },
+  recaudo: { label: "Recaudo", corto: "Recaudo", icon: Receipt, salida: false },
   retiro: { label: "Retiro", corto: "Retiro", icon: ArrowUp, salida: true },
 };
 
@@ -46,10 +48,11 @@ export function MovimientosManager({ fecha, movimientos }: { fecha: string; movi
   const [tipo, setTipo] = useState<Tipo>("consignacion_nequi");
   const [monto, setMonto] = useState(0);
   const [cliente, setCliente] = useState("");
+  const [convenio, setConvenio] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const totales = useMemo(() => {
-    const t: Record<Tipo, number> = { consignacion_nequi: 0, consignacion_bancolombia: 0, retiro: 0 };
+    const t: Record<Tipo, number> = { consignacion_nequi: 0, consignacion_bancolombia: 0, recaudo: 0, retiro: 0 };
     for (const m of movimientos) t[m.tipo as Tipo] = (t[m.tipo as Tipo] ?? 0) + m.monto;
     return t;
   }, [movimientos]);
@@ -58,10 +61,11 @@ export function MovimientosManager({ fecha, movimientos }: { fecha: string; movi
     if (monto <= 0) return setError("Ingresa un monto mayor a cero.");
     setError(null);
     startTransition(async () => {
-      const res = await agregarMovimiento({ fecha, tipo, monto, hora: horaActual(), cliente: cliente || null });
+      const res = await agregarMovimiento({ fecha, tipo, monto, hora: horaActual(), cliente: cliente || null, convenio: convenio || null });
       if (res.ok) {
         setMonto(0);
         setCliente("");
+        setConvenio("");
         router.refresh();
       } else {
         setError(res.error ?? "No se pudo registrar.");
@@ -106,13 +110,19 @@ export function MovimientosManager({ fecha, movimientos }: { fecha: string; movi
             })}
           </div>
 
-          <div className="mt-4 grid gap-4 sm:grid-cols-[1fr_1fr]">
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-2">
               <Label htmlFor="mov-monto">Monto</Label>
               <MoneyInput id="mov-monto" value={monto} onValueChange={setMonto} autoFocus />
             </div>
+            {tipo === "recaudo" && (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="mov-convenio">Código de convenio</Label>
+                <Input id="mov-convenio" value={convenio} onChange={(e) => setConvenio(e.target.value)} placeholder="Ej. 12345" inputMode="numeric" />
+              </div>
+            )}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="mov-cliente">Cliente (opcional)</Label>
+              <Label htmlFor="mov-cliente">{tipo === "recaudo" ? "Referencia o cliente" : "Cliente (opcional)"}</Label>
               <Input id="mov-cliente" value={cliente} onChange={(e) => setCliente(e.target.value)} placeholder="Nombre o referencia" />
             </div>
           </div>
@@ -175,6 +185,7 @@ export function MovimientosManager({ fecha, movimientos }: { fecha: string; movi
                                 {formatHora(m.hora)}
                               </>
                             )}
+                            {m.convenio && <span className="truncate">· conv. {m.convenio}</span>}
                             {m.cliente && <span className="truncate">· {m.cliente}</span>}
                           </p>
                         </div>

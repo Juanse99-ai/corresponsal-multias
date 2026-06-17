@@ -34,6 +34,7 @@ export interface MovimientosTotales {
   consignacion_nequi: number;
   consignacion_bancolombia: number;
   retiro: number;
+  recaudo: number;
   cantidad: number;
 }
 
@@ -42,12 +43,14 @@ export function totalesMovimientos(rows: MovimientoRow[]): MovimientosTotales {
     consignacion_nequi: 0,
     consignacion_bancolombia: 0,
     retiro: 0,
+    recaudo: 0,
     cantidad: rows.length,
   };
   for (const r of rows) {
     if (r.tipo === "consignacion_nequi") t.consignacion_nequi += r.monto;
     else if (r.tipo === "consignacion_bancolombia") t.consignacion_bancolombia += r.monto;
     else if (r.tipo === "retiro") t.retiro += r.monto;
+    else if (r.tipo === "recaudo") t.recaudo += r.monto;
   }
   return t;
 }

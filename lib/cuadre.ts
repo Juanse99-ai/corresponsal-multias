@@ -12,6 +12,7 @@ export interface CuadreValores {
   retiros_cash: number; // retiros entregados en efectivo (parte del "EFECTIVO" del Excel)
   nequis: number;
   bancolombia: number; // transferencias por Bancolombia (canal electronico)
+  recaudos: number; // pagos de convenios (cliente paga en efectivo, queda en la tirilla)
   prestamos_consignaciones: number;
   ret_real: number; // retiros reales procesados
   compensado: number; // saldo de Luis arrastrado del dia anterior
@@ -24,6 +25,7 @@ export const CUADRE_VACIO: CuadreValores = {
   retiros_cash: 0,
   nequis: 0,
   bancolombia: 0,
+  recaudos: 0,
   prestamos_consignaciones: 0,
   ret_real: 0,
   compensado: 0,
@@ -36,7 +38,7 @@ export const CUADRE_VACIO: CuadreValores = {
  * aqui: son caja y se verifican en el arqueo (no en el saldo).
  */
 export function sumaComponentes(v: CuadreValores): number {
-  return v.sr_luis + v.nequis + v.bancolombia + v.prestamos_consignaciones;
+  return v.sr_luis + v.nequis + v.bancolombia + v.recaudos + v.prestamos_consignaciones;
 }
 
 /**
@@ -108,6 +110,7 @@ export function cuadreBreakdown(v: CuadreValores): TermLine[] {
     { key: "sr_luis", label: "Sr. Luis", value: v.sr_luis, sign: 1, hint: "Consignaciones de Luis del dia" },
     { key: "nequis", label: "Nequis", value: v.nequis, sign: 1 },
     { key: "bancolombia", label: "Bancolombia", value: v.bancolombia, sign: 1 },
+    { key: "recaudos", label: "Recaudos", value: v.recaudos, sign: 1 },
     { key: "prestamos_consignaciones", label: "Prestamos por transferencia", value: v.prestamos_consignaciones, sign: 1 },
   ];
 }

@@ -48,6 +48,7 @@ export default async function CuadrePage({
         retiros_cash: cuadre.retiros_cash,
         nequis: cuadre.nequis,
         bancolombia: cuadre.bancolombia,
+        recaudos: cuadre.recaudos,
         prestamos_consignaciones: cuadre.prestamos_consignaciones,
         ret_real: cuadre.ret_real,
         compensado: cuadre.compensado,
@@ -62,6 +63,7 @@ export default async function CuadrePage({
         retiros_cash: 0,
         nequis: tot.consignacion_nequi,
         bancolombia: tot.consignacion_bancolombia,
+        recaudos: tot.recaudo,
         prestamos_consignaciones: prestamosMedio.transferencia,
         ret_real: tot.retiro,
         compensado: 0,
@@ -90,6 +92,7 @@ export default async function CuadrePage({
           consignacion_nequi: tot.consignacion_nequi,
           consignacion_bancolombia: tot.consignacion_bancolombia,
           retiro: tot.retiro,
+          recaudo: tot.recaudo,
         }}
       />
       <SoportesSection fecha={fecha} soportes={soportes} />
