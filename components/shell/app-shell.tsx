@@ -12,6 +12,7 @@ import {
   ChartLineUp,
   Vault,
   ClockCounterClockwise,
+  ArrowsDownUp,
   SignOut,
   CaretLeft,
 } from "@phosphor-icons/react/dist/ssr";
@@ -33,6 +34,7 @@ interface NavItem {
 const NAV: NavItem[] = [
   { href: "/panel", label: "Panel", short: "Panel", icon: House },
   { href: "/cuadre", label: "Cuadre diario", short: "Cuadre", icon: Calculator },
+  { href: "/movimientos", label: "Movimientos", short: "Movs", icon: ArrowsDownUp },
   { href: "/luis", label: "Cupo de Luis", short: "Luis", icon: Wallet },
   { href: "/prestamos", label: "Préstamos", short: "Préstamos", icon: HandCoins },
   { href: "/general", label: "Control general", short: "General", icon: Vault, adminOnly: true },

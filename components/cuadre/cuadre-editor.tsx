@@ -13,6 +13,7 @@ import {
   Lock,
   LockOpen,
   Coins,
+  ArrowClockwise,
 } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ interface Inicial {
   efectivo_consignaciones: number;
   retiros_cash: number;
   nequis: number;
+  bancolombia: number;
   prestamos_consignaciones: number;
   ret_real: number;
   compensado: number;
@@ -54,6 +56,8 @@ interface Props {
   inicial: Inicial;
   isAdmin: boolean;
   soportesCount: number;
+  movCount: number;
+  movTotales: { consignacion: number; retiro: number; nequi: number; bancolombia: number };
 }
 
 export function CuadreEditor({
@@ -64,6 +68,8 @@ export function CuadreEditor({
   inicial,
   isAdmin,
   soportesCount,
+  movCount,
+  movTotales,
 }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -74,6 +80,7 @@ export function CuadreEditor({
     efectivo_consignaciones: inicial.efectivo_consignaciones,
     retiros_cash: inicial.retiros_cash,
     nequis: inicial.nequis,
+    bancolombia: inicial.bancolombia,
     prestamos_consignaciones: inicial.prestamos_consignaciones,
     ret_real: inicial.ret_real,
     compensado: inicial.compensado,
@@ -84,6 +91,16 @@ export function CuadreEditor({
   const [nota, setNota] = useState(inicial.nota);
 
   const set = (k: keyof typeof vals) => (n: number) => setVals((s) => ({ ...s, [k]: n }));
+
+  function traerDeMovimientos() {
+    setVals((s) => ({
+      ...s,
+      efectivo_consignaciones: movTotales.consignacion,
+      nequis: movTotales.nequi,
+      ret_real: movTotales.retiro,
+      bancolombia: movTotales.bancolombia,
+    }));
+  }
 
   const valores = { ...vals, sr_luis: srLuis };
   const saldo = useMemo(() => computeSaldoFinal(valores), [valores]);
@@ -111,6 +128,7 @@ export function CuadreEditor({
     { label: "Retiros en cash", value: vals.retiros_cash },
     { label: "Compensado", value: vals.compensado },
     { label: "Nequis", value: vals.nequis },
+    { label: "Bancolombia", value: vals.bancolombia },
     { label: "Préstamos / consig.", value: vals.prestamos_consignaciones },
     { label: "Retiros reales", value: vals.ret_real },
   ];
@@ -199,6 +217,20 @@ export function CuadreEditor({
           </div>
         </Link>
 
+        {movCount > 0 && (
+          <button
+            type="button"
+            onClick={traerDeMovimientos}
+            className="mt-4 flex w-full items-center justify-between rounded-[--radius-card] border border-accent/25 bg-accent-soft/40 px-4 py-2.5 text-[0.82rem] transition-colors hover:bg-accent-soft"
+          >
+            <span className="flex items-center gap-2 text-muted">
+              <ArrowClockwise size={14} className="text-accent" />
+              Traer totales de {movCount} movimiento{movCount === 1 ? "" : "s"} del día
+            </span>
+            <span className="font-medium text-accent-strong">Aplicar</span>
+          </button>
+        )}
+
         {/* Desglose */}
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Campo label="Efectivo (consignaciones)" id="efectivo_consignaciones">
@@ -212,6 +244,9 @@ export function CuadreEditor({
           </Campo>
           <Campo label="Nequis" id="nequis">
             <MoneyInput id="nequis" value={vals.nequis} onValueChange={set("nequis")} />
+          </Campo>
+          <Campo label="Bancolombia" id="bancolombia">
+            <MoneyInput id="bancolombia" value={vals.bancolombia} onValueChange={set("bancolombia")} />
           </Campo>
           <Campo label="Préstamos / consignaciones" id="prestamos_consignaciones">
             <MoneyInput id="prestamos_consignaciones" value={vals.prestamos_consignaciones} onValueChange={set("prestamos_consignaciones")} />

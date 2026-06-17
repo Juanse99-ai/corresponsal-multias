@@ -33,21 +33,21 @@ export type Database = {
       corr_cuadres: {
         Row: {
           id: string; fecha: string; total_tirilla: number; efectivo_consignaciones: number;
-          retiros_cash: number; nequis: number; prestamos_consignaciones: number; ret_real: number;
+          retiros_cash: number; nequis: number; bancolombia: number; prestamos_consignaciones: number; ret_real: number;
           compensado: number; sr_luis: number; saldo_final: number; saldo_luis_cierre: number;
           fondo_caja: number; efectivo_contado: number;
           estado: string; nota: string | null; created_by: string | null; created_at: string; updated_at: string;
         };
         Insert: {
           id?: string; fecha: string; total_tirilla?: number; efectivo_consignaciones?: number;
-          retiros_cash?: number; nequis?: number; prestamos_consignaciones?: number; ret_real?: number;
+          retiros_cash?: number; nequis?: number; bancolombia?: number; prestamos_consignaciones?: number; ret_real?: number;
           compensado?: number; sr_luis?: number; saldo_final?: number; saldo_luis_cierre?: number;
           fondo_caja?: number; efectivo_contado?: number;
           estado?: string; nota?: string | null; created_by?: string | null; created_at?: string; updated_at?: string;
         };
         Update: {
           id?: string; fecha?: string; total_tirilla?: number; efectivo_consignaciones?: number;
-          retiros_cash?: number; nequis?: number; prestamos_consignaciones?: number; ret_real?: number;
+          retiros_cash?: number; nequis?: number; bancolombia?: number; prestamos_consignaciones?: number; ret_real?: number;
           compensado?: number; sr_luis?: number; saldo_final?: number; saldo_luis_cierre?: number;
           fondo_caja?: number; efectivo_contado?: number;
           estado?: string; nota?: string | null; created_by?: string | null; created_at?: string; updated_at?: string;
@@ -84,6 +84,12 @@ export type Database = {
         Update: { id?: string; fecha?: string; tipo?: string; monto?: number; nota?: string | null; soporte_path?: string | null; soporte_nombre?: string | null; created_by?: string | null; created_at?: string };
         Relationships: [];
       };
+      corr_movimientos: {
+        Row: { id: string; fecha: string; tipo: string; monto: number; hora: string | null; cliente: string | null; created_by: string | null; created_at: string };
+        Insert: { id?: string; fecha?: string; tipo: string; monto: number; hora?: string | null; cliente?: string | null; created_by?: string | null; created_at?: string };
+        Update: { id?: string; fecha?: string; tipo?: string; monto?: number; hora?: string | null; cliente?: string | null; created_by?: string | null; created_at?: string };
+        Relationships: [];
+      };
       corr_audit_log: {
         Row: { id: string; tabla: string; accion: string; registro_id: string | null; fecha_dato: string | null; actor_id: string | null; antes: Json | null; despues: Json | null; created_at: string };
         Insert: { id?: string; tabla: string; accion: string; registro_id?: string | null; fecha_dato?: string | null; actor_id?: string | null; antes?: Json | null; despues?: Json | null; created_at?: string };
@@ -112,3 +118,4 @@ export type SoporteRow = Database["public"]["Tables"]["corr_soportes"]["Row"];
 export type GeneralRow = Database["public"]["Tables"]["corr_general"]["Row"];
 export type MovPropioRow = Database["public"]["Tables"]["corr_mov_propios"]["Row"];
 export type AuditRow = Database["public"]["Tables"]["corr_audit_log"]["Row"];
+export type MovimientoRow = Database["public"]["Tables"]["corr_movimientos"]["Row"];
