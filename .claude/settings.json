@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(node:*)",
+      "Bash(vercel:*)",
+      "Bash(export PATH=*)",
+      "Bash(export:*)",
+      "Bash(cd:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(tail:*)",
+      "Bash(head:*)",
+      "Bash(grep:*)",
+      "Bash(rg:*)",
+      "Bash(find:*)",
+      "Bash(echo:*)",
+      "Bash(sleep:*)",
+      "Bash(which:*)",
+      "Bash(command -v:*)",
+      "Bash(wc:*)",
+      "Bash(sed:*)",
+      "Bash(awk:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(rm:*)",
+      "Bash(mkdir:*)",
+      "Bash(touch:*)",
+      "Bash(chmod:*)",
+      "Bash(pkill:*)",
+      "Bash(lsof:*)",
+      "Bash(kill:*)",
+      "Bash(xargs:*)",
+      "Bash(curl:*)",
+      "Bash(rsync:*)",
+      "Bash(test:*)",
+      "Read(//Users/juansecp12/**)",
+      "Read(//private/tmp/**)",
+      "Read(//tmp/**)"
+    ]
+  }
+}

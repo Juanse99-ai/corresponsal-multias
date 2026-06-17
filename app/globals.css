@@ -1,26 +1,173 @@
 @import "tailwindcss";
 
+/* ============================================================
+   App Corresponsal - Multidiagnosticos AS
+   Tema CLARO. Paleta del logo: azul royal (acento), rojo (alertas),
+   blanco. Riel lateral azul marino (no negro). Neutros entintados al azul.
+   ============================================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Lienzo claro (entintado levemente al azul) */
+  --bg: oklch(0.984 0.004 255);
+  --bg-soft: oklch(0.966 0.006 255);
+  --surface: oklch(1 0.0015 255);
+  --surface-2: oklch(0.963 0.006 255);
+  --elevated: oklch(0.944 0.008 255);
+  --line: oklch(0.905 0.009 255);
+  --line-strong: oklch(0.858 0.013 255);
+
+  --text: oklch(0.30 0.032 258);
+  --muted: oklch(0.502 0.026 258);
+  --faint: oklch(0.62 0.02 258);
+
+  /* Azul del logo */
+  --accent: oklch(0.515 0.172 258);
+  --accent-strong: oklch(0.455 0.18 258);
+  --accent-ink: oklch(0.99 0.01 258);
+  --accent-soft: oklch(0.935 0.045 258);
+
+  /* Verde semantico (cuadrado) */
+  --success: oklch(0.585 0.13 155);
+  --success-soft: oklch(0.935 0.06 155);
+
+  /* Rojo del logo (descuadre / negativos) */
+  --danger: oklch(0.545 0.2 25);
+  --danger-soft: oklch(0.945 0.06 25);
+
+  /* Riel lateral azul marino */
+  --nav-bg: oklch(0.268 0.058 260);
+  --nav-bg-2: oklch(0.305 0.052 260);
+  --nav-text: oklch(0.975 0.01 260);
+  --nav-muted: oklch(0.74 0.035 260);
+  --nav-faint: oklch(0.62 0.04 260);
+  --nav-line: oklch(0.42 0.045 260);
+  --nav-active: oklch(0.355 0.06 262);
+  --nav-accent: oklch(0.74 0.135 258);
+
+  --radius: 0.9rem;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg: var(--bg);
+  --color-bg-soft: var(--bg-soft);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-elevated: var(--elevated);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+
+  --color-nav-bg: var(--nav-bg);
+  --color-nav-bg-2: var(--nav-bg-2);
+  --color-nav-text: var(--nav-text);
+  --color-nav-muted: var(--nav-muted);
+  --color-nav-faint: var(--nav-faint);
+  --color-nav-line: var(--nav-line);
+  --color-nav-active: var(--nav-active);
+  --color-nav-accent: var(--nav-accent);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --radius-card: var(--radius);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  border-color: var(--line);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-feature-settings: "cv01", "ss01";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* Cifras tabulares monoespaciadas para columnas de pesos. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  letter-spacing: -0.01em;
+}
+
+/* Halo ambiental suave (azul) detras de todo. */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(54rem 38rem at 88% -10%, oklch(0.6 0.15 258 / 0.1), transparent 60%),
+    radial-gradient(44rem 32rem at -6% 0%, oklch(0.62 0.13 250 / 0.06), transparent 55%);
+}
+
+/* Sin grano: look limpio de panel. */
+.grain {
+  display: none;
+}
+
+/* Scrollbar discreto. */
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: oklch(0.74 0.02 258 / 0.55);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover { background: oklch(0.66 0.03 258 / 0.7); background-clip: content-box; }
+
+::selection { background: var(--accent-soft); color: var(--accent-strong); }
+
+input, button, textarea, select { font: inherit; }
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; }
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.55), transparent);
+  animation: shimmer 1.6s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
