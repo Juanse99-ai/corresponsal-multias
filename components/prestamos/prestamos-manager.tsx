@@ -137,6 +137,7 @@ function AddDeudaForm() {
   const [concepto, setConcepto] = useState("Préstamo personal");
   const [conceptoOtro, setConceptoOtro] = useState("");
   const [monto, setMonto] = useState(0);
+  const [medio, setMedio] = useState<"efectivo" | "transferencia">("transferencia");
   const [descripcion, setDescripcion] = useState("");
   const [fecha, setFecha] = useState(hoyISO());
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
@@ -154,6 +155,7 @@ function AddDeudaForm() {
         monto,
         concepto: conceptoFinal || null,
         descripcion: descripcion || null,
+        medio,
         fecha,
       });
       if (res.ok) {
@@ -234,6 +236,28 @@ function AddDeudaForm() {
         <div className="flex flex-col gap-2">
           <Label htmlFor="deuda-monto">Monto</Label>
           <MoneyInput id="deuda-monto" value={monto} onValueChange={setMonto} />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label>¿Cómo se lo diste?</Label>
+          <div className="flex gap-2">
+            {(["transferencia", "efectivo"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setMedio(m)}
+                className={cn(
+                  "flex-1 rounded-[--radius-card] border px-3 py-2 text-[0.8rem] font-medium transition-colors",
+                  medio === m
+                    ? "border-accent/40 bg-accent-soft text-accent-strong"
+                    : "border-line-strong text-muted hover:text-text",
+                )}
+              >
+                {m === "efectivo" ? "Efectivo" : "Transferencia"}
+              </button>
+            ))}
+          </div>
+          <p className="text-[0.7rem] text-faint">Transferencia entra al cuadre; efectivo va al arqueo.</p>
         </div>
 
         <div className="grid grid-cols-[1fr_auto] gap-3">
