@@ -12,6 +12,7 @@ import {
   CalendarBlank,
   HandCoins,
   ArrowRight,
+  List,
 } from "@phosphor-icons/react/dist/ssr";
 import { cn } from "@/lib/utils";
 import { formatCOP, formatFechaLarga, hoyISO, formatFecha } from "@/lib/format";
@@ -87,12 +88,34 @@ function parseFechaISO(raw: string): string | null {
   return null;
 }
 
-export function TopHeader({ resumen, isAdmin }: { resumen: HeaderResumen; isAdmin: boolean }) {
+export function TopHeader({
+  resumen,
+  isAdmin,
+  collapsed,
+  onExpand,
+}: {
+  resumen: HeaderResumen;
+  isAdmin: boolean;
+  collapsed?: boolean;
+  onExpand?: () => void;
+}) {
   const avisos = useMemo(() => buildAvisos(resumen), [resumen]);
   return (
     <header className="sticky top-0 z-20 hidden items-center justify-between gap-3 border-b border-line bg-bg/80 px-4 py-3 backdrop-blur-xl sm:px-6 lg:flex lg:px-8">
-      <p className="text-[0.82rem] text-muted">{formatFechaLarga(hoyISO())}</p>
-      <div className="ml-auto flex items-center gap-2.5">
+      <div className="flex items-center gap-3">
+        {collapsed && (
+          <button
+            onClick={onExpand}
+            title="Mostrar menú"
+            aria-label="Mostrar menú"
+            className="flex h-9 w-9 items-center justify-center rounded-[0.7rem] border border-line bg-surface text-muted transition-colors hover:text-text"
+          >
+            <List size={18} />
+          </button>
+        )}
+        <p className="text-[0.82rem] text-muted">{formatFechaLarga(hoyISO())}</p>
+      </div>
+      <div className="flex items-center gap-2.5">
         <HeaderSearch personas={isAdmin ? resumen.personas : []} />
         <HeaderAvisos avisos={avisos} urgentes={avisosUrgentes(avisos)} />
       </div>
