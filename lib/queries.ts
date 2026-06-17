@@ -261,6 +261,25 @@ export function totalPrestamosPendientes(rows: DeudaConSaldo[]): number {
   return rows.reduce((s, d) => s + d.saldo, 0);
 }
 
+// ===== Resumen para el header (avisos + buscador) =====
+export interface HeaderResumen {
+  cuadreHoy: { estado: string; saldo_final: number } | null;
+  prestamosTotal: number;
+  prestamosCount: number;
+  personas: string[];
+}
+
+export async function getHeaderResumen(fecha: string): Promise<HeaderResumen> {
+  const [cuadre, deudas] = await Promise.all([getCuadre(fecha), getDeudasConSaldo()]);
+  const pendientes = deudas.filter((d) => d.saldo > 0);
+  return {
+    cuadreHoy: cuadre ? { estado: cuadre.estado, saldo_final: cuadre.saldo_final } : null,
+    prestamosTotal: pendientes.reduce((s, d) => s + d.saldo, 0),
+    prestamosCount: pendientes.length,
+    personas: [...new Set(deudas.map((d) => d.persona))],
+  };
+}
+
 // ===== Bitácora de auditoría (admin) =====
 export interface AuditEntry extends AuditRow {
   actorNombre: string;
