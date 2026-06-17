@@ -27,13 +27,12 @@ import { formatCOP, formatHora } from "@/lib/format";
 import type { MovimientoRow } from "@/lib/database.types";
 import { agregarMovimiento, eliminarMovimiento } from "@/app/(app)/movimientos/actions";
 
-type Tipo = "consignacion" | "retiro" | "nequi" | "bancolombia";
+type Tipo = "consignacion_nequi" | "consignacion_bancolombia" | "retiro";
 
-const TIPOS: Record<Tipo, { label: string; icon: Icon; salida: boolean }> = {
-  consignacion: { label: "Consignación", icon: ArrowDown, salida: false },
-  retiro: { label: "Retiro", icon: ArrowUp, salida: true },
-  nequi: { label: "Nequi", icon: DeviceMobile, salida: false },
-  bancolombia: { label: "Bancolombia", icon: Bank, salida: false },
+const TIPOS: Record<Tipo, { label: string; corto: string; icon: Icon; salida: boolean }> = {
+  consignacion_nequi: { label: "Consignación a Nequi", corto: "a Nequi", icon: DeviceMobile, salida: false },
+  consignacion_bancolombia: { label: "Consignación a Bancolombia", corto: "a Bancolombia", icon: Bank, salida: false },
+  retiro: { label: "Retiro", corto: "Retiro", icon: ArrowUp, salida: true },
 };
 
 function horaActual(): string {
@@ -44,13 +43,13 @@ function horaActual(): string {
 export function MovimientosManager({ fecha, movimientos }: { fecha: string; movimientos: MovimientoRow[] }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [tipo, setTipo] = useState<Tipo>("consignacion");
+  const [tipo, setTipo] = useState<Tipo>("consignacion_nequi");
   const [monto, setMonto] = useState(0);
   const [cliente, setCliente] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const totales = useMemo(() => {
-    const t: Record<Tipo, number> = { consignacion: 0, retiro: 0, nequi: 0, bancolombia: 0 };
+    const t: Record<Tipo, number> = { consignacion_nequi: 0, consignacion_bancolombia: 0, retiro: 0 };
     for (const m of movimientos) t[m.tipo as Tipo] = (t[m.tipo as Tipo] ?? 0) + m.monto;
     return t;
   }, [movimientos]);
@@ -146,7 +145,7 @@ export function MovimientosManager({ fecha, movimientos }: { fecha: string; movi
             <ul className="flex flex-col divide-y divide-line">
               <AnimatePresence initial={false}>
                 {movimientos.map((m) => {
-                  const Ti = TIPOS[m.tipo as Tipo] ?? TIPOS.consignacion;
+                  const Ti = TIPOS[m.tipo as Tipo] ?? TIPOS.consignacion_nequi;
                   return (
                     <motion.li
                       key={m.id}

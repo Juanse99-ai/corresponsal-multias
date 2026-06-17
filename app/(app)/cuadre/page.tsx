@@ -54,10 +54,10 @@ export default async function CuadrePage({
       }
     : {
         total_tirilla: 0,
-        efectivo_consignaciones: tot.consignacion,
+        efectivo_consignaciones: 0,
         retiros_cash: 0,
-        nequis: tot.nequi,
-        bancolombia: tot.bancolombia,
+        nequis: tot.consignacion_nequi,
+        bancolombia: tot.consignacion_bancolombia,
         prestamos_consignaciones: 0,
         ret_real: tot.retiro,
         compensado: 0,
@@ -80,10 +80,9 @@ export default async function CuadrePage({
         soportesCount={soportes.length}
         movCount={tot.cantidad}
         movTotales={{
-          consignacion: tot.consignacion,
+          consignacion_nequi: tot.consignacion_nequi,
+          consignacion_bancolombia: tot.consignacion_bancolombia,
           retiro: tot.retiro,
-          nequi: tot.nequi,
-          bancolombia: tot.bancolombia,
         }}
       />
       <SoportesSection fecha={fecha} soportes={soportes} />
