@@ -57,7 +57,7 @@ interface Props {
   isAdmin: boolean;
   soportesCount: number;
   movCount: number;
-  movTotales: { consignacion: number; retiro: number; nequi: number; bancolombia: number };
+  movTotales: { consignacion_nequi: number; consignacion_bancolombia: number; retiro: number };
 }
 
 export function CuadreEditor({
@@ -95,10 +95,9 @@ export function CuadreEditor({
   function traerDeMovimientos() {
     setVals((s) => ({
       ...s,
-      efectivo_consignaciones: movTotales.consignacion,
-      nequis: movTotales.nequi,
+      nequis: movTotales.consignacion_nequi,
+      bancolombia: movTotales.consignacion_bancolombia,
       ret_real: movTotales.retiro,
-      bancolombia: movTotales.bancolombia,
     }));
   }
 

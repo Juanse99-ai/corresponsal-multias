@@ -7,7 +7,7 @@ import { requireSession } from "@/lib/auth";
 
 const addSchema = z.object({
   fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  tipo: z.enum(["consignacion", "retiro", "nequi", "bancolombia"]),
+  tipo: z.enum(["consignacion_nequi", "consignacion_bancolombia", "retiro"]),
   monto: z.number().int().positive(),
   hora: z
     .string()

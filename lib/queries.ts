@@ -31,20 +31,23 @@ export async function getMovimientos(fecha: string): Promise<MovimientoRow[]> {
 }
 
 export interface MovimientosTotales {
-  consignacion: number;
+  consignacion_nequi: number;
+  consignacion_bancolombia: number;
   retiro: number;
-  nequi: number;
-  bancolombia: number;
   cantidad: number;
 }
 
 export function totalesMovimientos(rows: MovimientoRow[]): MovimientosTotales {
-  const t: MovimientosTotales = { consignacion: 0, retiro: 0, nequi: 0, bancolombia: 0, cantidad: rows.length };
+  const t: MovimientosTotales = {
+    consignacion_nequi: 0,
+    consignacion_bancolombia: 0,
+    retiro: 0,
+    cantidad: rows.length,
+  };
   for (const r of rows) {
-    if (r.tipo === "consignacion") t.consignacion += r.monto;
+    if (r.tipo === "consignacion_nequi") t.consignacion_nequi += r.monto;
+    else if (r.tipo === "consignacion_bancolombia") t.consignacion_bancolombia += r.monto;
     else if (r.tipo === "retiro") t.retiro += r.monto;
-    else if (r.tipo === "nequi") t.nequi += r.monto;
-    else if (r.tipo === "bancolombia") t.bancolombia += r.monto;
   }
   return t;
 }
