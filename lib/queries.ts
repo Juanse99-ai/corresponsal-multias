@@ -276,6 +276,13 @@ export function prestamosPendientesPorMedio(rows: DeudaConSaldo[]): { transferen
   return { transferencia, efectivo };
 }
 
+/** True si el cuadre de esa fecha ya está cerrado (para bloquear ediciones). */
+export async function diaEstaCerrado(fecha: string): Promise<boolean> {
+  const sb = await createClient();
+  const { data } = await sb.from("corr_cuadres").select("estado").eq("fecha", fecha).maybeSingle();
+  return data?.estado === "cerrado";
+}
+
 // ===== Resumen para el header (avisos + buscador) =====
 export interface HeaderResumen {
   cuadreHoy: { estado: string; saldo_final: number } | null;

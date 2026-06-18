@@ -4,6 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireSession } from "@/lib/auth";
+import { diaEstaCerrado } from "@/lib/queries";
 
 const addSchema = z.object({
   fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -22,6 +23,10 @@ export async function agregarMovimiento(raw: unknown): Promise<{ ok: boolean; er
   const session = await requireSession();
   const p = addSchema.safeParse(raw);
   if (!p.success) return { ok: false, error: "Ingresa un monto válido." };
+
+  if (session.rol !== "admin" && (await diaEstaCerrado(p.data.fecha))) {
+    return { ok: false, error: "El día está cerrado. Solo Juan puede reabrirlo." };
+  }
 
   const sb = await createClient();
   const { error } = await sb.from("corr_movimientos").insert({
@@ -42,8 +47,12 @@ export async function agregarMovimiento(raw: unknown): Promise<{ ok: boolean; er
 }
 
 export async function eliminarMovimiento(id: string): Promise<{ ok: boolean; error?: string }> {
-  await requireSession();
+  const session = await requireSession();
   const sb = await createClient();
+  const { data: mov } = await sb.from("corr_movimientos").select("fecha").eq("id", id).maybeSingle();
+  if (mov?.fecha && session.rol !== "admin" && (await diaEstaCerrado(mov.fecha))) {
+    return { ok: false, error: "El día está cerrado. Solo Juan puede reabrirlo." };
+  }
   const { error } = await sb.from("corr_movimientos").delete().eq("id", id);
   if (error) return { ok: false, error: "No se pudo eliminar." };
 

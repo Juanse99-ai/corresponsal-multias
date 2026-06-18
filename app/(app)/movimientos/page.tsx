@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { hoyISO, formatFechaLarga } from "@/lib/format";
-import { getMovimientos, getPrestamosDia } from "@/lib/queries";
+import { getMovimientos, getPrestamosDia, getCuadre } from "@/lib/queries";
 import { getSessionProfile } from "@/lib/auth";
 import { MovimientosManager } from "@/components/movimientos/movimientos-manager";
 import { PrestamosDia } from "@/components/movimientos/prestamos-dia";
 import { PageHeader } from "@/components/shell/page-header";
+import { DateNav } from "@/components/shell/date-nav";
 
 export const metadata: Metadata = { title: "Movimientos · Corresponsal" };
 
@@ -17,17 +18,22 @@ export default async function MovimientosPage({
 }) {
   const sp = await searchParams;
   const fecha = sp.fecha && ISO.test(sp.fecha) ? sp.fecha : hoyISO();
-  const [movimientos, prestamos, profile] = await Promise.all([
+  const [movimientos, prestamos, cuadre, profile] = await Promise.all([
     getMovimientos(fecha),
     getPrestamosDia(fecha),
+    getCuadre(fecha),
     getSessionProfile(),
   ]);
+  const isAdmin = profile?.rol === "admin";
+  const bloqueado = cuadre?.estado === "cerrado" && !isAdmin;
 
   return (
     <div>
-      <PageHeader title="Movimientos del día" subtitle={formatFechaLarga(fecha)} />
-      <MovimientosManager fecha={fecha} movimientos={movimientos} />
-      <PrestamosDia fecha={fecha} prestamos={prestamos} isAdmin={profile?.rol === "admin"} />
+      <PageHeader title="Movimientos del día" subtitle={formatFechaLarga(fecha)}>
+        <DateNav fecha={fecha} base="/movimientos" />
+      </PageHeader>
+      <MovimientosManager fecha={fecha} movimientos={movimientos} bloqueado={bloqueado} />
+      <PrestamosDia fecha={fecha} prestamos={prestamos} isAdmin={isAdmin} bloqueado={bloqueado} />
     </div>
   );
 }

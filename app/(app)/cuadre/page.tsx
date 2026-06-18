@@ -14,6 +14,7 @@ import { getSessionProfile } from "@/lib/auth";
 import { CuadreEditor } from "@/components/cuadre/cuadre-editor";
 import { SoportesSection } from "@/components/cuadre/soportes-section";
 import { PageHeader } from "@/components/shell/page-header";
+import { DateNav } from "@/components/shell/date-nav";
 import type { EstadoCuadre } from "@/lib/cuadre";
 
 export const metadata: Metadata = { title: "Cuadre diario · Corresponsal" };
@@ -75,7 +76,9 @@ export default async function CuadrePage({
 
   return (
     <div>
-      <PageHeader title="Cuadre diario" subtitle={formatFechaLarga(fecha)} />
+      <PageHeader title="Cuadre diario" subtitle={formatFechaLarga(fecha)}>
+        <DateNav fecha={fecha} base="/cuadre" />
+      </PageHeader>
       <CuadreEditor
         fecha={fecha}
         srLuis={srLuis}

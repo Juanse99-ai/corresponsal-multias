@@ -4,6 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireSession, requireAdmin } from "@/lib/auth";
+import { diaEstaCerrado } from "@/lib/queries";
 
 const deudaSchema = z.object({
   persona: z.string().trim().min(1).max(60),
@@ -80,6 +81,10 @@ export async function registrarPrestamoDia(raw: unknown): Promise<{ ok: boolean;
   const p = prestamoDiaSchema.safeParse(raw);
   if (!p.success) return { ok: false, error: "Revisa la persona y el monto." };
 
+  if (session.rol !== "admin" && (await diaEstaCerrado(p.data.fecha))) {
+    return { ok: false, error: "El día está cerrado. Solo Juan puede reabrirlo." };
+  }
+
   const sb = await createClient();
   const { data: deuda, error } = await sb
     .from("corr_deudas")
@@ -121,6 +126,10 @@ export async function marcarPrestamoPagado(raw: unknown): Promise<{ ok: boolean;
   if (!p.success) return { ok: false, error: "Datos inválidos." };
 
   const sb = await createClient();
+  const { data: dRow } = await sb.from("corr_deudas").select("fecha").eq("id", p.data.deuda_id).maybeSingle();
+  if (dRow?.fecha && session.rol !== "admin" && (await diaEstaCerrado(dRow.fecha))) {
+    return { ok: false, error: "El día está cerrado. Solo Juan puede reabrirlo." };
+  }
   const { error } = await sb.from("corr_abonos").insert({
     deuda_id: p.data.deuda_id,
     monto: p.data.monto,
@@ -142,6 +151,43 @@ export async function eliminarDeuda(id: string): Promise<{ ok: boolean; error?: 
   const { error } = await sb.from("corr_deudas").delete().eq("id", id);
   if (error) return { ok: false, error: "No se pudo eliminar." };
   revalidatePath("/prestamos");
+  revalidatePath("/panel");
+  return { ok: true };
+}
+
+// ===== Corregir un préstamo (medio / monto / persona / concepto) sin borrarlo =====
+const editarDeudaSchema = z.object({
+  id: z.string().uuid(),
+  persona: z.string().trim().min(1).max(60).optional(),
+  concepto: z.string().trim().max(60).nullable().optional(),
+  monto: z.number().int().positive().optional(),
+  medio: z.enum(["efectivo", "transferencia"]).optional(),
+});
+
+export async function editarDeuda(raw: unknown): Promise<{ ok: boolean; error?: string }> {
+  const session = await requireSession();
+  const p = editarDeudaSchema.safeParse(raw);
+  if (!p.success) return { ok: false, error: "Datos inválidos." };
+
+  const sb = await createClient();
+  const { data: deuda } = await sb.from("corr_deudas").select("fecha").eq("id", p.data.id).maybeSingle();
+  if (deuda?.fecha && session.rol !== "admin" && (await diaEstaCerrado(deuda.fecha))) {
+    return { ok: false, error: "El día está cerrado. Solo Juan puede reabrirlo." };
+  }
+
+  const patch: { persona?: string; concepto?: string | null; monto?: number; medio?: string } = {};
+  if (p.data.persona !== undefined) patch.persona = p.data.persona;
+  if (p.data.concepto !== undefined) patch.concepto = p.data.concepto?.trim() || null;
+  if (p.data.monto !== undefined) patch.monto = p.data.monto;
+  if (p.data.medio !== undefined) patch.medio = p.data.medio;
+  if (Object.keys(patch).length === 0) return { ok: true };
+
+  const { error } = await sb.from("corr_deudas").update(patch).eq("id", p.data.id);
+  if (error) return { ok: false, error: "No se pudo editar el préstamo." };
+
+  revalidatePath("/prestamos");
+  revalidatePath("/movimientos");
+  revalidatePath("/cuadre");
   revalidatePath("/panel");
   return { ok: true };
 }

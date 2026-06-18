@@ -30,6 +30,7 @@ import {
   type EstadoCuadre,
 } from "@/lib/cuadre";
 import { guardarCuadre } from "@/app/(app)/cuadre/actions";
+import { CuadreExport } from "@/components/cuadre/cuadre-export";
 
 interface Inicial {
   total_tirilla: number;
@@ -175,10 +176,30 @@ export function CuadreEditor({
             <h2 className="text-[0.95rem] font-semibold tracking-tight text-text">Movimientos del día</h2>
             <p className="text-sm text-muted">Ingresa los totales al cerrar la jornada.</p>
           </div>
-          <Badge tone={estado === "cerrado" ? "success" : "neutral"}>
-            {estado === "cerrado" ? <Lock size={12} weight="fill" /> : <LockOpen size={12} />}
-            {estado === "cerrado" ? "Cerrado" : "Abierto"}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <CuadreExport
+              fecha={fecha}
+              lineas={lineas}
+              suma={suma}
+              tirilla={vals.total_tirilla}
+              saldo={saldo}
+              descuadre={descuadre}
+              estado={estado}
+              arqueo={{
+                entro: consignacionesCash,
+                retiros: vals.ret_real,
+                prestamosEfectivo: prestamosEfectivoDia,
+                compensado: vals.compensado,
+                esperado: esperadoCaja,
+                contado: vals.efectivo_contado,
+                diferencia: diferenciaCaja,
+              }}
+            />
+            <Badge tone={estado === "cerrado" ? "success" : "neutral"}>
+              {estado === "cerrado" ? <Lock size={12} weight="fill" /> : <LockOpen size={12} />}
+              {estado === "cerrado" ? "Cerrado" : "Abierto"}
+            </Badge>
+          </div>
         </div>
 
         {locked && (

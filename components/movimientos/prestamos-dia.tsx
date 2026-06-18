@@ -3,7 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { HandCoins, Plus, Trash, Check, Clock, Warning, CheckCircle } from "@phosphor-icons/react/dist/ssr";
+import { HandCoins, Plus, Trash, Check, Clock, Warning, CheckCircle, Lock } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,16 +14,18 @@ import { AnimatedMoney } from "@/components/ui/animated-number";
 import { cn } from "@/lib/utils";
 import { formatCOP, formatHoraISO } from "@/lib/format";
 import type { DeudaConSaldo } from "@/lib/queries";
-import { registrarPrestamoDia, marcarPrestamoPagado, eliminarDeuda } from "@/app/(app)/prestamos/actions";
+import { registrarPrestamoDia, marcarPrestamoPagado, eliminarDeuda, editarDeuda } from "@/app/(app)/prestamos/actions";
 
 export function PrestamosDia({
   fecha,
   prestamos,
   isAdmin,
+  bloqueado,
 }: {
   fecha: string;
   prestamos: DeudaConSaldo[];
   isAdmin: boolean;
+  bloqueado?: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -47,6 +49,7 @@ export function PrestamosDia({
   }, [prestamos]);
 
   function registrar() {
+    if (bloqueado) return;
     if (!persona.trim()) return setError("Escribe a quién es el préstamo.");
     if (monto <= 0) return setError("Ingresa un monto mayor a cero.");
     setError(null);
@@ -86,6 +89,13 @@ export function PrestamosDia({
     });
   }
 
+  function cambiarMedio(d: DeudaConSaldo) {
+    startTransition(async () => {
+      await editarDeuda({ id: d.id, medio: d.medio === "transferencia" ? "efectivo" : "transferencia" });
+      router.refresh();
+    });
+  }
+
   return (
     <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_400px] lg:items-start">
       {/* Registro + lista */}
@@ -100,6 +110,13 @@ export function PrestamosDia({
           <p className="mt-1 text-sm text-muted">
             Quedan en Préstamos con su saldo. Si ya te lo devolvió, márcalo y se salda de una.
           </p>
+
+          {bloqueado && (
+            <div className="mt-4 flex items-center gap-2 rounded-[--radius-card] border border-line-strong bg-surface-2 px-3.5 py-2.5 text-[0.82rem] text-muted">
+              <Lock size={15} weight="fill" className="text-accent" />
+              Día cerrado. Solo Juan puede reabrirlo.
+            </div>
+          )}
 
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-2">
@@ -180,7 +197,7 @@ export function PrestamosDia({
             </div>
           )}
 
-          <Button onClick={registrar} disabled={pending} className="mt-5 w-full sm:w-auto">
+          <Button onClick={registrar} disabled={pending || bloqueado} className="mt-5 w-full sm:w-auto">
             <Plus size={18} weight="bold" />
             {pending ? "Registrando…" : "Registrar préstamo"}
           </Button>
@@ -232,6 +249,20 @@ export function PrestamosDia({
                         </div>
                       </div>
                       <div className="flex shrink-0 items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => cambiarMedio(d)}
+                          disabled={pending || bloqueado}
+                          title="Cambiar entre efectivo y transferencia"
+                          className={cn(
+                            "rounded-full border px-2.5 py-1 text-[0.68rem] font-medium transition-colors disabled:opacity-50",
+                            d.medio === "transferencia"
+                              ? "border-accent/30 bg-accent-soft text-accent-strong"
+                              : "border-line-strong text-muted hover:text-text",
+                          )}
+                        >
+                          {d.medio === "transferencia" ? "Transf." : "Efectivo"}
+                        </button>
                         {saldado ? (
                           <Badge tone="success">Devuelto</Badge>
                         ) : (
@@ -243,7 +274,7 @@ export function PrestamosDia({
                             )}
                             <button
                               onClick={() => pagar(d)}
-                              disabled={pending}
+                              disabled={pending || bloqueado}
                               className="rounded-full border border-success/30 bg-success-soft px-2.5 py-1 text-[0.72rem] font-medium text-success transition-colors hover:bg-success/15 disabled:opacity-40"
                             >
                               Marcar devuelto
@@ -253,7 +284,7 @@ export function PrestamosDia({
                         {isAdmin && (
                           <button
                             onClick={() => borrar(d.id)}
-                            disabled={pending}
+                            disabled={pending || bloqueado}
                             className="flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
                             title="Eliminar"
                           >

@@ -15,6 +15,7 @@ import {
   Receipt,
   Warning,
   ArrowRight,
+  Lock,
 } from "@phosphor-icons/react/dist/ssr";
 import type { Icon } from "@phosphor-icons/react";
 import { Card } from "@/components/ui/card";
@@ -42,7 +43,15 @@ function horaActual(): string {
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
-export function MovimientosManager({ fecha, movimientos }: { fecha: string; movimientos: MovimientoRow[] }) {
+export function MovimientosManager({
+  fecha,
+  movimientos,
+  bloqueado,
+}: {
+  fecha: string;
+  movimientos: MovimientoRow[];
+  bloqueado?: boolean;
+}) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [tipo, setTipo] = useState<Tipo>("consignacion_nequi");
@@ -58,6 +67,7 @@ export function MovimientosManager({ fecha, movimientos }: { fecha: string; movi
   }, [movimientos]);
 
   function registrar() {
+    if (bloqueado) return;
     if (monto <= 0) return setError("Ingresa un monto mayor a cero.");
     setError(null);
     startTransition(async () => {
@@ -88,7 +98,14 @@ export function MovimientosManager({ fecha, movimientos }: { fecha: string; movi
           <h2 className="text-[0.95rem] font-semibold tracking-tight text-text">Registrar movimiento</h2>
           <p className="text-sm text-muted">A medida que pasan las operaciones del día.</p>
 
-          <div className="mt-4 flex flex-wrap gap-2">
+          {bloqueado && (
+            <div className="mt-4 flex items-center gap-2 rounded-[--radius-card] border border-line-strong bg-surface-2 px-3.5 py-2.5 text-[0.82rem] text-muted">
+              <Lock size={15} weight="fill" className="text-accent" />
+              Día cerrado. Solo Juan puede reabrirlo para editar.
+            </div>
+          )}
+
+          <div className={cn("mt-4 flex flex-wrap gap-2", bloqueado && "pointer-events-none opacity-50")}>
             {(Object.keys(TIPOS) as Tipo[]).map((t) => {
               const Ti = TIPOS[t];
               const active = tipo === t;
@@ -110,7 +127,7 @@ export function MovimientosManager({ fecha, movimientos }: { fecha: string; movi
             })}
           </div>
 
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div className={cn("mt-4 grid gap-4 sm:grid-cols-2", bloqueado && "pointer-events-none opacity-50")}>
             <div className="flex flex-col gap-2">
               <Label htmlFor="mov-monto">Monto</Label>
               <MoneyInput id="mov-monto" value={monto} onValueChange={setMonto} autoFocus />
@@ -134,7 +151,7 @@ export function MovimientosManager({ fecha, movimientos }: { fecha: string; movi
             </div>
           )}
 
-          <Button onClick={registrar} disabled={pending} className="mt-5 w-full sm:w-auto">
+          <Button onClick={registrar} disabled={pending || bloqueado} className="mt-5 w-full sm:w-auto">
             <Plus size={18} weight="bold" />
             {pending ? "Registrando…" : `Registrar ${TIPOS[tipo].label.toLowerCase()}`}
           </Button>
@@ -192,7 +209,7 @@ export function MovimientosManager({ fecha, movimientos }: { fecha: string; movi
                       </div>
                       <button
                         onClick={() => borrar(m.id)}
-                        disabled={pending}
+                        disabled={pending || bloqueado}
                         className="flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
                         title="Eliminar"
                       >
