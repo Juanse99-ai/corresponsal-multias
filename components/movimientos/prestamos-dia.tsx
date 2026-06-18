@@ -83,6 +83,7 @@ export function PrestamosDia({
   }
 
   function borrar(id: string) {
+    if (!window.confirm("¿Borrar este préstamo? Queda registrado en la Bitácora.")) return;
     startTransition(async () => {
       await eliminarDeuda(id);
       router.refresh();
