@@ -84,8 +84,10 @@ export function MovimientosManager({
   }
 
   function borrar(id: string) {
+    if (!window.confirm("¿Borrar este movimiento? Queda registrado en la Bitácora.")) return;
     startTransition(async () => {
-      await eliminarMovimiento(id);
+      const res = await eliminarMovimiento(id);
+      if (res && !res.ok) setError(res.error ?? "No se pudo borrar.");
       router.refresh();
     });
   }
