@@ -48,11 +48,10 @@ export async function agregarMovimiento(raw: unknown): Promise<{ ok: boolean; er
 
 export async function eliminarMovimiento(id: string): Promise<{ ok: boolean; error?: string }> {
   const session = await requireSession();
-  const sb = await createClient();
-  const { data: mov } = await sb.from("corr_movimientos").select("fecha").eq("id", id).maybeSingle();
-  if (mov?.fecha && session.rol !== "admin" && (await diaEstaCerrado(mov.fecha))) {
-    return { ok: false, error: "El día está cerrado. Solo Juan puede reabrirlo." };
+  if (session.rol !== "admin") {
+    return { ok: false, error: "Solo Juan (admin) puede borrar movimientos." };
   }
+  const sb = await createClient();
   const { error } = await sb.from("corr_movimientos").delete().eq("id", id);
   if (error) return { ok: false, error: "No se pudo eliminar." };
 
