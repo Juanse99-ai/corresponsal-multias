@@ -47,10 +47,12 @@ export function MovimientosManager({
   fecha,
   movimientos,
   bloqueado,
+  isAdmin,
 }: {
   fecha: string;
   movimientos: MovimientoRow[];
   bloqueado?: boolean;
+  isAdmin?: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -209,14 +211,16 @@ export function MovimientosManager({
                           </p>
                         </div>
                       </div>
-                      <button
-                        onClick={() => borrar(m.id)}
-                        disabled={pending || bloqueado}
-                        className="flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
-                        title="Eliminar"
-                      >
-                        <Trash size={15} />
-                      </button>
+                      {isAdmin && (
+                        <button
+                          onClick={() => borrar(m.id)}
+                          disabled={pending || bloqueado}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
+                          title="Eliminar"
+                        >
+                          <Trash size={15} />
+                        </button>
+                      )}
                     </motion.li>
                   );
                 })}
