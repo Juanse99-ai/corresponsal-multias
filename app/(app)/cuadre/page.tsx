@@ -89,6 +89,7 @@ export default async function CuadrePage({
         existente={!!cuadre}
         inicial={inicial}
         isAdmin={isAdmin}
+        nombre={profile?.nombre ?? ""}
         soportesCount={soportes.length}
         movCount={tot.cantidad}
         prestamosCount={prestamos.length}

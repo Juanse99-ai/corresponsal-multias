@@ -68,7 +68,7 @@ export function BienvenidaSplash({ nombre }: { nombre: string }) {
         month: "2-digit",
         day: "2-digit",
       }).format(new Date());
-      const key = `corr-bienvenida:${hoy}`;
+      const key = `corr-bienvenida:v2:${hoy}`;
       const veces = Number(localStorage.getItem(key) || "0");
       if (veces >= 2) return;
       localStorage.setItem(key, String(veces + 1));
@@ -87,12 +87,11 @@ export function BienvenidaSplash({ nombre }: { nombre: string }) {
       if (reduced()) {
         gsap.set(".bv-hero", { autoAlpha: 0 });
         gsap.set(".bv-shape", { autoAlpha: 1, scale: 1 });
-        gsap.set([".bv-logo", ".bv-greet", ".bv-msg"], { autoAlpha: 0, y: 0 });
-        const t = gsap.timeline({ onComplete: () => setShow(false) });
+        gsap.set([".bv-logo", ".bv-greet", ".bv-msg", ".bv-hint"], { autoAlpha: 0, y: 0 });
+        const t = gsap.timeline();
         t.fromTo(".bv-frost", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3 })
           .to([".bv-logo", ".bv-greet", ".bv-msg"], { autoAlpha: 1, duration: 0.4, stagger: 0.12 })
-          .to({}, { duration: 1.6 })
-          .to(".bv-frost", { autoAlpha: 0, duration: 0.4 });
+          .to(".bv-hint", { autoAlpha: 1, duration: 0.4 });
         tl.current = t;
         return;
       }
@@ -102,6 +101,7 @@ export function BienvenidaSplash({ nombre }: { nombre: string }) {
       gsap.set(".bv-shape", { scale: 0, autoAlpha: 0, y: 0, rotation: 0 });
       gsap.set(".bv-hero", { yPercent: -50, y: 40, autoAlpha: 0, scale: 0.85 });
       gsap.set([".bv-logo", ".bv-greet", ".bv-msg"], { autoAlpha: 0, y: 14 });
+      gsap.set(".bv-hint", { autoAlpha: 0 });
 
       // Flotación perpetua + morph (independientes de la secuencia).
       gsap.utils.toArray<HTMLElement>(".bv-shape").forEach((el, i) => {
@@ -125,7 +125,8 @@ export function BienvenidaSplash({ nombre }: { nombre: string }) {
         delay: 1.1,
       });
 
-      const t = gsap.timeline({ onComplete: () => setShow(false) });
+      // La intro se reproduce y se QUEDA: solo se cierra cuando ella toca/presiona (saltar).
+      const t = gsap.timeline();
       t.to(".bv-frost", { autoAlpha: 1, duration: 0.5, ease: "power2.out" })
         .to(".bv-shape", { scale: 1, autoAlpha: 1, duration: 0.65, ease: "back.out(1.8)", stagger: { each: 0.05, from: "random" } }, "-=0.2")
         .fromTo(".bv-hero", { y: 40, autoAlpha: 0, scale: 0.85 }, { y: 0, autoAlpha: 1, scale: 1, duration: 0.6, ease: "back.out(2)" }, "-=0.15")
@@ -133,10 +134,7 @@ export function BienvenidaSplash({ nombre }: { nombre: string }) {
         .to(".bv-logo", { y: 0, autoAlpha: 1, duration: 0.55, ease: "back.out(2.2)" }, "-=0.1")
         .to(".bv-greet", { y: 0, autoAlpha: 1, duration: 0.5 }, "-=0.3")
         .to(".bv-msg", { y: 0, autoAlpha: 1, duration: 0.55 }, "-=0.25")
-        .to({}, { duration: 1.5 })
-        .to(".bv-shape", { scale: 0, autoAlpha: 0, duration: 0.45, ease: "power2.in", stagger: 0.025 })
-        .to(".bv-center", { autoAlpha: 0, y: -12, duration: 0.45, ease: "power2.in" }, "-=0.4")
-        .to(".bv-frost", { autoAlpha: 0, duration: 0.6, ease: "power2.inOut" }, "-=0.2");
+        .to(".bv-hint", { autoAlpha: 1, duration: 0.5 }, "-=0.1");
       tl.current = t;
     },
     { scope: root, dependencies: [show] },
@@ -228,6 +226,10 @@ export function BienvenidaSplash({ nombre }: { nombre: string }) {
           {mensaje}
         </p>
       </div>
+
+      <p className="bv-hint pointer-events-none absolute bottom-9 left-0 right-0 z-10 text-center text-[0.82rem] text-white/55">
+        toca para continuar
+      </p>
     </div>,
     document.body,
   );
