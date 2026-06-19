@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -131,6 +131,60 @@ export function CuadreEditor({
   // Anti-tamper: un dia cerrado solo lo edita el admin.
   const locked = inicial.estado === "cerrado" && !isAdmin;
 
+  // Borrador local: lo que se escribe a mano (sobre todo la tirilla) no se pierde
+  // si recargas, cambias de pantalla o de dia. Los campos que salen de movimientos
+  // (Nequis, Bancolombia, etc.) NO se guardan aqui: siempre se traen frescos.
+  // Un dia cerrado en el servidor siempre manda: no se restaura un borrador encima.
+  const draftKey = `corr-cuadre-draft:${fecha}`;
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => {
+    if (inicial.estado === "cerrado") {
+      setHydrated(true);
+      return;
+    }
+    try {
+      const raw = window.localStorage.getItem(draftKey);
+      if (raw) {
+        const d = JSON.parse(raw) as Partial<{
+          total_tirilla: number;
+          compensado: number;
+          fondo_caja: number;
+          efectivo_contado: number;
+          nota: string;
+        }>;
+        setVals((s) => ({
+          ...s,
+          total_tirilla: typeof d.total_tirilla === "number" ? d.total_tirilla : s.total_tirilla,
+          compensado: typeof d.compensado === "number" ? d.compensado : s.compensado,
+          fondo_caja: typeof d.fondo_caja === "number" ? d.fondo_caja : s.fondo_caja,
+          efectivo_contado: typeof d.efectivo_contado === "number" ? d.efectivo_contado : s.efectivo_contado,
+        }));
+        if (typeof d.nota === "string") setNota(d.nota);
+      }
+    } catch {
+      /* localStorage no disponible: seguimos sin borrador */
+    }
+    setHydrated(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    if (!hydrated || locked) return;
+    try {
+      window.localStorage.setItem(
+        draftKey,
+        JSON.stringify({
+          total_tirilla: vals.total_tirilla,
+          compensado: vals.compensado,
+          fondo_caja: vals.fondo_caja,
+          efectivo_contado: vals.efectivo_contado,
+          nota,
+        }),
+      );
+    } catch {
+      /* sin localStorage no guardamos borrador, no es critico */
+    }
+  }, [vals.total_tirilla, vals.compensado, vals.fondo_caja, vals.efectivo_contado, nota, hydrated, locked, draftKey]);
+
   // El saldo final cuadra SOLO lo electrónico (lo que pasó por Bancolombia).
   const lineas = [
     { label: "Sr. Luis", value: srLuis },
@@ -155,6 +209,11 @@ export function CuadreEditor({
         nota: nota.trim() || null,
       });
       if (res.ok) {
+        try {
+          window.localStorage.removeItem(draftKey);
+        } catch {
+          /* nada */
+        }
         setEstado(estadoFinal);
         setToast({
           ok: true,
