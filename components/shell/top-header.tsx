@@ -33,7 +33,13 @@ export function buildAvisos(resumen: HeaderResumen): Aviso[] {
   const out: Aviso[] = [];
   const c = resumen.cuadreHoy;
   if (!c) {
-    out.push({ id: "cuadre", tone: "warn", title: "Cuadre de hoy sin abrir", detail: "Ábrelo cuando tengas la tirilla.", href: "/cuadre" });
+    out.push({
+      id: "cuadre",
+      tone: resumen.tarde ? "danger" : "warn",
+      title: resumen.tarde ? "Falta cerrar el día" : "Cuadre de hoy sin abrir",
+      detail: resumen.tarde ? "Ya es tarde y el cuadre sigue sin abrir." : "Ábrelo cuando tengas la tirilla.",
+      href: "/cuadre",
+    });
   } else if (Math.round(c.saldo_final) !== 0) {
     const sobra = c.saldo_final < 0;
     out.push({
@@ -41,6 +47,14 @@ export function buildAvisos(resumen: HeaderResumen): Aviso[] {
       tone: "danger",
       title: "Descuadre de hoy",
       detail: `${sobra ? "Sobran" : "Faltan"} ${formatCOP(Math.abs(c.saldo_final))} por justificar.`,
+      href: "/cuadre",
+    });
+  } else if (c.estado !== "cerrado" && resumen.tarde) {
+    out.push({
+      id: "cerrar",
+      tone: "warn",
+      title: "Recuerda cerrar el día",
+      detail: "Ya cuadra; ciérralo para dejarlo en firme.",
       href: "/cuadre",
     });
   }
