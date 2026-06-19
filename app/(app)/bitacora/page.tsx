@@ -8,11 +8,11 @@ export const metadata: Metadata = { title: "Bitácora · Corresponsal" };
 
 export default async function BitacoraPage() {
   await requireAdmin();
-  const entries = await getAuditLog(250);
+  const entries = await getAuditLog(400);
 
   return (
     <div>
-      <PageHeader title="Bitácora" subtitle="Cada cambio en el dinero queda registrado: quién, qué y cuándo" />
+      <PageHeader title="Bitácora" subtitle="Quién cambió qué, y cuándo." />
       <BitacoraView entries={entries} />
     </div>
   );
