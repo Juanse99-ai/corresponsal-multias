@@ -10,6 +10,7 @@ import {
   sumMontos,
 } from "@/lib/queries";
 import { hoyISO } from "@/lib/format";
+import { saludoHora, mensajeDelDia } from "@/lib/saludos";
 import { PanelView, type PanelData } from "@/components/panel/panel-view";
 
 export const metadata: Metadata = { title: "Panel · Corresponsal" };
@@ -18,6 +19,22 @@ export default async function PanelPage() {
   const profile = await requireSession();
   const hoy = hoyISO();
   const isAdmin = profile.rol === "admin";
+
+  // Saludo y mensaje del día en hora de Colombia (uno por día, estable).
+  const ahora = new Date();
+  const fechaBogota = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Bogota",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(ahora);
+  const horaBogota = Number(
+    new Intl.DateTimeFormat("en-GB", {
+      timeZone: "America/Bogota",
+      hour: "2-digit",
+      hourCycle: "h23",
+    }).format(ahora),
+  );
 
   const [cuadreHoy, consignacionesHoy, saldoLuisAcumulado, recientes, deudas] = await Promise.all([
     getCuadre(hoy),
@@ -46,6 +63,8 @@ export default async function PanelPage() {
 
   const data: PanelData = {
     nombre: profile.nombre,
+    saludo: saludoHora(horaBogota),
+    mensaje: mensajeDelDia(fechaBogota),
     rol: profile.rol,
     cuadreHoy: cuadreHoy ? { estado: cuadreHoy.estado, saldo_final: cuadreHoy.saldo_final } : null,
     tirillaHoy: cuadreHoy ? cuadreHoy.total_tirilla : 0,

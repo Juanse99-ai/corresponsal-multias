@@ -12,6 +12,9 @@ import {
   Plus,
   TrendUp,
   ChartPie,
+  Sun,
+  CloudSun,
+  MoonStars,
 } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +33,8 @@ interface Reciente {
 
 export interface PanelData {
   nombre: string;
+  saludo: string;
+  mensaje: string;
   rol: Rol;
   cuadreHoy: { estado: string; saldo_final: number } | null;
   tirillaHoy: number;
@@ -51,24 +56,30 @@ const item: Variants = {
   show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 130, damping: 20 } },
 };
 
-function saludo(): string {
-  const h = new Date().getHours();
-  if (h < 12) return "Buenos días";
-  if (h < 19) return "Buenas tardes";
-  return "Buenas noches";
-}
-
 export function PanelView({ data }: { data: PanelData }) {
   const primer = data.nombre.split(/\s+/)[0];
   const descuadreHoy = data.cuadreHoy && Math.round(data.cuadreHoy.saldo_final) !== 0;
+  const MomentoIcon = data.saludo.includes("días") ? Sun : data.saludo.includes("tardes") ? CloudSun : MoonStars;
 
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="flex flex-col gap-5">
       <motion.div variants={item}>
-        <h1 className="text-2xl font-semibold tracking-tight text-text sm:text-[1.8rem]">
-          {saludo()}, {primer}.
-        </h1>
-        <p className="mt-1 text-sm text-muted">Así va el corresponsal hoy.</p>
+        <div className="flex items-center gap-2.5">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent-strong">
+            <MomentoIcon size={19} weight="fill" />
+          </span>
+          <h1 className="text-2xl font-semibold tracking-tight text-text sm:text-[1.8rem]">
+            {data.saludo}, {primer}.
+          </h1>
+        </div>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.25, duration: 0.5 }}
+          className="mt-2.5 max-w-[58ch] text-[0.95rem] leading-relaxed text-muted"
+        >
+          {data.mensaje}
+        </motion.p>
       </motion.div>
 
       {/* Fila principal */}
