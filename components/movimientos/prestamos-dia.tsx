@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { HandCoins, Plus, Trash, Check, Clock, Warning, CheckCircle, Lock } from "@phosphor-icons/react/dist/ssr";
+import { HandCoins, Plus, Trash, PencilSimple, Check, Clock, Warning, CheckCircle, Lock } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +38,13 @@ export function PrestamosDia({
   const [medio, setMedio] = useState<"efectivo" | "transferencia">("efectivo");
   const [pagado, setPagado] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Edición inline de un préstamo.
+  const [editId, setEditId] = useState<string | null>(null);
+  const [ePersona, setEPersona] = useState("");
+  const [eOtro, setEOtro] = useState("");
+  const [eConcepto, setEConcepto] = useState("");
+  const [eMonto, setEMonto] = useState(0);
 
   // Préstamos recién registrados (no presentes al cargar) hacen flash verde.
   const idsIniciales = useRef<Set<string> | null>(null);
@@ -103,6 +110,38 @@ export function PrestamosDia({
     startTransition(async () => {
       await editarDeuda({ id: d.id, medio: d.medio === "transferencia" ? "efectivo" : "transferencia" });
       router.refresh();
+    });
+  }
+
+  function abrirEdicion(d: DeudaConSaldo) {
+    setEditId(d.id);
+    const preset = (PERSONAS_PRESET as readonly string[]).includes(d.persona);
+    setEPersona(preset ? d.persona : "Otro");
+    setEOtro(preset ? "" : d.persona);
+    setEConcepto(d.concepto ?? "");
+    setEMonto(d.monto);
+    setError(null);
+  }
+
+  function guardarEdicion() {
+    if (!editId) return;
+    const personaFinal = ePersona === "Otro" ? eOtro.trim() : ePersona;
+    if (!personaFinal) return setError("Elige a quién es el préstamo.");
+    if (eMonto <= 0) return setError("Ingresa un monto mayor a cero.");
+    setError(null);
+    startTransition(async () => {
+      const res = await editarDeuda({
+        id: editId,
+        persona: personaFinal,
+        concepto: eConcepto.trim() || null,
+        monto: eMonto,
+      });
+      if (res.ok) {
+        setEditId(null);
+        router.refresh();
+      } else {
+        setError(res.error ?? "No se pudo editar.");
+      }
     });
   }
 
@@ -258,71 +297,120 @@ export function PrestamosDia({
                       }
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ type: "spring", stiffness: 320, damping: 30, backgroundColor: { duration: 1.2, ease: "easeOut" } }}
-                      className="flex items-center justify-between gap-3 rounded-lg py-2.5"
+                      className="rounded-lg py-2.5"
                     >
-                      <div className="flex min-w-0 items-center gap-3">
-                        <div
-                          className={cn(
-                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
-                            saldado ? "bg-success-soft text-success" : "bg-accent-soft text-accent-strong",
+                      {editId === d.id ? (
+                        <div className="flex flex-col gap-2.5">
+                          <div className="flex flex-wrap gap-1.5">
+                            {[...PERSONAS_PRESET, "Otro"].map((p) => (
+                              <button
+                                key={p}
+                                type="button"
+                                onClick={() => setEPersona(p)}
+                                className={cn(
+                                  "rounded-full border px-2.5 py-1 text-[0.74rem] font-medium transition-colors",
+                                  ePersona === p
+                                    ? "border-accent/40 bg-accent-soft text-accent-strong"
+                                    : "border-line-strong text-muted hover:text-text",
+                                )}
+                              >
+                                {p}
+                              </button>
+                            ))}
+                          </div>
+                          {ePersona === "Otro" && (
+                            <Input value={eOtro} onChange={(e) => setEOtro(e.target.value)} placeholder="Nombre de la persona" />
                           )}
-                        >
-                          {saldado ? <CheckCircle size={16} weight="bold" /> : <HandCoins size={15} weight="bold" />}
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            <Input value={eConcepto} onChange={(e) => setEConcepto(e.target.value)} placeholder="Concepto" />
+                            <MoneyInput value={eMonto} onValueChange={setEMonto} />
+                          </div>
+                          <div className="flex gap-2">
+                            <Button size="sm" onClick={guardarEdicion} disabled={pending}>
+                              Guardar
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => setEditId(null)} disabled={pending}>
+                              Cancelar
+                            </Button>
+                          </div>
                         </div>
-                        <div className="min-w-0 leading-tight">
-                          <p className="tnum text-[0.92rem] font-medium text-text">{formatCOP(d.monto)}</p>
-                          <p className="flex items-center gap-1.5 truncate text-[0.7rem] text-faint">
-                            <span className="truncate text-muted">{d.persona}</span>
-                            {d.concepto && <span className="truncate">· {d.concepto}</span>}
-                            <Clock size={10} />
-                            {formatHoraISO(d.created_at)}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex shrink-0 items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => cambiarMedio(d)}
-                          disabled={pending || bloqueado}
-                          title="Cambiar entre efectivo y transferencia"
-                          className={cn(
-                            "rounded-full border px-2.5 py-1 text-[0.68rem] font-medium transition-colors disabled:opacity-50",
-                            d.medio === "transferencia"
-                              ? "border-accent/30 bg-accent-soft text-accent-strong"
-                              : "border-line-strong text-muted hover:text-text",
-                          )}
-                        >
-                          {d.medio === "transferencia" ? "Transf." : "Efectivo"}
-                        </button>
-                        {saldado ? (
-                          <Badge tone="success">Devuelto</Badge>
-                        ) : (
-                          <>
-                            {d.abonado > 0 && (
-                              <span className="tnum hidden text-[0.7rem] text-faint sm:inline">
-                                queda {formatCOP(d.saldo)}
-                              </span>
-                            )}
-                            <button
-                              onClick={() => pagar(d)}
-                              disabled={pending || bloqueado}
-                              className="rounded-full border border-success/30 bg-success-soft px-2.5 py-1 text-[0.72rem] font-medium text-success transition-colors hover:bg-success/15 disabled:opacity-40"
+                      ) : (
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex min-w-0 items-center gap-3">
+                            <div
+                              className={cn(
+                                "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
+                                saldado ? "bg-success-soft text-success" : "bg-accent-soft text-accent-strong",
+                              )}
                             >
-                              Marcar devuelto
+                              {saldado ? <CheckCircle size={16} weight="bold" /> : <HandCoins size={15} weight="bold" />}
+                            </div>
+                            <div className="min-w-0 leading-tight">
+                              <p className="tnum text-[0.92rem] font-medium text-text">{formatCOP(d.monto)}</p>
+                              <p className="flex items-center gap-1.5 truncate text-[0.7rem] text-faint">
+                                <span className="truncate text-muted">{d.persona}</span>
+                                {d.concepto && <span className="truncate">· {d.concepto}</span>}
+                                <Clock size={10} />
+                                {formatHoraISO(d.created_at)}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex shrink-0 items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => cambiarMedio(d)}
+                              disabled={pending || bloqueado}
+                              title="Cambiar entre efectivo y transferencia"
+                              className={cn(
+                                "rounded-full border px-2.5 py-1 text-[0.68rem] font-medium transition-colors disabled:opacity-50",
+                                d.medio === "transferencia"
+                                  ? "border-accent/30 bg-accent-soft text-accent-strong"
+                                  : "border-line-strong text-muted hover:text-text",
+                              )}
+                            >
+                              {d.medio === "transferencia" ? "Transf." : "Efectivo"}
                             </button>
-                          </>
-                        )}
-                        {isAdmin && (
-                          <button
-                            onClick={() => borrar(d.id)}
-                            disabled={pending || bloqueado}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
-                            title="Eliminar"
-                          >
-                            <Trash size={15} />
-                          </button>
-                        )}
-                      </div>
+                            {saldado ? (
+                              <Badge tone="success">Devuelto</Badge>
+                            ) : (
+                              <>
+                                {d.abonado > 0 && (
+                                  <span className="tnum hidden text-[0.7rem] text-faint sm:inline">
+                                    queda {formatCOP(d.saldo)}
+                                  </span>
+                                )}
+                                <button
+                                  onClick={() => pagar(d)}
+                                  disabled={pending || bloqueado}
+                                  className="rounded-full border border-success/30 bg-success-soft px-2.5 py-1 text-[0.72rem] font-medium text-success transition-colors hover:bg-success/15 disabled:opacity-40"
+                                >
+                                  Marcar devuelto
+                                </button>
+                              </>
+                            )}
+                            {!bloqueado && (
+                              <button
+                                onClick={() => abrirEdicion(d)}
+                                disabled={pending}
+                                className="flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors hover:bg-accent-soft hover:text-accent-strong disabled:opacity-40"
+                                title="Editar"
+                              >
+                                <PencilSimple size={15} />
+                              </button>
+                            )}
+                            {isAdmin && (
+                              <button
+                                onClick={() => borrar(d.id)}
+                                disabled={pending || bloqueado}
+                                className="flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
+                                title="Eliminar"
+                              >
+                                <Trash size={15} />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </motion.li>
                   );
                 })}

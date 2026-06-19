@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
   Trash,
+  PencilSimple,
   Clock,
   ArrowDown,
   ArrowUp,
@@ -27,7 +28,7 @@ import { AnimatedMoney } from "@/components/ui/animated-number";
 import { cn } from "@/lib/utils";
 import { formatCOP, formatHora } from "@/lib/format";
 import type { MovimientoRow } from "@/lib/database.types";
-import { agregarMovimiento, eliminarMovimiento } from "@/app/(app)/movimientos/actions";
+import { agregarMovimiento, eliminarMovimiento, editarMovimiento } from "@/app/(app)/movimientos/actions";
 import { reduced } from "@/components/fx/reduced";
 
 type Tipo = "consignacion_nequi" | "consignacion_bancolombia" | "recaudo" | "retiro";
@@ -63,6 +64,13 @@ export function MovimientosManager({
   const [convenio, setConvenio] = useState("");
   const [error, setError] = useState<string | null>(null);
 
+  // Edición inline de un movimiento existente.
+  const [editId, setEditId] = useState<string | null>(null);
+  const [eTipo, setETipo] = useState<Tipo>("consignacion_nequi");
+  const [eMonto, setEMonto] = useState(0);
+  const [eCliente, setECliente] = useState("");
+  const [eConvenio, setEConvenio] = useState("");
+
   // Filas presentes al cargar; las que aparecen después (recién registradas) hacen flash verde.
   const idsIniciales = useRef<Set<string> | null>(null);
   const yaEstaban = (idsIniciales.current ??= new Set(movimientos.map((m) => m.id)));
@@ -96,6 +104,36 @@ export function MovimientosManager({
       const res = await eliminarMovimiento(id);
       if (res && !res.ok) setError(res.error ?? "No se pudo borrar.");
       router.refresh();
+    });
+  }
+
+  function abrirEdicion(m: MovimientoRow) {
+    setEditId(m.id);
+    setETipo(m.tipo as Tipo);
+    setEMonto(m.monto);
+    setECliente(m.cliente ?? "");
+    setEConvenio(m.convenio ?? "");
+    setError(null);
+  }
+
+  function guardarEdicion() {
+    if (!editId) return;
+    if (eMonto <= 0) return setError("Ingresa un monto mayor a cero.");
+    setError(null);
+    startTransition(async () => {
+      const res = await editarMovimiento({
+        id: editId,
+        tipo: eTipo,
+        monto: eMonto,
+        cliente: eCliente.trim() || null,
+        convenio: eTipo === "recaudo" ? eConvenio.trim() || null : null,
+      });
+      if (res.ok) {
+        setEditId(null);
+        router.refresh();
+      } else {
+        setError(res.error ?? "No se pudo editar.");
+      }
     });
   }
 
@@ -194,41 +232,105 @@ export function MovimientosManager({
                       }
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ type: "spring", stiffness: 320, damping: 30, backgroundColor: { duration: 1.2, ease: "easeOut" } }}
-                      className="flex items-center justify-between gap-3 rounded-lg py-2.5"
+                      className="rounded-lg py-2.5"
                     >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={cn(
-                            "flex h-9 w-9 items-center justify-center rounded-full",
-                            Ti.salida ? "bg-danger-soft text-danger" : "bg-accent-soft text-accent-strong",
+                      {editId === m.id ? (
+                        <div className="flex flex-col gap-2.5">
+                          <div className="flex flex-wrap gap-1.5">
+                            {(Object.keys(TIPOS) as Tipo[]).map((t) => {
+                              const Te = TIPOS[t];
+                              return (
+                                <button
+                                  key={t}
+                                  type="button"
+                                  onClick={() => setETipo(t)}
+                                  className={cn(
+                                    "flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.74rem] font-medium transition-colors",
+                                    eTipo === t
+                                      ? "border-accent/40 bg-accent-soft text-accent-strong"
+                                      : "border-line-strong text-muted hover:text-text",
+                                  )}
+                                >
+                                  <Te.icon size={12} weight="bold" />
+                                  {Te.corto}
+                                </button>
+                              );
+                            })}
+                          </div>
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            <MoneyInput value={eMonto} onValueChange={setEMonto} autoFocus />
+                            <Input
+                              value={eCliente}
+                              onChange={(e) => setECliente(e.target.value)}
+                              placeholder={eTipo === "recaudo" ? "Referencia o cliente" : "Cliente (opcional)"}
+                            />
+                          </div>
+                          {eTipo === "recaudo" && (
+                            <Input
+                              value={eConvenio}
+                              onChange={(e) => setEConvenio(e.target.value)}
+                              placeholder="Código de convenio"
+                              inputMode="numeric"
+                            />
                           )}
-                        >
-                          <Ti.icon size={15} weight="bold" />
+                          <div className="flex gap-2">
+                            <Button size="sm" onClick={guardarEdicion} disabled={pending}>
+                              Guardar
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => setEditId(null)} disabled={pending}>
+                              Cancelar
+                            </Button>
+                          </div>
                         </div>
-                        <div className="leading-tight">
-                          <p className="tnum text-[0.92rem] font-medium text-text">{formatCOP(m.monto)}</p>
-                          <p className="flex items-center gap-1.5 text-[0.7rem] text-faint">
-                            <span>{Ti.label}</span>
-                            {m.hora && (
-                              <>
-                                <Clock size={10} />
-                                {formatHora(m.hora)}
-                              </>
+                      ) : (
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={cn(
+                                "flex h-9 w-9 items-center justify-center rounded-full",
+                                Ti.salida ? "bg-danger-soft text-danger" : "bg-accent-soft text-accent-strong",
+                              )}
+                            >
+                              <Ti.icon size={15} weight="bold" />
+                            </div>
+                            <div className="leading-tight">
+                              <p className="tnum text-[0.92rem] font-medium text-text">{formatCOP(m.monto)}</p>
+                              <p className="flex items-center gap-1.5 text-[0.7rem] text-faint">
+                                <span>{Ti.label}</span>
+                                {m.hora && (
+                                  <>
+                                    <Clock size={10} />
+                                    {formatHora(m.hora)}
+                                  </>
+                                )}
+                                {m.convenio && <span className="truncate">· conv. {m.convenio}</span>}
+                                {m.cliente && <span className="truncate">· {m.cliente}</span>}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex shrink-0 items-center gap-1">
+                            {!bloqueado && (
+                              <button
+                                onClick={() => abrirEdicion(m)}
+                                disabled={pending}
+                                className="flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors hover:bg-accent-soft hover:text-accent-strong disabled:opacity-40"
+                                title="Editar"
+                              >
+                                <PencilSimple size={15} />
+                              </button>
                             )}
-                            {m.convenio && <span className="truncate">· conv. {m.convenio}</span>}
-                            {m.cliente && <span className="truncate">· {m.cliente}</span>}
-                          </p>
+                            {isAdmin && (
+                              <button
+                                onClick={() => borrar(m.id)}
+                                disabled={pending || bloqueado}
+                                className="flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
+                                title="Eliminar"
+                              >
+                                <Trash size={15} />
+                              </button>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                      {isAdmin && (
-                        <button
-                          onClick={() => borrar(m.id)}
-                          disabled={pending || bloqueado}
-                          className="flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
-                          title="Eliminar"
-                        >
-                          <Trash size={15} />
-                        </button>
                       )}
                     </motion.li>
                   );
