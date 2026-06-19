@@ -33,8 +33,8 @@ export default async function MovimientosPage({
       <PageHeader title="Movimientos del día" subtitle={formatFechaLarga(fecha)}>
         <DateNav fecha={fecha} base="/movimientos" />
       </PageHeader>
-      <MovimientosManager fecha={fecha} movimientos={movimientos} bloqueado={bloqueado} isAdmin={isAdmin} />
-      <PrestamosDia fecha={fecha} prestamos={prestamos} isAdmin={isAdmin} bloqueado={bloqueado} />
+      <MovimientosManager key={fecha} fecha={fecha} movimientos={movimientos} bloqueado={bloqueado} isAdmin={isAdmin} />
+      <PrestamosDia key={fecha} fecha={fecha} prestamos={prestamos} isAdmin={isAdmin} bloqueado={bloqueado} />
     </div>
   );
 }

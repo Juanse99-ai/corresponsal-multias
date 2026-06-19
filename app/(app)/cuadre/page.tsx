@@ -82,6 +82,7 @@ export default async function CuadrePage({
         <DateNav fecha={fecha} base="/cuadre" />
       </PageHeader>
       <CuadreEditor
+        key={fecha}
         fecha={fecha}
         srLuis={srLuis}
         consignacionesCount={consignaciones.length}
