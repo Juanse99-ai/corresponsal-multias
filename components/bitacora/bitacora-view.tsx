@@ -441,7 +441,7 @@ function Chip({ active, onClick, icon: Icono, children }: { active: boolean; onC
       onClick={onClick}
       className={cn(
         "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[0.8rem] font-medium transition-colors",
-        active ? "border-accent/40 bg-accent-soft text-accent-strong" : "border-line-strong text-muted hover:text-text",
+        active ? "lg-glass-accent text-accent-strong" : "border-line-strong text-muted hover:text-text",
       )}
     >
       {Icono && <Icono size={13} weight="bold" />}
@@ -462,7 +462,7 @@ function AccionChip({
   children: React.ReactNode;
 }) {
   const a = tipo === "todas" ? null : ACCION[tipo];
-  const activeCls = a ? cn(a.bg, a.color, "border-transparent") : "border-accent/40 bg-accent-soft text-accent-strong";
+  const activeCls = a ? cn(a.bg, a.color, "border-transparent") : "lg-glass-accent text-accent-strong";
   return (
     <button
       onClick={onClick}

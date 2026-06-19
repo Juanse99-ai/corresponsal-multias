@@ -185,7 +185,7 @@ export function PrestamosDia({
                     className={cn(
                       "rounded-full border px-3 py-1.5 text-[0.8rem] font-medium transition-colors",
                       persona === p
-                        ? "border-accent/40 bg-accent-soft text-accent-strong"
+                        ? "lg-glass-accent text-accent-strong"
                         : "border-line-strong text-muted hover:text-text",
                     )}
                   >
@@ -251,7 +251,7 @@ export function PrestamosDia({
                   className={cn(
                     "flex-1 rounded-[--radius-card] border px-3 py-2.5 text-[0.82rem] font-medium transition-colors",
                     medio === m
-                      ? "border-accent/40 bg-accent-soft text-accent-strong"
+                      ? "lg-glass-accent text-accent-strong"
                       : "border-line-strong text-muted hover:text-text",
                   )}
                 >
@@ -319,7 +319,7 @@ export function PrestamosDia({
                                 className={cn(
                                   "rounded-full border px-2.5 py-1 text-[0.74rem] font-medium transition-colors",
                                   ePersona === p
-                                    ? "border-accent/40 bg-accent-soft text-accent-strong"
+                                    ? "lg-glass-accent text-accent-strong"
                                     : "border-line-strong text-muted hover:text-text",
                                 )}
                               >

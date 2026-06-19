@@ -162,7 +162,7 @@ export function MovimientosManager({
                   className={cn(
                     "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[0.8rem] font-medium transition-colors",
                     active
-                      ? "border-accent/40 bg-accent-soft text-accent-strong"
+                      ? "lg-glass-accent text-accent-strong"
                       : "border-line-strong text-muted hover:text-text",
                   )}
                 >
@@ -247,7 +247,7 @@ export function MovimientosManager({
                                   className={cn(
                                     "flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.74rem] font-medium transition-colors",
                                     eTipo === t
-                                      ? "border-accent/40 bg-accent-soft text-accent-strong"
+                                      ? "lg-glass-accent text-accent-strong"
                                       : "border-line-strong text-muted hover:text-text",
                                   )}
                                 >

@@ -163,6 +163,36 @@ input[type="number"] { -moz-appearance: textfield; }
   animation: shimmer 1.6s infinite;
 }
 
+/* ===== Liquid Glass: pill esmerilada (botones y toggles) ===== */
+.lg-glass,
+.lg-glass-accent,
+.lg-glass-danger {
+  -webkit-backdrop-filter: blur(14px) saturate(1.7);
+  backdrop-filter: blur(14px) saturate(1.7);
+  box-shadow:
+    0 8px 26px -8px oklch(0.3 0.03 258 / 0.18),
+    inset 0 1px 0 oklch(1 0 0 / 0.7),
+    inset 0 0 0 0.5px oklch(0.3 0.03 258 / 0.08);
+}
+.lg-glass {
+  background: linear-gradient(180deg, oklch(1 0 0 / 0.86), oklch(0.965 0.005 255 / 0.72));
+}
+.lg-glass:hover {
+  background: linear-gradient(180deg, oklch(1 0 0 / 0.97), oklch(0.972 0.005 255 / 0.83));
+}
+.lg-glass-accent {
+  background: linear-gradient(180deg, oklch(0.93 0.05 258 / 0.92), oklch(0.895 0.066 258 / 0.8));
+}
+.lg-glass-accent:hover {
+  background: linear-gradient(180deg, oklch(0.945 0.055 258 / 0.97), oklch(0.91 0.07 258 / 0.87));
+}
+.lg-glass-danger {
+  background: linear-gradient(180deg, oklch(0.95 0.05 25 / 0.92), oklch(0.93 0.06 25 / 0.8));
+}
+.lg-glass-danger:hover {
+  background: linear-gradient(180deg, oklch(0.96 0.055 25 / 0.97), oklch(0.94 0.066 25 / 0.87));
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;

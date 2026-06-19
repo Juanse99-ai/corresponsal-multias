@@ -490,20 +490,20 @@ export function CuadreEditor({
             </div>
           ) : (
             <>
-              <div className="flex rounded-[--radius-card] border border-line bg-surface-2 p-1">
+              <div className="flex rounded-full border border-line bg-surface-2 p-1">
                 {(["abierto", "cerrado"] as const).map((e) => (
                   <button
                     key={e}
                     onClick={() => setEstado(e)}
                     className={cn(
-                      "relative flex-1 rounded-[0.7rem] py-2 text-[0.8rem] font-medium capitalize transition-colors",
+                      "relative flex-1 rounded-full py-2 text-[0.8rem] font-medium capitalize transition-colors",
                       estado === e ? "text-text" : "text-faint hover:text-muted",
                     )}
                   >
                     {estado === e && (
                       <motion.span
                         layoutId="estado-pill"
-                        className="absolute inset-0 rounded-[0.7rem] border border-line-strong bg-elevated"
+                        className="absolute inset-0 rounded-full lg-glass"
                         transition={{ type: "spring", stiffness: 360, damping: 30 }}
                       />
                     )}
