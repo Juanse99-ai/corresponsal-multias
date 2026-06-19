@@ -172,7 +172,6 @@ function AddDeudaForm() {
   return (
     <Card className="p-5 sm:p-6">
       <h3 className="text-[0.95rem] font-semibold tracking-tight text-text">Nuevo préstamo</h3>
-      <p className="text-sm text-muted">Quién tomó, cuánto y cuándo.</p>
 
       <div className="mt-5 flex flex-col gap-4">
         <div className="flex flex-col gap-2">

@@ -50,9 +50,6 @@ export function LuisManager({
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <Badge tone={acumulado === 0 ? "success" : "accent"}>{favor(acumulado)}</Badge>
-              <span className="text-[0.72rem] text-faint">
-                Su dinero es exclusivo de él · se arrastra cada día
-              </span>
             </div>
           </div>
 

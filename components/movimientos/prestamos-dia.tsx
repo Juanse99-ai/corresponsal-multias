@@ -117,9 +117,6 @@ export function PrestamosDia({
             </span>
             <h2 className="text-[0.95rem] font-semibold tracking-tight text-text">Préstamos del día</h2>
           </div>
-          <p className="mt-1 text-sm text-muted">
-            Quedan en Préstamos con su saldo. Si ya te lo devolvió, márcalo y se salda de una.
-          </p>
 
           {bloqueado && (
             <div className="mt-4 flex items-center gap-2 rounded-[--radius-card] border border-line-strong bg-surface-2 px-3.5 py-2.5 text-[0.82rem] text-muted">
@@ -352,9 +349,6 @@ export function PrestamosDia({
               <span className="tnum font-medium text-success">{formatCOP(devuelto)}</span>
             </div>
           </div>
-          <p className="mt-3 rounded-[--radius-card] bg-accent-soft/40 px-3 py-2 text-[0.74rem] text-muted">
-            El pendiente pasa solo al campo <span className="font-medium text-accent-strong">Préstamos</span> del cuadre.
-          </p>
         </Card>
       </div>
     </div>

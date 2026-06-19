@@ -237,7 +237,6 @@ export function CuadreEditor({
         <div className="mb-5 flex items-center justify-between">
           <div>
             <h2 className="text-[0.95rem] font-semibold tracking-tight text-text">Movimientos del día</h2>
-            <p className="text-sm text-muted">Ingresa los totales al cerrar la jornada.</p>
           </div>
           <div className="flex items-center gap-2">
             <CuadreExport
@@ -440,9 +439,6 @@ export function CuadreEditor({
               {formatCOP(diferenciaCaja)}
             </span>
           </div>
-          <p className="mt-1 text-[0.68rem] leading-relaxed text-faint">
-            El efectivo que entró = Nequis + Bancolombia (los clientes pagan en efectivo).
-          </p>
         </div>
 
         <div className="mt-4 flex flex-col gap-2">
