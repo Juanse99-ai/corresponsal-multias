@@ -19,7 +19,9 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/field";
 import { MoneyInput } from "@/components/ui/money-input";
 import { Badge } from "@/components/ui/badge";
-import { AnimatedMoney } from "@/components/ui/animated-number";
+import { SaldoVivo } from "@/components/fx/saldo-vivo";
+import { CelebracionCierre } from "@/components/fx/celebracion-cierre";
+import { ripple } from "@/components/fx/ripple";
 import { cn } from "@/lib/utils";
 import { formatCOP } from "@/lib/format";
 import {
@@ -80,6 +82,7 @@ export function CuadreEditor({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [toast, setToast] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [celebrar, setCelebrar] = useState(0);
 
   const [vals, setVals] = useState({
     total_tirilla: inicial.total_tirilla,
@@ -215,6 +218,7 @@ export function CuadreEditor({
           /* nada */
         }
         setEstado(estadoFinal);
+        if (estadoFinal === "cerrado" && !descuadre) setCelebrar((c) => c + 1);
         setToast({
           ok: true,
           msg: estadoFinal === "cerrado" ? "Día cerrado y guardado." : "Cuadre guardado.",
@@ -306,8 +310,11 @@ export function CuadreEditor({
         {(movCount > 0 || prestamosCount > 0) && (
           <button
             type="button"
-            onClick={traerDeMovimientos}
-            className="mt-4 flex w-full items-center justify-between rounded-[--radius-card] border border-accent/25 bg-accent-soft/40 px-4 py-2.5 text-[0.82rem] transition-colors hover:bg-accent-soft"
+            onClick={(e) => {
+              ripple(e);
+              traerDeMovimientos();
+            }}
+            className="relative mt-4 flex w-full items-center justify-between overflow-hidden rounded-[--radius-card] border border-accent/25 bg-accent-soft/40 px-4 py-2.5 text-[0.82rem] transition-colors hover:bg-accent-soft"
           >
             <span className="flex items-center gap-2 text-muted">
               <ArrowClockwise size={14} className="text-accent" />
@@ -547,6 +554,8 @@ export function CuadreEditor({
           </AnimatePresence>
         </Card>
       </div>
+
+      <CelebracionCierre play={celebrar} />
     </div>
   );
 }
@@ -604,9 +613,9 @@ function SaldoHero({
             {descuadre ? "Descuadre" : "Cuadrado"}
           </Badge>
         </div>
-        <p className={cn("mt-2 text-4xl font-semibold tracking-tight", descuadre ? "text-danger" : "text-success")}>
-          <AnimatedMoney value={saldo} />
-        </p>
+        <div className="mt-3">
+          <SaldoVivo saldo={saldo} descuadre={descuadre} />
+        </div>
         <p className="mt-2 text-[0.82rem] leading-relaxed text-muted">
           {descuadre
             ? faltan
