@@ -381,13 +381,57 @@ export function CuadreEditor({
               <span className="font-medium text-text">Esperado en caja</span>
               <span className="tnum font-medium text-text">{formatCOP(esperadoCaja)}</span>
             </div>
-            <div className="flex items-center justify-between py-2">
-              <span className="font-medium text-text">Diferencia</span>
-              <span className={cn("tnum font-semibold", diferenciaCaja === 0 ? "text-success" : "text-danger")}>
-                {diferenciaCaja > 0 ? "+" : ""}
-                {formatCOP(diferenciaCaja)}
+          </div>
+
+          {/* Diferencia destacada: que se note de una si la caja cuadra o no. */}
+          <div
+            className={cn(
+              "mt-3 flex items-center justify-between gap-3 rounded-[1rem] border px-4 py-3.5 transition-colors",
+              diferenciaCaja === 0 ? "border-success/35 bg-success-soft" : "border-danger/50 bg-danger-soft",
+            )}
+          >
+            <div className="flex items-center gap-2.5">
+              <span
+                className={cn(
+                  "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
+                  diferenciaCaja === 0 ? "bg-success/15 text-success" : "bg-danger/15 text-danger",
+                )}
+              >
+                {diferenciaCaja === 0 ? (
+                  <CheckCircle size={20} weight="fill" />
+                ) : (
+                  <Warning size={20} weight="fill" />
+                )}
               </span>
+              <div className="leading-tight">
+                <p
+                  className={cn(
+                    "text-[0.92rem] font-semibold",
+                    diferenciaCaja === 0 ? "text-success" : "text-danger",
+                  )}
+                >
+                  {diferenciaCaja === 0
+                    ? "Caja cuadrada"
+                    : diferenciaCaja > 0
+                      ? "Sobra efectivo en caja"
+                      : "Falta efectivo en caja"}
+                </p>
+                <p className="text-[0.72rem] text-muted">
+                  {diferenciaCaja === 0
+                    ? "Lo contado coincide con lo esperado."
+                    : "Revisa el efectivo contado o los movimientos."}
+                </p>
+              </div>
             </div>
+            <span
+              className={cn(
+                "tnum shrink-0 text-xl font-bold tracking-tight",
+                diferenciaCaja === 0 ? "text-success" : "text-danger",
+              )}
+            >
+              {diferenciaCaja > 0 ? "+" : ""}
+              {formatCOP(diferenciaCaja)}
+            </span>
           </div>
           <p className="mt-1 text-[0.68rem] leading-relaxed text-faint">
             El efectivo que entró = Nequis + Bancolombia (los clientes pagan en efectivo).
