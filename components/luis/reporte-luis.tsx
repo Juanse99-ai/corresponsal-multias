@@ -34,8 +34,8 @@ export function ReporteLuisButton({
   useEffect(() => setMounted(true), []);
 
   const totalConsig = consignaciones.reduce((s, c) => s + c.monto, 0);
-  const totalComp = compensaciones.reduce((s, c) => s + c.monto, 0);
-  const saldo = totalComp - totalConsig;
+  // El arrastre del día anterior es la primera compensación a favor de Luis.
+  const totalComp = compensaciones.reduce((s, c) => s + c.monto, 0) + acumuladoAyer;
 
   async function generar(): Promise<Blob | null> {
     if (!ref.current) return null;
@@ -107,22 +107,17 @@ export function ReporteLuisButton({
               </div>
 
               <div className="grid grid-cols-2">
-                <ColumnaReporte titulo="COMPENSACIÓN" items={compensaciones} total={totalComp} borde />
+                <ColumnaReporte
+                  titulo="COMPENSACIÓN"
+                  items={compensaciones}
+                  total={totalComp}
+                  leading={acumuladoAyer ? { label: "Arrastre", monto: acumuladoAyer } : undefined}
+                  borde
+                />
                 <ColumnaReporte titulo="CONSIGNACIONES" items={consignaciones} total={totalConsig} />
               </div>
 
-              <div className="flex items-center justify-between gap-3 bg-[#a9eef7] px-6 py-3">
-                <span className="text-sm font-bold tracking-tight text-zinc-800">SALDO DEL DÍA</span>
-                <span className="text-base font-bold italic tabular-nums text-zinc-900">
-                  {formatCOP(saldo)}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between gap-3 border-t border-zinc-200 px-6 py-2 text-[0.76rem] text-zinc-600">
-                <span>Arrastre anterior</span>
-                <span className="tabular-nums">{formatCOP(acumuladoAyer)}</span>
-              </div>
-              <div className="flex items-center justify-between gap-3 bg-[#bfe9cb] px-6 py-2.5">
+              <div className="flex items-center justify-between gap-3 border-t border-zinc-200 bg-[#bfe9cb] px-6 py-3">
                 <span className="text-[0.78rem] font-bold tracking-tight text-zinc-800">
                   SALDO ACUMULADO A FAVOR DE LUIS
                 </span>
@@ -130,7 +125,7 @@ export function ReporteLuisButton({
               </div>
 
               <div className="px-6 py-2.5 text-center text-[0.62rem] text-zinc-400">
-                Multidiagnósticos AS · NIT 901572225 · Cuenta 120.000.021.21
+                Multidiagnósticos AS
               </div>
             </div>
 
@@ -169,30 +164,41 @@ function ColumnaReporte({
   items,
   total,
   borde,
+  leading,
 }: {
   titulo: string;
   items: MovimientoItem[];
   total: number;
   borde?: boolean;
+  leading?: { label: string; monto: number };
 }) {
+  const vacio = !leading && items.length === 0;
   return (
     <div className={borde ? "border-r border-zinc-200" : ""}>
       <div className="bg-[#f6e3d2] px-3 py-2 text-center text-[0.74rem] font-bold tracking-tight text-zinc-800">
         {titulo}
       </div>
       <div className="min-h-[80px] divide-y divide-zinc-100">
-        {items.length === 0 ? (
+        {vacio ? (
           <p className="px-3 py-6 text-center text-sm text-zinc-300">—</p>
         ) : (
-          items.map((c) => (
-            <div
-              key={c.id}
-              className="flex items-center justify-between gap-2 px-3 py-1.5 text-[0.8rem]"
-            >
-              <span className="tabular-nums text-zinc-400">{c.hora ? formatHora(c.hora) : ""}</span>
-              <span className="font-medium tabular-nums text-zinc-800">{formatCOP(c.monto)}</span>
-            </div>
-          ))
+          <>
+            {leading && (
+              <div className="flex items-center justify-between gap-2 px-3 py-1.5 text-[0.8rem]">
+                <span className="font-medium text-zinc-500">{leading.label}</span>
+                <span className="font-medium tabular-nums text-zinc-800">{formatCOP(leading.monto)}</span>
+              </div>
+            )}
+            {items.map((c) => (
+              <div
+                key={c.id}
+                className="flex items-center justify-between gap-2 px-3 py-1.5 text-[0.8rem]"
+              >
+                <span className="tabular-nums text-zinc-400">{c.hora ? formatHora(c.hora) : ""}</span>
+                <span className="font-medium tabular-nums text-zinc-800">{formatCOP(c.monto)}</span>
+              </div>
+            ))}
+          </>
         )}
       </div>
       <div className="bg-[#8ce99a] px-3 py-2 text-center text-[0.86rem] font-bold tabular-nums text-zinc-900">
