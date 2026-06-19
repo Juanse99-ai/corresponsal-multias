@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/shell/page-header";
 import { DateNav } from "@/components/shell/date-nav";
 
 export const metadata: Metadata = { title: "Movimientos · Corresponsal" };
+export const dynamic = "force-dynamic";
 
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 

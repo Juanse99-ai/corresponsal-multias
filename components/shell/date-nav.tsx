@@ -14,7 +14,7 @@ export function DateNav({ fecha, base }: { fecha: string; base: string }) {
 
   return (
     <div className="flex items-center gap-1.5">
-      <Link href={`${base}?fecha=${prev}`} className={cls} title="Día anterior" aria-label="Día anterior">
+      <Link href={`${base}?fecha=${prev}`} prefetch={false} className={cls} title="Día anterior" aria-label="Día anterior">
         <CaretLeft size={15} weight="bold" />
       </Link>
       <span className="min-w-[5.5rem] text-center text-[0.82rem] font-medium text-text">
@@ -25,13 +25,14 @@ export function DateNav({ fecha, base }: { fecha: string; base: string }) {
           <CaretRight size={15} weight="bold" />
         </span>
       ) : (
-        <Link href={`${base}?fecha=${next}`} className={cls} title="Día siguiente" aria-label="Día siguiente">
+        <Link href={`${base}?fecha=${next}`} prefetch={false} className={cls} title="Día siguiente" aria-label="Día siguiente">
           <CaretRight size={15} weight="bold" />
         </Link>
       )}
       {!esHoy && (
         <Link
           href={base}
+          prefetch={false}
           className="ml-1 rounded-lg border border-line bg-surface px-2.5 py-1.5 text-[0.78rem] font-medium text-accent-strong transition-colors hover:bg-surface-2"
         >
           Hoy

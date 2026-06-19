@@ -18,6 +18,8 @@ import { DateNav } from "@/components/shell/date-nav";
 import type { EstadoCuadre } from "@/lib/cuadre";
 
 export const metadata: Metadata = { title: "Cuadre diario · Corresponsal" };
+// Siempre datos frescos: al navegar entre días no debe servir una versión cacheada.
+export const dynamic = "force-dynamic";
 
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 
