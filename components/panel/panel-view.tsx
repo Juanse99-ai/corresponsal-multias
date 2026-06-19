@@ -12,9 +12,6 @@ import {
   Plus,
   TrendUp,
   ChartPie,
-  Sun,
-  CloudSun,
-  MoonStars,
 } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { formatCOP, formatCompactCOP, formatFechaCorta } from "@/lib/format";
 import type { Rol } from "@/lib/cuadre";
 import type { PersonaSaldo } from "@/lib/queries";
+import { SaludoGsap } from "@/components/fx/saludo-gsap";
 
 interface Reciente {
   fecha: string;
@@ -59,30 +57,13 @@ const item: Variants = {
 export function PanelView({ data }: { data: PanelData }) {
   const primer = data.nombre.split(/\s+/)[0];
   const descuadreHoy = data.cuadreHoy && Math.round(data.cuadreHoy.saldo_final) !== 0;
-  const MomentoIcon = data.saludo.includes("días") ? Sun : data.saludo.includes("tardes") ? CloudSun : MoonStars;
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="flex flex-col gap-5">
-      <motion.div variants={item}>
-        <div className="flex items-center gap-2.5">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent-strong">
-            <MomentoIcon size={19} weight="fill" />
-          </span>
-          <h1 className="text-2xl font-semibold tracking-tight text-text sm:text-[1.8rem]">
-            {data.saludo}, {primer}.
-          </h1>
-        </div>
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.25, duration: 0.5 }}
-          className="mt-2.5 max-w-[58ch] text-[0.95rem] leading-relaxed text-muted"
-        >
-          {data.mensaje}
-        </motion.p>
-      </motion.div>
+    <div className="flex flex-col gap-5">
+      <SaludoGsap saludo={data.saludo} nombre={primer} mensaje={data.mensaje} />
 
-      {/* Fila principal */}
+      <motion.div variants={container} initial="hidden" animate="show" className="flex flex-col gap-5">
+        {/* Fila principal */}
       <div className="grid gap-5 lg:grid-cols-[1.35fr_1fr]">
         <motion.div variants={item}>
           <Link href="/cuadre" className="group block h-full">
@@ -254,7 +235,8 @@ export function PanelView({ data }: { data: PanelData }) {
           )}
         </Card>
       </motion.div>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 }
 
