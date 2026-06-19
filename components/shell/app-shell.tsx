@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { motion, AnimatePresence, MotionConfig, type Variants } from "framer-motion";
 import {
   House,
   Calculator,
@@ -76,6 +76,7 @@ export function AppShell({
   const avisos = buildAvisos(resumen);
 
   return (
+    <MotionConfig reducedMotion="user">
     <div className="min-h-[100dvh]">
       <BienvenidaSplash nombre={profile.nombre} />
       {/* ===== Riel lateral escritorio (claro, colapsable) ===== */}
@@ -190,6 +191,7 @@ export function AppShell({
         </div>
       </div>
     </div>
+    </MotionConfig>
   );
 }
 

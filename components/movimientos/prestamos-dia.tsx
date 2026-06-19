@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { HandCoins, Plus, Trash, Check, Clock, Warning, CheckCircle, Lock } from "@phosphor-icons/react/dist/ssr";
@@ -16,6 +16,7 @@ import { formatCOP, formatHoraISO } from "@/lib/format";
 import { PERSONAS_PRESET } from "@/lib/personas";
 import type { DeudaConSaldo } from "@/lib/queries";
 import { registrarPrestamoDia, marcarPrestamoPagado, eliminarDeuda, editarDeuda } from "@/app/(app)/prestamos/actions";
+import { reduced } from "@/components/fx/reduced";
 
 export function PrestamosDia({
   fecha,
@@ -37,6 +38,10 @@ export function PrestamosDia({
   const [medio, setMedio] = useState<"efectivo" | "transferencia">("efectivo");
   const [pagado, setPagado] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Préstamos recién registrados (no presentes al cargar) hacen flash verde.
+  const idsIniciales = useRef<Set<string> | null>(null);
+  const yaEstaban = (idsIniciales.current ??= new Set(prestamos.map((d) => d.id)));
 
   const { pendiente, prestado, devuelto } = useMemo(() => {
     let pendiente = 0;
@@ -243,15 +248,20 @@ export function PrestamosDia({
               <AnimatePresence initial={false}>
                 {prestamos.map((d) => {
                   const saldado = d.saldo === 0;
+                  const nuevo = !yaEstaban.has(d.id) && !reduced();
                   return (
                     <motion.li
                       key={d.id}
                       layout
                       initial={{ opacity: 0, y: -8 }}
-                      animate={{ opacity: 1, y: 0 }}
+                      animate={
+                        nuevo
+                          ? { opacity: 1, y: 0, backgroundColor: ["rgba(29,158,117,0.2)", "rgba(29,158,117,0)"] }
+                          : { opacity: 1, y: 0 }
+                      }
                       exit={{ opacity: 0, height: 0 }}
-                      transition={{ type: "spring", stiffness: 320, damping: 30 }}
-                      className="flex items-center justify-between gap-3 py-2.5"
+                      transition={{ type: "spring", stiffness: 320, damping: 30, backgroundColor: { duration: 1.2, ease: "easeOut" } }}
+                      className="flex items-center justify-between gap-3 rounded-lg py-2.5"
                     >
                       <div className="flex min-w-0 items-center gap-3">
                         <div
