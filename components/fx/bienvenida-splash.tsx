@@ -10,46 +10,47 @@ import { saludoHora, mensajeDelDia } from "@/lib/saludos";
 
 gsap.registerPlugin(MorphSVGPlugin);
 
-const CIRCLE_PATH = "M50 8 C73.2 8 92 26.8 92 50 C92 73.2 73.2 92 50 92 C26.8 92 8 73.2 8 50 C8 26.8 26.8 8 50 8Z";
-const SPARKLE_PATH = "M50 6 C54 38 62 46 94 50 C62 54 54 62 50 94 C46 62 38 54 6 50 C38 46 46 38 50 6Z";
-const STAR5 = "M50 5 L61 38 L96 38 L68 59 L79 92 L50 71 L21 92 L32 59 L4 38 L39 38Z";
-
-const FORMAS: { t: string; c: string; x: number; y: number; w: number; r?: number }[] = [
-  { t: "circle", c: "#4f9cf9", x: 11, y: 14, w: 6 },
-  { t: "smile", c: "#ff7a1a", x: 30, y: 9, w: 11 },
-  { t: "heart", c: "#ff4fa3", x: 84, y: 12, w: 8 },
-  { t: "tri", c: "#3ddc84", x: 90, y: 42, w: 8 },
-  { t: "star", c: "#ffd21a", x: 86, y: 80, w: 8 },
-  { t: "blob", c: "#b06cf0", x: 9, y: 50, w: 7 },
-  { t: "rect", c: "#b06cf0", x: 13, y: 84, w: 9 },
-  { t: "sparkle", c: "#ffffff", x: 26, y: 76, w: 5 },
-  { t: "circle", c: "#ff7a1a", x: 50, y: 92, w: 5 },
-  { t: "smile", c: "#ffd21a", x: 5, y: 40, w: 9, r: 150 },
-];
-
-function FormaSVG({ t, c }: { t: string; c: string }) {
-  const inner: Record<string, React.ReactNode> = {
-    circle: <circle cx="50" cy="50" r="44" fill={c} />,
-    smile: <path d="M14 42 A38 38 0 0 0 86 42" fill="none" stroke={c} strokeWidth="22" strokeLinecap="round" />,
-    heart: (
-      <path d="M50 84 C18 60 8 40 8 27 C8 13 21 7 31 7 C40 7 47 12 50 19 C53 12 60 7 69 7 C79 7 92 13 92 27 C92 40 82 60 50 84Z" fill={c} />
-    ),
-    tri: <path d="M50 12 L86 82 L14 82 Z" fill={c} stroke={c} strokeWidth="12" strokeLinejoin="round" />,
-    sparkle: <path d={SPARKLE_PATH} fill={c} />,
-    rect: <rect x="8" y="22" width="84" height="56" rx="18" fill={c} />,
-    blob: <path d="M52 8 C72 6 92 22 92 44 C92 66 76 94 50 92 C26 90 8 72 10 48 C12 26 32 10 52 8Z" fill={c} />,
-    star: <path d={STAR5} fill={c} />,
-  };
-  return (
-    <svg viewBox="0 0 100 100" width="100%" style={{ display: "block" }}>
-      {inner[t]}
-    </svg>
-  );
+// Flor de 6 pétalos (generada una vez).
+function flor() {
+  const petals = 6, cx = 50, cy = 50, inner = 22, outer = 48;
+  let d = "";
+  for (let i = 0; i < petals; i++) {
+    const a1 = (i / petals) * Math.PI * 2 - Math.PI / 2;
+    const a2 = ((i + 1) / petals) * Math.PI * 2 - Math.PI / 2;
+    const am = (a1 + a2) / 2;
+    const p1x = cx + inner * Math.cos(a1), p1y = cy + inner * Math.sin(a1);
+    const p2x = cx + inner * Math.cos(a2), p2y = cy + inner * Math.sin(a2);
+    const tx = cx + outer * Math.cos(am), ty = cy + outer * Math.sin(am);
+    if (i === 0) d += `M${p1x.toFixed(1)} ${p1y.toFixed(1)}`;
+    d += `Q${tx.toFixed(1)} ${ty.toFixed(1)} ${p2x.toFixed(1)} ${p2y.toFixed(1)}`;
+  }
+  return d + "Z";
 }
 
-/** Bienvenida a pantalla completa: app borrosa detrás, formas de colores que flotan,
- *  una que morphea, secuencia de textos kinéticos y el logo. Primeras 2 veces del día
- *  (o forzada con ?bienvenida=1). Respeta prefers-reduced-motion. */
+const FLOR = flor();
+const CARRO =
+  "M10 58 Q10 48 22 46 L31 46 L39 34 Q41 30 47 30 L60 30 Q66 30 70 35 L78 46 Q90 48 90 58 L90 62 Q90 66 86 66 L80 66 A9 9 0 0 0 62 66 L40 66 A9 9 0 0 0 22 66 L14 66 Q10 66 10 62 Z";
+const CORAZON =
+  "M50 84 C18 60 8 40 8 27 C8 13 21 7 31 7 C40 7 47 12 50 19 C53 12 60 7 69 7 C79 7 92 13 92 27 C92 40 82 60 50 84Z";
+const ESTRELLA = "M50 6 L62 38 L96 39 L69 60 L79 93 L50 73 L21 93 L31 60 L4 39 L38 38Z";
+const SECUENCIA = [FLOR, CARRO, CORAZON, ESTRELLA];
+
+// Cada forma: color, posición (%), tamaño (%), forma inicial (índice en SECUENCIA).
+const PLACES: { c: string; x: number; y: number; w: number; s: number }[] = [
+  { c: "#ff4fa3", x: 12, y: 14, w: 9, s: 0 },
+  { c: "#4f9cf9", x: 32, y: 9, w: 11, s: 1 },
+  { c: "#ffd21a", x: 84, y: 12, w: 9, s: 3 },
+  { c: "#3ddc84", x: 90, y: 44, w: 9, s: 0 },
+  { c: "#ff7a1a", x: 86, y: 80, w: 10, s: 1 },
+  { c: "#b06cf0", x: 10, y: 50, w: 9, s: 2 },
+  { c: "#ff4fa3", x: 14, y: 84, w: 8, s: 3 },
+  { c: "#4f9cf9", x: 50, y: 91, w: 8, s: 2 },
+  { c: "#ffd21a", x: 6, y: 40, w: 9, s: 0 },
+];
+
+/** Bienvenida a pantalla completa: app borrosa detrás, formas (flor/carro/corazón/estrella)
+ *  que flotan y se MORPHEAN entre sí, secuencia de textos y el logo. Primeras 2 veces del día
+ *  (o forzada con ?bienvenida=1). Solo se cierra al tocar. Respeta prefers-reduced-motion. */
 export function BienvenidaSplash({ nombre }: { nombre: string }) {
   const [show, setShow] = useState(false);
   const root = useRef<HTMLDivElement>(null);
@@ -103,7 +104,7 @@ export function BienvenidaSplash({ nombre }: { nombre: string }) {
       gsap.set([".bv-logo", ".bv-greet", ".bv-msg"], { autoAlpha: 0, y: 14 });
       gsap.set(".bv-hint", { autoAlpha: 0 });
 
-      // Flotación perpetua + morph (independientes de la secuencia).
+      // Flotación perpetua de cada forma.
       gsap.utils.toArray<HTMLElement>(".bv-shape").forEach((el, i) => {
         gsap.to(el, {
           y: i % 2 ? 16 : -16,
@@ -115,14 +116,14 @@ export function BienvenidaSplash({ nombre }: { nombre: string }) {
           delay: 0.6,
         });
       });
-      gsap.to(".bv-morph", {
-        morphSVG: SPARKLE_PATH,
-        duration: 0.7,
-        ease: "power2.inOut",
-        yoyo: true,
-        repeat: -1,
-        repeatDelay: 1,
-        delay: 1.1,
+
+      // Morph continuo: cada forma va cambiando flor -> carro -> corazón -> estrella -> ...
+      gsap.utils.toArray<SVGPathElement>(".bv-morph").forEach((path, i) => {
+        const start = Number(path.dataset.s || "0");
+        const m = gsap.timeline({ repeat: -1, delay: 1.2 + i * 0.22 });
+        for (let k = 1; k <= 4; k++) {
+          m.to(path, { morphSVG: SECUENCIA[(start + k) % 4], duration: 0.8, ease: "power2.inOut" }, "+=1.1");
+        }
       });
 
       // La intro se reproduce y se QUEDA: solo se cierra cuando ella toca/presiona (saltar).
@@ -185,26 +186,17 @@ export function BienvenidaSplash({ nombre }: { nombre: string }) {
         }}
       />
 
-      {FORMAS.map((f, i) => (
+      {PLACES.map((p, i) => (
         <div
           key={i}
           className="bv-shape pointer-events-none absolute"
-          style={{ left: `${f.x}%`, top: `${f.y}%`, width: `${f.w}%`, transform: "translate(-50%,-50%)" }}
+          style={{ left: `${p.x}%`, top: `${p.y}%`, width: `${p.w}%`, transform: "translate(-50%,-50%)" }}
         >
-          <div style={{ transform: `rotate(${f.r ?? 0}deg)` }}>
-            <FormaSVG t={f.t} c={f.c} />
-          </div>
+          <svg viewBox="0 0 100 100" width="100%" style={{ display: "block" }}>
+            <path className="bv-morph" data-s={p.s} d={SECUENCIA[p.s]} fill={p.c} />
+          </svg>
         </div>
       ))}
-
-      <div
-        className="bv-shape pointer-events-none absolute"
-        style={{ left: "78%", top: "24%", width: "7%", transform: "translate(-50%,-50%)" }}
-      >
-        <svg viewBox="0 0 100 100" width="100%" style={{ display: "block" }}>
-          <path className="bv-morph" d={CIRCLE_PATH} fill="#b06cf0" />
-        </svg>
-      </div>
 
       <p className="bv-hero pointer-events-none absolute left-0 right-0 top-1/2 z-10 px-6 text-center text-[2.6rem] font-extrabold tracking-tight text-white sm:text-6xl">
         {bienvenida}
