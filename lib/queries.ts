@@ -102,6 +102,43 @@ export async function getSaldoLuisAcumulado(hasta: string, incluir: boolean): Pr
   return sumMontos(comp ?? []) - sumMontos(cons ?? []);
 }
 
+export interface LuisHistDia {
+  fecha: string;
+  consignaciones: number;
+  compensaciones: number;
+  saldoDia: number;
+  acumulado: number;
+}
+
+/** Historial de Luis por dia: consig/comp/saldo del dia + acumulado a favor. Mas reciente primero. */
+export async function listLuisHistorial(): Promise<LuisHistDia[]> {
+  const sb = await createClient();
+  const [{ data: cons }, { data: comp }] = await Promise.all([
+    sb.from("corr_consignaciones_luis").select("fecha, monto"),
+    sb.from("corr_compensaciones_luis").select("fecha, monto"),
+  ]);
+  const map = new Map<string, { consig: number; comp: number }>();
+  for (const r of cons ?? []) {
+    const e = map.get(r.fecha) ?? { consig: 0, comp: 0 };
+    e.consig += r.monto;
+    map.set(r.fecha, e);
+  }
+  for (const r of comp ?? []) {
+    const e = map.get(r.fecha) ?? { consig: 0, comp: 0 };
+    e.comp += r.monto;
+    map.set(r.fecha, e);
+  }
+  let acc = 0;
+  const asc: LuisHistDia[] = [];
+  for (const fecha of [...map.keys()].sort()) {
+    const e = map.get(fecha)!;
+    const saldoDia = e.comp - e.consig;
+    acc += saldoDia;
+    asc.push({ fecha, consignaciones: e.consig, compensaciones: e.comp, saldoDia, acumulado: acc });
+  }
+  return asc.reverse();
+}
+
 export interface SoporteConUrl extends SoporteRow {
   url: string | null;
 }
