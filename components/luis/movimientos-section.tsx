@@ -3,7 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Trash, Clock, Warning, ArrowDown, Receipt } from "@phosphor-icons/react/dist/ssr";
+import { Plus, Trash, PencilSimple, Clock, Warning, ArrowDown, Receipt } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/field";
@@ -35,6 +35,7 @@ export function MovimientosSection({
   tono,
   agregar,
   eliminar,
+  editar,
 }: {
   fecha: string;
   items: MovimientoItem[];
@@ -44,6 +45,7 @@ export function MovimientosSection({
   tono: "consig" | "comp";
   agregar: (raw: unknown) => Promise<{ ok: boolean; error?: string }>;
   eliminar: (id: string) => Promise<{ ok: boolean; error?: string }>;
+  editar: (raw: unknown) => Promise<{ ok: boolean; error?: string }>;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -51,6 +53,11 @@ export function MovimientosSection({
   const [hora, setHora] = useState(horaActual);
   const [nota, setNota] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  const [editId, setEditId] = useState<string | null>(null);
+  const [eMonto, setEMonto] = useState(0);
+  const [eHora, setEHora] = useState("");
+  const [eNota, setENota] = useState("");
 
   // Filas recién agregadas (no presentes al cargar) hacen flash verde.
   const idsIniciales = useRef<Set<string> | null>(null);
@@ -79,6 +86,29 @@ export function MovimientosSection({
     startTransition(async () => {
       await eliminar(id);
       router.refresh();
+    });
+  }
+
+  function abrirEdicion(c: MovimientoItem) {
+    setEditId(c.id);
+    setEMonto(c.monto);
+    setEHora(c.hora ?? "");
+    setENota(c.nota ?? "");
+    setError(null);
+  }
+
+  function guardarEdicion() {
+    if (!editId) return;
+    if (eMonto <= 0) return setError("Ingresa un monto mayor a cero.");
+    setError(null);
+    startTransition(async () => {
+      const res = await editar({ id: editId, monto: eMonto, hora: eHora || null, nota: eNota || null });
+      if (res.ok) {
+        setEditId(null);
+        router.refresh();
+      } else {
+        setError(res.error ?? "No se pudo editar.");
+      }
     });
   }
 
@@ -146,35 +176,65 @@ export function MovimientosSection({
                 }
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ type: "spring", stiffness: 320, damping: 30, backgroundColor: { duration: 1.2, ease: "easeOut" } }}
-                className="flex items-center justify-between gap-3 rounded-lg py-2.5"
+                className="rounded-lg py-2.5"
               >
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-soft text-accent-strong">
-                    <Icon size={13} weight="bold" />
+                {editId === c.id ? (
+                  <div className="flex flex-col gap-2.5">
+                    <div className="grid gap-2 sm:grid-cols-[1fr_120px]">
+                      <MoneyInput value={eMonto} onValueChange={setEMonto} autoFocus />
+                      <Input type="time" value={eHora} onChange={(e) => setEHora(e.target.value)} />
+                    </div>
+                    <Input value={eNota} onChange={(e) => setENota(e.target.value)} placeholder="Nota (opcional)" />
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={guardarEdicion} disabled={pending}>
+                        Guardar
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => setEditId(null)} disabled={pending}>
+                        Cancelar
+                      </Button>
+                    </div>
                   </div>
-                  <div className="leading-tight">
-                    <p className="tnum text-[0.88rem] font-medium text-text">{formatCOP(c.monto)}</p>
-                    {(c.hora || c.nota) && (
-                      <p className="flex items-center gap-1 text-[0.7rem] text-faint">
-                        {c.hora && (
-                          <>
-                            <Clock size={10} />
-                            {formatHora(c.hora)}
-                          </>
+                ) : (
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-soft text-accent-strong">
+                        <Icon size={13} weight="bold" />
+                      </div>
+                      <div className="leading-tight">
+                        <p className="tnum text-[0.88rem] font-medium text-text">{formatCOP(c.monto)}</p>
+                        {(c.hora || c.nota) && (
+                          <p className="flex items-center gap-1 text-[0.7rem] text-faint">
+                            {c.hora && (
+                              <>
+                                <Clock size={10} />
+                                {formatHora(c.hora)}
+                              </>
+                            )}
+                            {c.nota && <span className="truncate">· {c.nota}</span>}
+                          </p>
                         )}
-                        {c.nota && <span className="truncate">· {c.nota}</span>}
-                      </p>
-                    )}
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <button
+                        onClick={() => abrirEdicion(c)}
+                        disabled={pending}
+                        className="flex h-7 w-7 items-center justify-center rounded-lg text-faint transition-colors hover:bg-accent-soft hover:text-accent-strong disabled:opacity-40"
+                        title="Editar"
+                      >
+                        <PencilSimple size={14} />
+                      </button>
+                      <button
+                        onClick={() => borrar(c.id)}
+                        disabled={pending}
+                        className="flex h-7 w-7 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
+                        title="Eliminar"
+                      >
+                        <Trash size={14} />
+                      </button>
+                    </div>
                   </div>
-                </div>
-                <button
-                  onClick={() => borrar(c.id)}
-                  disabled={pending}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
-                  title="Eliminar"
-                >
-                  <Trash size={14} />
-                </button>
+                )}
               </motion.li>
               );
             })}

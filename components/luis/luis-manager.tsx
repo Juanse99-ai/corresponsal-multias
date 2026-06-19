@@ -12,8 +12,10 @@ import { ReporteLuisButton } from "@/components/luis/reporte-luis";
 import {
   agregarConsignacion,
   eliminarConsignacion,
+  editarConsignacion,
   agregarCompensacion,
   eliminarCompensacion,
+  editarCompensacion,
 } from "@/app/(app)/luis/actions";
 
 export function LuisManager({
@@ -87,6 +89,7 @@ export function LuisManager({
           tono="comp"
           agregar={agregarCompensacion}
           eliminar={eliminarCompensacion}
+          editar={editarCompensacion}
         />
         <MovimientosSection
           fecha={fecha}
@@ -97,6 +100,7 @@ export function LuisManager({
           tono="consig"
           agregar={agregarConsignacion}
           eliminar={eliminarConsignacion}
+          editar={editarConsignacion}
         />
       </div>
     </div>
