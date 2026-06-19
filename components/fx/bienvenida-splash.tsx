@@ -7,6 +7,7 @@ import { useGSAP } from "@gsap/react";
 import { SplitText } from "gsap/SplitText";
 import { Sun, CloudSun, MoonStars } from "@phosphor-icons/react/dist/ssr";
 import { saludoHora, mensajeDelDia } from "@/lib/saludos";
+import { reduced } from "@/components/fx/reduced";
 
 gsap.registerPlugin(SplitText);
 
@@ -32,11 +33,22 @@ export function BienvenidaSplash({ nombre }: { nombre: string }) {
   useGSAP(
     () => {
       if (!show || !root.current) return;
+      root.current.focus({ preventScroll: true });
+
+      if (reduced()) {
+        tl.current = gsap.timeline({ onComplete: () => setShow(false) });
+        tl.current
+          .fromTo(root.current, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3 })
+          .to({}, { duration: 1.6 })
+          .to(root.current, { autoAlpha: 0, duration: 0.4 });
+        return;
+      }
+
       const split = new SplitText(".bv-msg", { type: "words" });
       tl.current = gsap.timeline({ onComplete: () => setShow(false) });
       tl.current
         .fromTo(root.current, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.5, ease: "power2.out" })
-        .from(".bv-icon", { scale: 0, rotate: -90, autoAlpha: 0, duration: 0.6, ease: "back.out(2)" }, "-=0.1")
+        .from(".bv-icon", { scale: 0, rotate: -90, autoAlpha: 0, duration: 0.6, ease: "power4.out" }, "-=0.1")
         .from(".bv-greet", { y: 14, autoAlpha: 0, duration: 0.5 }, "-=0.25")
         .from(split.words, { y: 24, autoAlpha: 0, stagger: 0.045, duration: 0.55, ease: "power3.out" }, "-=0.15")
         .from(".bv-hint", { autoAlpha: 0, duration: 0.5 }, "-=0.1")
@@ -75,7 +87,13 @@ export function BienvenidaSplash({ nombre }: { nombre: string }) {
     <div
       ref={root}
       onClick={saltar}
-      className="fixed inset-0 z-[200] flex items-center justify-center overflow-hidden bg-[oklch(0.99_0.004_255/0.55)] backdrop-blur-2xl"
+      onKeyDown={(e) => {
+        if (e.key === "Escape" || e.key === "Enter" || e.key === " ") saltar();
+      }}
+      role="dialog"
+      aria-label={`${saludo}, ${primer}`}
+      tabIndex={-1}
+      className="fixed inset-0 z-[200] flex items-center justify-center overflow-hidden bg-[oklch(0.99_0.004_255/0.66)] outline-none backdrop-blur-md"
       style={{ opacity: 0 }}
     >
       <div className="pointer-events-none absolute left-1/2 top-1/2 h-[40rem] w-[40rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/10 blur-3xl" />

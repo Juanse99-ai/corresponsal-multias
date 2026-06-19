@@ -29,7 +29,9 @@ para estado negativo, verde solo para "cuadrado". El riel lateral azul marino da
 - Tipografía Geist (sans) + Geist Mono (cifras, clase `.tnum`).
 - Sin grano. Halo ambiental azul muy sutil.
 - Marca: cuadro azul con pulso (diagnóstico) blanco y pico rojo — guiño al logo.
-- Motion: GSAP solo en login; Framer Motion en el resto. Ease-out, sin rebote.
+- Motion: GSAP en componentes hoja aislados (`components/fx/`) y login; Framer Motion en el
+  resto, sin mezclar ambos en el mismo árbol. Ease-out (`power4`/`expo`), **sin rebote**.
+  Todo respeta `prefers-reduced-motion` (helper `components/fx/reduced.ts`).
 
 ## Anti-slop
 - Nada de negro puro ni "fintech navy+gold" (era el tema viejo).

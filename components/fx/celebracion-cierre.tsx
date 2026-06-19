@@ -6,12 +6,13 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { DrawSVGPlugin } from "gsap/DrawSVGPlugin";
 import { SplitText } from "gsap/SplitText";
+import { reduced } from "@/components/fx/reduced";
 
 gsap.registerPlugin(DrawSVGPlugin, SplitText);
 
-const COLORES = ["#C7A252", "#E2C77A", "#1d9e75", "#9FE1CB", "#bfe9cb"];
+const COLORES = ["oklch(0.515 0.172 258)", "oklch(0.64 0.15 255)", "#1d9e75", "#9FE1CB", "oklch(0.95 0.01 255)"];
 
-/** Celebración al cerrar un día cuadrado: confeti dorado + check que se dibuja + texto. */
+/** Celebración al cerrar un día cuadrado: confeti (azul/verde) + check que se dibuja + texto. */
 export function CelebracionCierre({ play }: { play: number }) {
   const [mounted, setMounted] = useState(false);
   const root = useRef<HTMLDivElement>(null);
@@ -21,7 +22,7 @@ export function CelebracionCierre({ play }: { play: number }) {
 
   useGSAP(
     () => {
-      if (play <= 0 || !root.current) return;
+      if (play <= 0 || !root.current || reduced()) return;
       gsap.set(root.current, { display: "flex", autoAlpha: 1 });
 
       const split = new SplitText(".cc-title", { type: "chars" });
@@ -32,7 +33,7 @@ export function CelebracionCierre({ play }: { play: number }) {
       });
 
       tl.fromTo(".cc-back", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.25 })
-        .fromTo(".cc-badge", { scale: 0.6, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.45, ease: "back.out(2.4)" }, "-=0.1")
+        .fromTo(".cc-badge", { scale: 0.6, autoAlpha: 0 }, { scale: 1, autoAlpha: 1, duration: 0.5, ease: "power4.out" }, "-=0.1")
         .fromTo(".cc-ring", { drawSVG: "0%" }, { drawSVG: "100%", duration: 0.5, ease: "power2.out" }, "-=0.35")
         .fromTo(".cc-check", { drawSVG: "0%" }, { drawSVG: "100%", duration: 0.32, ease: "power2.out" }, "-=0.1")
         .from(split.chars, { yPercent: 120, autoAlpha: 0, stagger: 0.035, duration: 0.45, ease: "power3.out" }, "-=0.15")

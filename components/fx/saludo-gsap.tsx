@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { SplitText } from "gsap/SplitText";
 import { Sun, CloudSun, MoonStars } from "@phosphor-icons/react/dist/ssr";
+import { reduced } from "@/components/fx/reduced";
 
 gsap.registerPlugin(SplitText);
 
@@ -15,9 +16,10 @@ export function SaludoGsap({ saludo, nombre, mensaje }: { saludo: string; nombre
 
   useGSAP(
     () => {
+      if (reduced()) return;
       const split = new SplitText(".sg-title", { type: "chars" });
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-      tl.from(".sg-icon", { scale: 0, rotate: -60, autoAlpha: 0, duration: 0.5, ease: "back.out(2)" })
+      tl.from(".sg-icon", { scale: 0, rotate: -60, autoAlpha: 0, duration: 0.5, ease: "power4.out" })
         .from(split.chars, { y: 20, autoAlpha: 0, stagger: 0.022, duration: 0.5 }, "-=0.2")
         .from(".sg-msg", { y: 12, autoAlpha: 0, duration: 0.6 }, "-=0.25");
       return () => split.revert();

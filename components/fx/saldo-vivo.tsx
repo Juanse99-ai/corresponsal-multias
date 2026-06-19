@@ -6,6 +6,7 @@ import { useGSAP } from "@gsap/react";
 import { MorphSVGPlugin } from "gsap/MorphSVGPlugin";
 import { cn } from "@/lib/utils";
 import { formatCOP } from "@/lib/format";
+import { reduced } from "@/components/fx/reduced";
 
 gsap.registerPlugin(MorphSVGPlugin);
 
@@ -21,10 +22,11 @@ export function SaldoVivo({ saldo, descuadre }: { saldo: number; descuadre: bool
 
   useGSAP(
     () => {
+      const rm = reduced();
       const o = { v: prev.current };
       gsap.to(o, {
         v: saldo,
-        duration: first.current ? 0 : 0.7,
+        duration: first.current || rm ? 0 : 0.7,
         ease: "power2.out",
         onUpdate: () => {
           if (numRef.current) numRef.current.textContent = formatCOP(Math.round(o.v));
@@ -33,10 +35,12 @@ export function SaldoVivo({ saldo, descuadre }: { saldo: number; descuadre: bool
       prev.current = saldo;
 
       const target = descuadre ? LINEA : CHECK;
-      if (first.current) {
+      if (first.current || rm) {
         gsap.set(".sv-glyph", { morphSVG: target });
       } else {
-        gsap.to(".sv-glyph", { morphSVG: target, duration: 0.5, ease: "power2.inOut" });
+        // Morph del glifo + "pop" del badge para que el cambio de estado se note.
+        gsap.to(".sv-glyph", { morphSVG: target, duration: 0.55, ease: "power2.inOut" });
+        gsap.fromTo(".sv-badge", { scale: 1.3 }, { scale: 1, duration: 0.6, ease: "power4.out" });
       }
       first.current = false;
     },
@@ -53,17 +57,17 @@ export function SaldoVivo({ saldo, descuadre }: { saldo: number; descuadre: bool
     >
       <span
         className={cn(
-          "flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition-colors duration-500",
+          "sv-badge flex h-14 w-14 shrink-0 items-center justify-center rounded-full transition-colors duration-500",
           descuadre ? "bg-danger-soft" : "bg-success-soft",
         )}
       >
-        <svg viewBox="0 0 24 24" className="h-6 w-6">
+        <svg viewBox="0 0 24 24" className="h-7 w-7">
           <path
             className="sv-glyph"
             d={CHECK}
             fill="none"
             stroke="currentColor"
-            strokeWidth="2.3"
+            strokeWidth="2.4"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
