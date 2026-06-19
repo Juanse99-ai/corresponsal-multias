@@ -105,7 +105,6 @@ export function MovimientosManager({
       <div className="flex flex-col gap-5">
         <Card className="p-5 sm:p-6">
           <h2 className="text-[0.95rem] font-semibold tracking-tight text-text">Registrar movimiento</h2>
-          <p className="text-sm text-muted">A medida que pasan las operaciones del día.</p>
 
           {bloqueado && (
             <div className="mt-4 flex items-center gap-2 rounded-[--radius-card] border border-line-strong bg-surface-2 px-3.5 py-2.5 text-[0.82rem] text-muted">
@@ -264,10 +263,7 @@ export function MovimientosManager({
 
         <Link href="/cuadre" className="group">
           <Card className="flex items-center justify-between p-5 transition-colors hover:border-line-strong">
-            <div>
-              <p className="text-[0.88rem] font-medium text-text">El cuadre se llena solo</p>
-              <p className="text-[0.74rem] text-faint">Estos totales pasan al cuadre del día.</p>
-            </div>
+            <p className="text-[0.88rem] font-medium text-text">Cuadre del día</p>
             <ArrowRight size={18} className="text-accent transition-transform group-hover:translate-x-1" />
           </Card>
         </Link>

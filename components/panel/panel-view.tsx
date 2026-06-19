@@ -197,7 +197,6 @@ export function PanelView({ data }: { data: PanelData }) {
                 </div>
                 <div>
                   <p className="text-lg font-semibold text-text">Registrar un préstamo</p>
-                  <p className="mt-1 text-sm text-muted">Anota quién tomó plata del fondo.</p>
                 </div>
                 <div className="flex items-center gap-1.5 text-[0.82rem] font-medium text-accent-strong">
                   <Plus size={15} weight="bold" />
