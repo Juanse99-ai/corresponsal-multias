@@ -13,6 +13,7 @@ import { MoneyInput } from "@/components/ui/money-input";
 import { AnimatedMoney } from "@/components/ui/animated-number";
 import { cn } from "@/lib/utils";
 import { formatCOP, formatHoraISO } from "@/lib/format";
+import { PERSONAS_PRESET } from "@/lib/personas";
 import type { DeudaConSaldo } from "@/lib/queries";
 import { registrarPrestamoDia, marcarPrestamoPagado, eliminarDeuda, editarDeuda } from "@/app/(app)/prestamos/actions";
 
@@ -30,6 +31,7 @@ export function PrestamosDia({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [persona, setPersona] = useState("");
+  const [otro, setOtro] = useState("");
   const [concepto, setConcepto] = useState("");
   const [monto, setMonto] = useState(0);
   const [medio, setMedio] = useState<"efectivo" | "transferencia">("efectivo");
@@ -50,13 +52,14 @@ export function PrestamosDia({
 
   function registrar() {
     if (bloqueado) return;
-    if (!persona.trim()) return setError("Escribe a quién es el préstamo.");
+    const personaFinal = persona === "Otro" ? otro.trim() : persona;
+    if (!personaFinal) return setError("Elige a quién es el préstamo.");
     if (monto <= 0) return setError("Ingresa un monto mayor a cero.");
     setError(null);
     startTransition(async () => {
       const res = await registrarPrestamoDia({
         fecha,
-        persona: persona.trim(),
+        persona: personaFinal,
         concepto: concepto.trim() || null,
         monto,
         medio,
@@ -64,6 +67,7 @@ export function PrestamosDia({
       });
       if (res.ok) {
         setPersona("");
+        setOtro("");
         setConcepto("");
         setMonto(0);
         setMedio("efectivo");
@@ -120,14 +124,33 @@ export function PrestamosDia({
           )}
 
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="pr-persona">A quién</Label>
-              <Input
-                id="pr-persona"
-                value={persona}
-                onChange={(e) => setPersona(e.target.value)}
-                placeholder="Nombre de la persona"
-              />
+            <div className="flex flex-col gap-2 sm:col-span-2">
+              <Label>A quién</Label>
+              <div className="flex flex-wrap gap-2">
+                {[...PERSONAS_PRESET, "Otro"].map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setPersona(p)}
+                    className={cn(
+                      "rounded-full border px-3 py-1.5 text-[0.8rem] font-medium transition-colors",
+                      persona === p
+                        ? "border-accent/40 bg-accent-soft text-accent-strong"
+                        : "border-line-strong text-muted hover:text-text",
+                    )}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+              {persona === "Otro" && (
+                <Input
+                  value={otro}
+                  onChange={(e) => setOtro(e.target.value)}
+                  placeholder="Nombre de la persona"
+                  className="mt-1"
+                />
+              )}
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="pr-concepto">Concepto</Label>

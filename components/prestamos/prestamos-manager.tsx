@@ -20,10 +20,10 @@ import { MoneyInput } from "@/components/ui/money-input";
 import { AnimatedMoney } from "@/components/ui/animated-number";
 import { cn } from "@/lib/utils";
 import { formatCOP, formatFecha, hoyISO } from "@/lib/format";
+import { PERSONAS_PRESET } from "@/lib/personas";
 import type { DeudaConSaldo, PersonaSaldo } from "@/lib/queries";
 import { crearDeuda, agregarAbono, eliminarDeuda } from "@/app/(app)/prestamos/actions";
 
-const PERSONAS = ["Juanse", "Ismael", "Martín", "JCamilo"];
 const CONCEPTOS = ["Préstamo personal", "Adelanto", "Gasto", "Otro"];
 
 export function PrestamosManager({
@@ -132,7 +132,7 @@ export function PrestamosManager({
 function AddDeudaForm() {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [persona, setPersona] = useState("Juanse");
+  const [persona, setPersona] = useState("Juan Sebastián");
   const [otro, setOtro] = useState("");
   const [concepto, setConcepto] = useState("Préstamo personal");
   const [conceptoOtro, setConceptoOtro] = useState("");
@@ -178,7 +178,7 @@ function AddDeudaForm() {
         <div className="flex flex-col gap-2">
           <Label>Persona</Label>
           <div className="flex flex-wrap gap-2">
-            {[...PERSONAS, "Otro"].map((p) => (
+            {[...PERSONAS_PRESET, "Otro"].map((p) => (
               <button
                 key={p}
                 type="button"

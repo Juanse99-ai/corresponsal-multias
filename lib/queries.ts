@@ -289,16 +289,21 @@ export interface HeaderResumen {
   prestamosTotal: number;
   prestamosCount: number;
   personas: string[];
+  tarde: boolean; // ya pasó la hora de cerrar (>= 6pm Colombia)
 }
 
 export async function getHeaderResumen(fecha: string): Promise<HeaderResumen> {
   const [cuadre, deudas] = await Promise.all([getCuadre(fecha), getDeudasConSaldo()]);
   const pendientes = deudas.filter((d) => d.saldo > 0);
+  const horaBogota = Number(
+    new Intl.DateTimeFormat("en-US", { timeZone: "America/Bogota", hour: "2-digit", hour12: false }).format(new Date()),
+  );
   return {
     cuadreHoy: cuadre ? { estado: cuadre.estado, saldo_final: cuadre.saldo_final } : null,
     prestamosTotal: pendientes.reduce((s, d) => s + d.saldo, 0),
     prestamosCount: pendientes.length,
     personas: [...new Set(deudas.map((d) => d.persona))],
+    tarde: horaBogota >= 18,
   };
 }
 
