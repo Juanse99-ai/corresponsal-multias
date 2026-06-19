@@ -57,6 +57,7 @@ interface Props {
   existente: boolean;
   inicial: Inicial;
   isAdmin: boolean;
+  nombre: string;
   soportesCount: number;
   movCount: number;
   prestamosCount: number;
@@ -72,6 +73,7 @@ export function CuadreEditor({
   existente,
   inicial,
   isAdmin,
+  nombre,
   soportesCount,
   movCount,
   prestamosCount,
@@ -218,7 +220,7 @@ export function CuadreEditor({
           /* nada */
         }
         setEstado(estadoFinal);
-        if (estadoFinal === "cerrado" && !descuadre) setCelebrar((c) => c + 1);
+        if (estadoFinal === "cerrado") setCelebrar((c) => c + 1);
         setToast({
           ok: true,
           msg: estadoFinal === "cerrado" ? "Día cerrado y guardado." : "Cuadre guardado.",
@@ -551,7 +553,7 @@ export function CuadreEditor({
         </Card>
       </div>
 
-      <CelebracionCierre play={celebrar} />
+      <CelebracionCierre play={celebrar} nombre={nombre} cuadrado={!descuadre} />
     </div>
   );
 }

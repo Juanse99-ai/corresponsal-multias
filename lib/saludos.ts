@@ -35,6 +35,32 @@ export const MENSAJES_DIA = [
   "Gracias por la responsabilidad de siempre. Se valora mucho.",
 ] as const;
 
+// Despedidas para el cierre del día. Cálidas, cercanas (Colombia), sin emojis.
+export const MENSAJES_DESPEDIDA = [
+  "Buen trabajo hoy. Ve a descansar.",
+  "Día cerrado. Nos vemos mañana.",
+  "Lo hiciste muy bien. Hasta mañana.",
+  "Gracias por tu trabajo de hoy.",
+  "A descansar, que te lo ganaste.",
+  "Otro día sacado adelante. Bien hecho.",
+  "Hasta mañana, con esa misma buena actitud.",
+  "Terminaste por hoy. Ve tranquila.",
+  "Cerraste con todo. Descansa rico.",
+  "Día cumplido. Nos vemos mañana temprano.",
+  "Lo diste todo hoy. Gracias.",
+  "Buen cierre. Ahora a descansar.",
+  "Trabajo hecho. Disfruta tu noche.",
+  "Bien cerrado. Que descanses.",
+] as const;
+
+/** Despedida del día: estable por fecha ISO, distinta cada día. */
+export function despedidaDelDia(fechaISO: string): string {
+  const n = fechaISO.replace(/-/g, "");
+  let h = 7;
+  for (let i = 0; i < n.length; i++) h = (h * 31 + n.charCodeAt(i)) >>> 0;
+  return MENSAJES_DESPEDIDA[h % MENSAJES_DESPEDIDA.length];
+}
+
 /** Saludo según la hora (Bogotá), recibida como número 0-23. */
 export function saludoHora(hora: number): string {
   if (hora < 12) return "Buenos días";
