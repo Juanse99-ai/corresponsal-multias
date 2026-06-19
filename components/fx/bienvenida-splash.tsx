@@ -10,26 +10,28 @@ import { saludoHora, mensajeDelDia } from "@/lib/saludos";
 
 gsap.registerPlugin(MorphSVGPlugin);
 
-// Flor de 6 pétalos (generada una vez).
+// Flor de 6 pétalos de gota (como la referencia). Generada una vez.
 function flor() {
-  const petals = 6, cx = 50, cy = 50, inner = 22, outer = 48;
-  let d = "";
+  const petals = 6, cx = 50, cy = 50, len = 47, wide = 15;
+  let d = `M${cx} ${cy}`;
   for (let i = 0; i < petals; i++) {
-    const a1 = (i / petals) * Math.PI * 2 - Math.PI / 2;
-    const a2 = ((i + 1) / petals) * Math.PI * 2 - Math.PI / 2;
-    const am = (a1 + a2) / 2;
-    const p1x = cx + inner * Math.cos(a1), p1y = cy + inner * Math.sin(a1);
-    const p2x = cx + inner * Math.cos(a2), p2y = cy + inner * Math.sin(a2);
-    const tx = cx + outer * Math.cos(am), ty = cy + outer * Math.sin(am);
-    if (i === 0) d += `M${p1x.toFixed(1)} ${p1y.toFixed(1)}`;
-    d += `Q${tx.toFixed(1)} ${ty.toFixed(1)} ${p2x.toFixed(1)} ${p2y.toFixed(1)}`;
+    const a = (i / petals) * Math.PI * 2 - Math.PI / 2;
+    const ux = Math.cos(a), uy = Math.sin(a);
+    const px = -uy, py = ux;
+    const tx = cx + ux * len, ty = cy + uy * len;
+    const b1x = cx + ux * len * 0.45 + px * wide, b1y = cy + uy * len * 0.45 + py * wide;
+    const b2x = tx + px * wide, b2y = ty + py * wide;
+    const b3x = tx - px * wide, b3y = ty - py * wide;
+    const b4x = cx + ux * len * 0.45 - px * wide, b4y = cy + uy * len * 0.45 - py * wide;
+    d += `C${b1x.toFixed(1)} ${b1y.toFixed(1)} ${b2x.toFixed(1)} ${b2y.toFixed(1)} ${tx.toFixed(1)} ${ty.toFixed(1)}`;
+    d += `C${b3x.toFixed(1)} ${b3y.toFixed(1)} ${b4x.toFixed(1)} ${b4y.toFixed(1)} ${cx} ${cy}`;
   }
   return d + "Z";
 }
 
 const FLOR = flor();
 const CARRO =
-  "M10 58 Q10 48 22 46 L31 46 L39 34 Q41 30 47 30 L60 30 Q66 30 70 35 L78 46 Q90 48 90 58 L90 62 Q90 66 86 66 L80 66 A9 9 0 0 0 62 66 L40 66 A9 9 0 0 0 22 66 L14 66 Q10 66 10 62 Z";
+  "M5 60 Q5 54 12 52 L24 49 Q30 38 40 36 L62 36 Q72 36 76 44 L86 50 Q95 52 95 59 L95 62 Q95 67 90 67 L82 67 A8 8 0 0 0 66 67 L38 67 A8 8 0 0 0 22 67 L10 67 Q5 67 5 62 Z";
 const CORAZON =
   "M50 84 C18 60 8 40 8 27 C8 13 21 7 31 7 C40 7 47 12 50 19 C53 12 60 7 69 7 C79 7 92 13 92 27 C92 40 82 60 50 84Z";
 const ESTRELLA = "M50 6 L62 38 L96 39 L69 60 L79 93 L50 73 L21 93 L31 60 L4 39 L38 38Z";
