@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import type { Rol } from "@/lib/cuadre";
 import type { HeaderResumen } from "@/lib/queries";
 import { TopHeader, HeaderAvisos, buildAvisos, avisosUrgentes } from "@/components/shell/top-header";
+import { BienvenidaSplash } from "@/components/fx/bienvenida-splash";
 
 type Grupo = "main" | "admin";
 
@@ -76,6 +77,7 @@ export function AppShell({
 
   return (
     <div className="min-h-[100dvh]">
+      <BienvenidaSplash nombre={profile.nombre} />
       {/* ===== Riel lateral escritorio (claro, colapsable) ===== */}
       <aside
         className={cn(
