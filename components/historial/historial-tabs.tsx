@@ -21,7 +21,7 @@ export function HistorialTabs({ cuadres, luis }: { cuadres: CuadreRow[]; luis: L
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex w-fit rounded-[--radius-card] border border-line bg-surface-2 p-1">
+      <div className="flex w-fit rounded-full border border-line bg-surface-2 p-1">
         {tabs.map((t) => {
           const Icono = t.icon;
           return (
@@ -29,14 +29,14 @@ export function HistorialTabs({ cuadres, luis }: { cuadres: CuadreRow[]; luis: L
               key={t.id}
               onClick={() => setTab(t.id)}
               className={cn(
-                "relative flex items-center gap-2 rounded-[0.7rem] px-4 py-1.5 text-[0.82rem] font-medium transition-colors",
+                "relative flex items-center gap-2 rounded-full px-4 py-1.5 text-[0.82rem] font-medium transition-colors",
                 tab === t.id ? "text-text" : "text-faint hover:text-muted",
               )}
             >
               {tab === t.id && (
                 <motion.span
                   layoutId="hist-tab"
-                  className="absolute inset-0 rounded-[0.7rem] border border-line-strong bg-elevated"
+                  className="absolute inset-0 rounded-full lg-glass"
                   transition={{ type: "spring", stiffness: 360, damping: 30 }}
                 />
               )}

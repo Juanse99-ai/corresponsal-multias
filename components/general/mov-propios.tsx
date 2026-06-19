@@ -87,20 +87,20 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
       <p className="text-sm text-muted">Lo que tú compensas en efectivo o retiras, con su anexo.</p>
 
       <div className="mt-5 flex flex-col gap-4">
-        <div className="flex rounded-[--radius-card] border border-line bg-surface-2 p-1">
+        <div className="flex rounded-full border border-line bg-surface-2 p-1">
           {(["compensacion", "retiro"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTipo(t)}
               className={cn(
-                "relative flex-1 rounded-[0.7rem] py-2 text-[0.8rem] font-medium capitalize transition-colors",
+                "relative flex-1 rounded-full py-2 text-[0.8rem] font-medium capitalize transition-colors",
                 tipo === t ? "text-text" : "text-faint hover:text-muted",
               )}
             >
               {tipo === t && (
                 <motion.span
                   layoutId="mov-pill"
-                  className="absolute inset-0 rounded-[0.7rem] border border-line-strong bg-elevated"
+                  className="absolute inset-0 rounded-full lg-glass"
                   transition={{ type: "spring", stiffness: 360, damping: 30 }}
                 />
               )}

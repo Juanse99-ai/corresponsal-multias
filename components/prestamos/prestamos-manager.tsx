@@ -186,7 +186,7 @@ function AddDeudaForm() {
                 className={cn(
                   "rounded-full border px-3 py-1.5 text-[0.8rem] font-medium transition-colors",
                   persona === p
-                    ? "border-accent/40 bg-accent-soft text-accent-strong"
+                    ? "lg-glass-accent text-accent-strong"
                     : "border-line-strong text-muted hover:text-text",
                 )}
               >
@@ -215,7 +215,7 @@ function AddDeudaForm() {
                 className={cn(
                   "rounded-full border px-3 py-1.5 text-[0.8rem] font-medium transition-colors",
                   concepto === c
-                    ? "border-accent/40 bg-accent-soft text-accent-strong"
+                    ? "lg-glass-accent text-accent-strong"
                     : "border-line-strong text-muted hover:text-text",
                 )}
               >
@@ -249,7 +249,7 @@ function AddDeudaForm() {
                 className={cn(
                   "flex-1 rounded-[--radius-card] border px-3 py-2 text-[0.8rem] font-medium transition-colors",
                   medio === m
-                    ? "border-accent/40 bg-accent-soft text-accent-strong"
+                    ? "lg-glass-accent text-accent-strong"
                     : "border-line-strong text-muted hover:text-text",
                 )}
               >
