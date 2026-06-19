@@ -11,8 +11,6 @@ import { reduced } from "@/components/fx/reduced";
 
 gsap.registerPlugin(SplitText);
 
-const KEY = "corr-bienvenida-vista";
-
 /** Bienvenida a pantalla completa al abrir la app: app borrosa detrás + saludo y
  *  mensaje del día en grande, con transición de salida. Una vez por sesión. */
 export function BienvenidaSplash({ nombre }: { nombre: string }) {
@@ -21,11 +19,20 @@ export function BienvenidaSplash({ nombre }: { nombre: string }) {
   const tl = useRef<gsap.core.Timeline | null>(null);
 
   useEffect(() => {
+    // Se muestra las primeras 2 veces que abre/recarga la app cada día (hora de Colombia).
     try {
-      if (sessionStorage.getItem(KEY)) return;
-      sessionStorage.setItem(KEY, "1");
+      const hoy = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Bogota",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(new Date());
+      const key = `corr-bienvenida:${hoy}`;
+      const veces = Number(localStorage.getItem(key) || "0");
+      if (veces >= 2) return;
+      localStorage.setItem(key, String(veces + 1));
     } catch {
-      /* sin sessionStorage: igual la mostramos una vez */
+      /* sin localStorage: la mostramos igual */
     }
     setShow(true);
   }, []);
