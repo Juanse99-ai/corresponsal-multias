@@ -10,6 +10,7 @@ import {
   CaretDown,
   Warning,
   CheckCircle,
+  ArrowCounterClockwise,
 } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,7 +23,7 @@ import { cn } from "@/lib/utils";
 import { formatCOP, formatFecha, hoyISO } from "@/lib/format";
 import { PERSONAS_PRESET } from "@/lib/personas";
 import type { DeudaConSaldo, PersonaSaldo } from "@/lib/queries";
-import { crearDeuda, agregarAbono, eliminarDeuda } from "@/app/(app)/prestamos/actions";
+import { crearDeuda, agregarAbono, eliminarDeuda, reabrirPrestamo } from "@/app/(app)/prestamos/actions";
 
 const CONCEPTOS = ["Préstamo personal", "Adelanto", "Gasto", "Otro"];
 
@@ -318,6 +319,14 @@ function DeudaCard({ deuda, isAdmin }: { deuda: DeudaConSaldo; isAdmin: boolean 
     });
   }
 
+  function reabrir() {
+    if (!window.confirm("¿Deshacer el pago? El préstamo vuelve a quedar pendiente y se borran sus abonos.")) return;
+    startTransition(async () => {
+      await reabrirPrestamo(deuda.id);
+      router.refresh();
+    });
+  }
+
   return (
     <motion.div layout initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
       <Card className="p-4 sm:p-5">
@@ -345,7 +354,12 @@ function DeudaCard({ deuda, isAdmin }: { deuda: DeudaConSaldo; isAdmin: boolean 
         </div>
 
         <div className="mt-3 flex items-center gap-2">
-          {!saldada && (
+          {saldada ? (
+            <Button size="sm" variant="secondary" onClick={reabrir} disabled={pending}>
+              <ArrowCounterClockwise size={15} weight="bold" />
+              Reabrir
+            </Button>
+          ) : (
             <Button size="sm" variant="secondary" onClick={() => setAbonoOpen((v) => !v)} disabled={pending}>
               Abonar
             </Button>
