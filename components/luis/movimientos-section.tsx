@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Trash, Clock, Warning, ArrowDown, Receipt } from "@phosphor-icons/react/dist/ssr";
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { MoneyInput } from "@/components/ui/money-input";
 import { AnimatedMoney } from "@/components/ui/animated-number";
 import { formatCOP, formatHora } from "@/lib/format";
+import { reduced } from "@/components/fx/reduced";
 
 function horaActual(): string {
   const d = new Date();
@@ -50,6 +51,10 @@ export function MovimientosSection({
   const [hora, setHora] = useState(horaActual);
   const [nota, setNota] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  // Filas recién agregadas (no presentes al cargar) hacen flash verde.
+  const idsIniciales = useRef<Set<string> | null>(null);
+  const yaEstaban = (idsIniciales.current ??= new Set(items.map((c) => c.id)));
 
   const total = items.reduce((s, c) => s + c.monto, 0);
   const Icon = tono === "consig" ? ArrowDown : Receipt;
@@ -127,15 +132,21 @@ export function MovimientosSection({
       ) : (
         <ul className="mt-4 flex flex-col divide-y divide-line">
           <AnimatePresence initial={false}>
-            {items.map((c) => (
+            {items.map((c) => {
+              const nuevo = !yaEstaban.has(c.id) && !reduced();
+              return (
               <motion.li
                 key={c.id}
                 layout
                 initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
+                animate={
+                  nuevo
+                    ? { opacity: 1, y: 0, backgroundColor: ["rgba(29,158,117,0.2)", "rgba(29,158,117,0)"] }
+                    : { opacity: 1, y: 0 }
+                }
                 exit={{ opacity: 0, height: 0 }}
-                transition={{ type: "spring", stiffness: 320, damping: 30 }}
-                className="flex items-center justify-between gap-3 py-2.5"
+                transition={{ type: "spring", stiffness: 320, damping: 30, backgroundColor: { duration: 1.2, ease: "easeOut" } }}
+                className="flex items-center justify-between gap-3 rounded-lg py-2.5"
               >
                 <div className="flex items-center gap-2.5">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-soft text-accent-strong">
@@ -165,7 +176,8 @@ export function MovimientosSection({
                   <Trash size={14} />
                 </button>
               </motion.li>
-            ))}
+              );
+            })}
           </AnimatePresence>
         </ul>
       )}

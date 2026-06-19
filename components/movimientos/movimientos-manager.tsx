@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 import { formatCOP, formatHora } from "@/lib/format";
 import type { MovimientoRow } from "@/lib/database.types";
 import { agregarMovimiento, eliminarMovimiento } from "@/app/(app)/movimientos/actions";
+import { reduced } from "@/components/fx/reduced";
 
 type Tipo = "consignacion_nequi" | "consignacion_bancolombia" | "recaudo" | "retiro";
 
@@ -61,6 +62,10 @@ export function MovimientosManager({
   const [cliente, setCliente] = useState("");
   const [convenio, setConvenio] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  // Filas presentes al cargar; las que aparecen después (recién registradas) hacen flash verde.
+  const idsIniciales = useRef<Set<string> | null>(null);
+  const yaEstaban = (idsIniciales.current ??= new Set(movimientos.map((m) => m.id)));
 
   const totales = useMemo(() => {
     const t: Record<Tipo, number> = { consignacion_nequi: 0, consignacion_bancolombia: 0, recaudo: 0, retiro: 0 };
@@ -177,15 +182,20 @@ export function MovimientosManager({
               <AnimatePresence initial={false}>
                 {movimientos.map((m) => {
                   const Ti = TIPOS[m.tipo as Tipo] ?? TIPOS.consignacion_nequi;
+                  const nuevo = !yaEstaban.has(m.id) && !reduced();
                   return (
                     <motion.li
                       key={m.id}
                       layout
                       initial={{ opacity: 0, y: -8 }}
-                      animate={{ opacity: 1, y: 0 }}
+                      animate={
+                        nuevo
+                          ? { opacity: 1, y: 0, backgroundColor: ["rgba(29,158,117,0.2)", "rgba(29,158,117,0)"] }
+                          : { opacity: 1, y: 0 }
+                      }
                       exit={{ opacity: 0, height: 0 }}
-                      transition={{ type: "spring", stiffness: 320, damping: 30 }}
-                      className="flex items-center justify-between gap-3 py-2.5"
+                      transition={{ type: "spring", stiffness: 320, damping: 30, backgroundColor: { duration: 1.2, ease: "easeOut" } }}
+                      className="flex items-center justify-between gap-3 rounded-lg py-2.5"
                     >
                       <div className="flex items-center gap-3">
                         <div
