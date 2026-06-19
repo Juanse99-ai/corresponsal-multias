@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { HandCoins, Plus, Trash, PencilSimple, Check, Clock, Warning, CheckCircle, Lock } from "@phosphor-icons/react/dist/ssr";
+import { HandCoins, Plus, Trash, PencilSimple, Check, Clock, Warning, CheckCircle, Lock, ArrowCounterClockwise } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import { formatCOP, formatHoraISO } from "@/lib/format";
 import { PERSONAS_PRESET } from "@/lib/personas";
 import type { DeudaConSaldo } from "@/lib/queries";
-import { registrarPrestamoDia, marcarPrestamoPagado, eliminarDeuda, editarDeuda } from "@/app/(app)/prestamos/actions";
+import { registrarPrestamoDia, marcarPrestamoPagado, reabrirPrestamo, eliminarDeuda, editarDeuda } from "@/app/(app)/prestamos/actions";
 import { reduced } from "@/components/fx/reduced";
 
 export function PrestamosDia({
@@ -94,6 +94,15 @@ export function PrestamosDia({
   function pagar(d: DeudaConSaldo) {
     startTransition(async () => {
       await marcarPrestamoPagado({ deuda_id: d.id, monto: d.saldo });
+      router.refresh();
+    });
+  }
+
+  function reabrir(d: DeudaConSaldo) {
+    if (!window.confirm("¿Deshacer el pago? El préstamo vuelve a quedar pendiente.")) return;
+    startTransition(async () => {
+      const res = await reabrirPrestamo(d.id);
+      if (res && !res.ok) setError(res.error ?? "No se pudo deshacer.");
       router.refresh();
     });
   }
@@ -371,7 +380,19 @@ export function PrestamosDia({
                               {d.medio === "transferencia" ? "Transf." : "Efectivo"}
                             </button>
                             {saldado ? (
-                              <Badge tone="success">Devuelto</Badge>
+                              <>
+                                <Badge tone="success">Devuelto</Badge>
+                                {!bloqueado && (
+                                  <button
+                                    onClick={() => reabrir(d)}
+                                    disabled={pending}
+                                    className="flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors hover:bg-accent-soft hover:text-accent-strong disabled:opacity-40"
+                                    title="Deshacer pago (volver a pendiente)"
+                                  >
+                                    <ArrowCounterClockwise size={14} />
+                                  </button>
+                                )}
+                              </>
                             ) : (
                               <>
                                 {d.abonado > 0 && (

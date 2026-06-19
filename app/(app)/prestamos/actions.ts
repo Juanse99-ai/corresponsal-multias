@@ -145,6 +145,27 @@ export async function marcarPrestamoPagado(raw: unknown): Promise<{ ok: boolean;
   return { ok: true };
 }
 
+/** Deshace el pago de un préstamo: borra sus abonos y vuelve a quedar pendiente. */
+export async function reabrirPrestamo(id: string): Promise<{ ok: boolean; error?: string }> {
+  const session = await requireSession();
+  if (!z.string().uuid().safeParse(id).success) return { ok: false, error: "Datos inválidos." };
+
+  const sb = await createClient();
+  const { data: dRow } = await sb.from("corr_deudas").select("fecha").eq("id", id).maybeSingle();
+  if (dRow?.fecha && session.rol !== "admin" && (await diaEstaCerrado(dRow.fecha))) {
+    return { ok: false, error: "El día está cerrado. Solo Juan puede reabrirlo." };
+  }
+
+  const { error } = await sb.from("corr_abonos").delete().eq("deuda_id", id);
+  if (error) return { ok: false, error: "No se pudo deshacer el pago." };
+
+  revalidatePath("/movimientos");
+  revalidatePath("/prestamos");
+  revalidatePath("/cuadre");
+  revalidatePath("/panel");
+  return { ok: true };
+}
+
 export async function eliminarDeuda(id: string): Promise<{ ok: boolean; error?: string }> {
   await requireAdmin();
   const sb = await createClient();
