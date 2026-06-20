@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Modo oscuro por clase en <html> (next-themes attribute="class"). */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ============================================================
    App Corresponsal - Multidiagnosticos AS
    Tema CLARO. Paleta del logo: azul royal (acento), rojo (alertas),
@@ -45,6 +48,48 @@
   --nav-accent: oklch(0.74 0.135 258);
 
   --radius: 0.9rem;
+  color-scheme: light;
+}
+
+/* ============================================================
+   Modo oscuro: mismos tokens, valores entintados al navy.
+   Sin negros puros; el acento azul se aclara para legibilidad.
+   ============================================================ */
+.dark {
+  --bg: oklch(0.218 0.018 260);
+  --bg-soft: oklch(0.246 0.02 260);
+  --surface: oklch(0.262 0.022 260);
+  --surface-2: oklch(0.298 0.024 260);
+  --elevated: oklch(0.335 0.026 260);
+  --line: oklch(0.362 0.024 260);
+  --line-strong: oklch(0.43 0.03 260);
+
+  --text: oklch(0.945 0.012 260);
+  --muted: oklch(0.745 0.022 260);
+  --faint: oklch(0.6 0.026 260);
+
+  --accent: oklch(0.62 0.16 258);
+  --accent-strong: oklch(0.82 0.115 258);
+  --accent-ink: oklch(0.16 0.03 260);
+  --accent-soft: oklch(0.37 0.07 260);
+
+  --success: oklch(0.74 0.135 155);
+  --success-soft: oklch(0.34 0.06 160);
+
+  --danger: oklch(0.7 0.165 25);
+  --danger-soft: oklch(0.36 0.085 25);
+
+  /* El riel/overlay ya es navy: se profundiza un punto. */
+  --nav-bg: oklch(0.214 0.022 262);
+  --nav-bg-2: oklch(0.262 0.026 262);
+  --nav-text: oklch(0.965 0.012 260);
+  --nav-muted: oklch(0.74 0.03 260);
+  --nav-faint: oklch(0.6 0.035 260);
+  --nav-line: oklch(0.38 0.03 262);
+  --nav-active: oklch(0.33 0.05 262);
+  --nav-accent: oklch(0.78 0.13 258);
+
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -111,15 +156,24 @@ body {
   letter-spacing: -0.01em;
 }
 
-/* Halo ambiental suave (azul) detras de todo. */
+/* Aurora ambiental (en la paleta de marca: azules + un susurro cálido). */
 .ambient {
   position: fixed;
   inset: 0;
   z-index: -2;
   pointer-events: none;
   background:
-    radial-gradient(54rem 38rem at 88% -10%, oklch(0.6 0.15 258 / 0.1), transparent 60%),
-    radial-gradient(44rem 32rem at -6% 0%, oklch(0.62 0.13 250 / 0.06), transparent 55%);
+    radial-gradient(ellipse 85% 65% at 6% 4%, oklch(0.62 0.14 258 / 0.18), transparent 60%),
+    radial-gradient(ellipse 70% 58% at 80% 20%, oklch(0.86 0.07 92 / 0.14), transparent 62%),
+    radial-gradient(ellipse 68% 60% at 14% 88%, oklch(0.68 0.12 232 / 0.14), transparent 62%),
+    radial-gradient(ellipse 72% 62% at 94% 94%, oklch(0.64 0.13 262 / 0.2), transparent 62%);
+}
+.dark .ambient {
+  background:
+    radial-gradient(ellipse 85% 65% at 6% 4%, oklch(0.52 0.15 258 / 0.32), transparent 60%),
+    radial-gradient(ellipse 70% 58% at 80% 20%, oklch(0.6 0.1 270 / 0.18), transparent 62%),
+    radial-gradient(ellipse 68% 60% at 14% 88%, oklch(0.5 0.13 232 / 0.22), transparent 62%),
+    radial-gradient(ellipse 72% 62% at 94% 94%, oklch(0.5 0.14 262 / 0.34), transparent 62%);
 }
 
 /* Sin grano: look limpio de panel. */
