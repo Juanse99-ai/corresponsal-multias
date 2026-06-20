@@ -28,9 +28,15 @@
   `app/(app)/*/actions.ts`. Clientes Supabase en `lib/supabase/{client,server,middleware}.ts`.
 - Auth/roles en `lib/auth.ts`; protección de rutas en `proxy.ts` (antes middleware).
 - UI: primitivos en `components/ui`, módulos por carpeta. Montos enteros (COP) y
-  `lib/format.ts` para formato. Números con clase `.tnum` (Geist Mono).
+  `lib/format.ts` para formato. Números con clase `.tnum` (misma fuente con
+  `tabular-nums` para alinear columnas).
 
 ## Convenciones de diseño
-- Tema oscuro, acento único dorado (`--accent`). Verde/rojo solo para estado
-  (cuadrado/descuadre). Sin morados/neón, sin emojis. Iconos: `@phosphor-icons/react/dist/ssr`.
+- Fuente única tipo iOS: SF Pro vía la pila del sistema de Apple (`--font-ios`,
+  `-apple-system`). Sin Geist ni webfonts.
+- Tema claro y oscuro (toggle `next-themes`, clase en `<html>`). Paleta dark por
+  tokens en `.dark` (globals.css). Acento único azul (`--accent`). Los tokens
+  `nav-*` (menú overlay + hero login) son iguales en ambos temas.
+- Verde/rojo solo para estado (cuadrado/descuadre). Sin morados/neón, sin emojis.
+  Sin glows decorativos en tarjetas. Iconos: `@phosphor-icons/react/dist/ssr`.
 - GSAP solo aislado (login). Framer Motion para el resto. No mezclarlos en el mismo árbol.
