@@ -121,7 +121,7 @@ export function CuadreExport({
           >
             <div
               ref={ref}
-              style={{ fontFamily: "var(--font-geist-sans), system-ui, sans-serif" }}
+              style={{ fontFamily: "var(--font-ios)" }}
               className="overflow-hidden rounded-[1.1rem] bg-white text-zinc-900"
             >
               <div className="border-b border-zinc-200 px-6 py-4 text-center">
