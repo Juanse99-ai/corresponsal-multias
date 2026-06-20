@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { ArrowRight, X, SignOut, CheckCircle, Warning } from "@phosphor-icons/react/dist/ssr";
 import { Logo } from "@/components/brand";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { signOutAction } from "@/app/login/actions";
 import { cn } from "@/lib/utils";
 import { formatCOP, formatFechaLarga, hoyISO } from "@/lib/format";
@@ -216,8 +217,17 @@ function ResumenPanel({
         </div>
       </div>
 
+      {/* Tema claro/oscuro. */}
+      <div className="flex items-center justify-between gap-3 border-t border-nav-line pt-4">
+        <div className="leading-tight">
+          <p className="text-[0.84rem] font-medium text-nav-text">Tema</p>
+          <p className="text-[0.7rem] text-nav-faint">Claro u oscuro</p>
+        </div>
+        <ThemeToggle />
+      </div>
+
       {/* Tarjeta de usuario + salir. */}
-      <div className="mt-auto flex items-center gap-3 border-t border-nav-line pt-4">
+      <div className="flex items-center gap-3 border-t border-nav-line pt-4">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-nav-accent/20 text-[0.85rem] font-semibold text-nav-accent">
           {profile.nombre.slice(0, 1).toUpperCase()}
         </div>

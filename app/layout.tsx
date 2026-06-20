@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: "Corresponsal · Multidiagnósticos AS",
@@ -17,8 +18,9 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+    <html lang="es" className={`${GeistSans.variable} ${GeistMono.variable}`} suppressHydrationWarning>
       <body className="min-h-[100dvh] antialiased">
+        <Providers>
         <div className="ambient" aria-hidden />
         <div className="grain" aria-hidden />
         {/* Filtro de refracción para los botones Liquid Glass (#container-glass). */}
@@ -34,6 +36,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </defs>
         </svg>
         {children}
+        </Providers>
       </body>
     </html>
   );
