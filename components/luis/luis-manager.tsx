@@ -40,7 +40,6 @@ export function LuisManager({
     <div className="flex flex-col gap-5">
       {/* Saldo acumulado de Luis (su dinero) */}
       <Card className="relative overflow-hidden border-accent/25 p-6">
-        <div className="pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full bg-accent/12 blur-3xl" />
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <div className="flex items-center gap-2 text-faint">

@@ -73,12 +73,6 @@ export function PanelView({ data }: { data: PanelData }) {
                 data.cuadreHoy ? (descuadreHoy ? "border-danger/40" : "border-success/40") : "hover:border-line-strong",
               )}
             >
-              <div
-                className={cn(
-                  "pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full blur-3xl",
-                  data.cuadreHoy ? (descuadreHoy ? "bg-danger/15" : "bg-success/15") : "bg-accent/10",
-                )}
-              />
               <div className="relative flex h-full flex-col">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-muted">
@@ -128,7 +122,6 @@ export function PanelView({ data }: { data: PanelData }) {
         <motion.div variants={item}>
           <Link href="/luis" className="group block h-full">
             <Card className="relative h-full overflow-hidden p-6 transition-colors hover:border-line-strong">
-              <div className="pointer-events-none absolute -right-10 -top-10 h-36 w-36 rounded-full bg-accent/10 blur-3xl" />
               <div className="relative flex h-full flex-col">
                 <div className="flex items-center gap-2 text-muted">
                   <Wallet size={18} weight="fill" className="text-accent" />

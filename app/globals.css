@@ -79,15 +79,8 @@
   --danger: oklch(0.7 0.165 25);
   --danger-soft: oklch(0.36 0.085 25);
 
-  /* El riel/overlay ya es navy: se profundiza un punto. */
-  --nav-bg: oklch(0.214 0.022 262);
-  --nav-bg-2: oklch(0.262 0.026 262);
-  --nav-text: oklch(0.965 0.012 260);
-  --nav-muted: oklch(0.74 0.03 260);
-  --nav-faint: oklch(0.6 0.035 260);
-  --nav-line: oklch(0.38 0.03 262);
-  --nav-active: oklch(0.33 0.05 262);
-  --nav-accent: oklch(0.78 0.13 258);
+  /* Los tokens nav-* (menú overlay + hero del login) NO se redefinen aquí:
+     el menú usa el mismo fondo navy en claro y en oscuro. */
 
   color-scheme: dark;
 }

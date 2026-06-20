@@ -130,7 +130,6 @@ export function GeneralEditor({
 
       <div className="flex flex-col gap-4 lg:sticky lg:top-8">
         <Card className="relative overflow-hidden border-accent/30 p-6">
-          <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-accent/15 blur-3xl" />
           <p className="text-[0.78rem] font-medium uppercase tracking-wide text-faint">Saldo total</p>
           <p className={cn("mt-2 text-4xl font-semibold tracking-tight", total < 0 ? "text-danger" : "text-text")}>
             <AnimatedMoney value={total} />

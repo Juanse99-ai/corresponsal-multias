@@ -597,12 +597,6 @@ function SaldoHero({
         descuadre ? "border-danger/40" : "border-success/40",
       )}
     >
-      <div
-        className={cn(
-          "pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full blur-3xl",
-          descuadre ? "bg-danger/20" : "bg-success/20",
-        )}
-      />
       <div className="relative">
         <div className="flex items-center justify-between">
           <p className="text-[0.78rem] font-medium uppercase tracking-wide text-faint">Saldo final</p>
