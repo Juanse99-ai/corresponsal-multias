@@ -176,17 +176,17 @@ export function MovimientosManager({
           <div className={cn("mt-4 grid gap-4 sm:grid-cols-2", bloqueado && "pointer-events-none opacity-50")}>
             <div className="flex flex-col gap-2">
               <Label htmlFor="mov-monto">Monto</Label>
-              <MoneyInput id="mov-monto" value={monto} onValueChange={setMonto} autoFocus />
+              <MoneyInput id="mov-monto" value={monto} onValueChange={setMonto} autoFocus onEnter={() => !pending && !bloqueado && registrar()} />
             </div>
             {tipo === "recaudo" && (
               <div className="flex flex-col gap-2">
                 <Label htmlFor="mov-convenio">Código de convenio</Label>
-                <Input id="mov-convenio" value={convenio} onChange={(e) => setConvenio(e.target.value)} placeholder="Ej. 12345" inputMode="numeric" />
+                <Input id="mov-convenio" value={convenio} onChange={(e) => setConvenio(e.target.value)} placeholder="Ej. 12345" inputMode="numeric" onEnter={() => !pending && !bloqueado && registrar()} />
               </div>
             )}
             <div className="flex flex-col gap-2">
               <Label htmlFor="mov-cliente">{tipo === "recaudo" ? "Referencia o cliente" : "Cliente (opcional)"}</Label>
-              <Input id="mov-cliente" value={cliente} onChange={(e) => setCliente(e.target.value)} placeholder="Nombre o referencia" />
+              <Input id="mov-cliente" value={cliente} onChange={(e) => setCliente(e.target.value)} placeholder="Nombre o referencia" onEnter={() => !pending && !bloqueado && registrar()} />
             </div>
           </div>
 

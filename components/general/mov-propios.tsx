@@ -112,7 +112,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
         <div className="grid gap-4 sm:grid-cols-[1fr_150px]">
           <div className="flex flex-col gap-2">
             <Label htmlFor="mov-monto">Monto</Label>
-            <MoneyInput id="mov-monto" value={monto} onValueChange={setMonto} />
+            <MoneyInput id="mov-monto" value={monto} onValueChange={setMonto} onEnter={() => !pending && registrar()} />
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="mov-fecha">Fecha</Label>
@@ -122,7 +122,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="mov-nota">Nota (opcional)</Label>
-          <Input id="mov-nota" value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Referencia…" />
+          <Input id="mov-nota" value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Referencia…" onEnter={() => !pending && registrar()} />
         </div>
 
         <label className="flex cursor-pointer items-center gap-2 self-start rounded-[--radius-card] border border-line-strong bg-surface-2 px-3.5 py-2 text-[0.82rem] text-muted transition-colors hover:text-text">

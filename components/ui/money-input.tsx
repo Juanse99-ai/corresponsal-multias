@@ -14,11 +14,13 @@ interface MoneyInputProps {
   disabled?: boolean;
   className?: string;
   size?: "md" | "lg";
+  /** Se dispara al presionar Enter. Útil para enviar el formulario. */
+  onEnter?: () => void;
 }
 
 /** Input de pesos con mascara de miles en vivo y prefijo $. Alinea a la derecha. */
 export const MoneyInput = React.forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyInput(
-  { value, onValueChange, id, name, placeholder = "0", autoFocus, disabled, className, size = "md" },
+  { value, onValueChange, id, name, placeholder = "0", autoFocus, disabled, className, size = "md", onEnter },
   ref,
 ) {
   const display = value ? maskMiles(String(value)) : "";
@@ -43,6 +45,12 @@ export const MoneyInput = React.forwardRef<HTMLInputElement, MoneyInputProps>(fu
         value={display}
         placeholder={placeholder}
         onChange={(e) => onValueChange(parseMontoInput(e.target.value))}
+        onKeyDown={(e) => {
+          if (onEnter && e.key === "Enter" && !e.nativeEvent.isComposing) {
+            e.preventDefault();
+            onEnter();
+          }
+        }}
         className={cn(
           "tnum w-full rounded-2xl border border-line-strong bg-surface-2/80 pr-3.5 pl-8 text-right text-text",
           "placeholder:text-faint shadow-[inset_0_1px_0_oklch(1_0_0/0.6)]",

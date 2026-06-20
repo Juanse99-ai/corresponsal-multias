@@ -199,6 +199,7 @@ export function PrestamosDia({
                   onChange={(e) => setOtro(e.target.value)}
                   placeholder="Nombre de la persona"
                   className="mt-1"
+                  onEnter={() => !pending && !bloqueado && registrar()}
                 />
               )}
             </div>
@@ -209,11 +210,12 @@ export function PrestamosDia({
                 value={concepto}
                 onChange={(e) => setConcepto(e.target.value)}
                 placeholder="Préstamo personal, adelanto…"
+                onEnter={() => !pending && !bloqueado && registrar()}
               />
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="pr-monto">Monto</Label>
-              <MoneyInput id="pr-monto" value={monto} onValueChange={setMonto} />
+              <MoneyInput id="pr-monto" value={monto} onValueChange={setMonto} onEnter={() => !pending && !bloqueado && registrar()} />
             </div>
             <div className="flex flex-col gap-2">
               <Label>¿Ya lo devolvió?</Label>
