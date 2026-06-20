@@ -15,6 +15,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/field";
 import { MoneyInput } from "@/components/ui/money-input";
+import { Textarea } from "@/components/ui/textarea";
 import { AnimatedMoney } from "@/components/ui/animated-number";
 import { cn } from "@/lib/utils";
 import { formatCOP } from "@/lib/format";
@@ -117,13 +118,12 @@ export function GeneralEditor({
 
         <div className="mt-4 flex flex-col gap-2">
           <Label htmlFor="nota_g">Nota (opcional)</Label>
-          <textarea
+          <Textarea
             id="nota_g"
             value={nota}
             onChange={(e) => setNota(e.target.value)}
             rows={2}
             placeholder="Observación…"
-            className="w-full resize-none rounded-[--radius-card] border border-line-strong bg-surface-2 p-3 text-sm text-text placeholder:text-faint focus:border-accent/60 focus:bg-surface focus:outline-none"
           />
         </div>
       </Card>

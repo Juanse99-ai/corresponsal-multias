@@ -18,6 +18,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/field";
 import { MoneyInput } from "@/components/ui/money-input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { SaldoVivo } from "@/components/fx/saldo-vivo";
 import { CelebracionCierre } from "@/components/fx/celebracion-cierre";
@@ -445,13 +446,12 @@ export function CuadreEditor({
 
         <div className="mt-4 flex flex-col gap-2">
           <Label htmlFor="nota">Nota (opcional)</Label>
-          <textarea
+          <Textarea
             id="nota"
             value={nota}
             onChange={(e) => setNota(e.target.value)}
             rows={2}
             placeholder="Observación del día…"
-            className="w-full resize-none rounded-[--radius-card] border border-line-strong bg-surface-2 p-3 text-sm text-text placeholder:text-faint focus:border-accent/60 focus:bg-surface focus:outline-none"
           />
         </div>
         </fieldset>
