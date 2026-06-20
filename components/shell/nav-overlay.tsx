@@ -91,7 +91,7 @@ export function NavOverlay({
             <Link href="/panel" onClick={onClose} className="flex items-center gap-2.5">
               <Logo size={34} />
               <div className="leading-tight">
-                <p className="text-sm font-semibold tracking-tight text-nav-text">Corresponsal</p>
+                <p className="text-sm font-semibold tracking-tight text-nav-text">Barrio Centro Sabanalarga 18</p>
                 <p className="text-[0.7rem] text-nav-faint">Multidiagnósticos AS</p>
               </div>
             </Link>

@@ -126,7 +126,7 @@ export function TopHeader({
         </button>
         <Link href="/panel" className="flex items-center gap-2">
           <Logo size={30} />
-          <span className="hidden text-sm font-semibold tracking-tight text-text sm:block">Corresponsal</span>
+          <span className="hidden text-sm font-semibold tracking-tight text-text sm:block">Barrio Centro Sabanalarga 18</span>
         </Link>
         <span className="ml-1 hidden text-[0.82rem] text-muted lg:block">{formatFechaLarga(hoyISO())}</span>
       </div>

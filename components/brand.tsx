@@ -21,7 +21,7 @@ export function Wordmark({ className }: { className?: string }) {
     <div className={cn("flex items-center gap-2.5", className)}>
       <Logo size={32} />
       <div className="leading-none">
-        <p className="text-sm font-semibold tracking-tight text-text">Corresponsal</p>
+        <p className="text-sm font-semibold tracking-tight text-text">Barrio Centro Sabanalarga 18</p>
         <p className="text-[0.7rem] text-faint">Multidiagnósticos AS</p>
       </div>
     </div>

@@ -38,8 +38,8 @@ export function LoginHero() {
       <div className="lh-top flex items-center gap-3">
         <Logo size={40} />
         <div className="leading-none">
-          <p className="text-sm font-semibold text-nav-text">Corresponsal</p>
-          <p className="text-[0.72rem] text-nav-faint">Barrio Centro Sabanalarga</p>
+          <p className="text-sm font-semibold text-nav-text">Barrio Centro Sabanalarga 18</p>
+          <p className="text-[0.72rem] text-nav-faint">Multidiagnósticos AS</p>
         </div>
       </div>
 

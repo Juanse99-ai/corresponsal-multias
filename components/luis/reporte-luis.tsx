@@ -130,32 +130,17 @@ export function ReporteLuisButton({
             </div>
 
             <div className="mt-3 flex items-center gap-2">
-              <button
-                type="button"
-                onClick={descargar}
-                disabled={busy}
-                className="flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-accent px-5 text-sm font-medium text-white transition hover:brightness-110 disabled:opacity-50"
-              >
+              <Button onClick={descargar} disabled={busy} className="flex-1 text-white">
                 <DownloadSimple size={17} weight="bold" />
                 {busy ? "Generando…" : "Descargar imagen"}
-              </button>
-              <button
-                type="button"
-                onClick={compartir}
-                disabled={busy}
-                className="flex h-11 items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-5 text-sm font-medium text-white transition hover:bg-white/20 disabled:opacity-50"
-              >
+              </Button>
+              <Button variant="secondary" onClick={compartir} disabled={busy} className="text-white">
                 <ShareNetwork size={17} />
                 Compartir
-              </button>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                aria-label="Cerrar"
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 text-white/80 transition hover:bg-white/15 hover:text-white"
-              >
+              </Button>
+              <Button variant="ghost" size="icon" onClick={() => setOpen(false)} aria-label="Cerrar" className="text-white">
                 <X size={18} />
-              </button>
+              </Button>
             </div>
           </motion.div>
         </motion.div>
