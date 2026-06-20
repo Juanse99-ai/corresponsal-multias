@@ -3,7 +3,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "Corresponsal · Multidiagnósticos AS",
+  title: "Barrio Centro Sabanalarga 18 · Multidiagnósticos AS",
   description: "Cuadre diario, cupo de Luis y préstamos del punto corresponsal Bancolombia.",
   robots: { index: false, follow: false },
 };
