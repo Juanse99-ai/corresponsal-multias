@@ -236,6 +236,14 @@ button:hover > .lg-liquid-accent {
 button:hover > .lg-liquid-danger {
   background: linear-gradient(180deg, oklch(0.96 0.055 25 / 0.62), oklch(0.94 0.066 25 / 0.46));
 }
+/* Vidrio "puro": casi sin relleno, solo bisel + blur (para <LiquidButton>). */
+.lg-liquid-clear {
+  background: linear-gradient(180deg, oklch(1 0 0 / 0.16), oklch(0.97 0.006 255 / 0.06));
+}
+button:hover > .lg-liquid-clear {
+  background: linear-gradient(180deg, oklch(1 0 0 / 0.26), oklch(0.97 0.006 255 / 0.12));
+}
+
 /* Refracción real (Firefox; en Chrome/Safari se ignora sin romper nada). */
 .lg-liquid-refract {
   -webkit-backdrop-filter: url("#container-glass");

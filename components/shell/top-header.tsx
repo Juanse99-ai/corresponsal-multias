@@ -14,6 +14,7 @@ import {
   ArrowRight,
   List,
 } from "@phosphor-icons/react/dist/ssr";
+import { Logo } from "@/components/brand";
 import { cn } from "@/lib/utils";
 import { formatCOP, formatFechaLarga, hoyISO, formatFecha } from "@/lib/format";
 import type { HeaderResumen } from "@/lib/queries";
@@ -105,32 +106,34 @@ function parseFechaISO(raw: string): string | null {
 export function TopHeader({
   resumen,
   isAdmin,
-  collapsed,
-  onExpand,
+  onOpenMenu,
 }: {
   resumen: HeaderResumen;
   isAdmin: boolean;
-  collapsed?: boolean;
-  onExpand?: () => void;
+  onOpenMenu: () => void;
 }) {
   const avisos = useMemo(() => buildAvisos(resumen), [resumen]);
   return (
-    <header className="sticky top-0 z-20 hidden items-center justify-between gap-3 border-b border-line bg-bg/80 px-4 py-3 backdrop-blur-xl sm:px-6 lg:flex lg:px-8">
-      <div className="flex items-center gap-3">
-        {collapsed && (
-          <button
-            onClick={onExpand}
-            title="Mostrar menú"
-            aria-label="Mostrar menú"
-            className="flex h-9 w-9 items-center justify-center rounded-[0.7rem] border border-line bg-surface text-muted transition-colors hover:text-text"
-          >
-            <List size={18} />
-          </button>
-        )}
-        <p className="text-[0.82rem] text-muted">{formatFechaLarga(hoyISO())}</p>
+    <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-line bg-bg/80 px-3 py-2.5 backdrop-blur-xl sm:px-6 lg:px-8">
+      <div className="flex items-center gap-2.5 sm:gap-3.5">
+        <button
+          onClick={onOpenMenu}
+          aria-label="Abrir menú"
+          className="flex h-10 items-center gap-2 rounded-full border border-line bg-surface pl-3 pr-3.5 text-[0.84rem] font-medium text-text transition-colors hover:bg-surface-2"
+        >
+          <List size={18} weight="bold" />
+          <span className="hidden sm:inline">Menú</span>
+        </button>
+        <Link href="/panel" className="flex items-center gap-2">
+          <Logo size={30} />
+          <span className="hidden text-sm font-semibold tracking-tight text-text sm:block">Corresponsal</span>
+        </Link>
+        <span className="ml-1 hidden text-[0.82rem] text-muted lg:block">{formatFechaLarga(hoyISO())}</span>
       </div>
       <div className="flex items-center gap-2.5">
-        <HeaderSearch personas={isAdmin ? resumen.personas : []} />
+        <div className="hidden sm:block">
+          <HeaderSearch personas={isAdmin ? resumen.personas : []} />
+        </div>
         <HeaderAvisos avisos={avisos} urgentes={avisosUrgentes(avisos)} />
       </div>
     </header>

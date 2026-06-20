@@ -1,0 +1,241 @@
+"use client";
+
+import { useEffect } from "react";
+import Link from "next/link";
+import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { ArrowRight, X, SignOut, CheckCircle, Warning } from "@phosphor-icons/react/dist/ssr";
+import { Logo } from "@/components/brand";
+import { signOutAction } from "@/app/login/actions";
+import { cn } from "@/lib/utils";
+import { formatCOP, formatFechaLarga, hoyISO } from "@/lib/format";
+import type { Rol } from "@/lib/cuadre";
+import type { HeaderResumen } from "@/lib/queries";
+import { NAV, isActive, type NavItem } from "@/components/shell/nav-items";
+
+const panel: Variants = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } },
+  exit: { opacity: 0, transition: { duration: 0.2, ease: [0.4, 0, 1, 1] } },
+};
+const listV: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.05, delayChildren: 0.1 } },
+};
+const itemV: Variants = {
+  hidden: { opacity: 0, y: 18 },
+  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 26 } },
+};
+const asideV: Variants = {
+  hidden: { opacity: 0, x: 24 },
+  show: { opacity: 1, x: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1], delay: 0.12 } },
+};
+
+export function NavOverlay({
+  open,
+  onClose,
+  profile,
+  isAdmin,
+  pathname,
+  resumen,
+}: {
+  open: boolean;
+  onClose: () => void;
+  profile: { nombre: string; rol: Rol; email: string };
+  isAdmin: boolean;
+  pathname: string;
+  resumen: HeaderResumen;
+}) {
+  // ESC para cerrar + bloquear scroll del fondo mientras el panel está abierto.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [open, onClose]);
+
+  const items = NAV.filter((i) => !i.adminOnly || isAdmin);
+  const main = items.filter((i) => i.grupo === "main");
+  const admin = items.filter((i) => i.grupo === "admin");
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          key="nav-overlay"
+          variants={panel}
+          initial="hidden"
+          animate="show"
+          exit="exit"
+          className="fixed inset-0 z-[60] flex flex-col overflow-y-auto bg-nav-bg text-nav-text"
+        >
+          {/* Halo de acento (decorativo). */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background:
+                "radial-gradient(48rem 32rem at 85% -8%, oklch(0.74 0.135 258 / 0.22), transparent 60%), radial-gradient(40rem 28rem at -6% 110%, oklch(0.6 0.12 250 / 0.16), transparent 60%)",
+            }}
+          />
+
+          {/* Cabecera del panel. */}
+          <div className="relative flex items-center justify-between px-5 py-5 sm:px-8">
+            <Link href="/panel" onClick={onClose} className="flex items-center gap-2.5">
+              <Logo size={34} />
+              <div className="leading-tight">
+                <p className="text-sm font-semibold tracking-tight text-nav-text">Corresponsal</p>
+                <p className="text-[0.7rem] text-nav-faint">Multidiagnósticos AS</p>
+              </div>
+            </Link>
+            <button
+              onClick={onClose}
+              aria-label="Cerrar menú"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-nav-line text-nav-muted transition-colors hover:bg-nav-active hover:text-nav-text"
+            >
+              <X size={20} weight="bold" />
+            </button>
+          </div>
+
+          {/* Cuerpo: links grandes + panel de resumen. */}
+          <div className="relative mx-auto grid w-full max-w-[1120px] flex-1 content-start gap-10 px-6 pb-14 pt-4 sm:px-8 lg:grid-cols-[1.45fr_1fr] lg:gap-16 lg:pt-10">
+            <motion.nav variants={listV} initial="hidden" animate="show" className="flex flex-col gap-9">
+              <NavBlock label="Menú principal" items={main} pathname={pathname} onClose={onClose} />
+              {isAdmin && admin.length > 0 && (
+                <NavBlock label="Administración" items={admin} pathname={pathname} onClose={onClose} />
+              )}
+            </motion.nav>
+
+            <motion.aside variants={asideV} initial="hidden" animate="show" className="flex flex-col">
+              <ResumenPanel resumen={resumen} profile={profile} />
+            </motion.aside>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+function NavBlock({
+  label,
+  items,
+  pathname,
+  onClose,
+}: {
+  label: string;
+  items: NavItem[];
+  pathname: string;
+  onClose: () => void;
+}) {
+  return (
+    <div>
+      <p className="mb-3 text-[0.66rem] font-semibold uppercase tracking-[0.16em] text-nav-faint">{label}</p>
+      <ul className="flex flex-col gap-1">
+        {items.map((item) => {
+          const active = isActive(pathname, item.href);
+          return (
+            <motion.li key={item.href} variants={itemV}>
+              <Link href={item.href} onClick={onClose} className="group flex items-center gap-3 py-1.5">
+                <span
+                  aria-hidden
+                  className={cn(
+                    "flex shrink-0 text-nav-accent transition-all duration-300 ease-out",
+                    active
+                      ? "translate-x-0 opacity-100"
+                      : "-translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100",
+                  )}
+                >
+                  <ArrowRight size={30} weight="bold" />
+                </span>
+                <span
+                  className={cn(
+                    "text-[1.9rem] font-semibold leading-none tracking-tight transition-all duration-300 ease-out sm:text-[2.4rem]",
+                    active
+                      ? "translate-x-0 text-nav-accent"
+                      : "-translate-x-[2.6rem] text-nav-text group-hover:translate-x-0 group-hover:text-nav-accent",
+                  )}
+                >
+                  {item.label}
+                </span>
+              </Link>
+            </motion.li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+function ResumenPanel({
+  resumen,
+  profile,
+}: {
+  resumen: HeaderResumen;
+  profile: { nombre: string; rol: Rol };
+}) {
+  const c = resumen.cuadreHoy;
+  const descuadre = c ? Math.round(c.saldo_final) !== 0 : false;
+
+  return (
+    <div className="flex flex-col gap-4 rounded-[1.4rem] border border-nav-line bg-nav-bg-2/70 p-6 backdrop-blur-xl shadow-[inset_0_1px_0_oklch(1_0_0/0.06)]">
+      <p className="text-[0.78rem] text-nav-faint">{formatFechaLarga(hoyISO())}</p>
+
+      <div className="flex flex-col gap-3">
+        {/* Estado del cuadre de hoy. */}
+        <div className="flex items-center justify-between gap-3 border-t border-nav-line pt-3">
+          <span className="text-[0.82rem] text-nav-muted">Cuadre de hoy</span>
+          {!c ? (
+            <span className="inline-flex items-center gap-1.5 text-[0.82rem] font-medium text-nav-accent">
+              <Warning size={15} weight="fill" /> Sin abrir
+            </span>
+          ) : descuadre ? (
+            <span className="tnum inline-flex items-center gap-1.5 text-[0.82rem] font-semibold text-[oklch(0.78_0.13_25)]">
+              <Warning size={15} weight="fill" />
+              {c.saldo_final < 0 ? "Sobran " : "Faltan "}
+              {formatCOP(Math.abs(c.saldo_final))}
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 text-[0.82rem] font-medium text-[oklch(0.8_0.13_155)]">
+              <CheckCircle size={15} weight="fill" /> Cuadrado
+            </span>
+          )}
+        </div>
+
+        {/* Préstamos pendientes. */}
+        <div className="flex items-center justify-between gap-3 border-t border-nav-line pt-3">
+          <span className="text-[0.82rem] text-nav-muted">Préstamos pendientes</span>
+          <span className="tnum text-[0.82rem] font-semibold text-nav-text">
+            {resumen.prestamosCount > 0 ? formatCOP(resumen.prestamosTotal) : "Ninguno"}
+          </span>
+        </div>
+      </div>
+
+      {/* Tarjeta de usuario + salir. */}
+      <div className="mt-auto flex items-center gap-3 border-t border-nav-line pt-4">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-nav-accent/20 text-[0.85rem] font-semibold text-nav-accent">
+          {profile.nombre.slice(0, 1).toUpperCase()}
+        </div>
+        <div className="min-w-0 flex-1 leading-tight">
+          <p className="truncate text-[0.85rem] font-medium text-nav-text">{profile.nombre}</p>
+          <p className="text-[0.7rem] capitalize text-nav-faint">{profile.rol}</p>
+        </div>
+        <form action={signOutAction}>
+          <button
+            type="submit"
+            title="Cerrar sesión"
+            aria-label="Cerrar sesión"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-nav-line text-nav-muted transition-colors hover:bg-nav-active hover:text-nav-text"
+          >
+            <SignOut size={17} />
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
