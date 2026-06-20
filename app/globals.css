@@ -48,6 +48,8 @@
   --nav-accent: oklch(0.74 0.135 258);
 
   --radius: 0.9rem;
+  /* Fuente única tipo iOS: SF Pro vía la pila del sistema de Apple. */
+  --font-ios: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
   color-scheme: light;
 }
 
@@ -117,8 +119,8 @@
   --color-nav-active: var(--nav-active);
   --color-nav-accent: var(--nav-accent);
 
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-ios);
+  --font-mono: var(--font-ios);
 
   --radius-card: var(--radius);
 }
@@ -135,8 +137,7 @@ html {
 body {
   background-color: var(--bg);
   color: var(--text);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
-  font-feature-settings: "cv01", "ss01";
+  font-family: var(--font-ios);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
@@ -145,8 +146,8 @@ body {
 /* Cifras tabulares monoespaciadas para columnas de pesos. */
 .tnum {
   font-variant-numeric: tabular-nums;
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  letter-spacing: -0.01em;
+  font-family: var(--font-ios);
+  letter-spacing: 0;
 }
 
 /* Aurora ambiental (en la paleta de marca: azules + un susurro cálido). */
