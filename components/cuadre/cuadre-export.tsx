@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Export, DownloadSimple, ShareNetwork, X } from "@phosphor-icons/react/dist/ssr";
-import { Button } from "@/components/ui/button";
 import { formatCOP } from "@/lib/format";
 
 interface Linea {
@@ -179,17 +178,32 @@ export function CuadreExport({
             </div>
 
             <div className="mt-3 flex items-center gap-2">
-              <Button onClick={descargar} disabled={busy} className="flex-1">
+              <button
+                type="button"
+                onClick={descargar}
+                disabled={busy}
+                className="flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-accent px-5 text-sm font-medium text-white transition hover:brightness-110 disabled:opacity-50"
+              >
                 <DownloadSimple size={17} weight="bold" />
                 {busy ? "Generando…" : "Descargar imagen"}
-              </Button>
-              <Button variant="secondary" onClick={compartir} disabled={busy}>
+              </button>
+              <button
+                type="button"
+                onClick={compartir}
+                disabled={busy}
+                className="flex h-11 items-center justify-center gap-2 rounded-full border border-white/25 bg-white/10 px-5 text-sm font-medium text-white transition hover:bg-white/20 disabled:opacity-50"
+              >
                 <ShareNetwork size={17} />
                 Compartir
-              </Button>
-              <Button variant="ghost" size="icon" onClick={() => setOpen(false)} aria-label="Cerrar">
+              </button>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                aria-label="Cerrar"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 text-white/80 transition hover:bg-white/15 hover:text-white"
+              >
                 <X size={18} />
-              </Button>
+              </button>
             </div>
           </motion.div>
         </motion.div>
