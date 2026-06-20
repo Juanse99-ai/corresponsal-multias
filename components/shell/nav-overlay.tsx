@@ -6,6 +6,7 @@ import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { ArrowRight, X, SignOut, CheckCircle, Warning } from "@phosphor-icons/react/dist/ssr";
 import { Logo } from "@/components/brand";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { ActivarAvisos } from "@/components/push/activar-avisos";
 import { signOutAction } from "@/app/login/actions";
 import { cn } from "@/lib/utils";
 import { formatCOP, formatFechaLarga, hoyISO } from "@/lib/format";
@@ -224,6 +225,15 @@ function ResumenPanel({
           <p className="text-[0.7rem] text-nav-faint">Claro u oscuro</p>
         </div>
         <ThemeToggle />
+      </div>
+
+      {/* Recordatorios push. */}
+      <div className="flex items-center justify-between gap-3 border-t border-nav-line pt-4">
+        <div className="leading-tight">
+          <p className="text-[0.84rem] font-medium text-nav-text">Avisos</p>
+          <p className="text-[0.7rem] text-nav-faint">Recordatorio para cerrar el día</p>
+        </div>
+        <ActivarAvisos />
       </div>
 
       {/* Tarjeta de usuario + salir. */}

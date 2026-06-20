@@ -96,11 +96,19 @@ export type Database = {
         Update: { id?: string; tabla?: string; accion?: string; registro_id?: string | null; fecha_dato?: string | null; actor_id?: string | null; antes?: Json | null; despues?: Json | null; created_at?: string };
         Relationships: [];
       };
+      corr_push_subscriptions: {
+        Row: { id: string; user_id: string; endpoint: string; p256dh: string; auth_key: string; created_at: string };
+        Insert: { id?: string; user_id: string; endpoint: string; p256dh: string; auth_key: string; created_at?: string };
+        Update: { id?: string; user_id?: string; endpoint?: string; p256dh?: string; auth_key?: string; created_at?: string };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
       corr_is_admin: { Args: Record<string, never>; Returns: boolean };
       corr_my_role: { Args: Record<string, never>; Returns: string };
+      corr_cron_targets: { Args: { p_secret: string }; Returns: Json };
+      corr_cron_delete_sub: { Args: { p_secret: string; p_endpoint: string }; Returns: undefined };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
