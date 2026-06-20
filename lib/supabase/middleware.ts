@@ -3,7 +3,8 @@ import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/lib/database.types";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/config";
 
-const PUBLIC_PATHS = ["/login", "/auth"];
+// /api/cron se protege con su propio secreto (CRON_SECRET), no con sesión.
+const PUBLIC_PATHS = ["/login", "/auth", "/api/cron"];
 
 /** Refresca la sesion y protege rutas. Se invoca desde proxy.ts. */
 export async function updateSession(request: NextRequest) {
