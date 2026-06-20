@@ -1,8 +1,13 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
-  ({ className, ...props }, ref) => (
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  /** Se dispara al presionar Enter (sin composición IME). Útil para enviar el formulario. */
+  onEnter?: () => void;
+}
+
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, onEnter, onKeyDown, ...props }, ref) => (
     <input
       ref={ref}
       className={cn(
@@ -14,6 +19,13 @@ export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttribute
         "disabled:opacity-50 disabled:pointer-events-none",
         className,
       )}
+      onKeyDown={(e) => {
+        onKeyDown?.(e);
+        if (onEnter && e.key === "Enter" && !e.nativeEvent.isComposing) {
+          e.preventDefault();
+          onEnter();
+        }
+      }}
       {...props}
     />
   ),

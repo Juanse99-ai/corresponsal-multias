@@ -234,7 +234,7 @@ function AddDeudaForm() {
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="deuda-monto">Monto</Label>
-          <MoneyInput id="deuda-monto" value={monto} onValueChange={setMonto} />
+          <MoneyInput id="deuda-monto" value={monto} onValueChange={setMonto} onEnter={() => !pending && registrar()} />
         </div>
 
         <div className="flex flex-col gap-2">
@@ -262,7 +262,7 @@ function AddDeudaForm() {
         <div className="grid grid-cols-[1fr_auto] gap-3">
           <div className="flex flex-col gap-2">
             <Label htmlFor="deuda-desc">Descripción</Label>
-            <Input id="deuda-desc" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Motivo" />
+            <Input id="deuda-desc" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Motivo" onEnter={() => !pending && registrar()} />
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="deuda-fecha">Fecha</Label>
@@ -396,7 +396,7 @@ function DeudaCard({ deuda, isAdmin }: { deuda: DeudaConSaldo; isAdmin: boolean 
                 <div className="flex-1">
                   <Label htmlFor={`ab-${deuda.id}`}>Abono</Label>
                   <div className="mt-1.5">
-                    <MoneyInput id={`ab-${deuda.id}`} value={abono} onValueChange={setAbono} />
+                    <MoneyInput id={`ab-${deuda.id}`} value={abono} onValueChange={setAbono} onEnter={() => !pending && abonar()} />
                   </div>
                 </div>
                 <Button size="md" onClick={abonar} disabled={pending}>

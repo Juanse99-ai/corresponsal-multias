@@ -130,7 +130,7 @@ export function MovimientosSection({
       <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_120px]">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor={`monto-${tono}`}>Monto</Label>
-          <MoneyInput id={`monto-${tono}`} value={monto} onValueChange={setMonto} />
+          <MoneyInput id={`monto-${tono}`} value={monto} onValueChange={setMonto} onEnter={() => !pending && registrar()} />
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor={`hora-${tono}`}>Hora</Label>
@@ -139,7 +139,7 @@ export function MovimientosSection({
       </div>
       <div className="mt-3 flex flex-col gap-1.5">
         <Label htmlFor={`nota-${tono}`}>Nota (opcional)</Label>
-        <Input id={`nota-${tono}`} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Referencia…" />
+        <Input id={`nota-${tono}`} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Referencia…" onEnter={() => !pending && registrar()} />
       </div>
 
       {error && (
