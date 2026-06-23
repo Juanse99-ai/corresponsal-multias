@@ -10,7 +10,7 @@ import {
   sumMontos,
 } from "@/lib/queries";
 import { hoyISO } from "@/lib/format";
-import { saludoHora, mensajeDelDia } from "@/lib/saludos";
+import { saludoHora, mensajePersonal } from "@/lib/saludos";
 import { PanelView, type PanelData } from "@/components/panel/panel-view";
 
 export const metadata: Metadata = { title: "Panel · Corresponsal" };
@@ -64,7 +64,7 @@ export default async function PanelPage() {
   const data: PanelData = {
     nombre: profile.nombre,
     saludo: saludoHora(horaBogota),
-    mensaje: mensajeDelDia(fechaBogota),
+    mensaje: mensajePersonal(profile.nombre, fechaBogota),
     rol: profile.rol,
     cuadreHoy: cuadreHoy ? { estado: cuadreHoy.estado, saldo_final: cuadreHoy.saldo_final } : null,
     tirillaHoy: cuadreHoy ? cuadreHoy.total_tirilla : 0,
