@@ -6,7 +6,7 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { MorphSVGPlugin } from "gsap/MorphSVGPlugin";
 import { reduced } from "@/components/fx/reduced";
-import { saludoHora, mensajePersonal } from "@/lib/saludos";
+import { saludoHora, mensajePersonal, esFemenino } from "@/lib/saludos";
 
 gsap.registerPlugin(MorphSVGPlugin);
 
@@ -158,7 +158,7 @@ export function BienvenidaSplash({ nombre }: { nombre: string }) {
   );
   const saludo = saludoHora(horaBogota);
   const mensaje = mensajePersonal(nombre, fechaBogota);
-  const bienvenida = /a$/i.test(primer) ? "¡Bienvenida!" : "¡Bienvenido!";
+  const bienvenida = esFemenino(nombre) ? "¡Bienvenida!" : "¡Bienvenido!";
 
   function saltar() {
     if (!root.current) return;
