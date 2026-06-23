@@ -86,3 +86,16 @@ export function mensajePersonal(nombre: string, fechaISO: string): string {
   const primer = nombre.trim().split(/\s+/)[0]?.toLowerCase() ?? "";
   return MENSAJES_PERSONA[primer] ?? mensajeDelDia(fechaISO);
 }
+
+// Género por persona para el saludo ("f" = femenino). Si no está, se infiere del nombre.
+const GENERO_PERSONA: Record<string, "f" | "m"> = {
+  carolina: "f",
+};
+
+/** True si el saludo debe ir en femenino (¡Bienvenida!). Garantizado por persona; si no, heurística. */
+export function esFemenino(nombre: string): boolean {
+  const primer = nombre.trim().split(/\s+/)[0]?.toLowerCase() ?? "";
+  const g = GENERO_PERSONA[primer];
+  if (g) return g === "f";
+  return /a$/.test(primer);
+}
