@@ -75,3 +75,14 @@ export function mensajeDelDia(fechaISO: string): string {
   for (let i = 0; i < n.length; i++) h = (h * 31 + n.charCodeAt(i)) >>> 0;
   return MENSAJES_DIA[h % MENSAJES_DIA.length];
 }
+
+// Mensaje fijo personalizado por persona (clave = primer nombre en minúsculas).
+const MENSAJES_PERSONA: Record<string, string> = {
+  carolina: "¡Qué linda estás hoy!",
+};
+
+/** Mensaje a mostrar: si la persona tiene mensaje personalizado lo usa; si no, el del día. */
+export function mensajePersonal(nombre: string, fechaISO: string): string {
+  const primer = nombre.trim().split(/\s+/)[0]?.toLowerCase() ?? "";
+  return MENSAJES_PERSONA[primer] ?? mensajeDelDia(fechaISO);
+}
