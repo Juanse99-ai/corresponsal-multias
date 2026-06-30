@@ -137,7 +137,7 @@ function AddDeudaForm() {
   const [concepto, setConcepto] = useState("Préstamo personal");
   const [conceptoOtro, setConceptoOtro] = useState("");
   const [monto, setMonto] = useState(0);
-  const [medio, setMedio] = useState<"efectivo" | "transferencia">("transferencia");
+  const [medio, setMedio] = useState<"efectivo" | "transferencia" | "registro">("transferencia");
   const [descripcion, setDescripcion] = useState("");
   const [fecha, setFecha] = useState(hoyISO());
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
@@ -256,7 +256,23 @@ function AddDeudaForm() {
               </button>
             ))}
           </div>
-          <p className="text-[0.7rem] text-faint">Transferencia entra al cuadre; efectivo va al arqueo.</p>
+          <button
+            type="button"
+            onClick={() => setMedio("registro")}
+            className={cn(
+              "rounded-[--radius-card] border px-3 py-2 text-[0.8rem] font-medium transition-colors",
+              medio === "registro"
+                ? "lg-glass-accent text-accent-strong"
+                : "border-line-strong text-muted hover:text-text",
+            )}
+          >
+            Solo registro · no afecta el cuadre
+          </button>
+          <p className="text-[0.7rem] text-faint">
+            {medio === "registro"
+              ? "Queda como préstamo por cobrar, pero no entra ni a la tirilla ni a la caja."
+              : "Transferencia entra al cuadre; efectivo va al arqueo."}
+          </p>
         </div>
 
         <div className="grid grid-cols-[1fr_auto] gap-3">

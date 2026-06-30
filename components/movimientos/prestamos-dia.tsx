@@ -35,7 +35,7 @@ export function PrestamosDia({
   const [otro, setOtro] = useState("");
   const [concepto, setConcepto] = useState("");
   const [monto, setMonto] = useState(0);
-  const [medio, setMedio] = useState<"efectivo" | "transferencia">("efectivo");
+  const [medio, setMedio] = useState<"efectivo" | "transferencia" | "registro">("efectivo");
   const [pagado, setPagado] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -116,8 +116,10 @@ export function PrestamosDia({
   }
 
   function cambiarMedio(d: DeudaConSaldo) {
+    const next =
+      d.medio === "efectivo" ? "transferencia" : d.medio === "transferencia" ? "registro" : "efectivo";
     startTransition(async () => {
-      await editarDeuda({ id: d.id, medio: d.medio === "transferencia" ? "efectivo" : "transferencia" });
+      await editarDeuda({ id: d.id, medio: next });
       router.refresh();
     });
   }
@@ -261,8 +263,22 @@ export function PrestamosDia({
                 </button>
               ))}
             </div>
+            <button
+              type="button"
+              onClick={() => setMedio("registro")}
+              className={cn(
+                "rounded-[--radius-card] border px-3 py-2.5 text-[0.82rem] font-medium transition-colors",
+                medio === "registro"
+                  ? "lg-glass-accent text-accent-strong"
+                  : "border-line-strong text-muted hover:text-text",
+              )}
+            >
+              Solo registro · no afecta el cuadre
+            </button>
             <p className="text-[0.7rem] text-faint">
-              Transferencia entra al cuadre (tirilla); efectivo va a la caja (arqueo).
+              {medio === "registro"
+                ? "Queda como préstamo por cobrar, pero no entra ni a la tirilla ni a la caja del cuadre."
+                : "Transferencia entra al cuadre (tirilla); efectivo va a la caja (arqueo)."}
             </p>
           </div>
 
@@ -371,15 +387,17 @@ export function PrestamosDia({
                               type="button"
                               onClick={() => cambiarMedio(d)}
                               disabled={pending || bloqueado}
-                              title="Cambiar entre efectivo y transferencia"
+                              title="Cambiar: efectivo, transferencia o solo registro"
                               className={cn(
                                 "rounded-full border px-2.5 py-1 text-[0.68rem] font-medium transition-colors disabled:opacity-50",
                                 d.medio === "transferencia"
                                   ? "border-accent/30 bg-accent-soft text-accent-strong"
-                                  : "border-line-strong text-muted hover:text-text",
+                                  : d.medio === "registro"
+                                    ? "border-line-strong text-faint"
+                                    : "border-line-strong text-muted hover:text-text",
                               )}
                             >
-                              {d.medio === "transferencia" ? "Transf." : "Efectivo"}
+                              {d.medio === "transferencia" ? "Transf." : d.medio === "registro" ? "Solo reg." : "Efectivo"}
                             </button>
                             {saldado ? (
                               <>
