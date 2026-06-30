@@ -92,7 +92,7 @@ export default async function CuadrePage({
         nombre={profile?.nombre ?? ""}
         soportesCount={soportes.length}
         movCount={tot.cantidad}
-        prestamosCount={prestamos.length}
+        prestamosCount={prestamos.filter((d) => d.medio !== "registro").length}
         prestamosTransferDia={prestamosMedio.transferencia}
         prestamosEfectivoDia={prestamosMedio.efectivo}
         movTotales={{

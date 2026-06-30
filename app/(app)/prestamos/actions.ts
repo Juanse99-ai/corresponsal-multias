@@ -11,7 +11,7 @@ const deudaSchema = z.object({
   monto: z.number().int().positive(),
   concepto: z.string().max(60).nullable().optional(),
   descripcion: z.string().max(200).nullable().optional(),
-  medio: z.enum(["efectivo", "transferencia"]).optional(),
+  medio: z.enum(["efectivo", "transferencia", "registro"]).optional(),
   fecha: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/)
@@ -71,7 +71,7 @@ const prestamoDiaSchema = z.object({
   persona: z.string().trim().min(1).max(60),
   concepto: z.string().trim().max(60).nullable().optional(),
   monto: z.number().int().positive(),
-  medio: z.enum(["efectivo", "transferencia"]).optional(),
+  medio: z.enum(["efectivo", "transferencia", "registro"]).optional(),
   pagado: z.boolean().optional(),
 });
 
@@ -182,7 +182,7 @@ const editarDeudaSchema = z.object({
   persona: z.string().trim().min(1).max(60).optional(),
   concepto: z.string().trim().max(60).nullable().optional(),
   monto: z.number().int().positive().optional(),
-  medio: z.enum(["efectivo", "transferencia"]).optional(),
+  medio: z.enum(["efectivo", "transferencia", "registro"]).optional(),
 });
 
 export async function editarDeuda(raw: unknown): Promise<{ ok: boolean; error?: string }> {

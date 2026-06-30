@@ -308,7 +308,8 @@ export function prestamosPendientesPorMedio(rows: DeudaConSaldo[]): { transferen
   for (const d of rows) {
     if (d.saldo <= 0) continue;
     if (d.medio === "transferencia") transferencia += d.saldo;
-    else efectivo += d.saldo;
+    else if (d.medio === "efectivo") efectivo += d.saldo;
+    // "registro": solo queda como deuda por cobrar; no entra ni a tirilla ni a caja.
   }
   return { transferencia, efectivo };
 }
