@@ -3,6 +3,7 @@ import { hoyISO, formatFechaLarga } from "@/lib/format";
 import { getConsignacionesLuis, getCompensacionesLuis, getSaldoLuisAcumulado } from "@/lib/queries";
 import { LuisManager } from "@/components/luis/luis-manager";
 import { PageHeader } from "@/components/shell/page-header";
+import { DateNav } from "@/components/shell/date-nav";
 
 export const metadata: Metadata = { title: "Cupo de Luis · Corresponsal" };
 
@@ -24,7 +25,9 @@ export default async function LuisPage({
 
   return (
     <div>
-      <PageHeader title="Cupo de Luis" subtitle={formatFechaLarga(fecha)} />
+      <PageHeader title="Cupo de Luis" subtitle={formatFechaLarga(fecha)}>
+        <DateNav fecha={fecha} base="/luis" />
+      </PageHeader>
       <LuisManager
         fecha={fecha}
         acumuladoAyer={acumuladoAyer}
