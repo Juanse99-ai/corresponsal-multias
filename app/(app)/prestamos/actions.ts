@@ -10,7 +10,7 @@ const deudaSchema = z.object({
   persona: z.string().trim().min(1).max(60),
   monto: z.number().int().positive(),
   concepto: z.string().max(60).nullable().optional(),
-  descripcion: z.string().max(200).nullable().optional(),
+  descripcion: z.string().trim().min(1, "Escribe el motivo").max(200),
   medio: z.enum(["efectivo", "transferencia", "registro"]).optional(),
   fecha: z
     .string()
@@ -21,7 +21,7 @@ const deudaSchema = z.object({
 export async function crearDeuda(raw: unknown): Promise<{ ok: boolean; error?: string }> {
   const session = await requireSession();
   const p = deudaSchema.safeParse(raw);
-  if (!p.success) return { ok: false, error: "Revisa la persona y el monto." };
+  if (!p.success) return { ok: false, error: "Revisa la persona, el monto y el motivo." };
 
   const sb = await createClient();
   const { error } = await sb.from("corr_deudas").insert({
@@ -69,7 +69,7 @@ export async function agregarAbono(raw: unknown): Promise<{ ok: boolean; error?:
 const prestamoDiaSchema = z.object({
   fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   persona: z.string().trim().min(1).max(60),
-  concepto: z.string().trim().max(60).nullable().optional(),
+  concepto: z.string().trim().min(1, "Escribe el motivo").max(60),
   monto: z.number().int().positive(),
   medio: z.enum(["efectivo", "transferencia", "registro"]).optional(),
   pagado: z.boolean().optional(),
@@ -79,7 +79,7 @@ const prestamoDiaSchema = z.object({
 export async function registrarPrestamoDia(raw: unknown): Promise<{ ok: boolean; error?: string }> {
   const session = await requireSession();
   const p = prestamoDiaSchema.safeParse(raw);
-  if (!p.success) return { ok: false, error: "Revisa la persona y el monto." };
+  if (!p.success) return { ok: false, error: "Revisa la persona, el monto y el motivo." };
 
   if (session.rol !== "admin" && (await diaEstaCerrado(p.data.fecha))) {
     return { ok: false, error: "El día está cerrado. Solo Juan puede reabrirlo." };

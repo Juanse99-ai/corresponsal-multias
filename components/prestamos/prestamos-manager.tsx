@@ -148,13 +148,15 @@ function AddDeudaForm() {
   function registrar() {
     if (!personaFinal) return setMsg({ ok: false, text: "Indica la persona." });
     if (monto <= 0) return setMsg({ ok: false, text: "Ingresa un monto." });
+    if (concepto === "Otro" && !conceptoOtro.trim()) return setMsg({ ok: false, text: "Especifica el concepto." });
+    if (!descripcion.trim()) return setMsg({ ok: false, text: "Escribe el motivo (para qué fue el préstamo)." });
     setMsg(null);
     startTransition(async () => {
       const res = await crearDeuda({
         persona: personaFinal,
         monto,
         concepto: conceptoFinal || null,
-        descripcion: descripcion || null,
+        descripcion: descripcion.trim(),
         medio,
         fecha,
       });
@@ -277,8 +279,8 @@ function AddDeudaForm() {
 
         <div className="grid grid-cols-[1fr_auto] gap-3">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="deuda-desc">Descripción</Label>
-            <Input id="deuda-desc" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Motivo" onEnter={() => !pending && registrar()} />
+            <Label htmlFor="deuda-desc">Motivo · ¿para qué fue?</Label>
+            <Input id="deuda-desc" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Para qué fue el préstamo" onEnter={() => !pending && registrar()} />
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="deuda-fecha">Fecha</Label>
