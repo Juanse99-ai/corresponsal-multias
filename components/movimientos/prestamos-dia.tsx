@@ -67,12 +67,13 @@ export function PrestamosDia({
     const personaFinal = persona === "Otro" ? otro.trim() : persona;
     if (!personaFinal) return setError("Elige a quién es el préstamo.");
     if (monto <= 0) return setError("Ingresa un monto mayor a cero.");
+    if (!concepto.trim()) return setError("Escribe para qué fue el préstamo (motivo).");
     setError(null);
     startTransition(async () => {
       const res = await registrarPrestamoDia({
         fecha,
         persona: personaFinal,
-        concepto: concepto.trim() || null,
+        concepto: concepto.trim(),
         monto,
         medio,
         pagado,
@@ -139,12 +140,13 @@ export function PrestamosDia({
     const personaFinal = ePersona === "Otro" ? eOtro.trim() : ePersona;
     if (!personaFinal) return setError("Elige a quién es el préstamo.");
     if (eMonto <= 0) return setError("Ingresa un monto mayor a cero.");
+    if (!eConcepto.trim()) return setError("Escribe para qué fue el préstamo (motivo).");
     setError(null);
     startTransition(async () => {
       const res = await editarDeuda({
         id: editId,
         persona: personaFinal,
-        concepto: eConcepto.trim() || null,
+        concepto: eConcepto.trim(),
         monto: eMonto,
       });
       if (res.ok) {
@@ -206,7 +208,7 @@ export function PrestamosDia({
               )}
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="pr-concepto">Concepto</Label>
+              <Label htmlFor="pr-concepto">Motivo · ¿para qué fue?</Label>
               <Input
                 id="pr-concepto"
                 value={concepto}
