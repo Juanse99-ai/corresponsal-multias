@@ -6,13 +6,15 @@ const buttonVariants = cva(
   "relative inline-flex items-center justify-center overflow-hidden rounded-full font-medium whitespace-nowrap select-none transition-transform duration-200 ease-out active:scale-[0.97] disabled:opacity-45 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/45 focus-visible:ring-offset-2 focus-visible:ring-offset-bg",
   {
     variants: {
+      // El relleno de vidrio es claro en ambos temas: la tinta va con los tokens
+      // glass-ink (oscuros siempre) para no perder contraste en modo oscuro.
       variant: {
-        primary: "text-accent-strong",
-        accent: "text-accent-strong",
-        secondary: "text-text",
-        outline: "text-text",
-        ghost: "text-muted hover:text-text",
-        danger: "text-danger",
+        primary: "text-glass-ink-accent",
+        accent: "text-glass-ink-accent",
+        secondary: "text-glass-ink",
+        outline: "text-glass-ink",
+        ghost: "text-glass-ink-muted hover:text-glass-ink",
+        danger: "text-glass-ink-danger",
       },
       size: {
         sm: "h-9 px-4 text-sm",

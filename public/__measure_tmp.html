@@ -1,0 +1,53 @@
+<meta charset="utf-8">
+<style>
+  body { margin:0; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  .tnum { font-variant-numeric: tabular-nums; letter-spacing: 0; }
+  span { white-space: nowrap; }
+  .row { padding: 2px 0; }
+</style>
+<div id="probe"></div>
+<script>
+  const samples = [
+    ["headerName14", 'Barrio Centro Sabanalarga 18', 'font-size:14px;font-weight:600;letter-spacing:-0.025em;'],
+    ["menuBtnLabel", 'Menú', 'font-size:0.84rem;font-weight:500;'],
+    ["fechaLarga13", 'Miércoles, 23 de julio de 2026', 'font-size:0.82rem;'],
+    ["navMulti", 'Multidiagnósticos AS', 'font-size:0.7rem;'],
+    ["nav1.9Control", 'Control general', 'font-size:1.9rem;font-weight:600;letter-spacing:-0.025em;'],
+    ["nav1.9Cuadre", 'Cuadre diario', 'font-size:1.9rem;font-weight:600;letter-spacing:-0.025em;'],
+    ["nav1.9Movim", 'Movimientos', 'font-size:1.9rem;font-weight:600;letter-spacing:-0.025em;'],
+    ["nav1.9Cupo", 'Cupo de Luis', 'font-size:1.9rem;font-weight:600;letter-spacing:-0.025em;'],
+    ["nav1.9Prest", 'Préstamos', 'font-size:1.9rem;font-weight:600;letter-spacing:-0.025em;'],
+    ["nav1.9Hist", 'Historial', 'font-size:1.9rem;font-weight:600;letter-spacing:-0.025em;'],
+    ["resLabelCuadre", 'Cuadre de hoy', 'font-size:0.82rem;'],
+    ["resFaltan", 'Faltan', 'font-size:0.82rem;font-weight:600;'],
+    ["resMonto", '$14.161.000', 'font-size:0.82rem;font-weight:600;font-variant-numeric:tabular-nums;'],
+    ["resMontoBig", '$115.952.000', 'font-size:0.82rem;font-weight:600;font-variant-numeric:tabular-nums;'],
+    ["resPrestLabel", 'Préstamos pendientes', 'font-size:0.82rem;'],
+    ["resPrestVal", '$2.500.000', 'font-size:0.82rem;font-weight:600;font-variant-numeric:tabular-nums;'],
+    ["avisosRecordatorio", 'Recordatorio para cerrar el día', 'font-size:0.7rem;'],
+    ["avisosUnsupported", 'Instala la app para activarlos', 'font-size:0.72rem;'],
+    ["avisosDenied", 'Bloqueados en ajustes', 'font-size:0.72rem;'],
+    ["avisosBtnActivados", 'Activados', 'font-size:0.8rem;font-weight:500;'],
+    ["temaClaroOscuro", 'Claro u oscuro', 'font-size:0.7rem;'],
+    ["dateNavFecha", 'mié 23 jul', 'font-size:0.82rem;font-weight:500;'],
+    ["pageTitle24", 'Movimientos del día', 'font-size:24px;font-weight:600;letter-spacing:-0.025em;'],
+    ["pageTitlePrest", 'Préstamos / Deudas', 'font-size:24px;font-weight:600;letter-spacing:-0.025em;'],
+    ["pageSub14", 'Miércoles, 23 de julio de 2026', 'font-size:14px;'],
+    ["searchPh", 'Buscar día, persona…', 'font-size:0.82rem;'],
+    ["avisoTitle", 'Falta cerrar el día', 'font-size:0.85rem;font-weight:500;'],
+    ["avisoDetail", 'Sobran $14.161.000 por justificar.', 'font-size:0.76rem;'],
+    ["avisoDetailPrest", '$1.250.000 por cobrar al fondo.', 'font-size:0.76rem;'],
+  ];
+  const out = {};
+  const probe = document.getElementById('probe');
+  for (const [k, txt, css] of samples) {
+    const s = document.createElement('span');
+    s.style.cssText = css;
+    s.textContent = txt;
+    const d = document.createElement('div'); d.className='row'; d.appendChild(s);
+    probe.appendChild(d);
+    out[k] = Math.round(s.getBoundingClientRect().width * 10) / 10;
+  }
+  window.__M = out;
+  document.title = 'measured';
+</script>

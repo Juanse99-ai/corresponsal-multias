@@ -30,7 +30,7 @@ export function HistorialTabs({ cuadres, luis }: { cuadres: CuadreRow[]; luis: L
               onClick={() => setTab(t.id)}
               className={cn(
                 "relative flex items-center gap-2 rounded-full px-4 py-1.5 text-[0.82rem] font-medium transition-colors",
-                tab === t.id ? "text-text" : "text-faint hover:text-muted",
+                tab === t.id ? "text-glass-ink" : "text-faint hover:text-muted",
               )}
             >
               {tab === t.id && (

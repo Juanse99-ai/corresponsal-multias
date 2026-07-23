@@ -251,7 +251,7 @@ export function BitacoraView({ entries }: { entries: AuditEntry[] }) {
       {/* Filtros */}
       <Card className="flex flex-col gap-4 p-4 sm:p-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <div className="flex h-10 flex-1 items-center gap-2 rounded-[--radius-card] border border-line-strong bg-surface-2 px-3">
+          <div className="flex h-10 flex-1 items-center gap-2 rounded-card border border-line-strong bg-surface-2 px-3">
             <MagnifyingGlass size={16} className="shrink-0 text-faint" />
             <input
               value={q}
@@ -381,7 +381,7 @@ function Fila({ e, abierto, onToggle }: { e: AuditEntry; abierto: boolean; onTog
             transition={{ duration: 0.22, ease: "easeOut" }}
             className="overflow-hidden"
           >
-            <div className="mb-2 ml-[3rem] mr-2 rounded-[--radius-card] border border-line bg-surface-2/50 p-3">
+            <div className="mb-2 ml-[3rem] mr-2 rounded-card border border-line bg-surface-2/50 p-3">
               {cambios.length === 0 ? (
                 <p className="text-[0.78rem] text-faint">Sin detalle adicional.</p>
               ) : (
@@ -441,7 +441,7 @@ function Chip({ active, onClick, icon: Icono, children }: { active: boolean; onC
       onClick={onClick}
       className={cn(
         "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[0.8rem] font-medium transition-colors",
-        active ? "lg-glass-accent text-accent-strong" : "border-line-strong text-muted hover:text-text",
+        active ? "lg-glass-accent text-glass-ink-accent" : "border-line-strong text-muted hover:text-text",
       )}
     >
       {Icono && <Icono size={13} weight="bold" />}
@@ -462,7 +462,7 @@ function AccionChip({
   children: React.ReactNode;
 }) {
   const a = tipo === "todas" ? null : ACCION[tipo];
-  const activeCls = a ? cn(a.bg, a.color, "border-transparent") : "lg-glass-accent text-accent-strong";
+  const activeCls = a ? cn(a.bg, a.color, "border-transparent") : "lg-glass-accent text-glass-ink-accent";
   return (
     <button
       onClick={onClick}

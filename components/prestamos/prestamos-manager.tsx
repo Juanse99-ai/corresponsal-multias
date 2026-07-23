@@ -187,7 +187,7 @@ function AddDeudaForm() {
                 className={cn(
                   "rounded-full border px-3 py-1.5 text-[0.8rem] font-medium transition-colors",
                   persona === p
-                    ? "lg-glass-accent text-accent-strong"
+                    ? "lg-glass-accent text-glass-ink-accent"
                     : "border-line-strong text-muted hover:text-text",
                 )}
               >
@@ -216,7 +216,7 @@ function AddDeudaForm() {
                 className={cn(
                   "rounded-full border px-3 py-1.5 text-[0.8rem] font-medium transition-colors",
                   concepto === c
-                    ? "lg-glass-accent text-accent-strong"
+                    ? "lg-glass-accent text-glass-ink-accent"
                     : "border-line-strong text-muted hover:text-text",
                 )}
               >
@@ -248,9 +248,9 @@ function AddDeudaForm() {
                 type="button"
                 onClick={() => setMedio(m)}
                 className={cn(
-                  "flex-1 rounded-[--radius-card] border px-3 py-2 text-[0.8rem] font-medium transition-colors",
+                  "flex-1 rounded-card border px-3 py-2 text-[0.8rem] font-medium transition-colors",
                   medio === m
-                    ? "lg-glass-accent text-accent-strong"
+                    ? "lg-glass-accent text-glass-ink-accent"
                     : "border-line-strong text-muted hover:text-text",
                 )}
               >
@@ -262,9 +262,9 @@ function AddDeudaForm() {
             type="button"
             onClick={() => setMedio("registro")}
             className={cn(
-              "rounded-[--radius-card] border px-3 py-2 text-[0.8rem] font-medium transition-colors",
+              "rounded-card border px-3 py-2 text-[0.8rem] font-medium transition-colors",
               medio === "registro"
-                ? "lg-glass-accent text-accent-strong"
+                ? "lg-glass-accent text-glass-ink-accent"
                 : "border-line-strong text-muted hover:text-text",
             )}
           >
@@ -291,7 +291,7 @@ function AddDeudaForm() {
         {msg && (
           <div
             className={cn(
-              "flex items-center gap-2 rounded-[--radius-card] px-3.5 py-2.5 text-[0.82rem]",
+              "flex items-center gap-2 rounded-card px-3.5 py-2.5 text-[0.82rem]",
               msg.ok ? "border border-success/30 bg-success-soft text-success" : "border border-danger/30 bg-danger-soft text-danger",
             )}
           >

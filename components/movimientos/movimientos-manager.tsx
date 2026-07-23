@@ -145,7 +145,7 @@ export function MovimientosManager({
           <h2 className="text-[0.95rem] font-semibold tracking-tight text-text">Registrar movimiento</h2>
 
           {bloqueado && (
-            <div className="mt-4 flex items-center gap-2 rounded-[--radius-card] border border-line-strong bg-surface-2 px-3.5 py-2.5 text-[0.82rem] text-muted">
+            <div className="mt-4 flex items-center gap-2 rounded-card border border-line-strong bg-surface-2 px-3.5 py-2.5 text-[0.82rem] text-muted">
               <Lock size={15} weight="fill" className="text-accent" />
               Día cerrado. Solo Juan puede reabrirlo para editar.
             </div>
@@ -162,7 +162,7 @@ export function MovimientosManager({
                   className={cn(
                     "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[0.8rem] font-medium transition-colors",
                     active
-                      ? "lg-glass-accent text-accent-strong"
+                      ? "lg-glass-accent text-glass-ink-accent"
                       : "border-line-strong text-muted hover:text-text",
                   )}
                 >
@@ -191,7 +191,7 @@ export function MovimientosManager({
           </div>
 
           {error && (
-            <div className="mt-4 flex items-center gap-2 rounded-[--radius-card] border border-danger/30 bg-danger-soft px-3.5 py-2.5 text-[0.82rem] text-danger">
+            <div className="mt-4 flex items-center gap-2 rounded-card border border-danger/30 bg-danger-soft px-3.5 py-2.5 text-[0.82rem] text-danger">
               <Warning size={15} weight="fill" />
               {error}
             </div>
@@ -247,7 +247,7 @@ export function MovimientosManager({
                                   className={cn(
                                     "flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.74rem] font-medium transition-colors",
                                     eTipo === t
-                                      ? "lg-glass-accent text-accent-strong"
+                                      ? "lg-glass-accent text-glass-ink-accent"
                                       : "border-line-strong text-muted hover:text-text",
                                   )}
                                 >

@@ -171,7 +171,7 @@ export function PrestamosDia({
           </div>
 
           {bloqueado && (
-            <div className="mt-4 flex items-center gap-2 rounded-[--radius-card] border border-line-strong bg-surface-2 px-3.5 py-2.5 text-[0.82rem] text-muted">
+            <div className="mt-4 flex items-center gap-2 rounded-card border border-line-strong bg-surface-2 px-3.5 py-2.5 text-[0.82rem] text-muted">
               <Lock size={15} weight="fill" className="text-accent" />
               Día cerrado. Solo Juan puede reabrirlo.
             </div>
@@ -189,7 +189,7 @@ export function PrestamosDia({
                     className={cn(
                       "rounded-full border px-3 py-1.5 text-[0.8rem] font-medium transition-colors",
                       persona === p
-                        ? "lg-glass-accent text-accent-strong"
+                        ? "lg-glass-accent text-glass-ink-accent"
                         : "border-line-strong text-muted hover:text-text",
                     )}
                   >
@@ -227,7 +227,7 @@ export function PrestamosDia({
                 type="button"
                 onClick={() => setPagado((v) => !v)}
                 className={cn(
-                  "flex h-[2.75rem] items-center gap-2.5 rounded-[--radius-card] border px-3.5 text-[0.85rem] transition-colors",
+                  "flex h-[2.75rem] items-center gap-2.5 rounded-card border px-3.5 text-[0.85rem] transition-colors",
                   pagado
                     ? "border-success/40 bg-success-soft text-success"
                     : "border-line-strong text-muted hover:text-text",
@@ -255,9 +255,9 @@ export function PrestamosDia({
                   type="button"
                   onClick={() => setMedio(m)}
                   className={cn(
-                    "flex-1 rounded-[--radius-card] border px-3 py-2.5 text-[0.82rem] font-medium transition-colors",
+                    "flex-1 rounded-card border px-3 py-2.5 text-[0.82rem] font-medium transition-colors",
                     medio === m
-                      ? "lg-glass-accent text-accent-strong"
+                      ? "lg-glass-accent text-glass-ink-accent"
                       : "border-line-strong text-muted hover:text-text",
                   )}
                 >
@@ -269,9 +269,9 @@ export function PrestamosDia({
               type="button"
               onClick={() => setMedio("registro")}
               className={cn(
-                "rounded-[--radius-card] border px-3 py-2.5 text-[0.82rem] font-medium transition-colors",
+                "rounded-card border px-3 py-2.5 text-[0.82rem] font-medium transition-colors",
                 medio === "registro"
-                  ? "lg-glass-accent text-accent-strong"
+                  ? "lg-glass-accent text-glass-ink-accent"
                   : "border-line-strong text-muted hover:text-text",
               )}
             >
@@ -285,7 +285,7 @@ export function PrestamosDia({
           </div>
 
           {error && (
-            <div className="mt-4 flex items-center gap-2 rounded-[--radius-card] border border-danger/30 bg-danger-soft px-3.5 py-2.5 text-[0.82rem] text-danger">
+            <div className="mt-4 flex items-center gap-2 rounded-card border border-danger/30 bg-danger-soft px-3.5 py-2.5 text-[0.82rem] text-danger">
               <Warning size={15} weight="fill" />
               {error}
             </div>
@@ -339,7 +339,7 @@ export function PrestamosDia({
                                 className={cn(
                                   "rounded-full border px-2.5 py-1 text-[0.74rem] font-medium transition-colors",
                                   ePersona === p
-                                    ? "lg-glass-accent text-accent-strong"
+                                    ? "lg-glass-accent text-glass-ink-accent"
                                     : "border-line-strong text-muted hover:text-text",
                                 )}
                               >
