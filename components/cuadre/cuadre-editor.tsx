@@ -203,9 +203,29 @@ export function CuadreEditor({
   function onGuardar(nuevoEstado?: EstadoCuadre) {
     const estadoFinal = nuevoEstado ?? estado;
     setToast(null);
-    if (estadoFinal === "cerrado" && soportesCount === 0) {
-      setToast({ ok: false, msg: "Adjunta la tirilla del datáfono (abajo) antes de cerrar el día." });
-      return;
+    if (estadoFinal === "cerrado") {
+      if (soportesCount === 0) {
+        setToast({ ok: false, msg: "Adjunta la tirilla del datáfono (abajo) antes de cerrar el día." });
+        return;
+      }
+      const hayDescuadre = descuadre || Math.round(diferenciaCaja) !== 0;
+      if (hayDescuadre) {
+        // Exige explicación escrita (queda para Juan) y confirmación antes de cerrar descuadrado.
+        if (!nota.trim()) {
+          setToast({ ok: false, msg: "El día no cuadra. Escribe en la nota por qué, antes de cerrarlo." });
+          return;
+        }
+        const partes: string[] = [];
+        if (descuadre) partes.push(`saldo final ${formatCOP(saldo)}`);
+        if (Math.round(diferenciaCaja) !== 0)
+          partes.push(`la caja ${diferenciaCaja > 0 ? "sobra" : "falta"} ${formatCOP(Math.abs(diferenciaCaja))}`);
+        if (
+          !window.confirm(
+            `El día NO cuadra (${partes.join(" y ")}). ¿Cerrarlo así de todos modos? Después solo Juan podrá reabrirlo.`,
+          )
+        )
+          return;
+      }
     }
     startTransition(async () => {
       const res = await guardarCuadre({

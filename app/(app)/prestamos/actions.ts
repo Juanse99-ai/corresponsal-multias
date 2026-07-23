@@ -22,6 +22,9 @@ export async function crearDeuda(raw: unknown): Promise<{ ok: boolean; error?: s
   const session = await requireSession();
   const p = deudaSchema.safeParse(raw);
   if (!p.success) return { ok: false, error: "Revisa la persona, el monto y el motivo." };
+  if (p.data.fecha && session.rol !== "admin" && (await diaEstaCerrado(p.data.fecha))) {
+    return { ok: false, error: "Ese día está cerrado. Solo Juan puede registrar en un día cerrado." };
+  }
 
   const sb = await createClient();
   const { error } = await sb.from("corr_deudas").insert({
@@ -46,15 +49,36 @@ const abonoSchema = z.object({
   nota: z.string().max(200).nullable().optional(),
 });
 
+/** Saldo aún pendiente de una deuda (monto − suma de abonos), leído del servidor. */
+async function saldoDeuda(
+  sb: Awaited<ReturnType<typeof createClient>>,
+  deudaId: string,
+): Promise<{ fecha: string; monto: number; abonado: number; restante: number } | null> {
+  const { data: deuda } = await sb.from("corr_deudas").select("monto, fecha").eq("id", deudaId).maybeSingle();
+  if (!deuda) return null;
+  const { data: abonos } = await sb.from("corr_abonos").select("monto").eq("deuda_id", deudaId);
+  const abonado = (abonos ?? []).reduce((s, a) => s + a.monto, 0);
+  return { fecha: deuda.fecha, monto: deuda.monto, abonado, restante: Math.max(0, deuda.monto - abonado) };
+}
+
 export async function agregarAbono(raw: unknown): Promise<{ ok: boolean; error?: string }> {
   const session = await requireSession();
   const p = abonoSchema.safeParse(raw);
   if (!p.success) return { ok: false, error: "Ingresa un abono válido." };
 
   const sb = await createClient();
+  const info = await saldoDeuda(sb, p.data.deuda_id);
+  if (!info) return { ok: false, error: "El préstamo no existe." };
+  if (session.rol !== "admin" && (await diaEstaCerrado(info.fecha))) {
+    return { ok: false, error: "El día está cerrado. Solo Juan puede reabrirlo." };
+  }
+  // No permitir sobrepago (y de paso mata el doble-toque: el 2do envío ve restante 0).
+  if (info.restante <= 0) return { ok: false, error: "Este préstamo ya está pagado por completo." };
+  const monto = Math.min(p.data.monto, info.restante);
+
   const { error } = await sb.from("corr_abonos").insert({
     deuda_id: p.data.deuda_id,
-    monto: p.data.monto,
+    monto,
     nota: p.data.nota?.trim() || null,
     created_by: session.id,
   });
@@ -126,13 +150,17 @@ export async function marcarPrestamoPagado(raw: unknown): Promise<{ ok: boolean;
   if (!p.success) return { ok: false, error: "Datos inválidos." };
 
   const sb = await createClient();
-  const { data: dRow } = await sb.from("corr_deudas").select("fecha").eq("id", p.data.deuda_id).maybeSingle();
-  if (dRow?.fecha && session.rol !== "admin" && (await diaEstaCerrado(dRow.fecha))) {
+  const info = await saldoDeuda(sb, p.data.deuda_id);
+  if (!info) return { ok: false, error: "El préstamo no existe." };
+  if (session.rol !== "admin" && (await diaEstaCerrado(info.fecha))) {
     return { ok: false, error: "El día está cerrado. Solo Juan puede reabrirlo." };
   }
+  // Salda por el restante REAL del servidor (no por el monto del cliente): así el
+  // doble-toque no crea un segundo abono y nunca se sobrepaga.
+  if (info.restante <= 0) return { ok: false, error: "Este préstamo ya estaba pagado." };
   const { error } = await sb.from("corr_abonos").insert({
     deuda_id: p.data.deuda_id,
-    monto: p.data.monto,
+    monto: info.restante,
     nota: "Pago registrado desde Movimientos",
     created_by: session.id,
   });
@@ -145,7 +173,7 @@ export async function marcarPrestamoPagado(raw: unknown): Promise<{ ok: boolean;
   return { ok: true };
 }
 
-/** Deshace el pago de un préstamo: borra sus abonos y vuelve a quedar pendiente. */
+/** Deshace el ÚLTIMO pago de un préstamo (no borra todo el historial de abonos). */
 export async function reabrirPrestamo(id: string): Promise<{ ok: boolean; error?: string }> {
   const session = await requireSession();
   if (!z.string().uuid().safeParse(id).success) return { ok: false, error: "Datos inválidos." };
@@ -156,8 +184,20 @@ export async function reabrirPrestamo(id: string): Promise<{ ok: boolean; error?
     return { ok: false, error: "El día está cerrado. Solo Juan puede reabrirlo." };
   }
 
-  const { error } = await sb.from("corr_abonos").delete().eq("deuda_id", id);
+  // Solo el abono más reciente, para no perder pagos parciales legítimos.
+  const { data: ultimo } = await sb
+    .from("corr_abonos")
+    .select("id")
+    .eq("deuda_id", id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (!ultimo) return { ok: false, error: "Este préstamo no tiene pagos que deshacer." };
+
+  const { data: borrados, error } = await sb.from("corr_abonos").delete().eq("id", ultimo.id).select("id");
   if (error) return { ok: false, error: "No se pudo deshacer el pago." };
+  // Si RLS impide borrar (p.ej. operadora), delete no falla pero no borra nada.
+  if (!borrados || borrados.length === 0) return { ok: false, error: "No tienes permiso para deshacer este pago." };
 
   revalidatePath("/movimientos");
   revalidatePath("/prestamos");

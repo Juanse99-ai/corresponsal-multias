@@ -94,7 +94,11 @@ export function PrestamosDia({
 
   function pagar(d: DeudaConSaldo) {
     startTransition(async () => {
-      await marcarPrestamoPagado({ deuda_id: d.id, monto: d.saldo });
+      const res = await marcarPrestamoPagado({ deuda_id: d.id, monto: d.saldo });
+      if (res && !res.ok) {
+        setError(res.error ?? "No se pudo marcar como pagado.");
+        return;
+      }
       router.refresh();
     });
   }

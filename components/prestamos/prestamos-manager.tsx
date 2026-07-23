@@ -315,14 +315,20 @@ function DeudaCard({ deuda, isAdmin }: { deuda: DeudaConSaldo; isAdmin: boolean 
   const [abonoOpen, setAbonoOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [abono, setAbono] = useState(0);
+  const [err, setErr] = useState<string | null>(null);
 
   const pct = deuda.monto > 0 ? Math.min(100, (deuda.abonado / deuda.monto) * 100) : 0;
   const saldada = deuda.saldo <= 0;
 
   function abonar() {
     if (abono <= 0) return;
+    setErr(null);
     startTransition(async () => {
-      await agregarAbono({ deuda_id: deuda.id, monto: Math.min(abono, deuda.saldo), nota: null });
+      const res = await agregarAbono({ deuda_id: deuda.id, monto: Math.min(abono, deuda.saldo), nota: null });
+      if (res && !res.ok) {
+        setErr(res.error ?? "No se pudo registrar el abono.");
+        return;
+      }
       setAbono(0);
       setAbonoOpen(false);
       router.refresh();
@@ -337,9 +343,14 @@ function DeudaCard({ deuda, isAdmin }: { deuda: DeudaConSaldo; isAdmin: boolean 
   }
 
   function reabrir() {
-    if (!window.confirm("¿Deshacer el pago? El préstamo vuelve a quedar pendiente y se borran sus abonos.")) return;
+    if (!window.confirm("¿Deshacer el último pago? El préstamo vuelve a quedar pendiente.")) return;
+    setErr(null);
     startTransition(async () => {
-      await reabrirPrestamo(deuda.id);
+      const res = await reabrirPrestamo(deuda.id);
+      if (res && !res.ok) {
+        setErr(res.error ?? "No se pudo deshacer el pago.");
+        return;
+      }
       router.refresh();
     });
   }
@@ -424,6 +435,13 @@ function DeudaCard({ deuda, isAdmin }: { deuda: DeudaConSaldo; isAdmin: boolean 
             </motion.div>
           )}
         </AnimatePresence>
+
+        {err && (
+          <div className="mt-3 flex items-center gap-2 rounded-card border border-danger/30 bg-danger-soft px-3 py-2 text-[0.8rem] text-danger">
+            <Warning size={15} weight="fill" />
+            {err}
+          </div>
+        )}
 
         <AnimatePresence>
           {historyOpen && deuda.abonos.length > 0 && (
