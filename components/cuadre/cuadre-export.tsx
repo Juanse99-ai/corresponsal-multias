@@ -178,8 +178,8 @@ export function CuadreExport({
               </div>
             </div>
 
-            <div className="mt-3 flex items-center gap-2">
-              <Button onClick={descargar} disabled={busy} className="flex-1 text-white">
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <Button onClick={descargar} disabled={busy} className="basis-full text-white sm:flex-1 sm:basis-0">
                 <DownloadSimple size={17} weight="bold" />
                 {busy ? "Generando…" : "Descargar imagen"}
               </Button>

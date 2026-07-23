@@ -51,17 +51,17 @@ export function SaldoVivo({ saldo, descuadre }: { saldo: number; descuadre: bool
     <div
       ref={root}
       className={cn(
-        "flex items-center gap-3 transition-colors duration-500",
+        "flex min-w-0 items-center gap-3 transition-colors duration-500",
         descuadre ? "text-danger" : "text-success",
       )}
     >
       <span
         className={cn(
-          "sv-badge flex h-14 w-14 shrink-0 items-center justify-center rounded-full transition-colors duration-500",
+          "sv-badge flex h-12 w-12 shrink-0 sm:h-14 sm:w-14 items-center justify-center rounded-full transition-colors duration-500",
           descuadre ? "bg-danger-soft" : "bg-success-soft",
         )}
       >
-        <svg viewBox="0 0 24 24" className="h-7 w-7">
+        <svg viewBox="0 0 24 24" className="h-6 w-6 sm:h-7 sm:w-7">
           <path
             className="sv-glyph"
             d={CHECK}
@@ -73,7 +73,7 @@ export function SaldoVivo({ saldo, descuadre }: { saldo: number; descuadre: bool
           />
         </svg>
       </span>
-      <span ref={numRef} className="tnum text-4xl font-semibold tracking-tight">
+      <span ref={numRef} className="tnum min-w-0 flex-1 text-[1.75rem] leading-none font-semibold tracking-tight sm:text-4xl">
         {formatCOP(saldo)}
       </span>
     </div>

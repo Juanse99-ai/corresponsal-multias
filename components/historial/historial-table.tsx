@@ -86,7 +86,7 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
           </Button>
         </div>
 
-        <div className="grid grid-cols-3 divide-x divide-line border-t border-line pt-4">
+        <div className="grid grid-cols-1 divide-y divide-line border-t border-line pt-4 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
           <Stat label="Días" value={String(totales.dias)} />
           <Stat label="Descuadres" value={String(totales.descuadres)} tone={totales.descuadres > 0 ? "danger" : "success"} />
           <Stat label="Tirilla total" value={formatCOP(totales.tirilla)} mono />
@@ -167,11 +167,11 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
 
 function Stat({ label, value, tone, mono }: { label: string; value: string; tone?: "danger" | "success"; mono?: boolean }) {
   return (
-    <div className="px-4 first:pl-0">
+    <div className="px-0 py-2 first:pt-0 sm:px-4 sm:py-0 sm:first:pl-0">
       <p className="text-[0.72rem] text-faint">{label}</p>
       <p
         className={cn(
-          "mt-0.5 font-semibold text-text",
+          "mt-0.5 text-[0.95rem] font-semibold text-text sm:text-base",
           mono && "tnum",
           tone === "danger" && "text-danger",
           tone === "success" && "text-success",

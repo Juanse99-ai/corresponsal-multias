@@ -199,7 +199,7 @@ export function MovimientosManager({
 
           <Button onClick={registrar} disabled={pending || bloqueado} className="mt-5 w-full sm:w-auto">
             <Plus size={18} weight="bold" />
-            {pending ? "Registrando…" : `Registrar ${TIPOS[tipo].label.toLowerCase()}`}
+            {pending ? "Registrando…" : `Registrar ${TIPOS[tipo].corto.toLowerCase()}`}
           </Button>
         </Card>
 
@@ -284,24 +284,24 @@ export function MovimientosManager({
                         </div>
                       ) : (
                         <div className="flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-3">
+                          <div className="flex min-w-0 flex-1 items-center gap-3">
                             <div
                               className={cn(
-                                "flex h-9 w-9 items-center justify-center rounded-full",
+                                "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
                                 Ti.salida ? "bg-danger-soft text-danger" : "bg-accent-soft text-accent-strong",
                               )}
                             >
                               <Ti.icon size={15} weight="bold" />
                             </div>
-                            <div className="leading-tight">
+                            <div className="min-w-0 leading-tight">
                               <p className="tnum text-[0.92rem] font-medium text-text">{formatCOP(m.monto)}</p>
                               <p className="flex items-center gap-1.5 text-[0.7rem] text-faint">
-                                <span>{Ti.label}</span>
+                                <span className="truncate">{Ti.corto}</span>
                                 {m.hora && (
-                                  <>
+                                  <span className="inline-flex shrink-0 items-center gap-1">
                                     <Clock size={10} />
                                     {formatHora(m.hora)}
-                                  </>
+                                  </span>
                                 )}
                                 {m.convenio && <span className="truncate">· conv. {m.convenio}</span>}
                                 {m.cliente && <span className="truncate">· {m.cliente}</span>}
@@ -350,11 +350,11 @@ export function MovimientosManager({
               const Ti = TIPOS[t];
               return (
                 <div key={t} className="flex items-center justify-between py-2.5">
-                  <span className="flex items-center gap-2 text-sm text-muted">
-                    <Ti.icon size={15} className={Ti.salida ? "text-danger" : "text-accent"} />
-                    {Ti.label}
+                  <span className="flex min-w-0 items-center gap-2 text-sm text-muted">
+                    <Ti.icon size={15} className={cn("shrink-0", Ti.salida ? "text-danger" : "text-accent")} />
+                    <span className="truncate">{Ti.label}</span>
                   </span>
-                  <span className="tnum text-[0.92rem] font-semibold text-text">
+                  <span className="tnum shrink-0 text-[0.92rem] font-semibold text-text">
                     <AnimatedMoney value={totales[t]} />
                   </span>
                 </div>

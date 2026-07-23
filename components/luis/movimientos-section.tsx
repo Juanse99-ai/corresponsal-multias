@@ -196,19 +196,19 @@ export function MovimientosSection({
                   </div>
                 ) : (
                   <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-soft text-accent-strong">
+                    <div className="flex min-w-0 flex-1 items-center gap-2.5">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent-strong">
                         <Icon size={13} weight="bold" />
                       </div>
-                      <div className="leading-tight">
+                      <div className="min-w-0 leading-tight">
                         <p className="tnum text-[0.88rem] font-medium text-text">{formatCOP(c.monto)}</p>
                         {(c.hora || c.nota) && (
-                          <p className="flex items-center gap-1 text-[0.7rem] text-faint">
+                          <p className="flex min-w-0 items-center gap-1 text-[0.7rem] text-faint">
                             {c.hora && (
-                              <>
+                              <span className="flex shrink-0 items-center gap-1">
                                 <Clock size={10} />
                                 {formatHora(c.hora)}
-                              </>
+                              </span>
                             )}
                             {c.nota && <span className="truncate">· {c.nota}</span>}
                           </p>

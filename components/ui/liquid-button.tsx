@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
  * (sobre imágenes, cabeceras, overlays) donde quieras el efecto cristal.
  */
 const liquidButtonVariants = cva(
-  "relative inline-flex items-center justify-center overflow-hidden rounded-full font-medium whitespace-nowrap select-none transition-transform duration-200 ease-out active:scale-[0.97] disabled:opacity-45 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/45 focus-visible:ring-offset-2 focus-visible:ring-offset-bg",
+  "relative inline-flex min-w-fit items-center justify-center overflow-hidden rounded-full font-medium whitespace-nowrap select-none transition-transform duration-200 ease-out active:scale-[0.97] disabled:opacity-45 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/45 focus-visible:ring-offset-2 focus-visible:ring-offset-bg",
   {
     variants: {
       tone: {

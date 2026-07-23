@@ -279,7 +279,7 @@ function DistribucionCard({ distribucion, tirilla }: { distribucion: { label: st
           <p className="text-[0.82rem] text-muted">Abre el cuadre de hoy para ver la distribución.</p>
         </div>
       ) : (
-        <div className="mt-5 flex items-center gap-5">
+        <div className="mt-5 flex items-center gap-4 sm:gap-5">
           <div className="relative h-32 w-32 shrink-0">
             <div className="h-full w-full rounded-full" style={{ background }} />
             <div className="absolute inset-[18px] flex flex-col items-center justify-center rounded-full bg-surface">
@@ -287,12 +287,12 @@ function DistribucionCard({ distribucion, tirilla }: { distribucion: { label: st
               <span className="tnum text-sm font-semibold text-text">{formatCompactCOP(tirilla)}</span>
             </div>
           </div>
-          <div className="flex flex-1 flex-col gap-2">
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
             {legend.map((l) => (
               <div key={l.label} className="flex items-center gap-2 text-[0.78rem]">
                 <span className="h-2.5 w-2.5 shrink-0 rounded-[3px]" style={{ background: l.color }} />
-                <span className="flex-1 text-muted">{l.label}</span>
-                <span className="tnum font-medium text-text">{l.pct}</span>
+                <span className="min-w-0 flex-1 truncate text-muted">{l.label}</span>
+                <span className="tnum shrink-0 font-medium text-text">{l.pct}</span>
               </div>
             ))}
           </div>

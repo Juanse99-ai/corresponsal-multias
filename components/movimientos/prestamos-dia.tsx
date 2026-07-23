@@ -364,8 +364,8 @@ export function PrestamosDia({
                           </div>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="flex min-w-0 items-center gap-3">
+                        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+                          <div className="flex min-w-0 flex-1 items-center gap-3">
                             <div
                               className={cn(
                                 "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
@@ -384,14 +384,14 @@ export function PrestamosDia({
                               </p>
                             </div>
                           </div>
-                          <div className="flex shrink-0 items-center gap-2">
+                          <div className="flex w-full shrink-0 flex-wrap items-center justify-end gap-2 sm:w-auto">
                             <button
                               type="button"
                               onClick={() => cambiarMedio(d)}
                               disabled={pending || bloqueado}
                               title="Cambiar: efectivo, transferencia o solo registro"
                               className={cn(
-                                "rounded-full border px-2.5 py-1 text-[0.68rem] font-medium transition-colors disabled:opacity-50",
+                                "shrink-0 whitespace-nowrap rounded-full border px-2.5 py-1 text-[0.68rem] font-medium transition-colors disabled:opacity-50",
                                 d.medio === "transferencia"
                                   ? "border-accent/30 bg-accent-soft text-accent-strong"
                                   : d.medio === "registro"
@@ -425,7 +425,7 @@ export function PrestamosDia({
                                 <button
                                   onClick={() => pagar(d)}
                                   disabled={pending || bloqueado}
-                                  className="rounded-full border border-success/30 bg-success-soft px-2.5 py-1 text-[0.72rem] font-medium text-success transition-colors hover:bg-success/15 disabled:opacity-40"
+                                  className="shrink-0 whitespace-nowrap rounded-full border border-success/30 bg-success-soft px-2.5 py-1 text-[0.72rem] font-medium text-success transition-colors hover:bg-success/15 disabled:opacity-40"
                                 >
                                   Marcar devuelto
                                 </button>
