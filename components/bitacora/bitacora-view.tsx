@@ -260,14 +260,14 @@ export function BitacoraView({ entries }: { entries: AuditEntry[] }) {
               className="w-full bg-transparent text-sm text-text placeholder:text-faint focus:outline-none"
             />
           </div>
-          <div className="flex items-end gap-2">
+          <div className="flex flex-wrap items-end gap-2">
             <Campo label="Desde">
-              <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="h-10 w-[8.8rem]" />
+              <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="h-10 w-full min-w-0 sm:w-[8.8rem]" />
             </Campo>
             <Campo label="Hasta">
-              <Input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} className="h-10 w-[8.8rem]" />
+              <Input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} className="h-10 w-full min-w-0 sm:w-[8.8rem]" />
             </Campo>
-            <Button variant="secondary" size="sm" onClick={exportar} disabled={filtrados.length === 0} className="h-10">
+            <Button variant="secondary" size="sm" onClick={exportar} disabled={filtrados.length === 0} className="h-10 shrink-0">
               <DownloadSimple size={16} weight="bold" />
               Excel
             </Button>
@@ -381,18 +381,18 @@ function Fila({ e, abierto, onToggle }: { e: AuditEntry; abierto: boolean; onTog
             transition={{ duration: 0.22, ease: "easeOut" }}
             className="overflow-hidden"
           >
-            <div className="mb-2 ml-[3rem] mr-2 rounded-card border border-line bg-surface-2/50 p-3">
+            <div className="mb-2 ml-10 mr-2 rounded-card border border-line bg-surface-2/50 p-3 sm:ml-[3rem]">
               {cambios.length === 0 ? (
                 <p className="text-[0.78rem] text-faint">Sin detalle adicional.</p>
               ) : (
                 <div className="flex flex-col divide-y divide-line/70">
                   {cambios.map((c) => (
-                    <div key={c.campo} className="flex items-center justify-between gap-3 py-1.5 text-[0.78rem]">
-                      <span className="text-muted">{CAMPO[c.campo] ?? c.campo}</span>
+                    <div key={c.campo} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-1.5 text-[0.78rem]">
+                      <span className="shrink-0 text-muted">{CAMPO[c.campo] ?? c.campo}</span>
                       {c.valor != null ? (
-                        <span className="tnum text-text">{c.valor}</span>
+                        <span className="tnum min-w-0 break-words text-right text-text">{c.valor}</span>
                       ) : (
-                        <span className="flex items-center gap-1.5">
+                        <span className="flex min-w-0 flex-wrap items-center justify-end gap-1.5">
                           <span className="tnum text-faint line-through">{c.antes}</span>
                           <ArrowRight size={11} className="text-faint" />
                           <span className="tnum font-medium text-text">{c.despues}</span>
@@ -428,7 +428,7 @@ function Stat({ label, value, tone }: { label: string; value: number; tone?: "su
 
 function Campo({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-none">
       <label className="text-[0.72rem] text-faint">{label}</label>
       {children}
     </div>

@@ -129,8 +129,8 @@ export function ReporteLuisButton({
               </div>
             </div>
 
-            <div className="mt-3 flex items-center gap-2">
-              <Button onClick={descargar} disabled={busy} className="flex-1 text-white">
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <Button onClick={descargar} disabled={busy} className="basis-full text-white sm:flex-1 sm:basis-0">
                 <DownloadSimple size={17} weight="bold" />
                 {busy ? "Generando…" : "Descargar imagen"}
               </Button>
@@ -175,7 +175,7 @@ function ColumnaReporte({
   const vacio = !leading && items.length === 0;
   return (
     <div className={borde ? "border-r border-zinc-200" : ""}>
-      <div className="bg-[#f6e3d2] px-3 py-2 text-center text-[0.74rem] font-bold tracking-tight text-zinc-800">
+      <div className="bg-[#f6e3d2] px-2 py-2 text-center text-[0.74rem] font-bold tracking-tight text-zinc-800 sm:px-3">
         {titulo}
       </div>
       <div className="min-h-[80px] divide-y divide-zinc-100">
@@ -184,18 +184,18 @@ function ColumnaReporte({
         ) : (
           <>
             {leading && (
-              <div className="flex items-center justify-between gap-2 px-3 py-1.5 text-[0.8rem]">
-                <span className="font-medium text-zinc-500">{leading.label}</span>
-                <span className="font-medium tabular-nums text-zinc-800">{formatCOP(leading.monto)}</span>
+              <div className="flex items-center justify-between gap-1.5 px-2 py-1.5 text-[0.8rem] sm:px-3">
+                <span className="shrink-0 font-medium text-zinc-500">{leading.label}</span>
+                <span className="shrink-0 font-medium tabular-nums whitespace-nowrap text-zinc-800">{formatCOP(leading.monto)}</span>
               </div>
             )}
             {items.map((c) => (
               <div
                 key={c.id}
-                className="flex items-center justify-between gap-2 px-3 py-1.5 text-[0.8rem]"
+                className="flex items-center justify-between gap-1.5 px-2 py-1.5 text-[0.8rem] sm:px-3"
               >
-                <span className="tabular-nums text-zinc-400">{c.hora ? formatHora(c.hora) : ""}</span>
-                <span className="font-medium tabular-nums text-zinc-800">{formatCOP(c.monto)}</span>
+                <span className="shrink-0 tabular-nums text-zinc-400">{c.hora ? formatHora(c.hora) : ""}</span>
+                <span className="shrink-0 font-medium tabular-nums whitespace-nowrap text-zinc-800">{formatCOP(c.monto)}</span>
               </div>
             ))}
           </>

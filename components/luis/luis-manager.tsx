@@ -70,7 +70,7 @@ export function LuisManager({
         </div>
 
         {/* Resumen del día */}
-        <div className="relative mt-6 grid grid-cols-3 divide-x divide-line border-t border-line pt-4">
+        <div className="relative mt-6 grid grid-cols-1 divide-y divide-line sm:grid-cols-3 sm:divide-x sm:divide-y-0 border-t border-line pt-4">
           <DiaStat label="Cupo de hoy" value={totalComp} />
           <DiaStat label="Consignaciones" value={totalConsig} />
           <DiaStat label="Movimiento del día" value={saldoDia} signed />
@@ -108,9 +108,9 @@ export function LuisManager({
 
 function DiaStat({ label, value, signed }: { label: string; value: number; signed?: boolean }) {
   return (
-    <div className="px-4 first:pl-0">
+    <div className="px-0 py-2 sm:px-4 sm:py-0 sm:first:pl-0">
       <p className="text-[0.7rem] uppercase tracking-wide text-faint">{label}</p>
-      <p className={cn("mt-1 text-lg font-semibold tracking-tight tnum", signed && value !== 0 ? (value > 0 ? "text-accent-strong" : "text-success") : "text-text")}>
+      <p className={cn("mt-1 text-base sm:text-lg font-semibold tracking-tight tnum", signed && value !== 0 ? (value > 0 ? "text-accent-strong" : "text-success") : "text-text")}>
         {formatCOP(value)}
       </p>
     </div>

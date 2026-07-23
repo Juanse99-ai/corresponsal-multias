@@ -125,9 +125,9 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
           <Input id="mov-nota" value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Referencia…" onEnter={() => !pending && registrar()} />
         </div>
 
-        <label className="flex cursor-pointer items-center gap-2 self-start rounded-card border border-line-strong bg-surface-2 px-3.5 py-2 text-[0.82rem] text-muted transition-colors hover:text-text">
-          <Paperclip size={15} />
-          {file ? file.name : "Adjuntar anexo (foto o PDF)"}
+        <label className="flex max-w-full cursor-pointer items-center gap-2 self-start rounded-card border border-line-strong bg-surface-2 px-3.5 py-2 text-[0.82rem] text-muted transition-colors hover:text-text">
+          <Paperclip size={15} className="shrink-0" />
+          <span className="min-w-0 truncate">{file ? file.name : "Adjuntar anexo (foto o PDF)"}</span>
           <input
             ref={inputRef}
             type="file"
@@ -162,7 +162,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
                 exit={{ opacity: 0, height: 0 }}
                 className="flex items-center justify-between gap-3 py-2.5"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex min-w-0 flex-1 items-center gap-3">
                   <div
                     className={cn(
                       "flex h-8 w-8 items-center justify-center rounded-full",
@@ -171,15 +171,15 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
                   >
                     {m.tipo === "compensacion" ? <ArrowUp size={14} weight="bold" /> : <ArrowDown size={14} weight="bold" />}
                   </div>
-                  <div className="leading-tight">
+                  <div className="min-w-0 leading-tight">
                     <p className="tnum text-[0.9rem] font-medium text-text">{formatCOP(m.monto)}</p>
-                    <p className="flex items-center gap-1.5 text-[0.7rem] text-faint">
-                      <span className="capitalize">{m.tipo}</span> · {formatFecha(m.fecha)}
-                      {m.nota && <span className="truncate">· {m.nota}</span>}
+                    <p className="flex min-w-0 items-center gap-1.5 text-[0.7rem] text-faint">
+                      <span className="shrink-0"><span className="capitalize">{m.tipo}</span> · {formatFecha(m.fecha)}</span>
+                      {m.nota && <span className="min-w-0 truncate">· {m.nota}</span>}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex shrink-0 items-center gap-1">
                   {m.url && (
                     <a
                       href={m.url}

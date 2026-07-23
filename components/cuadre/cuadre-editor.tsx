@@ -237,11 +237,11 @@ export function CuadreEditor({
     <div className="grid gap-5 lg:grid-cols-[1fr_400px] lg:items-start">
       {/* ====== Columna de captura ====== */}
       <Card className="p-5 sm:p-6">
-        <div className="mb-5 flex items-center justify-between">
-          <div>
-            <h2 className="text-[0.95rem] font-semibold tracking-tight text-text">Movimientos del día</h2>
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+          <div className="min-w-0">
+            <h2 className="truncate text-[0.95rem] font-semibold tracking-tight text-text">Movimientos del día</h2>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <CuadreExport
               fecha={fecha}
               lineas={lineas}
@@ -292,18 +292,18 @@ export function CuadreEditor({
           href="/luis"
           className="group mt-4 flex items-center justify-between rounded-[1rem] border border-line bg-surface-2 p-4 transition-colors hover:border-line-strong"
         >
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-soft text-accent-strong">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent-strong">
               <Wallet size={18} weight="fill" />
             </div>
-            <div className="leading-tight">
+            <div className="min-w-0 leading-tight">
               <p className="text-[0.82rem] font-medium text-text">Sr. Luis</p>
-              <p className="text-[0.72rem] text-faint">
+              <p className="truncate text-[0.72rem] text-faint">
                 {consignacionesCount} consignación{consignacionesCount === 1 ? "" : "es"} · toca para registrar
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2 pl-2">
             <span className="tnum text-base font-semibold text-text">{formatCOP(srLuis)}</span>
             <ArrowUpRight size={16} className="text-faint transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </div>
@@ -395,11 +395,11 @@ export function CuadreEditor({
           {/* Diferencia destacada: que se note de una si la caja cuadra o no. */}
           <div
             className={cn(
-              "mt-3 flex items-center justify-between gap-3 rounded-[1rem] border px-4 py-3.5 transition-colors",
+              "mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-[1rem] border px-4 py-3.5 transition-colors",
               diferenciaCaja === 0 ? "border-success/35 bg-success-soft" : "border-danger/50 bg-danger-soft",
             )}
           >
-            <div className="flex items-center gap-2.5">
+            <div className="flex min-w-0 flex-1 items-center gap-2.5">
               <span
                 className={cn(
                   "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
@@ -412,7 +412,7 @@ export function CuadreEditor({
                   <Warning size={20} weight="fill" />
                 )}
               </span>
-              <div className="leading-tight">
+              <div className="min-w-0 leading-tight">
                 <p
                   className={cn(
                     "text-[0.92rem] font-semibold",
@@ -434,7 +434,7 @@ export function CuadreEditor({
             </div>
             <span
               className={cn(
-                "tnum shrink-0 text-xl font-bold tracking-tight",
+                "tnum shrink-0 text-lg font-bold tracking-tight sm:text-xl",
                 diferenciaCaja === 0 ? "text-success" : "text-danger",
               )}
             >

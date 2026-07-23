@@ -3,7 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "relative inline-flex items-center justify-center overflow-hidden rounded-full font-medium whitespace-nowrap select-none transition-transform duration-200 ease-out active:scale-[0.97] disabled:opacity-45 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/45 focus-visible:ring-offset-2 focus-visible:ring-offset-bg",
+  "relative inline-flex min-w-fit items-center justify-center overflow-hidden rounded-full font-medium whitespace-nowrap select-none transition-transform duration-200 ease-out active:scale-[0.97] disabled:opacity-45 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/45 focus-visible:ring-offset-2 focus-visible:ring-offset-bg",
   {
     variants: {
       // El relleno de vidrio es claro en ambos temas: la tinta va con los tokens
