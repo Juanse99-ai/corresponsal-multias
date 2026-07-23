@@ -77,6 +77,7 @@ export function SoportesSection({
   }
 
   function borrar(id: string) {
+    if (!window.confirm("¿Borrar este soporte? Sin la tirilla adjunta no podrás cerrar el día.")) return;
     startTransition(async () => {
       await eliminarSoporte(id);
       router.refresh();

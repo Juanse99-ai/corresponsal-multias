@@ -71,7 +71,9 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
     });
   }
 
-  function borrar(id: string) {
+  function borrar(id: string, montoMov: number) {
+    if (!window.confirm(`¿Borrar este movimiento propio de ${formatCOP(montoMov)}? Cambia el saldo total del control general.`))
+      return;
     startTransition(async () => {
       await eliminarMovPropio(id);
       router.refresh();
@@ -192,7 +194,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
                     </a>
                   )}
                   <button
-                    onClick={() => borrar(m.id)}
+                    onClick={() => borrar(m.id, m.monto)}
                     disabled={pending}
                     className="flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger"
                   >

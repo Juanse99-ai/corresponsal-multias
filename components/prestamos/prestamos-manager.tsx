@@ -336,8 +336,19 @@ function DeudaCard({ deuda, isAdmin }: { deuda: DeudaConSaldo; isAdmin: boolean 
   }
 
   function borrar() {
+    if (
+      !window.confirm(
+        `¿Borrar el préstamo de ${deuda.persona} por ${formatCOP(deuda.monto)}? Se elimina junto con todos sus abonos. No se puede deshacer.`,
+      )
+    )
+      return;
+    setErr(null);
     startTransition(async () => {
-      await eliminarDeuda(deuda.id);
+      const res = await eliminarDeuda(deuda.id);
+      if (res && !res.ok) {
+        setErr(res.error ?? "No se pudo borrar el préstamo.");
+        return;
+      }
       router.refresh();
     });
   }
