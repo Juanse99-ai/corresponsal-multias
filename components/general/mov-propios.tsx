@@ -94,7 +94,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
               onClick={() => setTipo(t)}
               className={cn(
                 "relative flex-1 rounded-full py-2 text-[0.8rem] font-medium capitalize transition-colors",
-                tipo === t ? "text-text" : "text-faint hover:text-muted",
+                tipo === t ? "text-glass-ink" : "text-faint hover:text-muted",
               )}
             >
               {tipo === t && (
@@ -125,7 +125,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
           <Input id="mov-nota" value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Referencia…" onEnter={() => !pending && registrar()} />
         </div>
 
-        <label className="flex cursor-pointer items-center gap-2 self-start rounded-[--radius-card] border border-line-strong bg-surface-2 px-3.5 py-2 text-[0.82rem] text-muted transition-colors hover:text-text">
+        <label className="flex cursor-pointer items-center gap-2 self-start rounded-card border border-line-strong bg-surface-2 px-3.5 py-2 text-[0.82rem] text-muted transition-colors hover:text-text">
           <Paperclip size={15} />
           {file ? file.name : "Adjuntar anexo (foto o PDF)"}
           <input
@@ -138,7 +138,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
         </label>
 
         {error && (
-          <div className="flex items-center gap-2 rounded-[--radius-card] border border-danger/30 bg-danger-soft px-3.5 py-2.5 text-[0.82rem] text-danger">
+          <div className="flex items-center gap-2 rounded-card border border-danger/30 bg-danger-soft px-3.5 py-2.5 text-[0.82rem] text-danger">
             <Warning size={15} weight="fill" />
             {error}
           </div>

@@ -50,6 +50,16 @@
   --radius: 0.9rem;
   /* Fuente única tipo iOS: SF Pro vía la pila del sistema de Apple. */
   --font-ios: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
+
+  /* Tinta para texto SOBRE vidrio (.lg-glass* / .lg-liquid*). El vidrio es claro
+     en ambos temas, así que su texto debe ser oscuro SIEMPRE: por eso estos
+     tokens NO se redefinen en .dark. Sin esto, en oscuro el texto se aclara y
+     queda ilegible sobre la píldora clara (contraste ~1.2:1). */
+  --glass-ink: oklch(0.30 0.032 258);
+  --glass-ink-muted: oklch(0.44 0.03 258);
+  --glass-ink-accent: oklch(0.42 0.18 258);
+  --glass-ink-danger: oklch(0.50 0.2 25);
+
   color-scheme: light;
 }
 
@@ -123,6 +133,11 @@
   --font-mono: var(--font-ios);
 
   --radius-card: var(--radius);
+
+  --color-glass-ink: var(--glass-ink);
+  --color-glass-ink-muted: var(--glass-ink-muted);
+  --color-glass-ink-accent: var(--glass-ink-accent);
+  --color-glass-ink-danger: var(--glass-ink-danger);
 }
 
 * {

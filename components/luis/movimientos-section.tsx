@@ -143,7 +143,7 @@ export function MovimientosSection({
       </div>
 
       {error && (
-        <div className="mt-3 flex items-center gap-2 rounded-[--radius-card] border border-danger/30 bg-danger-soft px-3 py-2 text-[0.8rem] text-danger">
+        <div className="mt-3 flex items-center gap-2 rounded-card border border-danger/30 bg-danger-soft px-3 py-2 text-[0.8rem] text-danger">
           <Warning size={15} weight="fill" />
           {error}
         </div>

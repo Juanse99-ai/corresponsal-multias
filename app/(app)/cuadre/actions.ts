@@ -50,10 +50,18 @@ export async function guardarCuadre(raw: unknown): Promise<GuardarCuadreResult> 
 
   // sr_luis autoritativo: suma de consignaciones de Luis de ese dia.
   // saldo de Luis = compensaciones - consignaciones (se arrastra como compensado).
-  const [{ data: cons }, { data: comp }] = await Promise.all([
+  const [{ data: cons, error: eCons }, { data: comp, error: eComp }] = await Promise.all([
     sb.from("corr_consignaciones_luis").select("monto").eq("fecha", v.fecha),
     sb.from("corr_compensaciones_luis").select("monto").eq("fecha", v.fecha),
   ]);
+  // NUNCA guardar un cuadre con componentes que no se pudieron verificar: si la
+  // lectura falla, sr_luis quedaría en 0 y se persistiría un saldo final falso.
+  if (eCons || eComp) {
+    return {
+      ok: false,
+      error: "No se pudieron leer las consignaciones de Luis. No se guardó nada. Intenta de nuevo.",
+    };
+  }
   const sr_luis = (cons ?? []).reduce((s, r) => s + r.monto, 0);
   const compensacion_total = (comp ?? []).reduce((s, r) => s + r.monto, 0);
 

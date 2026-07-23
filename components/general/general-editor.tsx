@@ -151,7 +151,7 @@ export function GeneralEditor({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 className={cn(
-                  "flex items-center gap-2 rounded-[--radius-card] px-3.5 py-2.5 text-[0.82rem]",
+                  "flex items-center gap-2 rounded-card px-3.5 py-2.5 text-[0.82rem]",
                   toast.ok
                     ? "border border-success/30 bg-success-soft text-success"
                     : "border border-danger/30 bg-danger-soft text-danger",
@@ -194,7 +194,7 @@ function CampoSigned({
     <div className="flex flex-col gap-2">
       <Label htmlFor={id}>{label}</Label>
       <div className="flex gap-2">
-        <div className="flex rounded-[--radius-card] border border-line-strong bg-surface-2 p-0.5">
+        <div className="flex rounded-card border border-line-strong bg-surface-2 p-0.5">
           <button
             type="button"
             onClick={() => onChange(magnitud)}

@@ -62,13 +62,20 @@ export function formatFechaLarga(iso: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-/** Fecha de hoy en ISO (zona local del navegador/servidor). */
+/**
+ * Fecha de hoy en ISO, SIEMPRE en hora de Colombia (America/Bogota).
+ * No usa la zona del proceso: en Vercel el servidor corre en UTC y entre las
+ * 7pm y medianoche de Bogotá devolvía el día siguiente, haciendo que el cuadre
+ * y los movimientos se guardaran en el día equivocado.
+ */
 export function hoyISO(): string {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
+  // "en-CA" formatea como YYYY-MM-DD.
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Bogota",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
 }
 
 /** Suma/resta días a una fecha ISO devolviendo ISO. */

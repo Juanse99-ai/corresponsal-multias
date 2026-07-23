@@ -268,7 +268,7 @@ export function CuadreEditor({
         </div>
 
         {locked && (
-          <div className="mb-4 flex items-center gap-2 rounded-[--radius-card] border border-line-strong bg-surface-2 px-3.5 py-2.5 text-[0.82rem] text-muted">
+          <div className="mb-4 flex items-center gap-2 rounded-card border border-line-strong bg-surface-2 px-3.5 py-2.5 text-[0.82rem] text-muted">
             <Lock size={15} weight="fill" className="text-accent" />
             Día cerrado. Solo Juan puede reabrirlo para editar.
           </div>
@@ -316,7 +316,7 @@ export function CuadreEditor({
               ripple(e);
               traerDeMovimientos();
             }}
-            className="relative mt-4 flex w-full items-center justify-between overflow-hidden rounded-[--radius-card] border border-accent/25 bg-accent-soft/40 px-4 py-2.5 text-[0.82rem] transition-colors hover:bg-accent-soft"
+            className="relative mt-4 flex w-full items-center justify-between overflow-hidden rounded-card border border-accent/25 bg-accent-soft/40 px-4 py-2.5 text-[0.82rem] transition-colors hover:bg-accent-soft"
           >
             <span className="flex items-center gap-2 text-muted">
               <ArrowClockwise size={14} className="text-accent" />
@@ -484,7 +484,7 @@ export function CuadreEditor({
         {/* Estado + guardar */}
         <Card className="flex flex-col gap-3 p-5">
           {locked ? (
-            <div className="flex items-center gap-2 rounded-[--radius-card] border border-line-strong bg-surface-2 px-3.5 py-3 text-[0.82rem] text-muted">
+            <div className="flex items-center gap-2 rounded-card border border-line-strong bg-surface-2 px-3.5 py-3 text-[0.82rem] text-muted">
               <Lock size={16} weight="fill" className="text-accent" />
               Día cerrado. Solo Juan puede reabrirlo.
             </div>
@@ -497,7 +497,7 @@ export function CuadreEditor({
                     onClick={() => setEstado(e)}
                     className={cn(
                       "relative flex-1 rounded-full py-2 text-[0.8rem] font-medium capitalize transition-colors",
-                      estado === e ? "text-text" : "text-faint hover:text-muted",
+                      estado === e ? "text-glass-ink" : "text-faint hover:text-muted",
                     )}
                   >
                     {estado === e && (
@@ -539,7 +539,7 @@ export function CuadreEditor({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
                 className={cn(
-                  "flex items-center gap-2 rounded-[--radius-card] px-3.5 py-2.5 text-[0.82rem]",
+                  "flex items-center gap-2 rounded-card px-3.5 py-2.5 text-[0.82rem]",
                   toast.ok
                     ? "border border-success/30 bg-success-soft text-success"
                     : "border border-danger/30 bg-danger-soft text-danger",
