@@ -4,7 +4,7 @@ import type { Database } from "@/lib/database.types";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/config";
 
 // /api/cron se protege con su propio secreto (CRON_SECRET), no con sesión.
-const PUBLIC_PATHS = ["/login", "/auth", "/api/cron"];
+const PUBLIC_PATHS = ["/login", "/auth", "/api/cron", "/sin-acceso"];
 
 /** Refresca la sesion y protege rutas. Se invoca desde proxy.ts. */
 export async function updateSession(request: NextRequest) {

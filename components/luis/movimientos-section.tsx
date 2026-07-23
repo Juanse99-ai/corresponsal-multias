@@ -82,9 +82,19 @@ export function MovimientosSection({
     });
   }
 
-  function borrar(id: string) {
+  function borrar(c: MovimientoItem) {
+    if (
+      !window.confirm(
+        `¿Borrar este movimiento de ${formatCOP(c.monto)}? Cambia el saldo de Luis y el cuadre del día.`,
+      )
+    )
+      return;
     startTransition(async () => {
-      await eliminar(id);
+      const res = await eliminar(c.id);
+      if (res && !res.ok) {
+        setError(res.error ?? "No se pudo eliminar.");
+        return;
+      }
       router.refresh();
     });
   }
@@ -219,15 +229,15 @@ export function MovimientosSection({
                       <button
                         onClick={() => abrirEdicion(c)}
                         disabled={pending}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg text-faint transition-colors hover:bg-accent-soft hover:text-accent-strong disabled:opacity-40"
+                        className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-accent-soft hover:text-accent-strong disabled:opacity-40"
                         title="Editar"
                       >
                         <PencilSimple size={14} />
                       </button>
                       <button
-                        onClick={() => borrar(c.id)}
+                        onClick={() => borrar(c)}
                         disabled={pending}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
+                        className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
                         title="Eliminar"
                       >
                         <Trash size={14} />

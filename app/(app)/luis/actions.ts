@@ -4,6 +4,14 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireSession } from "@/lib/auth";
+import { diaEstaCerrado } from "@/lib/queries";
+
+const CERRADO = "El día está cerrado. Solo Juan puede reabrirlo para editar.";
+
+/** True si un operador intenta tocar un día ya cerrado (el admin sí puede). */
+async function diaBloqueado(rol: string, fecha: string): Promise<boolean> {
+  return rol !== "admin" && (await diaEstaCerrado(fecha));
+}
 
 const addSchema = z.object({
   fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -20,6 +28,7 @@ export async function agregarConsignacion(raw: unknown): Promise<{ ok: boolean; 
   const session = await requireSession();
   const p = addSchema.safeParse(raw);
   if (!p.success) return { ok: false, error: "Ingresa un monto válido." };
+  if (await diaBloqueado(session.rol, p.data.fecha)) return { ok: false, error: CERRADO };
 
   const sb = await createClient();
   const { error } = await sb.from("corr_consignaciones_luis").insert({
@@ -38,8 +47,10 @@ export async function agregarConsignacion(raw: unknown): Promise<{ ok: boolean; 
 }
 
 export async function eliminarConsignacion(id: string): Promise<{ ok: boolean; error?: string }> {
-  await requireSession();
+  const session = await requireSession();
   const sb = await createClient();
+  const { data: row } = await sb.from("corr_consignaciones_luis").select("fecha").eq("id", id).maybeSingle();
+  if (row?.fecha && (await diaBloqueado(session.rol, row.fecha))) return { ok: false, error: CERRADO };
   const { error } = await sb.from("corr_consignaciones_luis").delete().eq("id", id);
   if (error) return { ok: false, error: "No se pudo eliminar." };
 
@@ -53,6 +64,7 @@ export async function agregarCompensacion(raw: unknown): Promise<{ ok: boolean; 
   const session = await requireSession();
   const p = addSchema.safeParse(raw);
   if (!p.success) return { ok: false, error: "Ingresa un monto válido." };
+  if (await diaBloqueado(session.rol, p.data.fecha)) return { ok: false, error: CERRADO };
 
   const sb = await createClient();
   const { error } = await sb.from("corr_compensaciones_luis").insert({
@@ -71,8 +83,10 @@ export async function agregarCompensacion(raw: unknown): Promise<{ ok: boolean; 
 }
 
 export async function eliminarCompensacion(id: string): Promise<{ ok: boolean; error?: string }> {
-  await requireSession();
+  const session = await requireSession();
   const sb = await createClient();
+  const { data: row } = await sb.from("corr_compensaciones_luis").select("fecha").eq("id", id).maybeSingle();
+  if (row?.fecha && (await diaBloqueado(session.rol, row.fecha))) return { ok: false, error: CERRADO };
   const { error } = await sb.from("corr_compensaciones_luis").delete().eq("id", id);
   if (error) return { ok: false, error: "No se pudo eliminar." };
 
@@ -102,15 +116,21 @@ function patchLuis(p: z.infer<typeof editLuisSchema>): { monto?: number; hora?: 
   return patch;
 }
 
-export async function editarConsignacion(raw: unknown): Promise<{ ok: boolean; error?: string }> {
-  await requireSession();
+async function editarLuis(
+  tabla: "corr_consignaciones_luis" | "corr_compensaciones_luis",
+  raw: unknown,
+): Promise<{ ok: boolean; error?: string }> {
+  const session = await requireSession();
   const p = editLuisSchema.safeParse(raw);
   if (!p.success) return { ok: false, error: "Datos inválidos." };
   const patch = patchLuis(p.data);
   if (Object.keys(patch).length === 0) return { ok: true };
 
   const sb = await createClient();
-  const { error } = await sb.from("corr_consignaciones_luis").update(patch).eq("id", p.data.id);
+  const { data: row } = await sb.from(tabla).select("fecha").eq("id", p.data.id).maybeSingle();
+  if (row?.fecha && (await diaBloqueado(session.rol, row.fecha))) return { ok: false, error: CERRADO };
+
+  const { error } = await sb.from(tabla).update(patch).eq("id", p.data.id);
   if (error) return { ok: false, error: "No se pudo editar." };
 
   revalidatePath("/luis");
@@ -119,19 +139,10 @@ export async function editarConsignacion(raw: unknown): Promise<{ ok: boolean; e
   return { ok: true };
 }
 
+export async function editarConsignacion(raw: unknown): Promise<{ ok: boolean; error?: string }> {
+  return editarLuis("corr_consignaciones_luis", raw);
+}
+
 export async function editarCompensacion(raw: unknown): Promise<{ ok: boolean; error?: string }> {
-  await requireSession();
-  const p = editLuisSchema.safeParse(raw);
-  if (!p.success) return { ok: false, error: "Datos inválidos." };
-  const patch = patchLuis(p.data);
-  if (Object.keys(patch).length === 0) return { ok: true };
-
-  const sb = await createClient();
-  const { error } = await sb.from("corr_compensaciones_luis").update(patch).eq("id", p.data.id);
-  if (error) return { ok: false, error: "No se pudo editar." };
-
-  revalidatePath("/luis");
-  revalidatePath("/cuadre");
-  revalidatePath("/panel");
-  return { ok: true };
+  return editarLuis("corr_compensaciones_luis", raw);
 }
