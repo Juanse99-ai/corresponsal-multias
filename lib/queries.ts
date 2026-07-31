@@ -372,21 +372,7 @@ export async function getAuditLog(limit = 250): Promise<AuditEntry[]> {
   }));
 }
 
-export interface PersonaSaldo {
-  persona: string;
-  saldo: number;
-  total: number;
-  abonado: number;
-}
-
-export function agruparPorPersona(deudas: DeudaConSaldo[]): PersonaSaldo[] {
-  const map = new Map<string, PersonaSaldo>();
-  for (const d of deudas) {
-    const cur = map.get(d.persona) ?? { persona: d.persona, saldo: 0, total: 0, abonado: 0 };
-    cur.saldo += d.saldo;
-    cur.total += d.monto;
-    cur.abonado += d.abonado;
-    map.set(d.persona, cur);
-  }
-  return [...map.values()].sort((a, b) => b.saldo - a.saldo);
-}
+// Agrupación por persona: lógica pura en lib/prestamos.ts (se reexporta aquí para
+// no romper los imports existentes desde "@/lib/queries").
+export type { PersonaSaldo, PersonaGrupo } from "@/lib/prestamos";
+export { agruparDeudasPorPersona, agruparPorPersona } from "@/lib/prestamos";
