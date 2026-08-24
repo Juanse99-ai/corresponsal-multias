@@ -8,7 +8,6 @@ import {
   Trash,
   HandCoins,
   CaretDown,
-  Warning,
   CheckCircle,
   ArrowCounterClockwise,
 } from "@phosphor-icons/react/dist/ssr";
@@ -20,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { MoneyInput } from "@/components/ui/money-input";
 import { AnimatedMoney } from "@/components/ui/animated-number";
 import { cn } from "@/lib/utils";
+import { ErrorNotice } from "@/components/ui/error-notice";
 import { formatCOP, formatFecha, hoyISO } from "@/lib/format";
 import { PERSONAS_PRESET } from "@/lib/personas";
 import type { DeudaConSaldo, PersonaGrupo } from "@/lib/queries";
@@ -271,16 +271,13 @@ function AddDeudaForm() {
           </div>
         </div>
 
-        {msg && (
-          <div
-            className={cn(
-              "flex items-center gap-2 rounded-card px-3.5 py-2.5 text-[0.82rem]",
-              msg.ok ? "border border-success/30 bg-success-soft text-success" : "border border-danger/30 bg-danger-soft text-danger",
-            )}
-          >
-            {msg.ok ? <CheckCircle size={15} weight="fill" /> : <Warning size={15} weight="fill" />}
+        {msg?.ok ? (
+          <div className="flex items-center gap-2 rounded-card border border-success/30 bg-success-soft px-3.5 py-2.5 text-[0.82rem] text-success">
+            <CheckCircle size={15} weight="fill" />
             {msg.text}
           </div>
+        ) : (
+          <ErrorNotice message={msg?.text ?? null} />
         )}
 
         <Button onClick={registrar} disabled={pending}>
@@ -533,12 +530,7 @@ function DeudaRow({ deuda, isAdmin }: { deuda: DeudaConSaldo; isAdmin: boolean }
           )}
         </AnimatePresence>
 
-        {err && (
-          <div className="mt-3 flex items-center gap-2 rounded-card border border-danger/30 bg-danger-soft px-3 py-2 text-[0.8rem] text-danger">
-            <Warning size={15} weight="fill" />
-            {err}
-          </div>
-        )}
+        <ErrorNotice message={err} className="mt-3" />
 
         <AnimatePresence>
           {historyOpen && deuda.abonos.length > 0 && (

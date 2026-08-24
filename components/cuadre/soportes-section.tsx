@@ -8,13 +8,11 @@ import {
   Trash,
   FilePdf,
   Receipt,
-  UploadSimple,
-  Warning,
-  ArrowSquareOut,
-} from "@phosphor-icons/react/dist/ssr";
+  UploadSimple,ArrowSquareOut } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { ErrorNotice } from "@/components/ui/error-notice";
 import { createClient } from "@/lib/supabase/client";
 import type { SoporteConUrl } from "@/lib/queries";
 import { registrarSoporte, eliminarSoporte } from "@/app/(app)/cuadre/actions";
@@ -32,8 +30,7 @@ export function SoportesSection({
   soportes,
   contexto = "cuadre",
   titulo = "Soportes del día",
-  texto = "Sube la tirilla del datáfono",
-}: {
+  texto = "Sube la tirilla del datáfono" }: {
   fecha: string;
   soportes: SoporteConUrl[];
   contexto?: string;
@@ -69,8 +66,7 @@ export function SoportesSection({
         contexto,
         nombre: file.name,
         mime: file.type || null,
-        tamano: file.size,
-      });
+        tamano: file.size });
     }
     setSubiendo(false);
     router.refresh();
@@ -128,12 +124,7 @@ export function SoportesSection({
         <p className="text-[0.74rem] text-faint">Arrastra o toca · foto o PDF · hasta 10 MB</p>
       </label>
 
-      {error && (
-        <div className="mt-3 flex items-center gap-2 rounded-card border border-danger/30 bg-danger-soft px-3.5 py-2.5 text-[0.82rem] text-danger">
-          <Warning size={15} weight="fill" />
-          {error}
-        </div>
-      )}
+      <ErrorNotice message={error} className="mt-3" />
 
       {soportes.length > 0 && (
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">

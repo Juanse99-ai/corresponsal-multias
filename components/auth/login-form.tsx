@@ -1,11 +1,12 @@
 "use client";
 
 import { useActionState } from "react";
-import { ArrowRight, Warning } from "@phosphor-icons/react/dist/ssr";
+import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { signInAction, type LoginState } from "@/app/login/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
+import { ErrorNotice } from "@/components/ui/error-notice";
 
 const initial: LoginState = { error: null };
 
@@ -37,12 +38,7 @@ export function LoginForm() {
         />
       </Field>
 
-      {state.error && (
-        <div className="flex items-center gap-2 rounded-card border border-danger/30 bg-danger-soft px-3.5 py-2.5 text-[0.82rem] text-danger">
-          <Warning size={16} weight="fill" className="shrink-0" />
-          {state.error}
-        </div>
-      )}
+      <ErrorNotice message={state.error} />
 
       <Button type="submit" size="lg" disabled={pending} className="mt-1 w-full">
         {pending ? "Entrando…" : "Entrar"}
