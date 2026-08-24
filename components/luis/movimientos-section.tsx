@@ -3,14 +3,14 @@
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Trash, PencilSimple, Clock, Warning, ArrowDown, Receipt } from "@phosphor-icons/react/dist/ssr";
+import { Plus, Trash, PencilSimple, Clock,ArrowDown, Receipt } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/field";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { MoneyInput } from "@/components/ui/money-input";
 import { AnimatedMoney } from "@/components/ui/animated-number";
+import { ErrorNotice } from "@/components/ui/error-notice";
 import { formatCOP, formatHora } from "@/lib/format";
 import { reduced } from "@/components/fx/reduced";
 
@@ -35,8 +35,7 @@ export function MovimientosSection({
   tono,
   agregar,
   eliminar,
-  editar,
-}: {
+  editar }: {
   fecha: string;
   items: MovimientoItem[];
   titulo: string;
@@ -152,12 +151,7 @@ export function MovimientosSection({
         <Input id={`nota-${tono}`} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Referencia…" onEnter={() => !pending && registrar()} />
       </div>
 
-      {error && (
-        <div className="mt-3 flex items-center gap-2 rounded-card border border-danger/30 bg-danger-soft px-3 py-2 text-[0.8rem] text-danger">
-          <Warning size={15} weight="fill" />
-          {error}
-        </div>
-      )}
+      <ErrorNotice message={error} className="mt-3" />
 
       <Button onClick={registrar} disabled={pending} size="sm" className="mt-4 self-start">
         <Plus size={16} weight="bold" />

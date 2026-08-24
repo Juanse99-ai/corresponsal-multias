@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { HandCoins, Plus, Trash, PencilSimple, Check, Clock, Warning, CheckCircle, Lock, ArrowCounterClockwise } from "@phosphor-icons/react/dist/ssr";
+import { HandCoins, Plus, Trash, PencilSimple, Check, Clock,CheckCircle, Lock, ArrowCounterClockwise } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { MoneyInput } from "@/components/ui/money-input";
 import { AnimatedMoney } from "@/components/ui/animated-number";
 import { cn } from "@/lib/utils";
+import { ErrorNotice } from "@/components/ui/error-notice";
 import { formatCOP, formatHoraISO } from "@/lib/format";
 import { PERSONAS_PRESET } from "@/lib/personas";
 import type { DeudaConSaldo } from "@/lib/queries";
@@ -22,8 +23,7 @@ export function PrestamosDia({
   fecha,
   prestamos,
   isAdmin,
-  bloqueado,
-}: {
+  bloqueado }: {
   fecha: string;
   prestamos: DeudaConSaldo[];
   isAdmin: boolean;
@@ -76,8 +76,7 @@ export function PrestamosDia({
         concepto: concepto.trim(),
         monto,
         medio,
-        pagado,
-      });
+        pagado });
       if (res.ok) {
         setPersona("");
         setOtro("");
@@ -151,8 +150,7 @@ export function PrestamosDia({
         id: editId,
         persona: personaFinal,
         concepto: eConcepto.trim(),
-        monto: eMonto,
-      });
+        monto: eMonto });
       if (res.ok) {
         setEditId(null);
         router.refresh();
@@ -288,12 +286,7 @@ export function PrestamosDia({
             </p>
           </div>
 
-          {error && (
-            <div className="mt-4 flex items-center gap-2 rounded-card border border-danger/30 bg-danger-soft px-3.5 py-2.5 text-[0.82rem] text-danger">
-              <Warning size={15} weight="fill" />
-              {error}
-            </div>
-          )}
+          <ErrorNotice message={error} className="mt-4" />
 
           <Button onClick={registrar} disabled={pending || bloqueado} className="mt-5 w-full sm:w-auto">
             <Plus size={18} weight="bold" />

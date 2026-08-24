@@ -13,11 +13,8 @@ import {
   ArrowUp,
   DeviceMobile,
   Bank,
-  Receipt,
-  Warning,
-  ArrowRight,
-  Lock,
-} from "@phosphor-icons/react/dist/ssr";
+  Receipt,ArrowRight,
+  Lock } from "@phosphor-icons/react/dist/ssr";
 import type { Icon } from "@phosphor-icons/react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { MoneyInput } from "@/components/ui/money-input";
 import { AnimatedMoney } from "@/components/ui/animated-number";
 import { cn } from "@/lib/utils";
+import { ErrorNotice } from "@/components/ui/error-notice";
 import { formatCOP, formatHora } from "@/lib/format";
 import type { MovimientoRow } from "@/lib/database.types";
 import { agregarMovimiento, eliminarMovimiento, editarMovimiento } from "@/app/(app)/movimientos/actions";
@@ -37,8 +35,7 @@ const TIPOS: Record<Tipo, { label: string; corto: string; icon: Icon; salida: bo
   consignacion_nequi: { label: "Consignación a Nequi", corto: "a Nequi", icon: DeviceMobile, salida: false },
   consignacion_bancolombia: { label: "Consignación a Bancolombia", corto: "a Bancolombia", icon: Bank, salida: false },
   recaudo: { label: "Recaudo", corto: "Recaudo", icon: Receipt, salida: false },
-  retiro: { label: "Retiro", corto: "Retiro", icon: ArrowUp, salida: true },
-};
+  retiro: { label: "Retiro", corto: "Retiro", icon: ArrowUp, salida: true } };
 
 function horaActual(): string {
   const d = new Date();
@@ -49,8 +46,7 @@ export function MovimientosManager({
   fecha,
   movimientos,
   bloqueado,
-  isAdmin,
-}: {
+  isAdmin }: {
   fecha: string;
   movimientos: MovimientoRow[];
   bloqueado?: boolean;
@@ -126,8 +122,7 @@ export function MovimientosManager({
         tipo: eTipo,
         monto: eMonto,
         cliente: eCliente.trim() || null,
-        convenio: eTipo === "recaudo" ? eConvenio.trim() || null : null,
-      });
+        convenio: eTipo === "recaudo" ? eConvenio.trim() || null : null });
       if (res.ok) {
         setEditId(null);
         router.refresh();
@@ -190,12 +185,7 @@ export function MovimientosManager({
             </div>
           </div>
 
-          {error && (
-            <div className="mt-4 flex items-center gap-2 rounded-card border border-danger/30 bg-danger-soft px-3.5 py-2.5 text-[0.82rem] text-danger">
-              <Warning size={15} weight="fill" />
-              {error}
-            </div>
-          )}
+          <ErrorNotice message={error} className="mt-4" />
 
           <Button onClick={registrar} disabled={pending || bloqueado} className="mt-5 w-full sm:w-auto">
             <Plus size={18} weight="bold" />

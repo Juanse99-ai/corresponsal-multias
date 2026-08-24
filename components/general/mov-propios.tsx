@@ -9,17 +9,14 @@ import {
   Paperclip,
   ArrowsLeftRight,
   ArrowDown,
-  ArrowUp,
-  Warning,
-  ArrowSquareOut,
-} from "@phosphor-icons/react/dist/ssr";
+  ArrowUp,ArrowSquareOut } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { MoneyInput } from "@/components/ui/money-input";
 import { cn } from "@/lib/utils";
+import { ErrorNotice } from "@/components/ui/error-notice";
 import { formatCOP, formatFecha, hoyISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
 import type { MovPropioConUrl } from "@/lib/queries";
@@ -139,12 +136,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
           />
         </label>
 
-        {error && (
-          <div className="flex items-center gap-2 rounded-card border border-danger/30 bg-danger-soft px-3.5 py-2.5 text-[0.82rem] text-danger">
-            <Warning size={15} weight="fill" />
-            {error}
-          </div>
-        )}
+        <ErrorNotice message={error} />
 
         <Button onClick={registrar} disabled={pending} size="sm" className="self-start">
           <Plus size={16} weight="bold" />
