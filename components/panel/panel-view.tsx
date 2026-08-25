@@ -69,7 +69,7 @@ export function PanelView({ data }: { data: PanelData }) {
           <Link href="/cuadre" className="group block h-full">
             <Card
               className={cn(
-                "relative h-full overflow-hidden p-6 transition-colors",
+                "relative h-full overflow-hidden p-6 transition-colors sm:p-7",
                 data.cuadreHoy ? (descuadreHoy ? "border-danger/40" : "border-success/40") : "hover:border-line-strong",
               )}
             >
@@ -95,7 +95,7 @@ export function PanelView({ data }: { data: PanelData }) {
                       <p className="text-[0.74rem] uppercase tracking-wide text-faint">Saldo final</p>
                       <p
                         className={cn(
-                          "mt-1 text-4xl font-semibold tracking-tight",
+                          "mt-1 text-4xl font-semibold tracking-tight sm:text-5xl",
                           descuadreHoy ? "text-danger" : "text-success",
                         )}
                       >
@@ -129,12 +129,13 @@ export function PanelView({ data }: { data: PanelData }) {
                 </div>
                 <div className="mt-8">
                   <p className="text-[0.74rem] uppercase tracking-wide text-faint">Consignado hoy</p>
-                  <p className="mt-1 text-4xl font-semibold tracking-tight text-text">
+                  <p className="mt-1 text-3xl font-semibold tracking-tight text-text sm:text-4xl">
                     <AnimatedMoney value={data.srLuisHoy} />
                   </p>
                   <p className="mt-2 text-[0.82rem] text-muted">
-                    {data.consignacionesHoyCount} consignación{data.consignacionesHoyCount === 1 ? "" : "es"} · saldo
-                    de Luis <span className="tnum text-text">{formatCOP(data.saldoLuisAcumulado)}</span>
+                    {data.consignacionesHoyCount}{" "}
+                    {data.consignacionesHoyCount === 1 ? "consignación" : "consignaciones"} · saldo de Luis{" "}
+                    <span className="tnum text-text">{formatCOP(data.saldoLuisAcumulado)}</span>
                   </p>
                 </div>
                 <div className="mt-auto flex items-center gap-1.5 pt-6 text-[0.82rem] font-medium text-accent-strong">
@@ -201,9 +202,9 @@ export function PanelView({ data }: { data: PanelData }) {
         </motion.div>
       </div>
 
-      {/* Fila terciaria: últimos cierres a lo ancho */}
+      {/* Fila terciaria: últimos cierres a lo ancho (más compacta que las de arriba) */}
       <motion.div variants={item}>
-        <Card className="p-6">
+        <Card className="p-5 sm:p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-muted">
               <TrendUp size={18} weight="fill" className="text-accent" />
@@ -233,22 +234,24 @@ export function PanelView({ data }: { data: PanelData }) {
 }
 
 function DistribucionCard({ distribucion, tirilla }: { distribucion: { label: string; value: number }[]; tirilla: number }) {
+  // Rampa de un solo tono (el azul de la casa) por claridad: la torta muestra
+  // composición, no estado. Solo "Retiros" va en rojo porque es plata que sale.
   const SEG: Record<string, string> = {
-    "Sr. Luis": "oklch(0.515 0.172 258)",
-    Efectivo: "oklch(0.62 0.13 250)",
-    Nequis: "oklch(0.585 0.13 155)",
-    Bancolombia: "oklch(0.72 0.13 70)",
-    "Préstamos": "oklch(0.55 0.2 300)",
-    Compensado: "oklch(0.55 0.07 258)",
+    "Sr. Luis": "oklch(0.4 0.19 258)",
+    Efectivo: "oklch(0.515 0.172 258)",
+    Nequis: "oklch(0.62 0.14 258)",
+    Bancolombia: "oklch(0.72 0.1 258)",
+    "Préstamos": "oklch(0.8 0.06 258)",
+    Compensado: "oklch(0.62 0.04 258)",
     Retiros: "oklch(0.545 0.2 25)",
   };
   const activos = distribucion.filter((s) => s.value > 0);
   const total = activos.reduce((a, b) => a + b.value, 0);
 
-  let background = "oklch(0.93 0.006 255)";
+  let background = "var(--surface-2)";
   let legend: { label: string; pct: string; color: string }[] = distribucion
     .slice(0, 5)
-    .map((s) => ({ label: s.label, pct: "—", color: "oklch(0.88 0.008 255)" }));
+    .map((s) => ({ label: s.label, pct: "—", color: "var(--line)" }));
   if (total > 0) {
     let acc = 0;
     const stops: string[] = [];
