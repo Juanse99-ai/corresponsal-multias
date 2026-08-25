@@ -76,3 +76,34 @@ export function agruparPorPersona(deudas: DeudaConSaldo[]): PersonaSaldo[] {
     abonado,
   }));
 }
+
+/**
+ * Igual que agruparPorPersona pero sobre filas ya agregadas en SQL
+ * ({persona, monto, abonado}), sin bajar los abonos: unifica nombres y suma.
+ */
+export function resumenPorPersona(rows: { persona: string; monto: number; abonado: number }[]): PersonaSaldo[] {
+  const grupos = new Map<string, PersonaSaldo>();
+  const variantes = new Map<string, Map<string, number>>();
+
+  for (const r of rows) {
+    const nombre = r.persona.trim() || "Sin nombre";
+    const key = claveNombre(nombre) || "sin nombre";
+    const g = grupos.get(key) ?? { persona: nombre, saldo: 0, total: 0, abonado: 0 };
+    g.saldo += Math.max(0, r.monto - r.abonado);
+    g.total += r.monto;
+    g.abonado += r.abonado;
+    grupos.set(key, g);
+
+    const v = variantes.get(key) ?? new Map<string, number>();
+    v.set(nombre, (v.get(nombre) ?? 0) + 1);
+    variantes.set(key, v);
+  }
+
+  for (const [key, g] of grupos) {
+    const usados = [...(variantes.get(key) ?? new Map<string, number>())];
+    usados.sort((a, b) => b[1] - a[1] || b[0].length - a[0].length);
+    if (usados[0]) g.persona = usados[0][0];
+  }
+
+  return [...grupos.values()].sort((a, b) => b.saldo - a.saldo || a.persona.localeCompare(b.persona, "es"));
+}

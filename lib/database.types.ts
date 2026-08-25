@@ -109,6 +109,19 @@ export type Database = {
       corr_my_role: { Args: Record<string, never>; Returns: string };
       corr_cron_targets: { Args: { p_secret: string }; Returns: Json };
       corr_cron_delete_sub: { Args: { p_secret: string; p_endpoint: string }; Returns: undefined };
+      corr_header_resumen: {
+        Args: Record<string, never>;
+        Returns: { prestamos_total: number; prestamos_count: number; personas: string[] };
+      };
+      corr_saldo_luis: { Args: { p_hasta: string; p_incluir: boolean }; Returns: number };
+      corr_luis_historial: {
+        Args: Record<string, never>;
+        Returns: { fecha: string; consignaciones: number; compensaciones: number }[];
+      };
+      corr_deudas_saldos: {
+        Args: Record<string, never>;
+        Returns: { persona: string; monto: number; abonado: number }[];
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
