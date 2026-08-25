@@ -93,13 +93,10 @@ export async function getSaldoLuisDia(fecha: string): Promise<number> {
  * incluir=false => acumulado hasta el dia anterior (lo que se arrastra).
  */
 export async function getSaldoLuisAcumulado(hasta: string, incluir: boolean): Promise<number> {
+  // Agregado en SQL (RPC): antes bajaba todas las filas y sumaba en JS.
   const sb = await createClient();
-  const op = incluir ? "lte" : "lt";
-  const [{ data: comp }, { data: cons }] = await Promise.all([
-    sb.from("corr_compensaciones_luis").select("monto").filter("fecha", op, hasta),
-    sb.from("corr_consignaciones_luis").select("monto").filter("fecha", op, hasta),
-  ]);
-  return sumMontos(comp ?? []) - sumMontos(cons ?? []);
+  const { data } = await sb.rpc("corr_saldo_luis", { p_hasta: hasta, p_incluir: incluir });
+  return Number(data ?? 0);
 }
 
 export interface LuisHistDia {
@@ -112,30 +109,17 @@ export interface LuisHistDia {
 
 /** Historial de Luis por dia: consig/comp/saldo del dia + acumulado a favor. Mas reciente primero. */
 export async function listLuisHistorial(): Promise<LuisHistDia[]> {
+  // Agrupado por día en SQL (RPC): antes bajaba todas las filas de ambas tablas.
   const sb = await createClient();
-  const [{ data: cons }, { data: comp }] = await Promise.all([
-    sb.from("corr_consignaciones_luis").select("fecha, monto"),
-    sb.from("corr_compensaciones_luis").select("fecha, monto"),
-  ]);
-  const map = new Map<string, { consig: number; comp: number }>();
-  for (const r of cons ?? []) {
-    const e = map.get(r.fecha) ?? { consig: 0, comp: 0 };
-    e.consig += r.monto;
-    map.set(r.fecha, e);
-  }
-  for (const r of comp ?? []) {
-    const e = map.get(r.fecha) ?? { consig: 0, comp: 0 };
-    e.comp += r.monto;
-    map.set(r.fecha, e);
-  }
+  const { data } = await sb.rpc("corr_luis_historial");
   let acc = 0;
-  const asc: LuisHistDia[] = [];
-  for (const fecha of [...map.keys()].sort()) {
-    const e = map.get(fecha)!;
-    const saldoDia = e.comp - e.consig;
+  const asc: LuisHistDia[] = (data ?? []).map((r) => {
+    const consignaciones = Number(r.consignaciones);
+    const compensaciones = Number(r.compensaciones);
+    const saldoDia = compensaciones - consignaciones;
     acc += saldoDia;
-    asc.push({ fecha, consignaciones: e.consig, compensaciones: e.comp, saldoDia, acumulado: acc });
-  }
+    return { fecha: r.fecha, consignaciones, compensaciones, saldoDia, acumulado: acc };
+  });
   return asc.reverse();
 }
 
@@ -331,18 +315,27 @@ export interface HeaderResumen {
 }
 
 export async function getHeaderResumen(fecha: string): Promise<HeaderResumen> {
-  const [cuadre, deudas] = await Promise.all([getCuadre(fecha), getDeudasConSaldo()]);
-  const pendientes = deudas.filter((d) => d.saldo > 0);
+  // Corre en el layout (cada carga de página): un RPC agregado en vez de bajar
+  // todas las deudas y abonos para sumarlas aquí.
+  const sb = await createClient();
+  const [cuadre, { data: resumen }] = await Promise.all([getCuadre(fecha), sb.rpc("corr_header_resumen")]);
   const horaBogota = Number(
     new Intl.DateTimeFormat("en-US", { timeZone: "America/Bogota", hour: "2-digit", hour12: false }).format(new Date()),
   );
   return {
     cuadreHoy: cuadre ? { estado: cuadre.estado, saldo_final: cuadre.saldo_final } : null,
-    prestamosTotal: pendientes.reduce((s, d) => s + d.saldo, 0),
-    prestamosCount: pendientes.length,
-    personas: [...new Set(deudas.map((d) => d.persona))],
+    prestamosTotal: Number(resumen?.prestamos_total ?? 0),
+    prestamosCount: Number(resumen?.prestamos_count ?? 0),
+    personas: resumen?.personas ?? [],
     tarde: horaBogota >= 18,
   };
+}
+
+/** Deudas con su abonado ya agregado en SQL (sin detalle de abonos): para resúmenes. */
+export async function getDeudasSaldos(): Promise<{ persona: string; monto: number; abonado: number }[]> {
+  const sb = await createClient();
+  const { data } = await sb.rpc("corr_deudas_saldos");
+  return data ?? [];
 }
 
 // ===== Bitácora de auditoría (admin) =====
@@ -375,4 +368,4 @@ export async function getAuditLog(limit = 250): Promise<AuditEntry[]> {
 // Agrupación por persona: lógica pura en lib/prestamos.ts (se reexporta aquí para
 // no romper los imports existentes desde "@/lib/queries").
 export type { PersonaSaldo, PersonaGrupo } from "@/lib/prestamos";
-export { agruparDeudasPorPersona, agruparPorPersona } from "@/lib/prestamos";
+export { agruparDeudasPorPersona, agruparPorPersona, resumenPorPersona } from "@/lib/prestamos";

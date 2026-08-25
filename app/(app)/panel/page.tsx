@@ -5,8 +5,8 @@ import {
   getConsignacionesLuis,
   getSaldoLuisAcumulado,
   listCuadres,
-  getDeudasConSaldo,
-  agruparPorPersona,
+  getDeudasSaldos,
+  resumenPorPersona,
   sumMontos,
 } from "@/lib/queries";
 import { hoyISO } from "@/lib/format";
@@ -41,12 +41,12 @@ export default async function PanelPage() {
     getConsignacionesLuis(hoy),
     getSaldoLuisAcumulado(hoy, true),
     listCuadres(undefined, undefined, 14),
-    isAdmin ? getDeudasConSaldo() : Promise.resolve([]),
+    isAdmin ? getDeudasSaldos() : Promise.resolve([]),
   ]);
 
   const srLuisHoy = sumMontos(consignacionesHoy);
   const cuadrados = recientes.filter((c) => Math.round(c.saldo_final) === 0).length;
-  const personas = agruparPorPersona(deudas);
+  const personas = resumenPorPersona(deudas);
   const totalPendiente = personas.reduce((s, p) => s + p.saldo, 0);
 
   const distribucion = cuadreHoy
