@@ -171,7 +171,7 @@ export function MovimientosManager({
           <div className={cn("mt-4 grid gap-4 sm:grid-cols-2", bloqueado && "pointer-events-none opacity-50")}>
             <div className="flex flex-col gap-2">
               <Label htmlFor="mov-monto">Monto</Label>
-              <MoneyInput id="mov-monto" value={monto} onValueChange={setMonto} autoFocus onEnter={() => !pending && !bloqueado && registrar()} />
+              <MoneyInput id="mov-monto" size="lg" value={monto} onValueChange={setMonto} autoFocus onEnter={() => !pending && !bloqueado && registrar()} />
             </div>
             {tipo === "recaudo" && (
               <div className="flex flex-col gap-2">

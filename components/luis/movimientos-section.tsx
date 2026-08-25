@@ -136,24 +136,26 @@ export function MovimientosSection({
         </div>
       </div>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_120px]">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor={`monto-${tono}`}>Monto</Label>
-          <MoneyInput id={`monto-${tono}`} value={monto} onValueChange={setMonto} onEnter={() => !pending && registrar()} />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor={`hora-${tono}`}>Hora</Label>
-          <Input id={`hora-${tono}`} type="time" value={hora} onChange={(e) => setHora(e.target.value)} />
-        </div>
+      {/* Monto protagonista y el resto compacto: en celular el teclado numérico de
+          iOS no tiene Enter, así que "Agregar" debe quedar cerca y a todo lo ancho. */}
+      <div className="mt-4 flex flex-col gap-1.5">
+        <Label htmlFor={`monto-${tono}`}>Monto</Label>
+        <MoneyInput id={`monto-${tono}`} size="lg" value={monto} onValueChange={setMonto} onEnter={() => !pending && registrar()} />
       </div>
-      <div className="mt-3 flex flex-col gap-1.5">
-        <Label htmlFor={`nota-${tono}`}>Nota (opcional)</Label>
-        <Input id={`nota-${tono}`} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Referencia…" onEnter={() => !pending && registrar()} />
+      <div className="mt-3 grid grid-cols-[8.75rem_1fr] gap-3">
+        <div className="flex min-w-0 flex-col gap-1.5">
+          <Label htmlFor={`hora-${tono}`}>Hora</Label>
+          <Input id={`hora-${tono}`} type="time" value={hora} onChange={(e) => setHora(e.target.value)} className="min-w-0" />
+        </div>
+        <div className="flex min-w-0 flex-col gap-1.5">
+          <Label htmlFor={`nota-${tono}`}>Nota (opcional)</Label>
+          <Input id={`nota-${tono}`} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Referencia…" onEnter={() => !pending && registrar()} />
+        </div>
       </div>
 
       <ErrorNotice message={error} className="mt-3" />
 
-      <Button onClick={registrar} disabled={pending} size="sm" className="mt-4 self-start">
+      <Button onClick={registrar} disabled={pending} className="mt-4 w-full sm:w-auto sm:self-start">
         <Plus size={16} weight="bold" />
         {pending ? "Guardando…" : "Agregar"}
       </Button>
