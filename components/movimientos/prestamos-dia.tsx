@@ -386,7 +386,7 @@ export function PrestamosDia({
                               type="button"
                               onClick={() => cambiarMedio(d)}
                               disabled={pending || bloqueado}
-                              title="Cambiar: efectivo, transferencia o solo registro"
+                              title="Cambiar: efectivo, transferencia o solo registro" aria-label="Cambiar: efectivo, transferencia o solo registro"
                               className={cn(
                                 "shrink-0 whitespace-nowrap rounded-full border px-2.5 py-1 text-[0.68rem] font-medium transition-colors disabled:opacity-50",
                                 d.medio === "transferencia"
@@ -405,8 +405,8 @@ export function PrestamosDia({
                                   <button
                                     onClick={() => reabrir(d)}
                                     disabled={pending}
-                                    className="flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors hover:bg-accent-soft hover:text-accent-strong disabled:opacity-40"
-                                    title="Deshacer pago (volver a pendiente)"
+                                    className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-accent-soft hover:text-accent-strong disabled:opacity-40"
+                                    title="Deshacer pago (volver a pendiente)" aria-label="Deshacer pago (volver a pendiente)"
                                   >
                                     <ArrowCounterClockwise size={14} />
                                   </button>
@@ -432,8 +432,8 @@ export function PrestamosDia({
                               <button
                                 onClick={() => abrirEdicion(d)}
                                 disabled={pending}
-                                className="flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors hover:bg-accent-soft hover:text-accent-strong disabled:opacity-40"
-                                title="Editar"
+                                className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-accent-soft hover:text-accent-strong disabled:opacity-40"
+                                title="Editar" aria-label="Editar"
                               >
                                 <PencilSimple size={15} />
                               </button>
@@ -442,8 +442,8 @@ export function PrestamosDia({
                               <button
                                 onClick={() => borrar(d.id)}
                                 disabled={pending || bloqueado}
-                                className="flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
-                                title="Eliminar"
+                                className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
+                                title="Eliminar" aria-label="Eliminar"
                               >
                                 <Trash size={15} />
                               </button>

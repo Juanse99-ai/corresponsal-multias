@@ -10,7 +10,8 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, React.TextareaHTML
     <textarea
       ref={ref}
       className={cn(
-        "w-full resize-none rounded-2xl border border-line-strong bg-surface-2/80 px-4 py-3 text-sm text-text",
+        // text-base (16px): con menos, iOS hace zoom automático al enfocar el campo.
+        "w-full resize-none rounded-2xl border border-line-strong bg-surface-2/80 px-4 py-3 text-base text-text",
         "placeholder:text-faint shadow-[inset_0_1px_0_oklch(1_0_0/0.6)]",
         "transition-[color,background-color,border-color,box-shadow] duration-200",
         "focus:outline-none focus:border-accent/60 focus:bg-surface",

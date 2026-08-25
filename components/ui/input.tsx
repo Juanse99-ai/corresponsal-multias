@@ -11,7 +11,8 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     <input
       ref={ref}
       className={cn(
-        "h-11 w-full rounded-2xl border border-line-strong bg-surface-2/80 px-3.5 text-text",
+        // text-base explícito: si un input queda bajo 16px, iOS hace zoom al enfocarlo.
+        "h-11 w-full rounded-2xl border border-line-strong bg-surface-2/80 px-3.5 text-base text-text",
         "placeholder:text-faint shadow-[inset_0_1px_0_oklch(1_0_0/0.6)]",
         "transition-[color,background-color,border-color,box-shadow] duration-200",
         "focus:outline-none focus:border-accent/60 focus:bg-surface",

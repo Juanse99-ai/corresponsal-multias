@@ -10,7 +10,7 @@ export function DateNav({ fecha, base }: { fecha: string; base: string }) {
   const esHoy = fecha === hoy;
   const esFuturoOHoy = fecha >= hoy;
   const cls =
-    "flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-surface text-muted transition-colors hover:text-text";
+    "flex h-9 w-9 items-center justify-center rounded-lg border border-line bg-surface text-muted transition-colors hover:text-text";
 
   return (
     <div className="flex items-center gap-1.5">
@@ -21,7 +21,7 @@ export function DateNav({ fecha, base }: { fecha: string; base: string }) {
         {esHoy ? "Hoy" : formatFechaCorta(fecha)}
       </span>
       {esFuturoOHoy ? (
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg border border-line/50 text-faint/40">
+        <span className="flex h-9 w-9 items-center justify-center rounded-lg border border-line/50 text-faint/40">
           <CaretRight size={15} weight="bold" />
         </span>
       ) : (

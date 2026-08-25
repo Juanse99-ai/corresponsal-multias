@@ -260,14 +260,14 @@ function AddDeudaForm() {
           </p>
         </div>
 
-        <div className="grid grid-cols-[1fr_auto] gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto]">
           <div className="flex flex-col gap-2">
             <Label htmlFor="deuda-desc">Motivo · ¿para qué fue?</Label>
             <Input id="deuda-desc" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Para qué fue el préstamo" onEnter={() => !pending && registrar()} />
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="deuda-fecha">Fecha</Label>
-            <Input id="deuda-fecha" type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} className="w-[9.5rem]" />
+            <Input id="deuda-fecha" type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} className="w-full sm:w-[9.5rem]" />
           </div>
         </div>
 
@@ -499,8 +499,8 @@ function DeudaRow({ deuda, isAdmin }: { deuda: DeudaConSaldo; isAdmin: boolean }
             <button
               onClick={borrar}
               disabled={pending}
-              title="Eliminar préstamo"
-              className="ml-auto flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
+              title="Eliminar préstamo" aria-label="Eliminar préstamo"
+              className="ml-auto flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
             >
               <Trash size={15} />
             </button>

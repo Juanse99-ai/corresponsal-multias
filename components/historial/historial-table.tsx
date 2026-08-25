@@ -66,13 +66,13 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
       <Card className="flex flex-col gap-4 p-4 sm:p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex flex-wrap items-end gap-3">
-            <div className="flex flex-col gap-1.5">
+            <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-none">
               <label className="text-[0.72rem] text-faint">Desde</label>
-              <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="h-10 w-[9.5rem]" />
+              <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="h-10 w-full min-w-0 sm:w-[9.5rem]" />
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-none">
               <label className="text-[0.72rem] text-faint">Hasta</label>
-              <Input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} className="h-10 w-[9.5rem]" />
+              <Input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} className="h-10 w-full min-w-0 sm:w-[9.5rem]" />
             </div>
             {(desde || hasta) && (
               <button onClick={() => { setDesde(""); setHasta(""); }} className="h-10 px-2 text-[0.78rem] text-faint hover:text-muted">
@@ -147,7 +147,7 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
                           <button
                             onClick={(e) => borrar(c.id, e)}
                             disabled={pending}
-                            className="flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger"
+                            className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger"
                           >
                             <Trash size={14} />
                           </button>

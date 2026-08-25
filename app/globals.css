@@ -156,6 +156,10 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
+  /* PWA con viewport-fit=cover: no meter contenido bajo el notch ni la barra de inicio. */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* Cifras tabulares monoespaciadas para columnas de pesos. */
