@@ -111,7 +111,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
         <div className="grid gap-4 sm:grid-cols-[1fr_150px]">
           <div className="flex flex-col gap-2">
             <Label htmlFor="mov-monto">Monto</Label>
-            <MoneyInput id="mov-monto" value={monto} onValueChange={setMonto} onEnter={() => !pending && registrar()} />
+            <MoneyInput id="mov-monto" size="lg" value={monto} onValueChange={setMonto} onEnter={() => !pending && registrar()} />
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="mov-fecha">Fecha</Label>
@@ -138,7 +138,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
 
         <ErrorNotice message={error} />
 
-        <Button onClick={registrar} disabled={pending} size="sm" className="self-start">
+        <Button onClick={registrar} disabled={pending} className="w-full sm:w-auto sm:self-start">
           <Plus size={16} weight="bold" />
           {pending ? "Guardando…" : "Registrar movimiento"}
         </Button>

@@ -221,7 +221,7 @@ export function PrestamosDia({
             </div>
             <div className="flex flex-col gap-2">
               <Label htmlFor="pr-monto">Monto</Label>
-              <MoneyInput id="pr-monto" value={monto} onValueChange={setMonto} onEnter={() => !pending && !bloqueado && registrar()} />
+              <MoneyInput id="pr-monto" size="lg" value={monto} onValueChange={setMonto} onEnter={() => !pending && !bloqueado && registrar()} />
             </div>
             <div className="flex flex-col gap-2">
               <Label>¿Ya lo devolvió?</Label>

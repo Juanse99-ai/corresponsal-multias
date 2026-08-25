@@ -219,7 +219,7 @@ function AddDeudaForm() {
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="deuda-monto">Monto</Label>
-          <MoneyInput id="deuda-monto" value={monto} onValueChange={setMonto} onEnter={() => !pending && registrar()} />
+          <MoneyInput id="deuda-monto" size="lg" value={monto} onValueChange={setMonto} onEnter={() => !pending && registrar()} />
         </div>
 
         <div className="flex flex-col gap-2">
