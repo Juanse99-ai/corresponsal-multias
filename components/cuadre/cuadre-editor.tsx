@@ -319,7 +319,7 @@ export function CuadreEditor({
             <div className="min-w-0 leading-tight">
               <p className="text-[0.82rem] font-medium text-text">Sr. Luis</p>
               <p className="truncate text-[0.72rem] text-faint">
-                {consignacionesCount} consignación{consignacionesCount === 1 ? "" : "es"} · toca para registrar
+                {consignacionesCount} {consignacionesCount === 1 ? "consignación" : "consignaciones"} · toca para registrar
               </p>
             </div>
           </div>
