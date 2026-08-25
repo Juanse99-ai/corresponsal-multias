@@ -102,7 +102,7 @@ export function GeneralTable({ entries }: { entries: GeneralRow[] }) {
                     <button
                       onClick={(ev) => borrar(e.id, ev)}
                       disabled={pending}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger"
+                      className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger"
                     >
                       <Trash size={14} />
                     </button>

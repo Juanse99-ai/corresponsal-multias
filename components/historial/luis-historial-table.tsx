@@ -59,13 +59,13 @@ export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex flex-wrap items-end gap-3">
-            <div className="flex flex-col gap-1.5">
+            <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-none">
               <label className="text-[0.72rem] text-faint">Desde</label>
-              <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="h-10 w-[9.5rem]" />
+              <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="h-10 w-full min-w-0 sm:w-[9.5rem]" />
             </div>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-none">
               <label className="text-[0.72rem] text-faint">Hasta</label>
-              <Input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} className="h-10 w-[9.5rem]" />
+              <Input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} className="h-10 w-full min-w-0 sm:w-[9.5rem]" />
             </div>
             {(desde || hasta) && (
               <button onClick={() => { setDesde(""); setHasta(""); }} className="h-10 px-2 text-[0.78rem] text-faint hover:text-muted">
@@ -110,7 +110,7 @@ export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
                     transition={{ delay: Math.min(i * 0.02, 0.3) }}
                     onClick={() => router.push(`/luis?fecha=${d.fecha}`)}
                     className="cursor-pointer border-b border-line/60 transition-colors hover:bg-surface-2"
-                    title="Ver el día y abrir el reporte"
+                    title="Ver el día y abrir el reporte" aria-label="Ver el día y abrir el reporte"
                   >
                     <td className="whitespace-nowrap px-5 py-3 font-medium text-text">{formatFecha(d.fecha)}</td>
                     <td className="tnum px-3 py-3 text-right text-muted">{formatCOP(d.consignaciones)}</td>

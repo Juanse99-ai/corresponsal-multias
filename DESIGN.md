@@ -26,7 +26,8 @@ para estado negativo, verde solo para "cuadrado". El riel lateral azul marino da
 ## Reglas
 - Nunca `#000`/`#fff`; todo entintado al azul.
 - Sombras suaves tintadas al azul (no negro duro).
-- Tipografía Geist (sans) + Geist Mono (cifras, clase `.tnum`).
+- Tipografía única del sistema Apple (SF Pro vía `--font-ios`); cifras con clase `.tnum`
+  (misma fuente con `tabular-nums`). Sin webfonts.
 - Sin grano. Halo ambiental azul muy sutil.
 - Marca: cuadro azul con pulso (diagnóstico) blanco y pico rojo — guiño al logo.
 - Motion: GSAP en componentes hoja aislados (`components/fx/`) y login; Framer Motion en el

@@ -257,7 +257,7 @@ export function HeaderAvisos({ avisos, urgentes }: { avisos: Aviso[]; urgentes: 
       <button
         onClick={() => setOpen((v) => !v)}
         onBlur={() => setTimeout(() => setOpen(false), 150)}
-        title="Avisos"
+        title="Avisos" aria-label="Avisos"
         className="relative flex h-10 w-10 items-center justify-center rounded-[0.7rem] border border-line bg-surface text-muted transition-colors hover:text-text"
       >
         <Bell size={18} weight={avisos.length ? "fill" : "regular"} />

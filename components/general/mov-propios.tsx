@@ -180,7 +180,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
                       target="_blank"
                       rel="noopener noreferrer"
                       title={m.soporte_nombre ?? "Anexo"}
-                      className="flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors hover:bg-surface-2 hover:text-accent-strong"
+                      className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-surface-2 hover:text-accent-strong"
                     >
                       <ArrowSquareOut size={15} />
                     </a>
@@ -188,7 +188,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
                   <button
                     onClick={() => borrar(m.id, m.monto)}
                     disabled={pending}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger"
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger"
                   >
                     <Trash size={14} />
                   </button>

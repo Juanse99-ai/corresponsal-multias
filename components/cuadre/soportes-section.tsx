@@ -158,12 +158,14 @@ export function SoportesSection({
                     <ArrowSquareOut size={12} className="text-white/70" />
                   </div>
 
+                  {/* En táctil no existe hover: el botón debe verse siempre (pointer-coarse). */}
                   <button
                     onClick={() => borrar(s.id)}
                     title="Eliminar"
-                    className="absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-lg bg-black/55 text-white/85 opacity-0 backdrop-blur-sm transition-opacity hover:text-danger group-hover:opacity-100"
+                    aria-label="Eliminar soporte"
+                    className="absolute right-1.5 top-1.5 flex h-9 w-9 items-center justify-center rounded-lg bg-black/55 text-white/85 opacity-0 backdrop-blur-sm transition-opacity hover:text-danger group-hover:opacity-100 pointer-coarse:opacity-100"
                   >
-                    <Trash size={14} />
+                    <Trash size={15} />
                   </button>
                 </motion.div>
               );

@@ -303,8 +303,8 @@ export function MovimientosManager({
                               <button
                                 onClick={() => abrirEdicion(m)}
                                 disabled={pending}
-                                className="flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors hover:bg-accent-soft hover:text-accent-strong disabled:opacity-40"
-                                title="Editar"
+                                className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-accent-soft hover:text-accent-strong disabled:opacity-40"
+                                title="Editar" aria-label="Editar"
                               >
                                 <PencilSimple size={15} />
                               </button>
@@ -313,8 +313,8 @@ export function MovimientosManager({
                               <button
                                 onClick={() => borrar(m.id)}
                                 disabled={pending || bloqueado}
-                                className="flex h-8 w-8 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
-                                title="Eliminar"
+                                className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
+                                title="Eliminar" aria-label="Eliminar"
                               >
                                 <Trash size={15} />
                               </button>

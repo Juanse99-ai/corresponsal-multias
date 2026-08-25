@@ -224,7 +224,7 @@ export function MovimientosSection({
                         onClick={() => abrirEdicion(c)}
                         disabled={pending}
                         className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-accent-soft hover:text-accent-strong disabled:opacity-40"
-                        title="Editar"
+                        title="Editar" aria-label="Editar"
                       >
                         <PencilSimple size={14} />
                       </button>
@@ -232,7 +232,7 @@ export function MovimientosSection({
                         onClick={() => borrar(c)}
                         disabled={pending}
                         className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
-                        title="Eliminar"
+                        title="Eliminar" aria-label="Eliminar"
                       >
                         <Trash size={14} />
                       </button>
