@@ -88,9 +88,51 @@ export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
           <p className="text-sm text-muted">No hay movimientos de Luis en este rango.</p>
         </Card>
       ) : (
-        <Card className="overflow-hidden p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-sm">
+        <>
+        {/* Celular: una ficha por día en vez de arrastrar la tabla en horizontal. */}
+        <div className="flex flex-col gap-3 md:hidden">
+          {filtrados.map((d) => (
+            <Card
+              key={d.fecha}
+              className="p-4"
+              role="link"
+              tabIndex={0}
+              onClick={() => router.push(`/luis?fecha=${d.fecha}`)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  router.push(`/luis?fecha=${d.fecha}`);
+                }
+              }}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-[0.95rem] font-semibold text-text">{formatFecha(d.fecha)}</p>
+                <div className="shrink-0 text-right">
+                  <p className="text-[0.66rem] uppercase tracking-wide text-faint">Acumulado a favor</p>
+                  <p className="tnum text-[1.35rem] font-semibold text-text">{formatCOP(d.acumulado)}</p>
+                </div>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-x-3.5 gap-y-2 border-t border-line pt-3 text-[0.8rem]">
+                <div className="flex min-w-0 items-baseline justify-between gap-2">
+                  <span className="text-faint">Consignaciones</span>
+                  <span className="tnum text-text">{formatCOP(d.consignaciones)}</span>
+                </div>
+                <div className="flex min-w-0 items-baseline justify-between gap-2">
+                  <span className="text-faint">Cupo</span>
+                  <span className="tnum text-text">{formatCOP(d.compensaciones)}</span>
+                </div>
+                <div className="col-span-2 flex min-w-0 items-baseline justify-between gap-2">
+                  <span className="text-faint">Del día</span>
+                  <span className="tnum font-medium text-text">{formatCOP(d.saldoDia)}</span>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+
+        <Card className="hidden overflow-hidden p-0 md:block">
+          <div>
+            <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-line text-left text-[0.72rem] uppercase tracking-wide text-faint">
                   <th className="px-5 py-3 font-medium">Fecha</th>
@@ -128,6 +170,7 @@ export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
             </table>
           </div>
         </Card>
+        </>
       )}
     </div>
   );
