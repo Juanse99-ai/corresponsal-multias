@@ -11,13 +11,8 @@ import { Input } from "@/components/ui/input";
 import { MoneyInput } from "@/components/ui/money-input";
 import { AnimatedMoney } from "@/components/ui/animated-number";
 import { ErrorNotice } from "@/components/ui/error-notice";
-import { formatCOP, formatHora } from "@/lib/format";
+import { formatCOP, formatHora, horaBogotaHHMM } from "@/lib/format";
 import { reduced } from "@/components/fx/reduced";
-
-function horaActual(): string {
-  const d = new Date();
-  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-}
 
 export interface MovimientoItem {
   id: string;
@@ -49,7 +44,7 @@ export function MovimientosSection({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [monto, setMonto] = useState(0);
-  const [hora, setHora] = useState(horaActual);
+  const [hora, setHora] = useState(horaBogotaHHMM);
   const [nota, setNota] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -73,7 +68,7 @@ export function MovimientosSection({
       if (res.ok) {
         setMonto(0);
         setNota("");
-        setHora(horaActual());
+        setHora(horaBogotaHHMM());
         router.refresh();
       } else {
         setError(res.error ?? "No se pudo registrar.");

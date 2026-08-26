@@ -307,7 +307,9 @@ export async function diaEstaCerrado(fecha: string): Promise<boolean> {
 
 // ===== Resumen para el header (avisos + buscador) =====
 export interface HeaderResumen {
-  cuadreHoy: { estado: string; saldo_final: number } | null;
+  // total_tirilla sale del cuadre que ya se lee aquí: sirve para distinguir
+  // "todavía sin tirilla" de un descuadre real (no agrega consultas).
+  cuadreHoy: { estado: string; saldo_final: number; total_tirilla: number } | null;
   prestamosTotal: number;
   prestamosCount: number;
   personas: string[];
@@ -323,7 +325,9 @@ export async function getHeaderResumen(fecha: string): Promise<HeaderResumen> {
     new Intl.DateTimeFormat("en-US", { timeZone: "America/Bogota", hour: "2-digit", hour12: false }).format(new Date()),
   );
   return {
-    cuadreHoy: cuadre ? { estado: cuadre.estado, saldo_final: cuadre.saldo_final } : null,
+    cuadreHoy: cuadre
+      ? { estado: cuadre.estado, saldo_final: cuadre.saldo_final, total_tirilla: cuadre.total_tirilla }
+      : null,
     prestamosTotal: Number(resumen?.prestamos_total ?? 0),
     prestamosCount: Number(resumen?.prestamos_count ?? 0),
     personas: resumen?.personas ?? [],
