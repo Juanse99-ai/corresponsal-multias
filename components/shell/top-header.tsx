@@ -90,25 +90,33 @@ const MESES: Record<string, number> = {
   jul: 7, ago: 8, sep: 9, oct: 10, nov: 11, dic: 12,
 };
 
+/** Solo devuelve la fecha si el día existe en ese mes (31/02 no vale). */
+function fechaValida(y: string, mo: string, d: string): string | null {
+  const iso = `${y}-${mo}-${d}`;
+  const dt = new Date(`${iso}T00:00:00Z`);
+  if (Number.isNaN(dt.getTime())) return null;
+  return dt.toISOString().slice(0, 10) === iso ? iso : null;
+}
+
 /** Intenta leer una fecha de varios formatos y devolverla en ISO. */
 function parseFechaISO(raw: string): string | null {
   const q = raw.trim().toLowerCase();
   if (!q) return null;
   let m = q.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-  if (m) return `${m[1]}-${m[2].padStart(2, "0")}-${m[3].padStart(2, "0")}`;
+  if (m) return fechaValida(m[1], m[2].padStart(2, "0"), m[3].padStart(2, "0"));
   m = q.match(/^(\d{1,2})[/\-.](\d{1,2})(?:[/\-.](\d{2,4}))?$/);
   if (m) {
     const d = m[1].padStart(2, "0");
     const mo = m[2].padStart(2, "0");
     const y = m[3] ? (m[3].length === 2 ? "20" + m[3] : m[3]) : String(anioBogota());
-    return `${y}-${mo}-${d}`;
+    return fechaValida(y, mo, d);
   }
   m = q.match(/^(\d{1,2})\s+([a-zé]{3})\.?(?:\s+(\d{4}))?$/);
   if (m && MESES[m[2]]) {
     const d = m[1].padStart(2, "0");
     const mo = String(MESES[m[2]]).padStart(2, "0");
     const y = m[3] ?? String(anioBogota());
-    return `${y}-${mo}-${d}`;
+    return fechaValida(y, mo, d);
   }
   return null;
 }
@@ -300,7 +308,8 @@ function HeaderSearch({ personas }: { personas: string[] }) {
 
 const TONE: Record<Tone, { wrap: string; icon: typeof Warning }> = {
   danger: { wrap: "bg-danger-soft text-danger", icon: Warning },
-  warn: { wrap: "bg-accent-soft text-accent-strong", icon: Warning },
+  // Urgente e informativo tenían el mismo fondo y color: no se distinguían.
+  warn: { wrap: "bg-danger-soft/60 text-danger", icon: Warning },
   info: { wrap: "bg-accent-soft text-accent-strong", icon: HandCoins },
   ok: { wrap: "bg-success-soft text-success", icon: CheckCircle },
 };

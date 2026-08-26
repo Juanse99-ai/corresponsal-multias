@@ -35,6 +35,7 @@ import {
 } from "@/lib/cuadre";
 import { guardarCuadre } from "@/app/(app)/cuadre/actions";
 import { CuadreExport } from "@/components/cuadre/cuadre-export";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 interface Inicial {
   total_tirilla: number;
@@ -87,6 +88,7 @@ export function CuadreEditor({
   const [pending, startTransition] = useTransition();
   const [toast, setToast] = useState<{ ok: boolean; msg: string } | null>(null);
   const [celebrar, setCelebrar] = useState(0);
+  const [confirmarCierre, setConfirmarCierre] = useState(false);
 
   const [vals, setVals] = useState({
     total_tirilla: inicial.total_tirilla,
@@ -206,6 +208,15 @@ export function CuadreEditor({
     { label: "Préstamos por transferencia", value: vals.prestamos_consignaciones },
   ];
 
+  /** Texto de por qué no cuadra, para el diálogo de cierre. */
+  const motivoDescuadre = (() => {
+    const partes: string[] = [];
+    if (descuadre) partes.push(`el saldo final es ${formatCOP(saldo)}`);
+    if (!cajaCuadra)
+      partes.push(`en la caja ${diferenciaCaja > 0 ? "sobran" : "faltan"} ${formatCOP(Math.abs(diferenciaCaja))}`);
+    return partes.join(" y ");
+  })();
+
   function onGuardar(nuevoEstado?: EstadoCuadre) {
     const estadoFinal = nuevoEstado ?? estado;
     setToast(null);
@@ -214,25 +225,21 @@ export function CuadreEditor({
         setToast({ ok: false, msg: "Adjunta la tirilla del datáfono (abajo) antes de cerrar el día." });
         return;
       }
-      const hayDescuadre = descuadre || Math.round(diferenciaCaja) !== 0;
-      if (hayDescuadre) {
+      if (descuadre || !cajaCuadra) {
         // Exige explicación escrita (queda para Juan) y confirmación antes de cerrar descuadrado.
         if (!nota.trim()) {
           setToast({ ok: false, msg: "El día no cuadra. Escribe en la nota por qué, antes de cerrarlo." });
           return;
         }
-        const partes: string[] = [];
-        if (descuadre) partes.push(`saldo final ${formatCOP(saldo)}`);
-        if (Math.round(diferenciaCaja) !== 0)
-          partes.push(`la caja ${diferenciaCaja > 0 ? "sobra" : "falta"} ${formatCOP(Math.abs(diferenciaCaja))}`);
-        if (
-          !window.confirm(
-            `El día NO cuadra (${partes.join(" y ")}). ¿Cerrarlo así de todos modos? Después solo Juan podrá reabrirlo.`,
-          )
-        )
-          return;
+        setConfirmarCierre(true);
+        return;
       }
     }
+    guardar(estadoFinal);
+  }
+
+  function guardar(estadoFinal: EstadoCuadre) {
+    setConfirmarCierre(false);
     startTransition(async () => {
       const res = await guardarCuadre({
         fecha,
@@ -599,6 +606,15 @@ export function CuadreEditor({
         </Card>
       </div>
 
+      <ConfirmDialog
+        open={confirmarCierre}
+        titulo="El día no cuadra. ¿Cerrarlo así?"
+        detalle={`Hoy ${motivoDescuadre}. Después solo Juan podrá reabrirlo. Tu nota queda guardada como explicación.`}
+        confirmar="Sí, cerrar así"
+        onConfirmar={() => guardar("cerrado")}
+        onCancelar={() => setConfirmarCierre(false)}
+      />
+
       <CelebracionCierre play={celebrar} nombre={nombre} cuadrado={!descuadre} />
     </div>
   );
@@ -617,11 +633,11 @@ function Campo({
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-baseline justify-between gap-2">
-        <Label htmlFor={id}>{label}</Label>
-        {hint && <span className="text-right text-[0.66rem] leading-tight text-faint">{hint}</span>}
-      </div>
+      {/* La ayuda va DEBAJO del input: compartiendo fila con el rótulo, ambos se
+          apretaban a dos líneas en campos de nombre largo. */}
+      <Label htmlFor={id}>{label}</Label>
       {children}
+      {hint && <span className="text-[0.68rem] leading-tight text-faint">{hint}</span>}
     </div>
   );
 }

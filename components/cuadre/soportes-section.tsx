@@ -10,6 +10,7 @@ import {
   Receipt,
   UploadSimple,ArrowSquareOut } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
@@ -40,6 +41,7 @@ export function SoportesSection({
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [, startTransition] = useTransition();
+  const [porBorrar, setPorBorrar] = useState<string | null>(null);
   const [subiendo, setSubiendo] = useState(false);
   const [drag, setDrag] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +75,7 @@ export function SoportesSection({
   }
 
   function borrar(id: string) {
-    if (!window.confirm("¿Borrar este soporte? Sin la tirilla adjunta no podrás cerrar el día.")) return;
+    setPorBorrar(null);
     startTransition(async () => {
       await eliminarSoporte(id);
       router.refresh();
@@ -160,7 +162,7 @@ export function SoportesSection({
 
                   {/* En táctil no existe hover: el botón debe verse siempre (pointer-coarse). */}
                   <button
-                    onClick={() => borrar(s.id)}
+                    onClick={() => setPorBorrar(s.id)}
                     title="Eliminar"
                     aria-label="Eliminar soporte"
                     className="absolute right-1.5 top-1.5 flex h-9 w-9 items-center justify-center rounded-lg bg-black/55 text-white/85 opacity-0 backdrop-blur-sm transition-opacity hover:text-danger group-hover:opacity-100 pointer-coarse:opacity-100"
@@ -173,6 +175,13 @@ export function SoportesSection({
           </AnimatePresence>
         </div>
       )}
+      <ConfirmDialog
+        open={!!porBorrar}
+        titulo="¿Borrar este soporte?"
+        detalle="Sin la tirilla adjunta no podrás cerrar el día."
+        onConfirmar={() => porBorrar && borrar(porBorrar)}
+        onCancelar={() => setPorBorrar(null)}
+      />
     </Card>
   );
 }

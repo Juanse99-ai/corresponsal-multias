@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { MoneyInput } from "@/components/ui/money-input";
 import { cn } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatCOP, formatFecha, hoyISO } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
 import type { MovPropioConUrl } from "@/lib/queries";
@@ -34,6 +35,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
   const [nota, setNota] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [porBorrar, setPorBorrar] = useState<{ id: string; monto: number } | null>(null);
 
   function registrar() {
     if (monto <= 0) return setError("Ingresa un monto.");
@@ -68,9 +70,8 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
     });
   }
 
-  function borrar(id: string, montoMov: number) {
-    if (!window.confirm(`¿Borrar este movimiento propio de ${formatCOP(montoMov)}? Cambia el saldo total del control general.`))
-      return;
+  function borrar(id: string) {
+    setPorBorrar(null);
     startTransition(async () => {
       await eliminarMovPropio(id);
       router.refresh();
@@ -186,7 +187,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
                     </a>
                   )}
                   <button
-                    onClick={() => borrar(m.id, m.monto)}
+                    onClick={() => setPorBorrar({ id: m.id, monto: m.monto })}
                     disabled={pending}
                     className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger"
                   >
@@ -198,6 +199,14 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
           </AnimatePresence>
         </ul>
       )}
+      <ConfirmDialog
+        open={!!porBorrar}
+        titulo="¿Borrar este movimiento propio?"
+        monto={porBorrar?.monto ?? null}
+        detalle="Cambia el saldo total del control general."
+        onConfirmar={() => porBorrar && borrar(porBorrar.id)}
+        onCancelar={() => setPorBorrar(null)}
+      />
     </Card>
   );
 }

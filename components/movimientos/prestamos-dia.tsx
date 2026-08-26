@@ -13,6 +13,7 @@ import { MoneyInput } from "@/components/ui/money-input";
 import { AnimatedMoney } from "@/components/ui/animated-number";
 import { cn } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatCOP, formatHoraISO } from "@/lib/format";
 import { PERSONAS_PRESET } from "@/lib/personas";
 import type { DeudaConSaldo } from "@/lib/queries";
@@ -39,6 +40,8 @@ export function PrestamosDia({
   const [medio, setMedio] = useState<"efectivo" | "transferencia" | "registro" | null>(null);
   const [pagado, setPagado] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Confirmación propia para las dos acciones destructivas.
+  const [confirmar, setConfirmar] = useState<null | { tipo: "borrar" | "reabrir"; d: DeudaConSaldo }>(null);
 
   // Edición inline de un préstamo.
   const [editId, setEditId] = useState<string | null>(null);
@@ -105,7 +108,7 @@ export function PrestamosDia({
   }
 
   function reabrir(d: DeudaConSaldo) {
-    if (!window.confirm("¿Deshacer el pago? El préstamo vuelve a quedar pendiente.")) return;
+    setConfirmar(null);
     startTransition(async () => {
       const res = await reabrirPrestamo(d.id);
       if (res && !res.ok) setError(res.error ?? "No se pudo deshacer.");
@@ -114,7 +117,7 @@ export function PrestamosDia({
   }
 
   function borrar(id: string) {
-    if (!window.confirm("¿Borrar este préstamo? Queda registrado en la Bitácora.")) return;
+    setConfirmar(null);
     startTransition(async () => {
       await eliminarDeuda(id);
       router.refresh();
@@ -402,7 +405,7 @@ export function PrestamosDia({
                                 <Badge tone="success">Devuelto</Badge>
                                 {!bloqueado && (
                                   <button
-                                    onClick={() => reabrir(d)}
+                                    onClick={() => setConfirmar({ tipo: "reabrir", d })}
                                     disabled={pending}
                                     className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-accent-soft hover:text-accent-strong disabled:opacity-40"
                                     title="Deshacer pago (volver a pendiente)" aria-label="Deshacer pago (volver a pendiente)"
@@ -439,7 +442,7 @@ export function PrestamosDia({
                             )}
                             {isAdmin && (
                               <button
-                                onClick={() => borrar(d.id)}
+                                onClick={() => setConfirmar({ tipo: "borrar", d })}
                                 disabled={pending || bloqueado}
                                 className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
                                 title="Eliminar" aria-label="Eliminar"
@@ -478,6 +481,23 @@ export function PrestamosDia({
           </div>
         </Card>
       </div>
+      <ConfirmDialog
+        open={!!confirmar}
+        titulo={confirmar?.tipo === "reabrir" ? "¿Deshacer el pago?" : "¿Borrar este préstamo?"}
+        monto={confirmar?.tipo === "borrar" ? confirmar.d.monto : null}
+        detalle={
+          confirmar?.tipo === "reabrir"
+            ? "El préstamo vuelve a quedar pendiente."
+            : "Queda registrado en la Bitácora."
+        }
+        confirmar={confirmar?.tipo === "reabrir" ? "Sí, deshacer" : "Sí, borrar"}
+        onConfirmar={() => {
+          if (!confirmar) return;
+          if (confirmar.tipo === "reabrir") reabrir(confirmar.d);
+          else borrar(confirmar.d.id);
+        }}
+        onCancelar={() => setConfirmar(null)}
+      />
     </div>
   );
 }
