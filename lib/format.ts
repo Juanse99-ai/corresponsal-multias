@@ -78,6 +78,27 @@ export function hoyISO(): string {
   }).format(new Date());
 }
 
+/**
+ * Hora actual "HH:MM" en Colombia, igual que hoyISO: no depende del reloj ni de
+ * la zona del dispositivo, que puede estar en otra hora y guardar el movimiento
+ * con una hora que no corresponde al día del punto.
+ */
+export function horaBogotaHHMM(): string {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: "America/Bogota",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(new Date());
+}
+
+/** Año actual en Colombia (para completar fechas escritas sin año). */
+export function anioBogota(): number {
+  return Number(
+    new Intl.DateTimeFormat("en-CA", { timeZone: "America/Bogota", year: "numeric" }).format(new Date()),
+  );
+}
+
 /** Suma/resta días a una fecha ISO devolviendo ISO. */
 export function addDiasISO(iso: string, dias: number): string {
   const [y, m, d] = iso.split("-").map(Number);

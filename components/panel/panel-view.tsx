@@ -56,7 +56,9 @@ const item: Variants = {
 
 export function PanelView({ data }: { data: PanelData }) {
   const primer = data.nombre.split(/\s+/)[0];
-  const descuadreHoy = data.cuadreHoy && Math.round(data.cuadreHoy.saldo_final) !== 0;
+  // Sin tirilla escrita el saldo todavía no significa nada: no se pinta rojo.
+  const sinTirilla = !!data.cuadreHoy && data.tirillaHoy === 0;
+  const descuadreHoy = !!data.cuadreHoy && !sinTirilla && Math.round(data.cuadreHoy.saldo_final) !== 0;
 
   return (
     <div className="flex flex-col gap-5">
@@ -70,7 +72,11 @@ export function PanelView({ data }: { data: PanelData }) {
             <Card
               className={cn(
                 "relative h-full overflow-hidden p-6 transition-colors sm:p-7",
-                data.cuadreHoy ? (descuadreHoy ? "border-danger/40" : "border-success/40") : "hover:border-line-strong",
+                data.cuadreHoy && !sinTirilla
+                  ? descuadreHoy
+                    ? "border-danger/40"
+                    : "border-success/40"
+                  : "hover:border-line-strong",
               )}
             >
               <div className="relative flex h-full flex-col">
@@ -79,18 +85,26 @@ export function PanelView({ data }: { data: PanelData }) {
                     <Calculator size={18} weight="fill" className="text-accent" />
                     <span className="text-[0.82rem] font-medium">Cuadre de hoy</span>
                   </div>
-                  {data.cuadreHoy ? (
+                  {!data.cuadreHoy ? (
+                    <Badge tone="neutral">Sin abrir</Badge>
+                  ) : sinTirilla ? (
+                    <Badge tone="neutral">Sin tirilla</Badge>
+                  ) : (
                     <Badge tone={descuadreHoy ? "danger" : "success"}>
                       {descuadreHoy ? <Warning size={11} weight="fill" /> : <CheckCircle size={11} weight="fill" />}
                       {descuadreHoy ? "Descuadre" : "Cuadrado"}
                     </Badge>
-                  ) : (
-                    <Badge tone="neutral">Sin abrir</Badge>
                   )}
                 </div>
 
                 <div className="mt-8">
-                  {data.cuadreHoy ? (
+                  {data.cuadreHoy && sinTirilla ? (
+                    <>
+                      <p className="text-[0.74rem] uppercase tracking-wide text-faint">Saldo final</p>
+                      <p className="tnum mt-1 text-4xl font-semibold tracking-tight text-faint sm:text-5xl">—</p>
+                      <p className="mt-1 text-sm text-muted">Escribe el total de la tirilla para ver si el día cuadra.</p>
+                    </>
+                  ) : data.cuadreHoy ? (
                     <>
                       <p className="text-[0.74rem] uppercase tracking-wide text-faint">Saldo final</p>
                       <p
@@ -311,7 +325,9 @@ function RecientesChart({ recientes }: { recientes: Reciente[] }) {
 
   return (
     <div>
-      <div className="mt-6 flex h-28 items-end gap-1.5">
+      {/* items-stretch (no items-end): si el enlace no se estira queda con alto
+          automático y el alto en % de la barra resuelve a cero (barras invisibles). */}
+      <div className="mt-6 flex h-28 items-stretch gap-1.5">
         {orden.map((r) => {
           const descuadre = Math.round(r.saldo_final) !== 0;
           const h = Math.max(8, (r.total_tirilla / max) * 100);
@@ -319,15 +335,16 @@ function RecientesChart({ recientes }: { recientes: Reciente[] }) {
             <Link
               key={r.fecha}
               href={`/cuadre?fecha=${r.fecha}`}
-              className="group/bar relative flex flex-1 flex-col items-center justify-end"
+              className="group/bar relative flex h-full flex-1 flex-col items-center justify-end"
               title={`${formatFechaCorta(r.fecha)} · ${formatCOP(r.total_tirilla)}`}
             >
-              <motion.span
-                initial={{ height: 0 }}
-                animate={{ height: `${h}%` }}
-                transition={{ type: "spring", stiffness: 120, damping: 20, delay: 0.1 }}
+              {/* Alto en style (% contra el enlace, ya estirado) y entrada con
+                  la clase CSS .t-bar-rise: animar height no funcionaba (Framer no
+                  interpola 0px -> "45%") y además es animar layout. */}
+              <span
+                style={{ height: `${h}%` }}
                 className={cn(
-                  "w-full rounded-md transition-opacity group-hover/bar:opacity-100",
+                  "t-bar-rise block w-full rounded-md transition-opacity group-hover/bar:opacity-100",
                   descuadre ? "bg-danger/70" : "bg-success/60",
                 )}
               />

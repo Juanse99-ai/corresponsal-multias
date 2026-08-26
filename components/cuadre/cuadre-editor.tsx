@@ -13,6 +13,7 @@ import {
   Lock,
   LockOpen,
   ArrowClockwise,
+  Receipt,
 } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -120,6 +121,8 @@ export function CuadreEditor({
   const saldo = useMemo(() => computeSaldoFinal(valores), [valores]);
   const suma = useMemo(() => sumaComponentes(valores), [valores]);
   const descuadre = isDescuadre(saldo);
+  // Día recién abierto y sin tirilla: no se habla de sobra ni de falta todavía.
+  const sinEmpezar = vals.total_tirilla === 0 && !existente;
   // Efectivo que entró por consignaciones (Nequi + Bancolombia, pagadas en efectivo).
   const consignacionesCash = vals.nequis + vals.bancolombia + vals.recaudos;
   const esperadoCaja = useMemo(
@@ -479,7 +482,7 @@ export function CuadreEditor({
 
       {/* ====== Columna de resultado ====== */}
       <div className="flex flex-col gap-4 lg:sticky lg:top-8">
-        <SaldoHero saldo={saldo} descuadre={descuadre} estado={estado} />
+        <SaldoHero saldo={saldo} descuadre={descuadre} estado={estado} sinEmpezar={sinEmpezar} />
 
         <Card className="p-5">
           <p className="mb-3 text-[0.78rem] font-medium uppercase tracking-wide text-faint">Cómo cuadra</p>
@@ -604,38 +607,53 @@ function SaldoHero({
   saldo,
   descuadre,
   estado,
+  sinEmpezar,
 }: {
   saldo: number;
   descuadre: boolean;
   estado: EstadoCuadre;
+  /** Sin tirilla escrita: el saldo aún no significa nada, no es un descuadre. */
+  sinEmpezar: boolean;
 }) {
   const faltan = saldo > 0;
   return (
     <Card
       className={cn(
         "relative overflow-hidden p-6 transition-colors",
-        descuadre ? "border-danger/40" : "border-success/40",
+        sinEmpezar ? "border-line-strong" : descuadre ? "border-danger/40" : "border-success/40",
       )}
     >
       <div className="relative">
         <div className="flex items-center justify-between">
           <p className="text-[0.78rem] font-medium uppercase tracking-wide text-faint">Saldo final</p>
-          <Badge tone={descuadre ? "danger" : "success"}>
-            {descuadre ? <Warning size={12} weight="fill" /> : <CheckCircle size={12} weight="fill" />}
-            {descuadre ? "Descuadre" : "Cuadrado"}
+          <Badge tone={sinEmpezar ? "neutral" : descuadre ? "danger" : "success"}>
+            {sinEmpezar ? (
+              <Receipt size={12} weight="fill" />
+            ) : descuadre ? (
+              <Warning size={12} weight="fill" />
+            ) : (
+              <CheckCircle size={12} weight="fill" />
+            )}
+            {sinEmpezar ? "Sin tirilla" : descuadre ? "Descuadre" : "Cuadrado"}
           </Badge>
         </div>
         <div className="mt-3">
-          <SaldoVivo saldo={saldo} descuadre={descuadre} />
+          {sinEmpezar ? (
+            <p className="tnum text-4xl font-semibold tracking-tight text-faint">—</p>
+          ) : (
+            <SaldoVivo saldo={saldo} descuadre={descuadre} />
+          )}
         </div>
         <p className="mt-2 text-[0.82rem] leading-relaxed text-muted">
-          {descuadre
-            ? faltan
-              ? `Faltan ${formatCOP(saldo)} por registrar para que la tirilla cuadre.`
-              : `Sobran ${formatCOP(Math.abs(saldo))} sin justificar. Revisa los movimientos del día.`
-            : estado === "cerrado"
-              ? "El día cerró perfecto. Nada pendiente."
-              : "Todo cuadra. Puedes cerrar el día."}
+          {sinEmpezar
+            ? "Escribe el total de la tirilla para ver si el día cuadra."
+            : descuadre
+              ? faltan
+                ? `Faltan ${formatCOP(saldo)} por registrar para que la tirilla cuadre.`
+                : `Sobran ${formatCOP(Math.abs(saldo))} sin justificar. Revisa los movimientos del día.`
+              : estado === "cerrado"
+                ? "El día cerró perfecto. Nada pendiente."
+                : "Todo cuadra. Puedes cerrar el día."}
         </p>
       </div>
     </Card>

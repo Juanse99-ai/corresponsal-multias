@@ -16,7 +16,7 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import { Logo } from "@/components/brand";
 import { cn } from "@/lib/utils";
-import { formatCOP, formatFechaLarga, hoyISO, formatFecha } from "@/lib/format";
+import { formatCOP, formatFechaLarga, hoyISO, formatFecha, anioBogota } from "@/lib/format";
 import type { HeaderResumen } from "@/lib/queries";
 
 type Tone = "danger" | "warn" | "info" | "ok";
@@ -39,6 +39,15 @@ export function buildAvisos(resumen: HeaderResumen): Aviso[] {
       tone: resumen.tarde ? "danger" : "warn",
       title: resumen.tarde ? "Falta cerrar el día" : "Cuadre de hoy sin abrir",
       detail: resumen.tarde ? "Ya es tarde y el cuadre sigue sin abrir." : "Ábrelo cuando tengas la tirilla.",
+      href: "/cuadre",
+    });
+  } else if (c.total_tirilla === 0) {
+    // Sin tirilla escrita el saldo es un número provisional, no un descuadre.
+    out.push({
+      id: "cuadre",
+      tone: "info",
+      title: "Falta la tirilla de hoy",
+      detail: "Escribe el total de la tirilla para ver si el día cuadra.",
       href: "/cuadre",
     });
   } else if (Math.round(c.saldo_final) !== 0) {
@@ -90,14 +99,14 @@ function parseFechaISO(raw: string): string | null {
   if (m) {
     const d = m[1].padStart(2, "0");
     const mo = m[2].padStart(2, "0");
-    const y = m[3] ? (m[3].length === 2 ? "20" + m[3] : m[3]) : String(new Date().getFullYear());
+    const y = m[3] ? (m[3].length === 2 ? "20" + m[3] : m[3]) : String(anioBogota());
     return `${y}-${mo}-${d}`;
   }
   m = q.match(/^(\d{1,2})\s+([a-zé]{3})\.?(?:\s+(\d{4}))?$/);
   if (m && MESES[m[2]]) {
     const d = m[1].padStart(2, "0");
     const mo = String(MESES[m[2]]).padStart(2, "0");
-    const y = m[3] ?? String(new Date().getFullYear());
+    const y = m[3] ?? String(anioBogota());
     return `${y}-${mo}-${d}`;
   }
   return null;

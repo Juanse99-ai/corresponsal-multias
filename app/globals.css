@@ -350,6 +350,17 @@ button:hover > .lg-liquid-clear {
   100%   { transform: translateX(0); }
 }
 
+/* Barras del gráfico de cierres: crecen desde la base. En CSS y no en Framer
+   porque dentro de un árbol con variantes la animación del hijo no dispara. */
+.t-bar-rise {
+  transform-origin: bottom;
+  animation: t-bar-rise var(--duration-slow) var(--ease-smooth-out) both;
+}
+@keyframes t-bar-rise {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
 /* Skeleton de carga: fantasmas grises que pulsan mientras el servidor responde. */
 .t-skel-pulse {
   animation: t-skel-pulse var(--pulse-dur) ease-in-out infinite;
