@@ -183,12 +183,13 @@ export function PrestamosDia({
 
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-2 sm:col-span-2">
-              <Label>A quién</Label>
-              <div className="flex flex-wrap gap-2">
+              <Label id="grp-persona-dia">A quién</Label>
+              <div role="group" aria-labelledby="grp-persona-dia" className="flex flex-wrap gap-2">
                 {[...PERSONAS_PRESET, "Otro"].map((p) => (
                   <button
                     key={p}
                     type="button"
+                    aria-pressed={persona === p}
                     onClick={() => setPersona(p)}
                     className={cn(
                       "rounded-full border px-3 py-1.5 text-[0.8rem] font-medium transition-colors",
@@ -251,7 +252,7 @@ export function PrestamosDia({
           </div>
 
           <div className="mt-4 flex flex-col gap-2">
-            <Label>¿Cómo se lo diste?</Label>
+            <Label id="grp-medio-dia">¿Cómo se lo diste?</Label>
             <div className="flex gap-2">
               {(["efectivo", "transferencia"] as const).map((m) => (
                 <button
@@ -318,14 +319,10 @@ export function PrestamosDia({
                       key={d.id}
                       layout
                       initial={{ opacity: 0, y: -8 }}
-                      animate={
-                        nuevo
-                          ? { opacity: 1, y: 0, backgroundColor: ["rgba(29,158,117,0.2)", "rgba(29,158,117,0)"] }
-                          : { opacity: 1, y: 0 }
-                      }
+                      animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, height: 0 }}
-                      transition={{ type: "spring", stiffness: 320, damping: 30, backgroundColor: { duration: 1.2, ease: "easeOut" } }}
-                      className="rounded-lg py-2.5"
+                      transition={{ type: "spring", stiffness: 320, damping: 30 }}
+                      className={cn("rounded-lg py-2.5", nuevo && "t-flash-ok")}
                     >
                       {editId === d.id ? (
                         <div className="flex flex-col gap-2.5">

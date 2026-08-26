@@ -3,13 +3,14 @@
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Trash, PencilSimple, Clock,ArrowDown, Receipt } from "@phosphor-icons/react/dist/ssr";
+import { Plus, Trash, PencilSimple, Clock, ArrowDown, Receipt, CheckCircle } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { MoneyInput } from "@/components/ui/money-input";
 import { AnimatedMoney } from "@/components/ui/animated-number";
+import { cn } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
 import { formatCOP, formatHora, horaBogotaHHMM } from "@/lib/format";
 import { reduced } from "@/components/fx/reduced";
@@ -47,6 +48,8 @@ export function MovimientosSection({
   const [hora, setHora] = useState(horaBogotaHHMM);
   const [nota, setNota] = useState("");
   const [error, setError] = useState<string | null>(null);
+  // Acuse visible: el destello de fila dura un segundo y con reduced-motion no existe.
+  const [okMsg, setOkMsg] = useState<string | null>(null);
 
   const [editId, setEditId] = useState<string | null>(null);
   const [eMonto, setEMonto] = useState(0);
@@ -60,15 +63,22 @@ export function MovimientosSection({
   const total = items.reduce((s, c) => s + c.monto, 0);
   const Icon = tono === "consig" ? ArrowDown : Receipt;
 
+  function avisarOk(texto: string) {
+    setOkMsg(texto);
+    setTimeout(() => setOkMsg(null), 4000);
+  }
+
   function registrar() {
     if (monto <= 0) return setError("Ingresa un monto mayor a cero.");
     setError(null);
+    setOkMsg(null);
     startTransition(async () => {
       const res = await agregar({ fecha, monto, hora: hora || null, nota: nota || null });
       if (res.ok) {
         setMonto(0);
         setNota("");
         setHora(horaBogotaHHMM());
+        avisarOk("Movimiento agregado.");
         router.refresh();
       } else {
         setError(res.error ?? "No se pudo registrar.");
@@ -109,6 +119,7 @@ export function MovimientosSection({
       const res = await editar({ id: editId, monto: eMonto, hora: eHora || null, nota: eNota || null });
       if (res.ok) {
         setEditId(null);
+        avisarOk("Cambio guardado.");
         router.refresh();
       } else {
         setError(res.error ?? "No se pudo editar.");
@@ -150,6 +161,16 @@ export function MovimientosSection({
 
       <ErrorNotice message={error} className="mt-3" />
 
+      {okMsg && (
+        <div
+          role="status"
+          className="mt-3 flex items-center gap-2 rounded-card border border-success/30 bg-success-soft px-3 py-2 text-[0.8rem] text-success"
+        >
+          <CheckCircle size={15} weight="fill" />
+          {okMsg}
+        </div>
+      )}
+
       <Button onClick={registrar} disabled={pending} className="mt-4 w-full sm:w-auto sm:self-start">
         <Plus size={16} weight="bold" />
         {pending ? "Guardando…" : "Agregar"}
@@ -170,14 +191,10 @@ export function MovimientosSection({
                 key={c.id}
                 layout
                 initial={{ opacity: 0, y: -8 }}
-                animate={
-                  nuevo
-                    ? { opacity: 1, y: 0, backgroundColor: ["rgba(29,158,117,0.2)", "rgba(29,158,117,0)"] }
-                    : { opacity: 1, y: 0 }
-                }
+                animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, height: 0 }}
-                transition={{ type: "spring", stiffness: 320, damping: 30, backgroundColor: { duration: 1.2, ease: "easeOut" } }}
-                className="rounded-lg py-2.5"
+                transition={{ type: "spring", stiffness: 320, damping: 30 }}
+                className={cn("rounded-lg py-2.5", nuevo && "t-flash-ok")}
               >
                 {editId === c.id ? (
                   <div className="flex flex-col gap-2.5">

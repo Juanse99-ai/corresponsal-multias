@@ -2,7 +2,7 @@
 
 import { useId } from "react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { formatCOP } from "@/lib/format";
+import { formatCOP, formatCompactCOP } from "@/lib/format";
 
 export interface PuntoTendencia {
   /** Fecha ISO (yyyy-mm-dd). */
@@ -15,15 +15,6 @@ const MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "o
 function etiquetaDia(iso: string): string {
   const [, m, d] = iso.split("-");
   return `${Number(d)} ${MESES[Number(m) - 1] ?? ""}`;
-}
-
-/** Eje Y compacto: $12,5 M en vez de $12.477.000. */
-function compacto(n: number): string {
-  const abs = Math.abs(n);
-  const sign = n < 0 ? "-" : "";
-  if (abs >= 1_000_000) return `${sign}$${(abs / 1_000_000).toLocaleString("es-CO", { maximumFractionDigits: 1 })} M`;
-  if (abs >= 1_000) return `${sign}$${Math.round(abs / 1_000)} mil`;
-  return `${sign}$${abs}`;
 }
 
 function TooltipCOP({
@@ -91,7 +82,7 @@ export function AreaTendencia({
             tickLine={false}
             axisLine={false}
             tick={{ fill: "var(--faint)", fontSize: 11 }}
-            tickFormatter={compacto}
+            tickFormatter={formatCompactCOP}
           />
           <Tooltip content={<TooltipCOP nombre={nombre} />} cursor={{ stroke: "var(--line-strong)" }} />
           <Area
