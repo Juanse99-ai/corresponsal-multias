@@ -329,7 +329,7 @@ export function BitacoraView({ entries }: { entries: AuditEntry[] }) {
           <div key={dia} className="flex flex-col gap-1.5">
             <div className="flex items-center justify-between px-1">
               <h3 className="text-[0.8rem] font-semibold text-muted">{labelDia(dia)}</h3>
-              <span className="text-[0.72rem] text-faint">{items.length} mov.</span>
+              <span className="text-[0.72rem] text-faint">{items.length} {items.length === 1 ? "movimiento" : "movimientos"}</span>
             </div>
             <Card className="p-1.5 sm:p-2">
               <ul className="flex flex-col divide-y divide-line">

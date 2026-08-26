@@ -12,7 +12,8 @@ import { despedidaDelDia } from "@/lib/saludos";
 
 gsap.registerPlugin(DrawSVGPlugin, SplitText);
 
-const COLORES = ["oklch(0.515 0.172 258)", "oklch(0.64 0.15 255)", "#1d9e75", "#9FE1CB", "oklch(0.95 0.01 255)"];
+// Todo en tokens de marca: azules del acento, el verde de "cuadrado" y un neutro.
+const COLORES = ["oklch(0.515 0.172 258)", "oklch(0.64 0.15 255)", "oklch(0.585 0.13 155)", "oklch(0.74 0.10 155)", "oklch(0.95 0.01 255)"];
 
 /** Despedida al cerrar el día: confeti + check si quedó cuadrado, mensaje cálido.
  *  Se queda hasta que la persona toca/presiona (no se cierra sola). */
@@ -110,8 +111,8 @@ export function CelebracionCierre({ play, nombre, cuadrado }: { play: number; no
         >
           {cuadrado ? (
             <svg viewBox="0 0 100 100" className="h-20 w-20">
-              <circle className="cc-ring" cx="50" cy="50" r="42" fill="none" stroke="#1d9e75" strokeWidth="5" strokeLinecap="round" />
-              <path className="cc-check" d="M30 51 L44 65 L71 35" fill="none" stroke="#1d9e75" strokeWidth="6.5" strokeLinecap="round" strokeLinejoin="round" />
+              <circle className="cc-ring" cx="50" cy="50" r="42" fill="none" stroke="oklch(0.585 0.13 155)" strokeWidth="5" strokeLinecap="round" />
+              <path className="cc-check" d="M30 51 L44 65 L71 35" fill="none" stroke="oklch(0.585 0.13 155)" strokeWidth="6.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           ) : (
             <MoonStars size={40} weight="fill" />

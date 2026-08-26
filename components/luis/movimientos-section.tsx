@@ -12,6 +12,7 @@ import { MoneyInput } from "@/components/ui/money-input";
 import { AnimatedMoney } from "@/components/ui/animated-number";
 import { cn } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatCOP, formatHora, horaBogotaHHMM } from "@/lib/format";
 import { reduced } from "@/components/fx/reduced";
 
@@ -50,6 +51,8 @@ export function MovimientosSection({
   const [error, setError] = useState<string | null>(null);
   // Acuse visible: el destello de fila dura un segundo y con reduced-motion no existe.
   const [okMsg, setOkMsg] = useState<string | null>(null);
+  // Confirmación propia en vez de window.confirm (que en la PWA de iOS corta del todo).
+  const [porBorrar, setPorBorrar] = useState<MovimientoItem | null>(null);
 
   const [editId, setEditId] = useState<string | null>(null);
   const [eMonto, setEMonto] = useState(0);
@@ -86,19 +89,17 @@ export function MovimientosSection({
     });
   }
 
-  function borrar(c: MovimientoItem) {
-    if (
-      !window.confirm(
-        `¿Borrar este movimiento de ${formatCOP(c.monto)}? Cambia el saldo de Luis y el cuadre del día.`,
-      )
-    )
-      return;
+  function confirmarBorrado() {
+    const c = porBorrar;
+    setPorBorrar(null);
+    if (!c) return;
     startTransition(async () => {
       const res = await eliminar(c.id);
       if (res && !res.ok) {
         setError(res.error ?? "No se pudo eliminar.");
         return;
       }
+      avisarOk("Movimiento borrado.");
       router.refresh();
     });
   }
@@ -138,7 +139,7 @@ export function MovimientosSection({
           <p className="tnum text-lg font-semibold text-text">
             <AnimatedMoney value={total} />
           </p>
-          <p className="text-[0.68rem] text-faint">{items.length} mov.</p>
+          <p className="text-[0.68rem] text-faint">{items.length} {items.length === 1 ? "movimiento" : "movimientos"}</p>
         </div>
       </div>
 
@@ -243,7 +244,7 @@ export function MovimientosSection({
                         <PencilSimple size={14} />
                       </button>
                       <button
-                        onClick={() => borrar(c)}
+                        onClick={() => setPorBorrar(c)}
                         disabled={pending}
                         className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
                         title="Eliminar" aria-label="Eliminar"
@@ -259,6 +260,15 @@ export function MovimientosSection({
           </AnimatePresence>
         </ul>
       )}
+
+      <ConfirmDialog
+        open={!!porBorrar}
+        titulo="¿Borrar este movimiento?"
+        monto={porBorrar?.monto ?? null}
+        detalle="Cambia el saldo de Sr. Luis y el cuadre del día."
+        onConfirmar={confirmarBorrado}
+        onCancelar={() => setPorBorrar(null)}
+      />
     </Card>
   );
 }

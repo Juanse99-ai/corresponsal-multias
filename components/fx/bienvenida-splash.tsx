@@ -38,16 +38,23 @@ const ESTRELLA = "M50 6 L62 38 L96 39 L69 60 L79 93 L50 73 L21 93 L31 60 L4 39 L
 const SECUENCIA = [FLOR, CARRO, CORAZON, ESTRELLA];
 
 // Cada forma: color, posición (%), tamaño (%), forma inicial (índice en SECUENCIA).
+// Paleta de marca: azules del acento, el verde de "cuadrado" y un neutro claro.
+// Antes traía fucsia, ámbar, naranja y morado, colores que no existen en el tema.
+const AZUL = "oklch(0.515 0.172 258)";
+const AZUL_CLARO = "oklch(0.66 0.14 255)";
+const AZUL_PALIDO = "oklch(0.80 0.08 258)";
+const VERDE = "oklch(0.585 0.13 155)";
+const NEUTRO = "oklch(0.93 0.012 258)";
 const PLACES: { c: string; x: number; y: number; w: number; s: number }[] = [
-  { c: "#ff4fa3", x: 12, y: 14, w: 9, s: 0 },
-  { c: "#4f9cf9", x: 32, y: 9, w: 11, s: 1 },
-  { c: "#ffd21a", x: 84, y: 12, w: 9, s: 3 },
-  { c: "#3ddc84", x: 90, y: 44, w: 9, s: 0 },
-  { c: "#ff7a1a", x: 86, y: 80, w: 10, s: 1 },
-  { c: "#b06cf0", x: 10, y: 50, w: 9, s: 2 },
-  { c: "#ff4fa3", x: 14, y: 84, w: 8, s: 3 },
-  { c: "#4f9cf9", x: 50, y: 91, w: 8, s: 2 },
-  { c: "#ffd21a", x: 6, y: 40, w: 9, s: 0 },
+  { c: AZUL, x: 12, y: 14, w: 9, s: 0 },
+  { c: AZUL_CLARO, x: 32, y: 9, w: 11, s: 1 },
+  { c: NEUTRO, x: 84, y: 12, w: 9, s: 3 },
+  { c: VERDE, x: 90, y: 44, w: 9, s: 0 },
+  { c: AZUL_PALIDO, x: 86, y: 80, w: 10, s: 1 },
+  { c: AZUL, x: 10, y: 50, w: 9, s: 2 },
+  { c: AZUL_CLARO, x: 14, y: 84, w: 8, s: 3 },
+  { c: AZUL_PALIDO, x: 50, y: 91, w: 8, s: 2 },
+  { c: NEUTRO, x: 6, y: 40, w: 9, s: 0 },
 ];
 
 /** Bienvenida a pantalla completa: app borrosa detrás, formas (flor/carro/corazón/estrella)

@@ -24,6 +24,7 @@ import { MoneyInput } from "@/components/ui/money-input";
 import { AnimatedMoney } from "@/components/ui/animated-number";
 import { cn } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatCOP, formatHora } from "@/lib/format";
 import type { MovimientoRow } from "@/lib/database.types";
 import { agregarMovimiento, eliminarMovimiento, editarMovimiento } from "@/app/(app)/movimientos/actions";
@@ -59,6 +60,7 @@ export function MovimientosManager({
   const [cliente, setCliente] = useState("");
   const [convenio, setConvenio] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [porBorrar, setPorBorrar] = useState<{ id: string; monto: number } | null>(null);
 
   // Edición inline de un movimiento existente.
   const [editId, setEditId] = useState<string | null>(null);
@@ -95,7 +97,7 @@ export function MovimientosManager({
   }
 
   function borrar(id: string) {
-    if (!window.confirm("¿Borrar este movimiento? Queda registrado en la Bitácora.")) return;
+    setPorBorrar(null);
     startTransition(async () => {
       const res = await eliminarMovimiento(id);
       if (res && !res.ok) setError(res.error ?? "No se pudo borrar.");
@@ -307,7 +309,7 @@ export function MovimientosManager({
                             )}
                             {isAdmin && (
                               <button
-                                onClick={() => borrar(m.id)}
+                                onClick={() => setPorBorrar({ id: m.id, monto: m.monto })}
                                 disabled={pending || bloqueado}
                                 className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
                                 title="Eliminar" aria-label="Eliminar"
@@ -356,6 +358,15 @@ export function MovimientosManager({
           </Card>
         </Link>
       </div>
+
+      <ConfirmDialog
+        open={!!porBorrar}
+        titulo="¿Borrar este movimiento?"
+        monto={porBorrar?.monto ?? null}
+        detalle="Queda registrado en la Bitácora."
+        onConfirmar={() => porBorrar && borrar(porBorrar.id)}
+        onCancelar={() => setPorBorrar(null)}
+      />
     </div>
   );
 }

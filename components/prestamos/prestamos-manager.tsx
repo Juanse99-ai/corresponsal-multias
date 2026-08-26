@@ -20,6 +20,7 @@ import { MoneyInput } from "@/components/ui/money-input";
 import { AnimatedMoney } from "@/components/ui/animated-number";
 import { cn } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatCOP, formatFecha, hoyISO } from "@/lib/format";
 import { PERSONAS_PRESET } from "@/lib/personas";
 import type { DeudaConSaldo, PersonaGrupo } from "@/lib/queries";
@@ -368,6 +369,8 @@ function PersonaCard({
           />
         </button>
 
+        {/* Sin abonos la barra es un riel gris decorativo: no se dibuja. */}
+        {(grupo.abonado > 0 || alDia) && (
         <div className="mx-4 mb-4 h-1.5 overflow-hidden rounded-full bg-surface-2 sm:mx-5 sm:mb-5">
           <motion.div
             className={cn("h-full rounded-full", alDia ? "bg-success" : "bg-accent")}
@@ -376,6 +379,7 @@ function PersonaCard({
             transition={{ type: "spring", stiffness: 120, damping: 22 }}
           />
         </div>
+        )}
 
         <AnimatePresence initial={false}>
           {open && (
@@ -406,6 +410,8 @@ function DeudaRow({ deuda, isAdmin }: { deuda: DeudaConSaldo; isAdmin: boolean }
   const [historyOpen, setHistoryOpen] = useState(false);
   const [abono, setAbono] = useState(0);
   const [err, setErr] = useState<string | null>(null);
+  // Confirmación propia para las dos acciones destructivas de la fila.
+  const [confirmando, setConfirmando] = useState<null | "borrar" | "reabrir">(null);
 
   const pct = deuda.monto > 0 ? Math.min(100, (deuda.abonado / deuda.monto) * 100) : 0;
   const saldada = deuda.saldo <= 0;
@@ -426,12 +432,7 @@ function DeudaRow({ deuda, isAdmin }: { deuda: DeudaConSaldo; isAdmin: boolean }
   }
 
   function borrar() {
-    if (
-      !window.confirm(
-        `¿Borrar el préstamo de ${deuda.persona} por ${formatCOP(deuda.monto)}? Se elimina junto con todos sus abonos. No se puede deshacer.`,
-      )
-    )
-      return;
+    setConfirmando(null);
     setErr(null);
     startTransition(async () => {
       const res = await eliminarDeuda(deuda.id);
@@ -444,7 +445,7 @@ function DeudaRow({ deuda, isAdmin }: { deuda: DeudaConSaldo; isAdmin: boolean }
   }
 
   function reabrir() {
-    if (!window.confirm("¿Deshacer el último pago? El préstamo vuelve a quedar pendiente.")) return;
+    setConfirmando(null);
     setErr(null);
     startTransition(async () => {
       const res = await reabrirPrestamo(deuda.id);
@@ -473,7 +474,9 @@ function DeudaRow({ deuda, isAdmin }: { deuda: DeudaConSaldo; isAdmin: boolean }
             <p className={cn("tnum text-[0.95rem] font-semibold", saldada ? "text-success" : "text-text")}>
               {saldada ? formatCOP(0) : formatCOP(deuda.saldo)}
             </p>
-            <p className="text-[0.68rem] text-faint">de {formatCOP(deuda.monto)}</p>
+            {deuda.abonado > 0 && (
+              <p className="text-[0.68rem] text-faint">de {formatCOP(deuda.monto)}</p>
+            )}
           </div>
         </div>
 
@@ -485,7 +488,7 @@ function DeudaRow({ deuda, isAdmin }: { deuda: DeudaConSaldo; isAdmin: boolean }
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {saldada ? (
-            <Button size="sm" variant="secondary" onClick={reabrir} disabled={pending}>
+            <Button size="sm" variant="secondary" onClick={() => setConfirmando("reabrir")} disabled={pending}>
               <ArrowCounterClockwise size={15} weight="bold" />
               Reabrir
             </Button>
@@ -505,7 +508,7 @@ function DeudaRow({ deuda, isAdmin }: { deuda: DeudaConSaldo; isAdmin: boolean }
           )}
           {isAdmin && (
             <button
-              onClick={borrar}
+              onClick={() => setConfirmando("borrar")}
               disabled={pending}
               title="Eliminar préstamo" aria-label="Eliminar préstamo"
               className="ml-auto flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
@@ -559,6 +562,20 @@ function DeudaRow({ deuda, isAdmin }: { deuda: DeudaConSaldo; isAdmin: boolean }
             </motion.div>
           )}
         </AnimatePresence>
+
+      <ConfirmDialog
+        open={confirmando !== null}
+        titulo={confirmando === "reabrir" ? "¿Deshacer el último pago?" : "¿Borrar este préstamo?"}
+        monto={confirmando === "borrar" ? deuda.monto : null}
+        detalle={
+          confirmando === "reabrir"
+            ? "El préstamo vuelve a quedar pendiente."
+            : `De ${deuda.persona}. Se elimina junto con todos sus abonos y no se puede deshacer.`
+        }
+        confirmar={confirmando === "reabrir" ? "Sí, deshacer" : "Sí, borrar"}
+        onConfirmar={confirmando === "reabrir" ? reabrir : borrar}
+        onCancelar={() => setConfirmando(null)}
+      />
     </li>
   );
 }

@@ -4,7 +4,6 @@ import { Wallet, TrendUp } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AnimatedMoney } from "@/components/ui/animated-number";
-import { cn } from "@/lib/utils";
 import { formatCOP } from "@/lib/format";
 import type { ConsignacionLuisRow, CompensacionLuisRow } from "@/lib/database.types";
 import { MovimientosSection } from "@/components/luis/movimientos-section";
