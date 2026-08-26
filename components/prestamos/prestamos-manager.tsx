@@ -120,7 +120,9 @@ function AddDeudaForm() {
   const [concepto, setConcepto] = useState("Préstamo personal");
   const [conceptoOtro, setConceptoOtro] = useState("");
   const [monto, setMonto] = useState(0);
-  const [medio, setMedio] = useState<"efectivo" | "transferencia" | "registro">("transferencia");
+  // Sin premarcar: el medio decide si la plata sale del arqueo o de la tirilla,
+  // y ningún valor domina lo suficiente para arriesgar un registro por inercia.
+  const [medio, setMedio] = useState<"efectivo" | "transferencia" | "registro" | null>(null);
   const [descripcion, setDescripcion] = useState("");
   const [fecha, setFecha] = useState(hoyISO());
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
@@ -133,6 +135,7 @@ function AddDeudaForm() {
     if (monto <= 0) return setMsg({ ok: false, text: "Ingresa un monto." });
     if (concepto === "Otro" && !conceptoOtro.trim()) return setMsg({ ok: false, text: "Especifica el concepto." });
     if (!descripcion.trim()) return setMsg({ ok: false, text: "Escribe el motivo (para qué fue el préstamo)." });
+    if (!medio) return setMsg({ ok: false, text: "Indica cómo se lo diste: efectivo, transferencia o solo registro." });
     setMsg(null);
     startTransition(async () => {
       const res = await crearDeuda({
@@ -146,6 +149,9 @@ function AddDeudaForm() {
       if (res.ok) {
         setMonto(0);
         setDescripcion("");
+        setOtro("");
+        setConceptoOtro("");
+        setMedio(null);
         setMsg({ ok: true, text: "Préstamo registrado." });
         router.refresh();
       } else {
@@ -256,7 +262,7 @@ function AddDeudaForm() {
           <p className="text-[0.7rem] text-faint">
             {medio === "registro"
               ? "Queda como préstamo por cobrar, pero no entra ni a la tirilla ni a la caja."
-              : "Transferencia entra al cuadre; efectivo va al arqueo."}
+              : "Transferencia entra al cuadre; efectivo va al arqueo de caja."}
           </p>
         </div>
 
