@@ -13,6 +13,7 @@ import {
   HandCoins,
   ArrowRight,
   List,
+  X,
 } from "@phosphor-icons/react/dist/ssr";
 import { Logo } from "@/components/brand";
 import { cn } from "@/lib/utils";
@@ -123,7 +124,7 @@ export function TopHeader({
 }) {
   const avisos = useMemo(() => buildAvisos(resumen), [resumen]);
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-line bg-bg/80 px-3 py-2.5 backdrop-blur-xl sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-line bg-bg/80 px-3 py-2.5 backdrop-blur-xl sm:px-6 lg:px-8 relative">
       <div className="flex items-center gap-2.5 sm:gap-3.5">
         <button
           onClick={onOpenMenu}
@@ -140,9 +141,7 @@ export function TopHeader({
         <span className="ml-1 hidden text-[0.82rem] text-muted lg:block">{formatFechaLarga(hoyISO())}</span>
       </div>
       <div className="flex items-center gap-2.5">
-        <div className="hidden sm:block">
-          <HeaderSearch personas={isAdmin ? resumen.personas : []} />
-        </div>
+        <HeaderSearch personas={isAdmin ? resumen.personas : []} />
         <HeaderAvisos avisos={avisos} urgentes={avisosUrgentes(avisos)} />
       </div>
     </header>
@@ -153,6 +152,9 @@ function HeaderSearch({ personas }: { personas: string[] }) {
   const router = useRouter();
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
+  // En celular el buscador vive detrás de una lupa y se abre a todo el ancho.
+  const [movil, setMovil] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
   const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fechaISO = parseFechaISO(q);
@@ -164,13 +166,21 @@ function HeaderSearch({ personas }: { personas: string[] }) {
 
   const hayResultados = !!fechaISO || personasMatch.length > 0;
 
+  function cerrarMovil() {
+    setMovil(false);
+    setOpen(false);
+    setQ("");
+  }
+
   function irAFecha(iso: string) {
     setOpen(false);
+    setMovil(false);
     setQ("");
     router.push(`/cuadre?fecha=${iso}`);
   }
   function irAPersona() {
     setOpen(false);
+    setMovil(false);
     setQ("");
     router.push("/prestamos");
   }
@@ -182,15 +192,39 @@ function HeaderSearch({ personas }: { personas: string[] }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="relative">
+    <>
+      {/* Celular: lupa de 44x44. El buscador completo se abre encima del encabezado. */}
+      <button
+        type="button"
+        onClick={() => {
+          setMovil(true);
+          requestAnimationFrame(() => inputRef.current?.focus());
+        }}
+        aria-label="Buscar día o persona"
+        className={cn(
+          "flex h-11 w-11 items-center justify-center rounded-full border border-line bg-surface text-muted transition-colors hover:bg-surface-2 sm:hidden",
+          movil && "invisible",
+        )}
+      >
+        <MagnifyingGlass size={18} />
+      </button>
+
+    <form
+      onSubmit={onSubmit}
+      className={cn(
+        "relative",
+        movil ? "absolute inset-x-3 top-2.5 z-30 sm:static sm:inset-auto" : "hidden sm:block",
+      )}
+    >
       <div
         className={cn(
-          "flex h-10 items-center gap-2 rounded-[0.7rem] border bg-surface px-3 transition-colors sm:w-[240px]",
+          "flex h-11 items-center gap-2 rounded-[0.7rem] border bg-surface px-3 transition-colors sm:h-10 sm:w-[240px]",
           open ? "border-accent/50 bg-surface" : "border-line",
         )}
       >
         <MagnifyingGlass size={16} className="shrink-0 text-faint" />
         <input
+          ref={inputRef}
           value={q}
           onChange={(e) => setQ(e.target.value)}
           onFocus={() => setOpen(true)}
@@ -198,8 +232,20 @@ function HeaderSearch({ personas }: { personas: string[] }) {
             blurTimer.current = setTimeout(() => setOpen(false), 120);
           }}
           placeholder="Buscar día, persona…"
-          className="w-28 bg-transparent text-[0.82rem] text-text outline-none placeholder:text-faint sm:w-full"
+          aria-label="Buscar día o persona"
+          /* text-base en celular: con menos de 16px iOS hace zoom al enfocar. */
+          className="w-full min-w-0 bg-transparent text-base text-text outline-none placeholder:text-faint sm:text-[0.82rem]"
         />
+        {movil && (
+          <button
+            type="button"
+            onClick={cerrarMovil}
+            aria-label="Cerrar buscador"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-faint transition-colors hover:text-text sm:hidden"
+          >
+            <X size={16} weight="bold" />
+          </button>
+        )}
       </div>
 
       <AnimatePresence>
@@ -248,6 +294,7 @@ function HeaderSearch({ personas }: { personas: string[] }) {
         )}
       </AnimatePresence>
     </form>
+    </>
   );
 }
 

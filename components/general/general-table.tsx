@@ -61,8 +61,58 @@ export function GeneralTable({ entries }: { entries: GeneralRow[] }) {
           Excel
         </Button>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[900px] text-sm">
+      {/* Celular: una ficha por día. Nueve columnas no caben en un teléfono. */}
+      <div className="flex flex-col gap-3 md:hidden">
+        {entries.map((e) => {
+          const total = computeSaldoTotal(e);
+          return (
+            <Card
+              key={e.id}
+              className={cn("p-4", total < 0 && "border-danger/35")}
+              role="link"
+              tabIndex={0}
+              onClick={() => router.push(`/general?fecha=${e.fecha}`)}
+              onKeyDown={(ev) => {
+                if (ev.key === "Enter" || ev.key === " ") {
+                  ev.preventDefault();
+                  router.push(`/general?fecha=${e.fecha}`);
+                }
+              }}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <p className="text-[0.95rem] font-semibold text-text">{formatFecha(e.fecha)}</p>
+                <div className="shrink-0 text-right">
+                  <p className="text-[0.66rem] uppercase tracking-wide text-faint">Saldo total</p>
+                  <p className={cn("tnum text-[1.35rem] font-semibold", total < 0 ? "text-danger" : "text-text")}>
+                    {formatCOP(total)}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-x-3.5 gap-y-2 border-t border-line pt-3 text-[0.8rem]">
+                <div className="flex min-w-0 items-baseline justify-between gap-2">
+                  <span className="text-faint">Saldo Luis</span>
+                  <span className="tnum text-text">{formatCOP(e.saldo_luis)}</span>
+                </div>
+                <div className="flex min-w-0 items-baseline justify-between gap-2">
+                  <span className="text-faint">Cupo</span>
+                  <span className="tnum text-text">{formatCOP(e.cupo_disponible)}</span>
+                </div>
+                <div className="flex min-w-0 items-baseline justify-between gap-2">
+                  <span className="text-faint">Efectivo</span>
+                  <span className="tnum text-text">{formatCOP(e.efectivo)}</span>
+                </div>
+                <div className="flex min-w-0 items-baseline justify-between gap-2">
+                  <span className="text-faint">Deudas</span>
+                  <span className="tnum text-text">{formatCOP(e.deudas_terceros)}</span>
+                </div>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+
+      <div className="hidden md:block">
+        <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-line text-left text-[0.7rem] uppercase tracking-wide text-faint">
               <th className="px-5 py-3 font-medium">Fecha</th>
