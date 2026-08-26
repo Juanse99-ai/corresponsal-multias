@@ -215,14 +215,10 @@ export function MovimientosManager({
                       key={m.id}
                       layout
                       initial={{ opacity: 0, y: -8 }}
-                      animate={
-                        nuevo
-                          ? { opacity: 1, y: 0, backgroundColor: ["rgba(29,158,117,0.2)", "rgba(29,158,117,0)"] }
-                          : { opacity: 1, y: 0 }
-                      }
+                      animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, height: 0 }}
-                      transition={{ type: "spring", stiffness: 320, damping: 30, backgroundColor: { duration: 1.2, ease: "easeOut" } }}
-                      className="rounded-lg py-2.5"
+                      transition={{ type: "spring", stiffness: 320, damping: 30 }}
+                      className={cn("rounded-lg py-2.5", nuevo && "t-flash-ok")}
                     >
                       {editId === m.id ? (
                         <div className="flex flex-col gap-2.5">

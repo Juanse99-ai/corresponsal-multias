@@ -139,7 +139,7 @@ export function PanelView({ data }: { data: PanelData }) {
               <div className="relative flex h-full flex-col">
                 <div className="flex items-center gap-2 text-muted">
                   <Wallet size={18} weight="fill" className="text-accent" />
-                  <span className="text-[0.82rem] font-medium">Cupo de Luis hoy</span>
+                  <span className="text-[0.82rem] font-medium">Sr. Luis · hoy</span>
                 </div>
                 <div className="mt-8">
                   <p className="text-[0.74rem] uppercase tracking-wide text-faint">Consignado hoy</p>
@@ -148,7 +148,7 @@ export function PanelView({ data }: { data: PanelData }) {
                   </p>
                   <p className="mt-2 text-[0.82rem] text-muted">
                     {data.consignacionesHoyCount}{" "}
-                    {data.consignacionesHoyCount === 1 ? "consignación" : "consignaciones"} · saldo de Luis{" "}
+                    {data.consignacionesHoyCount === 1 ? "consignación" : "consignaciones"} · saldo de Sr. Luis{" "}
                     <span className="tnum text-text">{formatCOP(data.saldoLuisAcumulado)}</span>
                   </p>
                 </div>

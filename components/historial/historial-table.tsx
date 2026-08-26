@@ -133,7 +133,7 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
                   </div>
                   <div className="shrink-0 text-right">
                     <p className="text-[0.66rem] uppercase tracking-wide text-faint">Saldo final</p>
-                    <p className={cn("tnum text-[1.35rem] font-semibold", descuadre ? "text-danger" : "text-success")}>
+                    <p className={cn("tnum text-[1.35rem] font-semibold", descuadre ? "text-danger" : "text-text")}>
                       {formatCOP(c.saldo_final)}
                     </p>
                   </div>
@@ -200,7 +200,7 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
                       <td className="tnum px-3 py-3 text-right text-text">{formatCOP(c.total_tirilla)}</td>
                       <td className="tnum px-3 py-3 text-right text-muted">{formatCOP(c.sr_luis)}</td>
                       <td className="tnum px-3 py-3 text-right text-muted">{formatCOP(c.compensado)}</td>
-                      <td className={cn("tnum px-3 py-3 text-right font-semibold", descuadre ? "text-danger" : "text-success")}>
+                      <td className={cn("tnum px-3 py-3 text-right font-semibold", descuadre ? "text-danger" : "text-text")}>
                         {formatCOP(c.saldo_final)}
                       </td>
                       <td className="px-5 py-3 text-right">

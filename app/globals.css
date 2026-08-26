@@ -350,6 +350,16 @@ button:hover > .lg-liquid-clear {
   100%   { transform: translateX(0); }
 }
 
+/* Destello de fila recién agregada. Con el token --success en vez de un rgba
+   copiado a mano, así también se ve bien en tema oscuro. */
+.t-flash-ok {
+  animation: t-flash-ok 1.2s ease-out both;
+}
+@keyframes t-flash-ok {
+  from { background-color: color-mix(in oklch, var(--success) 22%, transparent); }
+  to   { background-color: transparent; }
+}
+
 /* Barras del gráfico de cierres: crecen desde la base. En CSS y no en Framer
    porque dentro de un árbol con variantes la animación del hijo no dispara. */
 .t-bar-rise {

@@ -166,12 +166,13 @@ function AddDeudaForm() {
 
       <div className="mt-5 flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <Label>Persona</Label>
-          <div className="flex flex-wrap gap-2">
+          <Label id="grp-persona">Persona</Label>
+          <div role="group" aria-labelledby="grp-persona" className="flex flex-wrap gap-2">
             {[...PERSONAS_PRESET, "Otro"].map((p) => (
               <button
                 key={p}
                 type="button"
+                aria-pressed={persona === p}
                 onClick={() => setPersona(p)}
                 className={cn(
                   "rounded-full border px-3 py-1.5 text-[0.8rem] font-medium transition-colors",
@@ -195,12 +196,13 @@ function AddDeudaForm() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label>Concepto</Label>
-          <div className="flex flex-wrap gap-2">
+          <Label id="grp-concepto">Concepto</Label>
+          <div role="group" aria-labelledby="grp-concepto" className="flex flex-wrap gap-2">
             {CONCEPTOS.map((c) => (
               <button
                 key={c}
                 type="button"
+                aria-pressed={concepto === c}
                 onClick={() => setConcepto(c)}
                 className={cn(
                   "rounded-full border px-3 py-1.5 text-[0.8rem] font-medium transition-colors",
@@ -229,7 +231,7 @@ function AddDeudaForm() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label>¿Cómo se lo diste?</Label>
+          <Label id="grp-medio">¿Cómo se lo diste?</Label>
           <div className="flex gap-2">
             {(["transferencia", "efectivo"] as const).map((m) => (
               <button
@@ -356,7 +358,7 @@ function PersonaCard({
 
           <span className="shrink-0 text-right">
             <span className={cn("tnum block text-lg font-semibold", alDia ? "text-success" : "text-text")}>
-              {alDia ? "$0" : formatCOP(grupo.saldo)}
+              {formatCOP(alDia ? 0 : grupo.saldo)}
             </span>
           </span>
 

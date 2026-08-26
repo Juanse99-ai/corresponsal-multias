@@ -38,13 +38,13 @@ export function LuisManager({
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Saldo acumulado de Luis (su dinero) */}
+      {/* Saldo acumulado de Sr. Luis (su dinero) */}
       <Card className="relative overflow-hidden border-accent/25 p-6">
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <div className="flex items-center gap-2 text-faint">
               <Wallet size={15} weight="fill" className="text-accent" />
-              <span className="text-[0.72rem] uppercase tracking-wide">Saldo acumulado de Luis</span>
+              <span className="text-[0.72rem] uppercase tracking-wide">Saldo acumulado de Sr. Luis</span>
             </div>
             <p className="mt-1.5 text-4xl font-semibold tracking-tight text-text">
               <AnimatedMoney value={acumulado} />
@@ -73,7 +73,7 @@ export function LuisManager({
         <div className="relative mt-6 grid grid-cols-1 divide-y divide-line sm:grid-cols-3 sm:divide-x sm:divide-y-0 border-t border-line pt-4">
           <DiaStat label="Cupo de hoy" value={totalComp} />
           <DiaStat label="Consignaciones" value={totalConsig} />
-          <DiaStat label="Movimiento del día" value={saldoDia} signed />
+          <DiaStat label="Del día" value={saldoDia} />
         </div>
       </Card>
 
@@ -82,9 +82,9 @@ export function LuisManager({
         <MovimientosSection
           fecha={fecha}
           items={compensaciones}
-          titulo="Compensación (cupo)"
-          subtitulo="El cupo que Luis te da en el día"
-          emptyText="Sin compensaciones aún."
+          titulo="Cupo que dio"
+          subtitulo="Lo que Sr. Luis presta en el día"
+          emptyText="Sin cupo registrado aún."
           tono="comp"
           agregar={agregarCompensacion}
           eliminar={eliminarCompensacion}
@@ -106,11 +106,12 @@ export function LuisManager({
   );
 }
 
-function DiaStat({ label, value, signed }: { label: string; value: number; signed?: boolean }) {
+function DiaStat({ label, value }: { label: string; value: number; signed?: boolean }) {
   return (
     <div className="px-0 py-2 sm:px-4 sm:py-0 sm:first:pl-0">
       <p className="text-[0.7rem] uppercase tracking-wide text-faint">{label}</p>
-      <p className={cn("mt-1 text-base sm:text-lg font-semibold tracking-tight tnum", signed && value !== 0 ? (value > 0 ? "text-accent-strong" : "text-success") : "text-text")}>
+      {/* Neutro con su signo: el color se reserva para estado (cuadrado / descuadre). */}
+      <p className="tnum mt-1 text-base font-semibold tracking-tight text-text sm:text-lg">
         {formatCOP(value)}
       </p>
     </div>

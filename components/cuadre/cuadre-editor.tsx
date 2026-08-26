@@ -129,14 +129,17 @@ export function CuadreEditor({
     () =>
       efectivoEsperadoCaja({
         fondo_caja: vals.fondo_caja,
-        consignaciones_cash: vals.nequis + vals.bancolombia + vals.recaudos,
+        consignaciones_cash: consignacionesCash,
         ret_real: vals.ret_real,
         prestamos_efectivo: prestamosEfectivoDia,
         compensado: vals.compensado,
       }),
-    [vals, prestamosEfectivoDia],
+    [vals, consignacionesCash, prestamosEfectivoDia],
   );
   const diferenciaCaja = vals.efectivo_contado - esperadoCaja;
+  // Un solo umbral para pintar y para bloquear el cierre: antes se pintaba con
+  // === 0 y se bloqueaba con Math.round(...) !== 0, que no es lo mismo.
+  const cajaCuadra = Math.round(diferenciaCaja) === 0;
   // Anti-tamper: un dia cerrado solo lo edita el admin.
   const locked = inicial.estado === "cerrado" && !isAdmin;
 
@@ -419,17 +422,17 @@ export function CuadreEditor({
           <div
             className={cn(
               "mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-[1rem] border px-4 py-3.5 transition-colors",
-              diferenciaCaja === 0 ? "border-success/35 bg-success-soft" : "border-danger/50 bg-danger-soft",
+              cajaCuadra ? "border-success/35 bg-success-soft" : "border-danger/50 bg-danger-soft",
             )}
           >
             <div className="flex min-w-0 flex-1 items-center gap-2.5">
               <span
                 className={cn(
                   "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
-                  diferenciaCaja === 0 ? "bg-success/15 text-success" : "bg-danger/15 text-danger",
+                  cajaCuadra ? "bg-success/15 text-success" : "bg-danger/15 text-danger",
                 )}
               >
-                {diferenciaCaja === 0 ? (
+                {cajaCuadra ? (
                   <CheckCircle size={20} weight="fill" />
                 ) : (
                   <Warning size={20} weight="fill" />
@@ -439,17 +442,17 @@ export function CuadreEditor({
                 <p
                   className={cn(
                     "text-[0.92rem] font-semibold",
-                    diferenciaCaja === 0 ? "text-success" : "text-danger",
+                    cajaCuadra ? "text-success" : "text-danger",
                   )}
                 >
-                  {diferenciaCaja === 0
+                  {cajaCuadra
                     ? "Caja cuadrada"
                     : diferenciaCaja > 0
                       ? "Sobra efectivo en caja"
                       : "Falta efectivo en caja"}
                 </p>
                 <p className="text-[0.72rem] text-muted">
-                  {diferenciaCaja === 0
+                  {cajaCuadra
                     ? "Lo contado coincide con lo esperado."
                     : "Revisa el efectivo contado o los movimientos."}
                 </p>
@@ -458,7 +461,7 @@ export function CuadreEditor({
             <span
               className={cn(
                 "tnum shrink-0 text-lg font-bold tracking-tight sm:text-xl",
-                diferenciaCaja === 0 ? "text-success" : "text-danger",
+                cajaCuadra ? "text-success" : "text-danger",
               )}
             >
               {diferenciaCaja > 0 ? "+" : ""}

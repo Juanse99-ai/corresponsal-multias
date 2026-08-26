@@ -5,7 +5,7 @@ import { LuisManager } from "@/components/luis/luis-manager";
 import { PageHeader } from "@/components/shell/page-header";
 import { DateNav } from "@/components/shell/date-nav";
 
-export const metadata: Metadata = { title: "Cupo de Luis · Corresponsal" };
+export const metadata: Metadata = { title: "Cuenta de Sr. Luis · Corresponsal" };
 
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -25,7 +25,7 @@ export default async function LuisPage({
 
   return (
     <div>
-      <PageHeader title="Cupo de Luis" subtitle={formatFechaLarga(fecha)}>
+      <PageHeader title="Cuenta de Sr. Luis" subtitle={formatFechaLarga(fecha)}>
         <DateNav fecha={fecha} base="/luis" />
       </PageHeader>
       <LuisManager
