@@ -16,8 +16,17 @@
   romperlas afecta la otra app.
 
 ## Lógica del cuadre (lib/cuadre.ts)
-- `SALDO FINAL = total_tirilla − sr_luis − efectivo_consignaciones − retiros_cash
-  − compensado − nequis − prestamos_consignaciones + ret_real`.
+- `SALDO FINAL = total_tirilla − (sr_luis + nequis + bancolombia + recaudos
+  + prestamos_consignaciones)`. Solo cuadra lo ELECTRÓNICO (lo que pasó por
+  Bancolombia). Verificado contra los 15 días cerrados: da cero en los 13 que
+  cerraron cuadrados. La versión anterior de esta línea (con compensado,
+  efectivo_consignaciones y retiros_cash restando) era incorrecta: solo daba
+  cero en 2 de 15.
+- `compensado` NO resta del saldo final: solo del arqueo de caja físico
+  (`efectivoEsperadoCaja`). Comprobado con el 2026-06-25, único día cerrado con
+  compensado ($2.575.000): cerró en cero con la fórmula de arriba.
+- `efectivo_consignaciones` y `retiros_cash` son columnas MUERTAS: existen en
+  `corr_cuadres`, se guardan siempre en 0 y no tienen campo ni efecto.
 - `sr_luis` es autoritativo del servidor (suma de `corr_consignaciones_luis` del día);
   nunca confíes en el valor del cliente al guardar.
 - Arrastre: `saldo_luis_cierre = −saldo_final`; el `compensado` de un día se sugiere

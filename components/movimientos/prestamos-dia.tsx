@@ -35,7 +35,8 @@ export function PrestamosDia({
   const [otro, setOtro] = useState("");
   const [concepto, setConcepto] = useState("");
   const [monto, setMonto] = useState(0);
-  const [medio, setMedio] = useState<"efectivo" | "transferencia" | "registro">("efectivo");
+  // Sin premarcar (igual que en /prestamos): el medio decide dónde cae la plata.
+  const [medio, setMedio] = useState<"efectivo" | "transferencia" | "registro" | null>(null);
   const [pagado, setPagado] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -68,6 +69,7 @@ export function PrestamosDia({
     if (!personaFinal) return setError("Elige a quién es el préstamo.");
     if (monto <= 0) return setError("Ingresa un monto mayor a cero.");
     if (!concepto.trim()) return setError("Escribe para qué fue el préstamo (motivo).");
+    if (!medio) return setError("Indica cómo se lo diste: efectivo, transferencia o solo registro.");
     setError(null);
     startTransition(async () => {
       const res = await registrarPrestamoDia({
@@ -82,7 +84,7 @@ export function PrestamosDia({
         setOtro("");
         setConcepto("");
         setMonto(0);
-        setMedio("efectivo");
+        setMedio(null);
         setPagado(false);
         router.refresh();
       } else {

@@ -497,10 +497,30 @@ export function CuadreEditor({
               <span className="text-[0.82rem] font-medium text-text">Suma componentes</span>
               <span className="tnum text-[0.82rem] font-semibold text-text">{formatCOP(suma)}</span>
             </div>
-            <div className="flex items-center justify-between py-2.5">
-              <span className="text-[0.82rem] font-medium text-text">Total tirilla</span>
-              <span className="tnum text-[0.82rem] font-semibold text-text">{formatCOP(vals.total_tirilla)}</span>
+          </div>
+
+          {/* La resta completa: sin esto había que hacer la cuenta de cabeza para
+              conectar la lista con el saldo de arriba. */}
+          <div className="mt-3 flex flex-col divide-y divide-line border-t border-line pt-1">
+            <div className="flex items-center justify-between py-2 text-sm">
+              <span className="text-muted">Total tirilla</span>
+              <span className="tnum text-text">{formatCOP(vals.total_tirilla)}</span>
             </div>
+            <div className="flex items-center justify-between py-2 text-sm">
+              <span className="text-muted">− Suma componentes</span>
+              <span className="tnum text-text">{formatCOP(suma)}</span>
+            </div>
+          </div>
+          <div className="mt-1 flex items-center justify-between border-t-[1.5px] border-line-strong pt-2.5">
+            <span className="text-[0.85rem] font-semibold text-text">Saldo final</span>
+            <span
+              className={cn(
+                "tnum text-[0.95rem] font-bold tracking-tight",
+                sinEmpezar ? "text-faint" : descuadre ? "text-danger" : "text-success",
+              )}
+            >
+              {sinEmpezar ? "—" : formatCOP(saldo)}
+            </span>
           </div>
         </Card>
 
