@@ -149,14 +149,24 @@ export function MovimientosSection({
         <Label htmlFor={`monto-${tono}`}>Monto</Label>
         <MoneyInput id={`monto-${tono}`} size="lg" value={monto} onValueChange={setMonto} onEnter={() => !pending && registrar()} />
       </div>
-      <div className="mt-3 grid grid-cols-[8.75rem_1fr] gap-3">
-        <div className="flex min-w-0 flex-col gap-1.5">
+      {/* flex-wrap y no grid: en iOS el input de hora tiene un ancho nativo propio
+          (12h con "a. m.") que no respeta la columna y se montaba sobre la nota.
+          Si los dos no caben, la nota baja a su propia línea. */}
+      <div className="mt-3 flex flex-wrap gap-3">
+        <div className="flex w-[9.5rem] shrink-0 flex-col gap-1.5">
           <Label htmlFor={`hora-${tono}`}>Hora</Label>
-          <Input id={`hora-${tono}`} type="time" value={hora} onChange={(e) => setHora(e.target.value)} className="min-w-0" />
+          <Input id={`hora-${tono}`} type="time" value={hora} onChange={(e) => setHora(e.target.value)} className="w-full min-w-0" />
         </div>
-        <div className="flex min-w-0 flex-col gap-1.5">
+        <div className="flex min-w-[7rem] flex-1 flex-col gap-1.5">
           <Label htmlFor={`nota-${tono}`}>Nota (opcional)</Label>
-          <Input id={`nota-${tono}`} value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Referencia…" onEnter={() => !pending && registrar()} />
+          <Input
+            id={`nota-${tono}`}
+            value={nota}
+            onChange={(e) => setNota(e.target.value)}
+            placeholder="Referencia…"
+            onEnter={() => !pending && registrar()}
+            className="w-full min-w-0"
+          />
         </div>
       </div>
 
