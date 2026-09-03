@@ -17,9 +17,9 @@ export interface MovimientoLeido {
   monto: number;
   /** "HH:MM" en 24h, o null si no venía hora. */
   hora: string | null;
-  /** Fecha ISO del mensaje si venía en el encabezado de WhatsApp. */
-  fecha: string | null;
-  /** Quién lo escribió, si venía en el encabezado. */
+  /** Fecha ISO: la del encabezado del mensaje, o la del día abierto. */
+  fecha: string;
+  /** Quién lo escribió, si venía en el encabezado. El chat es un grupo. */
   de: string | null;
   /** Lo que acompaña al monto ("Nequi Andrea Michelle SDK"), ya sin el monto. */
   nota: string | null;
@@ -27,11 +27,19 @@ export interface MovimientoLeido {
   texto: string;
 }
 
-export interface ResultadoLectura {
-  /** Movimientos del día pedido (o todos, si no se pasó fecha). */
+export interface DiaLeido {
+  fecha: string;
   movimientos: MovimientoLeido[];
-  /** Movimientos que traían otra fecha en el encabezado: no se guardan. */
-  otrosDias: MovimientoLeido[];
+  total: number;
+}
+
+export interface ResultadoLectura {
+  /** Todos los movimientos encontrados, en el orden del chat. */
+  movimientos: MovimientoLeido[];
+  /** Los mismos, agrupados por día (del más viejo al más nuevo). */
+  dias: DiaLeido[];
+  /** Quién escribió montos y cuántos: en un grupo escriben varios. */
+  remitentes: { nombre: string; n: number }[];
   /** Líneas que no se entendieron como un movimiento (se muestran, no se guardan). */
   ignoradas: string[];
   total: number;
@@ -151,9 +159,13 @@ function normalizarTexto(texto: string): string {
   return texto.replace(/[‎‏﻿]/g, "").replace(/[  ]/g, " ");
 }
 
-export function leerListaWhatsApp(texto: string, fecha?: string): ResultadoLectura {
+/**
+ * Lee el chat completo. `fechaPorDefecto` es la del día abierto en la app: se
+ * usa solo para los mensajes que no traen encabezado (al copiar una burbuja
+ * suelta). Los que sí lo traen conservan su propio día.
+ */
+export function leerListaWhatsApp(texto: string, fechaPorDefecto: string): ResultadoLectura {
   const movimientos: MovimientoLeido[] = [];
-  const otrosDias: MovimientoLeido[] = [];
   const ignoradas: string[] = [];
 
   // Un mensaje de varias líneas trae encabezado solo en la primera: las demás lo heredan.
@@ -207,15 +219,33 @@ export function leerListaWhatsApp(texto: string, fecha?: string): ResultadoLectu
 
     const idx = cuerpo.toLowerCase().indexOf(leido.crudo);
     const resto = idx >= 0 ? cuerpo.slice(0, idx) + " " + cuerpo.slice(idx + leido.crudo.length) : cuerpo;
-    const mov: MovimientoLeido = { monto: leido.monto, hora, fecha: fechaMsg, de, nota: limpiarNota(resto), texto: linea };
+    movimientos.push({
+      monto: leido.monto,
+      hora,
+      fecha: fechaMsg ?? fechaPorDefecto,
+      de,
+      nota: limpiarNota(resto),
+      texto: linea,
+    });
+  }
 
-    if (fecha && mov.fecha && mov.fecha !== fecha) otrosDias.push(mov);
-    else movimientos.push(mov);
+  const porDia = new Map<string, MovimientoLeido[]>();
+  const porRemitente = new Map<string, number>();
+  for (const m of movimientos) {
+    const lista = porDia.get(m.fecha);
+    if (lista) lista.push(m);
+    else porDia.set(m.fecha, [m]);
+    if (m.de) porRemitente.set(m.de, (porRemitente.get(m.de) ?? 0) + 1);
   }
 
   return {
     movimientos,
-    otrosDias,
+    dias: [...porDia.entries()]
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([f, ms]) => ({ fecha: f, movimientos: ms, total: ms.reduce((s, m) => s + m.monto, 0) })),
+    remitentes: [...porRemitente.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([nombre, n]) => ({ nombre, n })),
     ignoradas,
     total: movimientos.reduce((s, m) => s + m.monto, 0),
   };

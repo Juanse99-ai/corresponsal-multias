@@ -21,6 +21,35 @@ import { reduced } from "@/components/fx/reduced";
 const botonMini =
   "flex h-9 items-center gap-1.5 whitespace-nowrap rounded-full border border-line-strong bg-surface px-3 text-[0.78rem] font-medium text-muted transition-colors hover:text-text";
 
+/** Acuse del lote: cuántos entraron, en cuántos días y cuántos ya estaban. */
+function resumenLote(insertados: number, dias: number, repetidos: number): string {
+  if (insertados === 0) {
+    return repetidos === 1 ? "Ese ya estaba registrado." : "Todos ya estaban registrados.";
+  }
+  let t = `${insertados} ${insertados === 1 ? "movimiento agregado" : "movimientos agregados"}`;
+  if (dias > 1) t += ` en ${dias} días`;
+  if (repetidos > 0) t += `; ${repetidos} ya ${repetidos === 1 ? "estaba" : "estaban"}`;
+  return `${t}.`;
+}
+
+/**
+ * Nombre de pila para las fichas del grupo. Si dos personas lo comparten,
+ * todas llevan también el segundo nombre para poder distinguirlas.
+ */
+function nombresCortos(nombres: string[]): Map<string, string> {
+  const pila = (n: string) => n.split(/\s+/)[0];
+  const repetido = new Set<string>();
+  const vistos = new Set<string>();
+  for (const n of nombres) {
+    const p = pila(n);
+    if (vistos.has(p)) repetido.add(p);
+    vistos.add(p);
+  }
+  return new Map(
+    nombres.map((n) => [n, repetido.has(pila(n)) ? n.split(/\s+/).slice(0, 2).join(" ") : pila(n)]),
+  );
+}
+
 export interface MovimientoItem {
   id: string;
   monto: number;
@@ -46,8 +75,14 @@ export function MovimientosSection({
   emptyText: string;
   tono: "consig" | "comp";
   agregar: (raw: unknown) => Promise<{ ok: boolean; error?: string }>;
-  /** Guarda varios de una (la lista que Luis manda por WhatsApp). */
-  agregarLote: (raw: unknown) => Promise<{ ok: boolean; error?: string; insertados?: number }>;
+  /** Guarda varios de una, cada uno con su día (el chat que manda Luis). */
+  agregarLote: (raw: unknown) => Promise<{
+    ok: boolean;
+    error?: string;
+    insertados?: number;
+    repetidos?: number;
+    dias?: number;
+  }>;
   eliminar: (id: string) => Promise<{ ok: boolean; error?: string }>;
   editar: (raw: unknown) => Promise<{ ok: boolean; error?: string }>;
 }) {
@@ -67,11 +102,14 @@ export function MovimientosSection({
   const [loteTexto, setLoteTexto] = useState("");
   // Filas que el usuario marcó o desmarcó a mano (índice dentro de lote.movimientos).
   const [tocados, setTocados] = useState<Set<number>>(() => new Set());
+  // El chat es un grupo: quien no sea Luis se puede apagar de un toque.
+  const [remitentesFuera, setRemitentesFuera] = useState<Set<string>>(() => new Set());
   const archivoRef = useRef<HTMLInputElement>(null);
   const lote = useMemo(() => leerListaWhatsApp(loteTexto, fecha), [loteTexto, fecha]);
+  const indiceDe = useMemo(() => new Map(lote.movimientos.map((m, i) => [m, i])), [lote]);
 
-  // Al pegar el chat completo es fácil volver a cargar un día ya registrado.
-  // Mismo monto y misma hora que uno del día = repetido: entra desmarcado.
+  // Al pegar el chat completo es fácil volver a cargar algo ya registrado. Aquí
+  // solo se ve el día abierto; el servidor revisa todos los días del lote.
   const yaEnElDia = useMemo(
     () => new Set(items.map((i) => `${i.monto}@${(i.hora ?? "").slice(0, 5)}`)),
     [items],
@@ -79,21 +117,28 @@ export function MovimientosSection({
   const repetidos = useMemo(() => {
     const s = new Set<number>();
     lote.movimientos.forEach((m, i) => {
-      if (m.hora && yaEnElDia.has(`${m.monto}@${m.hora}`)) s.add(i);
+      if (m.hora && m.fecha === fecha && yaEnElDia.has(`${m.monto}@${m.hora}`)) s.add(i);
     });
     return s;
-  }, [lote, yaEnElDia]);
+  }, [lote, yaEnElDia, fecha]);
 
-  // Por defecto va marcado, salvo los repetidos; tocar una fila invierte ese default.
-  const estaMarcado = (i: number) => (tocados.has(i) ? repetidos.has(i) : !repetidos.has(i));
+  // Por defecto entra marcado, salvo repetidos y remitentes apagados; tocar
+  // una fila invierte ese default.
+  const marcadoPorDefecto = (i: number) => {
+    const m = lote.movimientos[i];
+    if (m?.de && remitentesFuera.has(m.de)) return false;
+    return !repetidos.has(i);
+  };
+  const estaMarcado = (i: number) => (tocados.has(i) ? !marcadoPorDefecto(i) : marcadoPorDefecto(i));
   const seleccionados = useMemo(
     () => lote.movimientos.filter((_, i) => estaMarcado(i)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [lote, tocados, repetidos],
+    [lote, tocados, repetidos, remitentesFuera],
   );
   const totalSeleccion = seleccionados.reduce((s, m) => s + m.monto, 0);
-  // Si en el chat escribieron varias personas, se muestra quién mandó cada monto.
-  const variosRemitentes = new Set(lote.movimientos.map((m) => m.de).filter(Boolean)).size > 1;
+  const diasSeleccionados = new Set(seleccionados.map((m) => m.fecha)).size;
+  const variosDias = lote.dias.length > 1;
+  const etiquetas = useMemo(() => nombresCortos(lote.remitentes.map((r) => r.nombre)), [lote]);
 
   const [editId, setEditId] = useState<string | null>(null);
   const [eMonto, setEMonto] = useState(0);
@@ -133,6 +178,7 @@ export function MovimientosSection({
   function cambiarTexto(t: string) {
     setLoteTexto(t);
     setTocados(new Set());
+    setRemitentesFuera(new Set());
   }
 
   function alternarFila(i: number) {
@@ -140,6 +186,16 @@ export function MovimientosSection({
       const s = new Set(prev);
       if (s.has(i)) s.delete(i);
       else s.add(i);
+      return s;
+    });
+  }
+
+  function alternarRemitente(nombre: string) {
+    setTocados(new Set()); // el filtro por persona manda sobre los toques sueltos
+    setRemitentesFuera((prev) => {
+      const s = new Set(prev);
+      if (s.has(nombre)) s.delete(nombre);
+      else s.add(nombre);
       return s;
     });
   }
@@ -169,18 +225,23 @@ export function MovimientosSection({
     if (seleccionados.length === 0) return;
     setError(null);
     setOkMsg(null);
-    // Si el mensaje no trae horas, todas quedan con la hora de registro (como al agregar a mano).
+    // Si el mensaje no trae hora, queda con la de registro (como al agregar a mano).
     const ahora = horaBogotaHHMM();
     startTransition(async () => {
       const res = await agregarLote({
         fecha,
-        items: seleccionados.map((m) => ({ monto: m.monto, hora: m.hora ?? ahora, nota: m.nota })),
+        items: seleccionados.map((m) => ({
+          fecha: m.fecha,
+          monto: m.monto,
+          hora: m.hora ?? ahora,
+          nota: m.nota,
+        })),
       });
       if (res.ok) {
         const n = res.insertados ?? seleccionados.length;
         cambiarTexto("");
         setLoteAbierto(false);
-        avisarOk(`${n} ${n === 1 ? "movimiento agregado" : "movimientos agregados"} desde WhatsApp.`);
+        avisarOk(resumenLote(n, res.dias ?? 1, res.repetidos ?? 0));
         router.refresh();
       } else {
         setError(res.error ?? "No se pudo guardar la lista.");
@@ -310,8 +371,8 @@ export function MovimientosSection({
             <div className="mt-4 rounded-[1rem] border border-accent/25 bg-accent-soft/30 p-4">
               <p className="text-[0.88rem] font-semibold text-text">Chat de WhatsApp</p>
               <p className="mt-0.5 text-[0.76rem] text-muted">
-                Copia los mensajes de Luis (o exporta el chat sin archivos y súbelo). Tomo el monto,
-                la hora y la nota de cada mensaje, y solo los del {formatFechaCorta(fecha)}.
+                Exporta el chat del grupo sin archivos y súbelo, o pega los mensajes. De cada uno
+                tomo el monto, el día, la hora y la nota. Van a su día aunque sean de varias fechas.
               </p>
               <div className="mt-2.5 flex gap-2">
                 <button type="button" onClick={pegarDelPortapapeles} className={botonMini}>
@@ -349,15 +410,38 @@ export function MovimientosSection({
               {loteTexto.trim() && (
                 <div className="mt-3">
                   {lote.movimientos.length === 0 ? (
-                    <p className="text-[0.82rem] text-danger">
-                      {lote.otrosDias.length > 0
-                        ? `Los ${lote.otrosDias.length} montos que encontré son de otro día, no del ${formatFechaCorta(fecha)}.`
-                        : "No encontré montos en ese texto."}
-                    </p>
+                    <p className="text-[0.82rem] text-danger">No encontré montos en ese texto.</p>
                   ) : (
                     <>
+                      {/* El chat es un grupo: apagar a quien no manda movimientos
+                          quita sus montos de un toque, sin fila por fila. */}
+                      {lote.remitentes.length > 1 && (
+                        <div className="mb-2.5 flex flex-wrap gap-1.5">
+                          {lote.remitentes.map((r) => {
+                            const dentro = !remitentesFuera.has(r.nombre);
+                            return (
+                              <button
+                                key={r.nombre}
+                                type="button"
+                                onClick={() => alternarRemitente(r.nombre)}
+                                aria-pressed={dentro}
+                                className={cn(
+                                  "flex h-7 items-center gap-1 rounded-full border px-2.5 text-[0.72rem] font-medium transition-colors",
+                                  dentro
+                                    ? "border-accent/40 bg-accent-soft text-accent-strong"
+                                    : "border-line-strong bg-surface text-faint",
+                                )}
+                              >
+                                {etiquetas.get(r.nombre) ?? r.nombre}
+                                <span className="tnum opacity-70">{r.n}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+
                       <div className="flex items-baseline justify-between gap-3">
-                        <p className="text-[0.82rem] font-medium text-text">
+                        <p className="min-w-0 text-[0.82rem] font-medium text-text">
                           {seleccionados.length}
                           {seleccionados.length !== lote.movimientos.length && ` de ${lote.movimientos.length}`}{" "}
                           {seleccionados.length === 1 && seleccionados.length === lote.movimientos.length
@@ -366,59 +450,72 @@ export function MovimientosSection({
                         </p>
                         <p className="tnum shrink-0 text-[0.95rem] font-semibold text-text">{formatCOP(totalSeleccion)}</p>
                       </div>
-                      {/* Cada fila se puede desmarcar: en el chat también escribe Juan y a veces
-                          Luis corrige un monto; así no toca borrar después. */}
-                      <ul className="mt-2 max-h-64 overflow-y-auto rounded-[0.8rem] border border-line bg-surface">
-                        {lote.movimientos.map((m, i) => {
-                          const activo = estaMarcado(i);
-                          return (
-                            <li key={`${i}-${m.texto}`} className="border-b border-line last:border-b-0">
-                              <label
-                                className={cn(
-                                  "flex cursor-pointer items-center gap-2.5 px-3 py-2 text-[0.84rem] transition-opacity",
-                                  !activo && "opacity-45",
-                                )}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={activo}
-                                  onChange={() => alternarFila(i)}
-                                  className="h-4 w-4 shrink-0 accent-accent"
-                                  aria-label={`Incluir ${formatCOP(m.monto)}`}
-                                />
-                                <span className="min-w-0 flex-1 leading-tight">
-                                  <span className="flex items-baseline justify-between gap-2">
-                                    <span className="tnum font-medium text-text">{formatCOP(m.monto)}</span>
-                                    <span className="tnum shrink-0 text-[0.74rem] text-faint">
-                                      {m.hora ? formatHora(m.hora) : "sin hora"}
-                                    </span>
-                                  </span>
-                                  {(m.nota || repetidos.has(i) || (variosRemitentes && m.de)) && (
-                                    <span className="block truncate text-[0.74rem] text-muted">
-                                      {repetidos.has(i) && <span className="font-medium text-text">Ya está · </span>}
-                                      {variosRemitentes && m.de && <span className="text-faint">{m.de.split(" ")[0]} · </span>}
-                                      {m.nota ?? ""}
-                                    </span>
-                                  )}
+
+                      {/* Cada fila se puede desmarcar: en el grupo también escriben
+                          otros y a veces Luis corrige un monto. */}
+                      <ul className="mt-2 max-h-72 overflow-y-auto rounded-[0.8rem] border border-line bg-surface">
+                        {lote.dias.map((d) => (
+                          <li key={d.fecha}>
+                            {variosDias && (
+                              <p className="sticky top-0 flex items-baseline justify-between gap-2 border-b border-line bg-surface-2 px-3 py-1.5 text-[0.72rem] font-medium text-muted">
+                                <span className={cn(d.fecha === fecha && "text-accent-strong")}>
+                                  {formatFechaCorta(d.fecha)}
+                                  {d.fecha === fecha && " · día abierto"}
                                 </span>
-                              </label>
-                            </li>
-                          );
-                        })}
+                                <span className="tnum shrink-0">{formatCOP(d.total)}</span>
+                              </p>
+                            )}
+                            <ul>
+                              {d.movimientos.map((m) => {
+                                const i = indiceDe.get(m) ?? -1;
+                                const activo = estaMarcado(i);
+                                return (
+                                  <li key={i} className="border-b border-line last:border-b-0">
+                                    <label
+                                      className={cn(
+                                        "flex cursor-pointer items-center gap-2.5 px-3 py-2 text-[0.84rem] transition-opacity",
+                                        !activo && "opacity-45",
+                                      )}
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={activo}
+                                        onChange={() => alternarFila(i)}
+                                        className="h-4 w-4 shrink-0 accent-accent"
+                                        aria-label={`Incluir ${formatCOP(m.monto)}`}
+                                      />
+                                      <span className="min-w-0 flex-1 leading-tight">
+                                        <span className="flex items-baseline justify-between gap-2">
+                                          <span className="tnum font-medium text-text">{formatCOP(m.monto)}</span>
+                                          <span className="tnum shrink-0 text-[0.74rem] text-faint">
+                                            {m.hora ? formatHora(m.hora) : "sin hora"}
+                                          </span>
+                                        </span>
+                                        {(m.nota || repetidos.has(i) || lote.remitentes.length > 1) && (
+                                          <span className="block truncate text-[0.74rem] text-muted">
+                                            {repetidos.has(i) && <span className="font-medium text-text">Ya está · </span>}
+                                            {lote.remitentes.length > 1 && m.de && (
+                                              <span className="text-faint">{m.de.split(" ")[0]} · </span>
+                                            )}
+                                            {m.nota ?? ""}
+                                          </span>
+                                        )}
+                                      </span>
+                                    </label>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          </li>
+                        ))}
                       </ul>
                     </>
                   )}
                   {repetidos.size > 0 && (
                     <p className="mt-2 text-[0.74rem] text-muted">
                       {repetidos.size === 1
-                        ? "1 ya estaba registrado hoy y quedó sin marcar."
-                        : `${repetidos.size} ya estaban registrados hoy y quedaron sin marcar.`}
-                    </p>
-                  )}
-                  {lote.otrosDias.length > 0 && lote.movimientos.length > 0 && (
-                    <p className="mt-1 text-[0.74rem] text-muted">
-                      Dejé fuera {lote.otrosDias.length} de otros días. Cambia la fecha arriba y vuelve a
-                      pegar para cargarlos.
+                        ? "1 ya estaba registrado en este día y quedó sin marcar."
+                        : `${repetidos.size} ya estaban registrados en este día y quedaron sin marcar.`}
                     </p>
                   )}
                   {lote.ignoradas.length > 0 && (
@@ -445,7 +542,10 @@ export function MovimientosSection({
                 <Button onClick={guardarLote} disabled={pending || seleccionados.length === 0} className="w-full sm:w-auto">
                   {pending
                     ? "Guardando…"
-                    : `Guardar ${seleccionados.length || ""} ${seleccionados.length === 1 ? "movimiento" : "movimientos"}`.replace("  ", " ")}
+                    : seleccionados.length === 0
+                      ? "Guardar"
+                      : `Guardar ${seleccionados.length} ${seleccionados.length === 1 ? "movimiento" : "movimientos"}` +
+                        (diasSeleccionados > 1 ? ` en ${diasSeleccionados} días` : "")}
                 </Button>
                 <Button
                   variant="ghost"
