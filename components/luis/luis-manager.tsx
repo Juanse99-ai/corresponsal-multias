@@ -15,6 +15,8 @@ import {
   agregarCompensacion,
   eliminarCompensacion,
   editarCompensacion,
+  agregarConsignacionesLote,
+  agregarCompensacionesLote,
 } from "@/app/(app)/luis/actions";
 
 export function LuisManager({
@@ -86,6 +88,7 @@ export function LuisManager({
           emptyText="Sin cupo registrado aún."
           tono="comp"
           agregar={agregarCompensacion}
+          agregarLote={agregarCompensacionesLote}
           eliminar={eliminarCompensacion}
           editar={editarCompensacion}
         />
@@ -97,6 +100,7 @@ export function LuisManager({
           emptyText="Sin consignaciones aún."
           tono="consig"
           agregar={agregarConsignacion}
+          agregarLote={agregarConsignacionesLote}
           eliminar={eliminarConsignacion}
           editar={editarConsignacion}
         />

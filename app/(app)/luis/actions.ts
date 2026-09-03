@@ -96,6 +96,60 @@ export async function eliminarCompensacion(id: string): Promise<{ ok: boolean; e
   return { ok: true };
 }
 
+// ===== Por lote: la lista que Luis manda por WhatsApp, ya leída y revisada =====
+const loteSchema = z.object({
+  fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  items: z
+    .array(
+      z.object({
+        monto: z.number().int().positive(),
+        hora: z
+          .string()
+          .regex(/^\d{2}:\d{2}$/)
+          .nullable()
+          .optional(),
+        nota: z.string().max(200).nullable().optional(),
+      }),
+    )
+    .min(1)
+    .max(200),
+});
+
+async function agregarLote(
+  tabla: "corr_consignaciones_luis" | "corr_compensaciones_luis",
+  raw: unknown,
+): Promise<{ ok: boolean; error?: string; insertados?: number }> {
+  const session = await requireSession();
+  const p = loteSchema.safeParse(raw);
+  if (!p.success) return { ok: false, error: "La lista trae un monto que no se entiende." };
+  if (await diaBloqueado(session.rol, p.data.fecha)) return { ok: false, error: CERRADO };
+
+  const sb = await createClient();
+  const filas = p.data.items.map((it) => ({
+    fecha: p.data.fecha,
+    monto: it.monto,
+    hora: it.hora ?? null,
+    nota: it.nota?.trim() || null,
+    created_by: session.id,
+  }));
+  // Un solo insert: o entran todos o no entra ninguno.
+  const { error, data } = await sb.from(tabla).insert(filas).select("id");
+  if (error) return { ok: false, error: "No se pudieron guardar los movimientos." };
+
+  revalidatePath("/luis");
+  revalidatePath("/cuadre");
+  revalidatePath("/panel");
+  return { ok: true, insertados: data?.length ?? filas.length };
+}
+
+export async function agregarConsignacionesLote(raw: unknown) {
+  return agregarLote("corr_consignaciones_luis", raw);
+}
+
+export async function agregarCompensacionesLote(raw: unknown) {
+  return agregarLote("corr_compensaciones_luis", raw);
+}
+
 // ===== Corregir (monto / hora / nota) sin borrar =====
 const editLuisSchema = z.object({
   id: z.string().uuid(),
