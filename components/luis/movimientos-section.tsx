@@ -65,11 +65,32 @@ export function MovimientosSection({
   // Pegar el chat de WhatsApp: se lee en vivo y se revisa antes de guardar.
   const [loteAbierto, setLoteAbierto] = useState(false);
   const [loteTexto, setLoteTexto] = useState("");
-  // Filas que el usuario desmarcó en la revisión (índice dentro de lote.movimientos).
-  const [excluidos, setExcluidos] = useState<Set<number>>(() => new Set());
+  // Filas que el usuario marcó o desmarcó a mano (índice dentro de lote.movimientos).
+  const [tocados, setTocados] = useState<Set<number>>(() => new Set());
   const archivoRef = useRef<HTMLInputElement>(null);
   const lote = useMemo(() => leerListaWhatsApp(loteTexto, fecha), [loteTexto, fecha]);
-  const seleccionados = useMemo(() => lote.movimientos.filter((_, i) => !excluidos.has(i)), [lote, excluidos]);
+
+  // Al pegar el chat completo es fácil volver a cargar un día ya registrado.
+  // Mismo monto y misma hora que uno del día = repetido: entra desmarcado.
+  const yaEnElDia = useMemo(
+    () => new Set(items.map((i) => `${i.monto}@${(i.hora ?? "").slice(0, 5)}`)),
+    [items],
+  );
+  const repetidos = useMemo(() => {
+    const s = new Set<number>();
+    lote.movimientos.forEach((m, i) => {
+      if (m.hora && yaEnElDia.has(`${m.monto}@${m.hora}`)) s.add(i);
+    });
+    return s;
+  }, [lote, yaEnElDia]);
+
+  // Por defecto va marcado, salvo los repetidos; tocar una fila invierte ese default.
+  const estaMarcado = (i: number) => (tocados.has(i) ? repetidos.has(i) : !repetidos.has(i));
+  const seleccionados = useMemo(
+    () => lote.movimientos.filter((_, i) => estaMarcado(i)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [lote, tocados, repetidos],
+  );
   const totalSeleccion = seleccionados.reduce((s, m) => s + m.monto, 0);
   // Si en el chat escribieron varias personas, se muestra quién mandó cada monto.
   const variosRemitentes = new Set(lote.movimientos.map((m) => m.de).filter(Boolean)).size > 1;
@@ -111,11 +132,11 @@ export function MovimientosSection({
 
   function cambiarTexto(t: string) {
     setLoteTexto(t);
-    setExcluidos(new Set());
+    setTocados(new Set());
   }
 
   function alternarFila(i: number) {
-    setExcluidos((prev) => {
+    setTocados((prev) => {
       const s = new Set(prev);
       if (s.has(i)) s.delete(i);
       else s.add(i);
@@ -338,8 +359,10 @@ export function MovimientosSection({
                       <div className="flex items-baseline justify-between gap-3">
                         <p className="text-[0.82rem] font-medium text-text">
                           {seleccionados.length}
-                          {excluidos.size > 0 && ` de ${lote.movimientos.length}`}{" "}
-                          {seleccionados.length === 1 && excluidos.size === 0 ? "movimiento" : "movimientos"}
+                          {seleccionados.length !== lote.movimientos.length && ` de ${lote.movimientos.length}`}{" "}
+                          {seleccionados.length === 1 && seleccionados.length === lote.movimientos.length
+                            ? "movimiento"
+                            : "movimientos"}
                         </p>
                         <p className="tnum shrink-0 text-[0.95rem] font-semibold text-text">{formatCOP(totalSeleccion)}</p>
                       </div>
@@ -347,7 +370,7 @@ export function MovimientosSection({
                           Luis corrige un monto; así no toca borrar después. */}
                       <ul className="mt-2 max-h-64 overflow-y-auto rounded-[0.8rem] border border-line bg-surface">
                         {lote.movimientos.map((m, i) => {
-                          const activo = !excluidos.has(i);
+                          const activo = estaMarcado(i);
                           return (
                             <li key={`${i}-${m.texto}`} className="border-b border-line last:border-b-0">
                               <label
@@ -370,8 +393,9 @@ export function MovimientosSection({
                                       {m.hora ? formatHora(m.hora) : "sin hora"}
                                     </span>
                                   </span>
-                                  {(m.nota || (variosRemitentes && m.de)) && (
+                                  {(m.nota || repetidos.has(i) || (variosRemitentes && m.de)) && (
                                     <span className="block truncate text-[0.74rem] text-muted">
+                                      {repetidos.has(i) && <span className="font-medium text-text">Ya está · </span>}
                                       {variosRemitentes && m.de && <span className="text-faint">{m.de.split(" ")[0]} · </span>}
                                       {m.nota ?? ""}
                                     </span>
@@ -384,9 +408,17 @@ export function MovimientosSection({
                       </ul>
                     </>
                   )}
-                  {lote.otrosDias.length > 0 && lote.movimientos.length > 0 && (
+                  {repetidos.size > 0 && (
                     <p className="mt-2 text-[0.74rem] text-muted">
-                      Dejé fuera {lote.otrosDias.length} {lote.otrosDias.length === 1 ? "movimiento" : "movimientos"} de otros días.
+                      {repetidos.size === 1
+                        ? "1 ya estaba registrado hoy y quedó sin marcar."
+                        : `${repetidos.size} ya estaban registrados hoy y quedaron sin marcar.`}
+                    </p>
+                  )}
+                  {lote.otrosDias.length > 0 && lote.movimientos.length > 0 && (
+                    <p className="mt-1 text-[0.74rem] text-muted">
+                      Dejé fuera {lote.otrosDias.length} de otros días. Cambia la fecha arriba y vuelve a
+                      pegar para cargarlos.
                     </p>
                   )}
                   {lote.ignoradas.length > 0 && (
@@ -395,12 +427,14 @@ export function MovimientosSection({
                         No tomé en cuenta {lote.ignoradas.length} {lote.ignoradas.length === 1 ? "línea" : "líneas"} (fotos,
                         números de cuenta, texto sin monto)
                       </summary>
+                      {/* El chat exportado trae miles de líneas: se muestran unas pocas. */}
                       <ul className="mt-1 max-h-32 overflow-y-auto pl-3">
-                        {lote.ignoradas.map((l, i) => (
+                        {lote.ignoradas.slice(0, 25).map((l, i) => (
                           <li key={i} className="truncate">
                             {l}
                           </li>
                         ))}
+                        {lote.ignoradas.length > 25 && <li>y {lote.ignoradas.length - 25} más</li>}
                       </ul>
                     </details>
                   )}
