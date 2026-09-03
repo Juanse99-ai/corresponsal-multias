@@ -96,12 +96,16 @@ export async function eliminarCompensacion(id: string): Promise<{ ok: boolean; e
   return { ok: true };
 }
 
-// ===== Por lote: la lista que Luis manda por WhatsApp, ya leída y revisada =====
+// ===== Por lote: el chat que Luis manda por WhatsApp, ya leído y revisado =====
+// El chat es un grupo y trae varios días, así que cada movimiento viaja con su
+// propia fecha; `fecha` es solo el día abierto, para los que no traen encabezado.
+const ISO = /^\d{4}-\d{2}-\d{2}$/;
 const loteSchema = z.object({
-  fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  fecha: z.string().regex(ISO),
   items: z
     .array(
       z.object({
+        fecha: z.string().regex(ISO).optional(),
         monto: z.number().int().positive(),
         hora: z
           .string()
@@ -112,26 +116,68 @@ const loteSchema = z.object({
       }),
     )
     .min(1)
-    .max(200),
+    .max(500),
 });
+
+export interface ResultadoLote {
+  ok: boolean;
+  error?: string;
+  insertados?: number;
+  /** Los que ya estaban guardados con el mismo día, monto y hora. */
+  repetidos?: number;
+  /** Cuántos días distintos recibieron movimientos. */
+  dias?: number;
+}
 
 async function agregarLote(
   tabla: "corr_consignaciones_luis" | "corr_compensaciones_luis",
   raw: unknown,
-): Promise<{ ok: boolean; error?: string; insertados?: number }> {
+): Promise<ResultadoLote> {
   const session = await requireSession();
   const p = loteSchema.safeParse(raw);
   if (!p.success) return { ok: false, error: "La lista trae un monto que no se entiende." };
-  if (await diaBloqueado(session.rol, p.data.fecha)) return { ok: false, error: CERRADO };
+
+  const items = p.data.items.map((it) => ({ ...it, fecha: it.fecha ?? p.data.fecha }));
+  const fechas = [...new Set(items.map((it) => it.fecha))];
+
+  // Un día cerrado bloquea todo el lote: es más claro que guardar a medias.
+  for (const f of fechas) {
+    if (await diaBloqueado(session.rol, f)) {
+      return { ok: false, error: `${CERRADO} (${f})` };
+    }
+  }
 
   const sb = await createClient();
-  const filas = p.data.items.map((it) => ({
-    fecha: p.data.fecha,
-    monto: it.monto,
-    hora: it.hora ?? null,
-    nota: it.nota?.trim() || null,
-    created_by: session.id,
-  }));
+
+  // Descartar lo que ya está: mismo día, monto y hora. Es la única defensa si
+  // se sube el mismo chat exportado dos veces.
+  const { data: existentes } = await sb.from(tabla).select("fecha, monto, hora").in("fecha", fechas);
+  const clave = (f: string, monto: number, hora: string | null) => `${f}|${monto}|${(hora ?? "").slice(0, 5)}`;
+  const yaEstan = new Set((existentes ?? []).map((r) => clave(r.fecha, r.monto, r.hora)));
+
+  const filas: {
+    fecha: string;
+    monto: number;
+    hora: string | null;
+    nota: string | null;
+    created_by: string;
+  }[] = [];
+  for (const it of items) {
+    const k = clave(it.fecha, it.monto, it.hora ?? null);
+    if (yaEstan.has(k)) continue;
+    yaEstan.add(k); // dos idénticos dentro del mismo lote tampoco se duplican
+    filas.push({
+      fecha: it.fecha,
+      monto: it.monto,
+      hora: it.hora ?? null,
+      nota: it.nota?.trim() || null,
+      created_by: session.id,
+    });
+  }
+
+  const repetidos = items.length - filas.length;
+  if (filas.length === 0) return { ok: true, insertados: 0, repetidos, dias: 0 };
+
   // Un solo insert: o entran todos o no entra ninguno.
   const { error, data } = await sb.from(tabla).insert(filas).select("id");
   if (error) return { ok: false, error: "No se pudieron guardar los movimientos." };
@@ -139,7 +185,13 @@ async function agregarLote(
   revalidatePath("/luis");
   revalidatePath("/cuadre");
   revalidatePath("/panel");
-  return { ok: true, insertados: data?.length ?? filas.length };
+  revalidatePath("/historial");
+  return {
+    ok: true,
+    insertados: data?.length ?? filas.length,
+    repetidos,
+    dias: new Set(filas.map((f) => f.fecha)).size,
+  };
 }
 
 export async function agregarConsignacionesLote(raw: unknown) {
