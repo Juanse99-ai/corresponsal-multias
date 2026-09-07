@@ -4,7 +4,13 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireSession } from "@/lib/auth";
-import { diaEstaCerrado } from "@/lib/queries";
+import { diaEstaCerrado, SOPORTES_BUCKET } from "@/lib/queries";
+import {
+  leerComprobante,
+  lecturaDisponible,
+  comprobanteSchema,
+  type Comprobante,
+} from "@/lib/leer-comprobante";
 
 const CERRADO = "El día está cerrado. Solo Juan puede reabrirlo para editar.";
 
@@ -200,6 +206,113 @@ export async function agregarConsignacionesLote(raw: unknown) {
 
 export async function agregarCompensacionesLote(raw: unknown) {
   return agregarLote("corr_compensaciones_luis", raw);
+}
+
+// ===== Leer los montos de las fotos de los comprobantes =====
+export interface ComprobanteLeido {
+  soporteId: string;
+  nombre: string | null;
+  monto: number | null;
+  fecha: string | null;
+  hora: string | null;
+  transaccion: string | null;
+  titular: string | null;
+  destino: string | null;
+  recibo: string | null;
+  seguro: boolean;
+  esComprobante: boolean;
+  error?: string;
+}
+
+/** Cuántas fotos se leen a la vez. */
+const LECTURAS_EN_PARALELO = 3;
+
+/**
+ * Lee las tirillas del día que todavía no se han leído y guarda el resultado
+ * en el soporte, para no volver a pagar la misma imagen. No guarda ningún
+ * movimiento: eso lo decide el usuario en la revisión.
+ */
+export async function leerComprobantesDelDia(
+  fecha: string,
+): Promise<{ ok: boolean; error?: string; items?: ComprobanteLeido[] }> {
+  await requireSession();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return { ok: false, error: "Fecha inválida." };
+  if (!lecturaDisponible()) {
+    return { ok: false, error: "Falta configurar la llave de lectura (ANTHROPIC_API_KEY)." };
+  }
+
+  const sb = await createClient();
+  const { data: soportes } = await sb
+    .from("corr_soportes")
+    .select("id, path, nombre, mime, datos")
+    .eq("fecha", fecha)
+    .eq("contexto", "luis")
+    .order("created_at", { ascending: true });
+
+  if (!soportes || soportes.length === 0) {
+    return { ok: false, error: "No hay fotos de comprobantes en este día." };
+  }
+
+  const salida: ComprobanteLeido[] = new Array(soportes.length);
+
+  const deDatos = (id: string, nombre: string | null, d: Comprobante): ComprobanteLeido => ({
+    soporteId: id,
+    nombre,
+    monto: d.monto,
+    fecha: d.fecha,
+    hora: d.hora,
+    transaccion: d.transaccion,
+    titular: d.titular,
+    destino: d.destino,
+    recibo: d.recibo,
+    seguro: d.seguro,
+    esComprobante: d.es_comprobante });
+
+  const cola = soportes.map((s, i) => ({ s, i }));
+  async function trabajador() {
+    for (;;) {
+      const item = cola.shift();
+      if (!item) return;
+      const { s, i } = item;
+
+      // Ya leída antes: se reusa y no se vuelve a cobrar.
+      const cacheada = comprobanteSchema.safeParse(s.datos);
+      if (cacheada.success) {
+        salida[i] = deDatos(s.id, s.nombre, cacheada.data);
+        continue;
+      }
+
+      try {
+        const { data: archivo, error } = await sb.storage.from(SOPORTES_BUCKET).download(s.path);
+        if (error || !archivo) throw new Error("No se pudo abrir la foto.");
+        const buffer = Buffer.from(await archivo.arrayBuffer());
+        const leido = await leerComprobante(buffer, s.mime || archivo.type || "image/jpeg");
+        await sb.from("corr_soportes").update({ datos: leido }).eq("id", s.id);
+        salida[i] = deDatos(s.id, s.nombre, leido);
+      } catch (e) {
+        salida[i] = {
+          soporteId: s.id,
+          nombre: s.nombre,
+          monto: null,
+          fecha: null,
+          hora: null,
+          transaccion: null,
+          titular: null,
+          destino: null,
+          recibo: null,
+          seguro: false,
+          esComprobante: false,
+          error: e instanceof Error ? e.message : "No se pudo leer.",
+        };
+      }
+    }
+  }
+
+  await Promise.all(
+    Array.from({ length: Math.min(LECTURAS_EN_PARALELO, soportes.length) }, trabajador),
+  );
+
+  return { ok: true, items: salida };
 }
 
 // ===== Corregir (monto / hora / nota) sin borrar =====
