@@ -73,6 +73,14 @@ const RE_SISTEMA = /\b(omitid[oa]|adjunto|multimedia|sticker|elimin(?:ó|o|ad[oa
 // Líneas de resumen: no son movimientos.
 const RE_RESUMEN = /\b(total|suma|saldo|subtotal)\b/i;
 
+// Al soltar fotos sobre el cuadro de texto, el navegador escribe sus rutas.
+// Los códigos del nombre parecen montos ("...0E0CC0E2-4298-9249..." daba $7.446),
+// así que cualquier cosa que huela a archivo se descarta antes de leer nada.
+const RE_ARCHIVO = /\.(jpe?g|png|gif|bmp|tiff?|heic|heif|webp|pdf|mov|mp4|m4v|txt|zip|docx?|xlsx?|csv)\b/i;
+const RE_RUTA = /(^|\s)(\/[^\s/]|~\/|[a-z]:\\|file:\/\/)/i;
+/** Bloques hexadecimales tipo UUID: no son plata. */
+const RE_UUID = /[0-9a-f]{8}-[0-9a-f]{4}/i;
+
 function normalizarHora(h: string, m: string, sufijo?: string): string | null {
   let hh = Number(h);
   const mm = Number(m);
@@ -191,7 +199,13 @@ export function leerListaWhatsApp(texto: string, fechaPorDefecto: string): Resul
     if (cab) ({ fecha: fechaMsg, hora, de } = cab);
     if (!cuerpo) continue;
 
-    if (RE_SISTEMA.test(cuerpo) || RE_RESUMEN.test(cuerpo)) {
+    if (
+      RE_SISTEMA.test(cuerpo) ||
+      RE_RESUMEN.test(cuerpo) ||
+      RE_ARCHIVO.test(cuerpo) ||
+      RE_RUTA.test(cuerpo) ||
+      RE_UUID.test(cuerpo)
+    ) {
       ignoradas.push(linea);
       continue;
     }
