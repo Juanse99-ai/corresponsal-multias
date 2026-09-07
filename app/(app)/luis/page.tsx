@@ -36,14 +36,16 @@ export default async function LuisPage({
         consignaciones={consignaciones}
         compensaciones={compensaciones}
       />
-      <SoportesSection
-        fecha={fecha}
-        soportes={soportes}
-        contexto="luis"
-        titulo="Comprobantes del día"
-        texto="Sube las fotos de las transferencias"
-        detalleBorrado="Se borra la foto del comprobante. Los movimientos no cambian."
-      />
+      <div id="comprobantes" className="scroll-mt-20">
+        <SoportesSection
+          fecha={fecha}
+          soportes={soportes}
+          contexto="luis"
+          titulo="Comprobantes del día"
+          texto="Sube las fotos de las transferencias"
+          detalleBorrado="Se borra la foto del comprobante. Los movimientos no cambian."
+        />
+      </div>
     </div>
   );
 }

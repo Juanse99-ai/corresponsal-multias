@@ -104,6 +104,8 @@ export function MovimientosSection({
   const [tocados, setTocados] = useState<Set<number>>(() => new Set());
   // El chat es un grupo: quien no sea Luis se puede apagar de un toque.
   const [remitentesFuera, setRemitentesFuera] = useState<Set<string>>(() => new Set());
+  // Al soltar fotos aquí el navegador escribe sus rutas y se leían como montos.
+  const [soltoFotos, setSoltoFotos] = useState(false);
   const archivoRef = useRef<HTMLInputElement>(null);
   const lote = useMemo(() => leerListaWhatsApp(loteTexto, fecha), [loteTexto, fecha]);
   const indiceDe = useMemo(() => new Map(lote.movimientos.map((m, i) => [m, i])), [lote]);
@@ -401,11 +403,34 @@ export function MovimientosSection({
               <Textarea
                 value={loteTexto}
                 onChange={(e) => cambiarTexto(e.target.value)}
+                onDragOver={(e) => {
+                  if (e.dataTransfer?.types?.includes("Files")) e.preventDefault();
+                }}
+                onDrop={(e) => {
+                  // Sin esto el navegador pega la ruta del archivo como texto.
+                  if (e.dataTransfer?.files?.length) {
+                    e.preventDefault();
+                    setSoltoFotos(true);
+                  }
+                }}
                 rows={5}
                 autoFocus
                 placeholder={"[3/9/26, 4:10 p. m.] Luis: 1'500.000 ese neki Andrea\n635.000 ese neki Luifer hijo\n…"}
                 className="mt-3"
               />
+
+              {soltoFotos && (
+                <div
+                  role="status"
+                  className="mt-2 rounded-card border border-line-strong bg-surface px-3 py-2 text-[0.78rem] text-muted"
+                >
+                  Aquí va el texto del chat, no las fotos. Las fotos de los comprobantes van en{" "}
+                  <a href="#comprobantes" onClick={() => setSoltoFotos(false)} className="font-medium text-accent-strong underline underline-offset-2">
+                    Comprobantes del día
+                  </a>
+                  , al final de esta página.
+                </div>
+              )}
 
               {loteTexto.trim() && (
                 <div className="mt-3">
