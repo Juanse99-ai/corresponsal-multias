@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { hoyISO, formatFechaLarga } from "@/lib/format";
-import { getConsignacionesLuis, getCompensacionesLuis, getSaldoLuisAcumulado } from "@/lib/queries";
+import { getConsignacionesLuis, getCompensacionesLuis, getSaldoLuisAcumulado, getSoportes } from "@/lib/queries";
 import { LuisManager } from "@/components/luis/luis-manager";
+import { SoportesSection } from "@/components/cuadre/soportes-section";
 import { PageHeader } from "@/components/shell/page-header";
 import { DateNav } from "@/components/shell/date-nav";
 
@@ -17,10 +18,11 @@ export default async function LuisPage({
   const sp = await searchParams;
   const fecha = sp.fecha && ISO.test(sp.fecha) ? sp.fecha : hoyISO();
 
-  const [consignaciones, compensaciones, acumuladoAyer] = await Promise.all([
+  const [consignaciones, compensaciones, acumuladoAyer, soportes] = await Promise.all([
     getConsignacionesLuis(fecha),
     getCompensacionesLuis(fecha),
     getSaldoLuisAcumulado(fecha, false),
+    getSoportes(fecha, "luis"),
   ]);
 
   return (
@@ -33,6 +35,14 @@ export default async function LuisPage({
         acumuladoAyer={acumuladoAyer}
         consignaciones={consignaciones}
         compensaciones={compensaciones}
+      />
+      <SoportesSection
+        fecha={fecha}
+        soportes={soportes}
+        contexto="luis"
+        titulo="Comprobantes del día"
+        texto="Sube las fotos de las transferencias"
+        detalleBorrado="Se borra la foto del comprobante. Los movimientos no cambian."
       />
     </div>
   );

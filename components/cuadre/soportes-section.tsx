@@ -15,10 +15,13 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
 import { createClient } from "@/lib/supabase/client";
+import { comprimirImagen } from "@/lib/comprimir-imagen";
 import type { SoporteConUrl } from "@/lib/queries";
 import { registrarSoporte, eliminarSoporte } from "@/app/(app)/cuadre/actions";
 
 const BUCKET = "corr-soportes";
+/** Cuántas suben a la vez: más que esto satura el dato móvil y va más lento. */
+const EN_PARALELO = 3;
 
 function pesoArchivo(n: number | null): string {
   if (!n) return "";
@@ -26,51 +29,95 @@ function pesoArchivo(n: number | null): string {
   return `${Math.round(n / 1000)} KB`;
 }
 
+/** Traduce el error de Storage a algo que se entienda. */
+function motivo(msg: string): string {
+  const m = msg.toLowerCase();
+  if (m.includes("row-level") || m.includes("unauthorized") || m.includes("jwt")) return "vuelve a entrar";
+  if (m.includes("size") || m.includes("large")) return "pesa demasiado";
+  if (m.includes("mime") || m.includes("type")) return "ese formato no se admite";
+  if (m.includes("duplicate") || m.includes("exists")) return "ya estaba subida";
+  return "falló la subida";
+}
+
 export function SoportesSection({
   fecha,
   soportes,
   contexto = "cuadre",
   titulo = "Soportes del día",
-  texto = "Sube la tirilla del datáfono" }: {
+  texto = "Sube la tirilla del datáfono",
+  detalleBorrado = "Sin la tirilla adjunta no podrás cerrar el día." }: {
   fecha: string;
   soportes: SoporteConUrl[];
   contexto?: string;
   titulo?: string;
   texto?: string;
+  detalleBorrado?: string;
 }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [, startTransition] = useTransition();
   const [porBorrar, setPorBorrar] = useState<string | null>(null);
-  const [subiendo, setSubiendo] = useState(false);
   const [drag, setDrag] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Subida por tandas: con veinte fotos hay que ver que algo avanza.
+  const [progreso, setProgreso] = useState<{ hechos: number; total: number } | null>(null);
+  const subiendo = progreso !== null;
+
+  async function subirUna(file: File): Promise<string | null> {
+    const supabase = createClient();
+    const listo = await comprimirImagen(file);
+    const ext = (listo.name.split(".").pop() || "jpg").toLowerCase();
+    const path = `${contexto}/${fecha}/${crypto.randomUUID()}.${ext}`;
+    const { error: upErr } = await supabase.storage
+      .from(BUCKET)
+      .upload(path, listo, { upsert: false, contentType: listo.type || undefined });
+    if (upErr) return motivo(upErr.message ?? "");
+
+    const res = await registrarSoporte({
+      fecha,
+      path,
+      contexto,
+      nombre: file.name,
+      mime: listo.type || null,
+      tamano: listo.size });
+    return res?.ok === false ? "no se pudo registrar" : null;
+  }
 
   async function subir(files: FileList | File[]) {
     const lista = Array.from(files);
-    if (lista.length === 0) return;
+    if (lista.length === 0 || subiendo) return; // una tanda a la vez
     setError(null);
-    setSubiendo(true);
-    const supabase = createClient();
-    for (const file of lista) {
-      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-      const path = `${contexto}/${fecha}/${crypto.randomUUID()}.${ext}`;
-      const { error: upErr } = await supabase.storage
-        .from(BUCKET)
-        .upload(path, file, { upsert: false, contentType: file.type || undefined });
-      if (upErr) {
-        setError(`No se pudo subir ${file.name}.`);
-        continue;
+    setProgreso({ hechos: 0, total: lista.length });
+
+    const cola = [...lista];
+    const fallos: string[] = [];
+    let hechos = 0;
+
+    async function trabajador() {
+      for (;;) {
+        const file = cola.shift();
+        if (!file) return;
+        try {
+          const falla = await subirUna(file);
+          if (falla) fallos.push(`${file.name} (${falla})`);
+        } catch {
+          fallos.push(`${file.name} (falló la subida)`);
+        }
+        hechos += 1;
+        setProgreso({ hechos, total: lista.length });
       }
-      await registrarSoporte({
-        fecha,
-        path,
-        contexto,
-        nombre: file.name,
-        mime: file.type || null,
-        tamano: file.size });
     }
-    setSubiendo(false);
+
+    await Promise.all(Array.from({ length: Math.min(EN_PARALELO, lista.length) }, trabajador));
+
+    setProgreso(null);
+    if (fallos.length > 0) {
+      const detalle = fallos.slice(0, 3).join(", ");
+      const resto = fallos.length > 3 ? ` y ${fallos.length - 3} más` : "";
+      setError(
+        `${lista.length - fallos.length} de ${lista.length} subieron. No entraron: ${detalle}${resto}.`,
+      );
+    }
     router.refresh();
   }
 
@@ -110,8 +157,15 @@ export function SoportesSection({
           type="file"
           accept="image/*,application/pdf"
           multiple
+          disabled={subiendo}
           className="hidden"
-          onChange={(e) => e.target.files && subir(e.target.files)}
+          onChange={(e) => {
+            // Copiar antes de limpiar: al vaciar el input, su FileList (que es
+            // viva) se queda sin archivos y no subiría nada.
+            const elegidos = Array.from(e.target.files ?? []);
+            e.target.value = ""; // permite volver a elegir la misma foto
+            if (elegidos.length > 0) subir(elegidos);
+          }}
         />
         <div className="flex h-11 w-11 items-center justify-center rounded-full bg-surface-2 text-accent">
           {subiendo ? (
@@ -122,8 +176,22 @@ export function SoportesSection({
             <Receipt size={19} weight="fill" />
           )}
         </div>
-        <p className="text-[0.86rem] font-medium text-text">{subiendo ? "Subiendo…" : texto}</p>
-        <p className="text-[0.74rem] text-faint">Arrastra o toca · foto o PDF · hasta 10 MB</p>
+        <p className="text-[0.86rem] font-medium text-text">
+          {progreso ? `Subiendo ${progreso.hechos} de ${progreso.total}…` : texto}
+        </p>
+        <p className="text-[0.74rem] text-faint">
+          {progreso ? "No cierres esta pantalla." : "Arrastra o toca · varias a la vez · foto o PDF"}
+        </p>
+        {progreso && (
+          <span className="mt-1 h-1 w-40 overflow-hidden rounded-full bg-surface-2">
+            <motion.span
+              className="block h-full rounded-full bg-accent"
+              initial={false}
+              animate={{ width: `${Math.round((progreso.hechos / progreso.total) * 100)}%` }}
+              transition={{ type: "spring", stiffness: 200, damping: 30 }}
+            />
+          </span>
+        )}
       </label>
 
       <ErrorNotice message={error} className="mt-3" />
@@ -178,7 +246,7 @@ export function SoportesSection({
       <ConfirmDialog
         open={!!porBorrar}
         titulo="¿Borrar este soporte?"
-        detalle="Sin la tirilla adjunta no podrás cerrar el día."
+        detalle={detalleBorrado}
         onConfirmar={() => porBorrar && borrar(porBorrar)}
         onCancelar={() => setPorBorrar(null)}
       />

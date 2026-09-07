@@ -155,6 +155,7 @@ export async function registrarSoporte(raw: unknown): Promise<{ ok: boolean; err
 
   revalidatePath("/cuadre");
   revalidatePath("/general");
+  revalidatePath("/luis");
   return { ok: true };
 }
 
@@ -167,5 +168,7 @@ export async function eliminarSoporte(id: string): Promise<{ ok: boolean; error?
   if (error) return { ok: false, error: "No se pudo eliminar el soporte." };
 
   revalidatePath("/cuadre");
+  revalidatePath("/general");
+  revalidatePath("/luis");
   return { ok: true };
 }
