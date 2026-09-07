@@ -67,6 +67,16 @@ export function lecturaDisponible(): boolean {
   return !!process.env.ANTHROPIC_API_KEY;
 }
 
+/**
+ * Modelo que lee las tirillas. Se puede cambiar desde Vercel con
+ * MODELO_LECTURA, sin tocar código, para comparar precisión contra costo.
+ * No se fija el modo de razonamiento a propósito: cada modelo trae el suyo
+ * por defecto y así el cambio por variable no rompe nada.
+ */
+function modelo(): string {
+  return process.env.MODELO_LECTURA?.trim() || "claude-sonnet-5";
+}
+
 export async function leerComprobante(imagen: Buffer, mime: string): Promise<Comprobante> {
   if (!esMimeValido(mime)) {
     throw new Error(`Formato no admitido para leer: ${mime || "desconocido"}`);
@@ -74,7 +84,7 @@ export async function leerComprobante(imagen: Buffer, mime: string): Promise<Com
 
   const client = new Anthropic();
   const res = await client.messages.parse({
-    model: "claude-opus-5",
+    model: modelo(),
     max_tokens: 2000,
     system: INSTRUCCIONES,
     messages: [
