@@ -67,9 +67,9 @@ export type Database = {
         Relationships: [];
       };
       corr_soportes: {
-        Row: { id: string; fecha: string; tipo: string; contexto: string; path: string; nombre: string | null; mime: string | null; tamano: number | null; created_by: string | null; created_at: string };
-        Insert: { id?: string; fecha: string; tipo?: string; contexto?: string; path: string; nombre?: string | null; mime?: string | null; tamano?: number | null; created_by?: string | null; created_at?: string };
-        Update: { id?: string; fecha?: string; tipo?: string; contexto?: string; path?: string; nombre?: string | null; mime?: string | null; tamano?: number | null; created_by?: string | null; created_at?: string };
+        Row: { id: string; fecha: string; tipo: string; contexto: string; path: string; nombre: string | null; mime: string | null; tamano: number | null; datos: Json | null; created_by: string | null; created_at: string };
+        Insert: { id?: string; fecha: string; tipo?: string; contexto?: string; path: string; nombre?: string | null; mime?: string | null; tamano?: number | null; datos?: Json | null; created_by?: string | null; created_at?: string };
+        Update: { id?: string; fecha?: string; tipo?: string; contexto?: string; path?: string; nombre?: string | null; mime?: string | null; tamano?: number | null; datos?: Json | null; created_by?: string | null; created_at?: string };
         Relationships: [];
       };
       corr_general: {

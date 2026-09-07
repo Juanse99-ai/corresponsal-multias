@@ -3,6 +3,8 @@ import { hoyISO, formatFechaLarga } from "@/lib/format";
 import { getConsignacionesLuis, getCompensacionesLuis, getSaldoLuisAcumulado, getSoportes } from "@/lib/queries";
 import { LuisManager } from "@/components/luis/luis-manager";
 import { SoportesSection } from "@/components/cuadre/soportes-section";
+import { ComprobantesLector } from "@/components/luis/comprobantes-lector";
+import { leerComprobantesDelDia, agregarConsignacionesLote } from "@/app/(app)/luis/actions";
 import { PageHeader } from "@/components/shell/page-header";
 import { DateNav } from "@/components/shell/date-nav";
 
@@ -44,6 +46,12 @@ export default async function LuisPage({
           titulo="Comprobantes del día"
           texto="Sube las fotos de las transferencias"
           detalleBorrado="Se borra la foto del comprobante. Los movimientos no cambian."
+        />
+        <ComprobantesLector
+          fecha={fecha}
+          cantidadFotos={soportes.length}
+          leerFotos={leerComprobantesDelDia}
+          guardarLote={agregarConsignacionesLote}
         />
       </div>
     </div>
