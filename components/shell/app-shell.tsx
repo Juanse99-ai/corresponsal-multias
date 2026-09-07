@@ -7,6 +7,7 @@ import type { Rol } from "@/lib/cuadre";
 import type { HeaderResumen } from "@/lib/queries";
 import { TopHeader } from "@/components/shell/top-header";
 import { NavOverlay } from "@/components/shell/nav-overlay";
+import { NuevaVersion } from "@/components/shell/nueva-version";
 import { BienvenidaSplash } from "@/components/fx/bienvenida-splash";
 
 export function AppShell({
@@ -41,6 +42,8 @@ export function AppShell({
         <div className="mx-auto w-full max-w-[1200px] px-4 pb-16 pt-6 sm:px-6 lg:px-8 lg:pt-7">
           {children}
         </div>
+
+        <NuevaVersion />
       </div>
     </MotionConfig>
   );
