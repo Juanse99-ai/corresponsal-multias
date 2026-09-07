@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
 import { createClient } from "@/lib/supabase/client";
-import { comprimirImagen } from "@/lib/comprimir-imagen";
+import { comprimirImagen, pareceImagen, esPdf, tipoDeArchivo } from "@/lib/comprimir-imagen";
 import type { SoporteConUrl } from "@/lib/queries";
 import { registrarSoporte, eliminarSoporte } from "@/app/(app)/cuadre/actions";
 
@@ -64,13 +64,16 @@ export function SoportesSection({
   const subiendo = progreso !== null;
 
   async function subirUna(file: File): Promise<string | null> {
+    if (!pareceImagen(file) && !esPdf(file)) return "no es foto ni PDF";
+
     const supabase = createClient();
     const listo = await comprimirImagen(file);
+    const tipo = tipoDeArchivo(listo);
     const ext = (listo.name.split(".").pop() || "jpg").toLowerCase();
     const path = `${contexto}/${fecha}/${crypto.randomUUID()}.${ext}`;
     const { error: upErr } = await supabase.storage
       .from(BUCKET)
-      .upload(path, listo, { upsert: false, contentType: listo.type || undefined });
+      .upload(path, listo, { upsert: false, contentType: tipo });
     if (upErr) return motivo(upErr.message ?? "");
 
     const res = await registrarSoporte({
@@ -78,7 +81,7 @@ export function SoportesSection({
       path,
       contexto,
       nombre: file.name,
-      mime: listo.type || null,
+      mime: tipo ?? null,
       tamano: listo.size });
     return res?.ok === false ? "no se pudo registrar" : null;
   }
@@ -155,7 +158,11 @@ export function SoportesSection({
         <input
           ref={inputRef}
           type="file"
-          accept="image/*,application/pdf"
+          // Con solo "image/*" el diálogo del Mac deja en gris las fotos cuyo
+          // tipo no logra resolver (las de Fotos, iCloud o AirDrop). Nombrando
+          // también las extensiones se pueden escoger, y el iPhone sigue
+          // ofreciendo la Fototeca porque "image/*" está presente.
+          accept="image/*,.jpg,.jpeg,.png,.heic,.heif,.webp,application/pdf,.pdf"
           multiple
           disabled={subiendo}
           className="hidden"
@@ -180,7 +187,9 @@ export function SoportesSection({
           {progreso ? `Subiendo ${progreso.hechos} de ${progreso.total}…` : texto}
         </p>
         <p className="text-[0.74rem] text-faint">
-          {progreso ? "No cierres esta pantalla." : "Arrastra o toca · varias a la vez · foto o PDF"}
+          {progreso
+            ? "No cierres esta pantalla."
+            : "Toca para escoger, o arrastra las fotos aquí · varias a la vez"}
         </p>
         {progreso && (
           <span className="mt-1 h-1 w-40 overflow-hidden rounded-full bg-surface-2">
