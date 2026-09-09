@@ -19,14 +19,22 @@ async function diaBloqueado(rol: string, fecha: string): Promise<boolean> {
   return rol !== "admin" && (await diaEstaCerrado(fecha));
 }
 
+/**
+ * Hora del movimiento. Se aceptan segundos porque así los devuelve Postgres
+ * ("09:27:00") y es fácil que vuelvan tal cual desde un formulario de edición;
+ * se recortan antes de guardar.
+ */
+const horaSchema = z
+  .string()
+  .regex(/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/)
+  .transform((h) => h.slice(0, 5))
+  .nullable()
+  .optional();
+
 const addSchema = z.object({
   fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   monto: z.number().int().positive(),
-  hora: z
-    .string()
-    .regex(/^\d{2}:\d{2}$/)
-    .nullable()
-    .optional(),
+  hora: horaSchema,
   nota: z.string().max(200).nullable().optional(),
 });
 
@@ -113,11 +121,7 @@ const loteSchema = z.object({
       z.object({
         fecha: z.string().regex(ISO).optional(),
         monto: z.number().int().positive(),
-        hora: z
-          .string()
-          .regex(/^\d{2}:\d{2}$/)
-          .nullable()
-          .optional(),
+        hora: horaSchema,
         nota: z.string().max(200).nullable().optional(),
       }),
     )
@@ -319,11 +323,7 @@ export async function leerComprobantesDelDia(
 const editLuisSchema = z.object({
   id: z.string().uuid(),
   monto: z.number().int().positive().optional(),
-  hora: z
-    .string()
-    .regex(/^\d{2}:\d{2}$/)
-    .nullable()
-    .optional(),
+  hora: horaSchema,
   nota: z.string().max(200).nullable().optional(),
 });
 
