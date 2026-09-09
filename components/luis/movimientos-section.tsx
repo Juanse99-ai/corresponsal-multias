@@ -269,7 +269,8 @@ export function MovimientosSection({
   function abrirEdicion(c: MovimientoItem) {
     setEditId(c.id);
     setEMonto(c.monto);
-    setEHora(c.hora ?? "");
+    // La base devuelve "09:27:00"; el input de hora y el servidor esperan "09:27".
+    setEHora(formatHora(c.hora));
     setENota(c.nota ?? "");
     setError(null);
   }
