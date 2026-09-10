@@ -70,8 +70,22 @@ const RE_CABECERA = new RegExp(
 
 // Avisos del propio WhatsApp: fotos, stickers, borrados, cifrado.
 const RE_SISTEMA = /\b(omitid[oa]|adjunto|multimedia|sticker|elimin(?:ó|o|ad[oa]|aste)|cifrad[oa]s?)\b/i;
-// Líneas de resumen: no son movimientos.
-const RE_RESUMEN = /\b(total|suma|saldo|subtotal)\b/i;
+/**
+ * La marca de la foto, sin el pie. Sr. Luis manda la pantalla de la cuenta y
+ * escribe el monto ahí mismo ("240,000 mi esposa ‎imagen omitida"): si se
+ * descarta el mensaje entero por la marca, ese pedido desaparece del cruce.
+ */
+const RE_ADJUNTO =
+  /\b(?:imagen|v[ií]deo|audio|documento|sticker|gif|contacto|ubicaci[oó]n|tarjeta)\s+omitid[oa]\b|<archivo adjunto>|\bmultimedia omitido\b/gi;
+/**
+ * Líneas de resumen: no son movimientos. La palabra tiene que encabezar la
+ * línea o venir con dos puntos ("Total: 4.985.000"); suelta no cuenta, porque
+ * Sr. Luis la usa dentro de los apodos ("237.000 ese neki Sandra total") y con
+ * la regla amplia ese pedido desaparecía. "palos" es como anota su propio
+ * corte al mandar la foto ("20 palos nuevo"): eso nunca es un pedido.
+ */
+const RE_RESUMEN =
+  /^\s*(?:total|suma|saldo|subtotal)\b|\b(?:total|suma|saldo|subtotal)\s*[:=]|\bpalos?\b/i;
 
 // Al soltar fotos sobre el cuadro de texto, el navegador escribe sus rutas.
 // Los códigos del nombre parecen montos ("...0E0CC0E2-4298-9249..." daba $7.446),
@@ -131,7 +145,13 @@ function enteroDe(cruda: string): number | null {
 
 /** Convierte "1.580.000", "310,000", "1'000.000", "310 mil", "1.5 millones" a entero. */
 function leerMonto(fragmento: string): { monto: number; crudo: string } | null {
-  const t = fragmento.toLowerCase().replace(RE_TASA, " ");
+  const t = fragmento
+    .toLowerCase()
+    .replace(RE_TASA, " ")
+    // "1.000 000 de pesos": el ultimo separador se le fue por un espacio. Solo
+    // cuando lo de la izquierda YA es un monto con separador, para no unir los
+    // celulares que escribe por partes ("320 861 21 01").
+    .replace(/(\d{1,3}[.,']\d{3})\s+(\d{3})(?!\d)/g, "$1.$2");
 
   // Compuesto: "1 millón 343 mil pesos" son 1.343.000, no 1.000.000. Va primero
   // porque las dos reglas de abajo lo partirían y se quedarían con la mitad.
@@ -148,8 +168,9 @@ function leerMonto(fragmento: string): { monto: number; crudo: string } | null {
     return monto <= MONTO_MAXIMO ? { monto, crudo: mill[0] } : null;
   }
 
-  // "310 mil" / "310k"
-  const mil = t.match(/(\d+(?:[.,]\d+)?)\s*(mil\b|k\b)/);
+  // "310 mil" / "310k". El numero tiene que venir pelado: en "1.740.000 mil
+  // pesos" la palabra sobra y quedarse con "740.000 mil" daria $740.000.
+  const mil = t.match(/(?<![\d.,'])(\d{1,3}(?:[.,]\d{1,2})?)\s*(mil\b|k\b)/);
   if (mil) return { monto: Math.round(Number(mil[1].replace(",", ".")) * 1_000), crudo: mil[0] };
 
   // SOLO números con separador de miles ("1.565.000", "310,000", "1'000.000").
@@ -157,11 +178,17 @@ function leerMonto(fragmento: string): { monto: number; crudo: string } | null {
   // celulares, cédulas y cuentas ("PPT: 5923066", "320 6286634") y sin esta
   // regla se leen como plata. Él siempre escribe los montos con separador o
   // con palabra ("65 mil"), así que no se pierde nada real.
-  const corridas = t.match(/\d{1,3}(?:[.,']\d{3})+/g);
+  // Los bordes exigen que no haya más dígitos pegados: en "1'8000.000" (un cero
+  // de más al escribir) sin eso se leía "1'800" y salía un pedido de $1.800.
+  // Mejor no leer nada y que el monto aparezca como registro sin pedido.
+  const corridas = t.match(/(?<!\d)\d{1,3}(?:[.,']\d{3})+(?!\d)/g);
   if (!corridas) return null;
   const candidatas = corridas
     .map((c) => ({ crudo: c, monto: enteroDe(c) }))
-    .filter((c): c is { crudo: string; monto: number } => c.monto !== null && c.monto <= MONTO_MAXIMO);
+    .filter(
+      (c): c is { crudo: string; monto: number } =>
+        c.monto !== null && c.monto > 0 && c.monto <= MONTO_MAXIMO,
+    );
   if (candidatas.length === 0) return null;
   return candidatas.reduce((a, b) => (b.crudo.replace(/\D/g, "").length > a.crudo.replace(/\D/g, "").length ? b : a));
 }
@@ -222,15 +249,23 @@ function aMinutos(hora: string | null): number | null {
   return Number.isFinite(h) && Number.isFinite(m) ? h * 60 + m : null;
 }
 
-/** Índices de un subconjunto de `libres` que suma exactamente `objetivo`. */
+/**
+ * Índices de un subconjunto de `libres` que suma exactamente `objetivo`.
+ *
+ * Busca de mayor a menor porque así parte el datáfono: llena tirillas de
+ * $3.000.000 y deja el resto en la última. Al revés encuentra primero
+ * combinaciones de pedacitos que le quitan las piezas a otro pedido.
+ */
 function buscarPartes(libres: number[], objetivo: number): number[] | null {
   const n = Math.min(maxPartes(objetivo), libres.length);
+  const orden = libres.map((_, i) => i).sort((a, b) => libres[b] - libres[a]);
   const buscar = (desde: number, faltante: number, tomados: number[]): number[] | null => {
     if (faltante === 0) return tomados;
-    if (tomados.length === n || desde >= libres.length) return null;
-    for (let i = desde; i < libres.length; i++) {
+    if (tomados.length === n || desde >= orden.length) return null;
+    for (let k = desde; k < orden.length; k++) {
+      const i = orden[k];
       if (libres[i] > faltante) continue;
-      const r = buscar(i + 1, faltante - libres[i], [...tomados, i]);
+      const r = buscar(k + 1, faltante - libres[i], [...tomados, i]);
       if (r) return r;
     }
     return null;
@@ -246,39 +281,50 @@ function buscarPartes(libres: number[], objetivo: number): number[] | null {
  * y aparecen faltantes que no existen.
  */
 export function conciliarDia(pedidos: MovimientoLeido[], registrados: number[]): Conciliacion {
-  // Luis suele mandar la cuenta con el monto y enseguida confirmarlo: es un
-  // solo movimiento. Se marca el segundo y no se cuenta.
-  const posiblesRepetidos: MovimientoLeido[] = [];
-  const unicos: MovimientoLeido[] = [];
-  for (const p of pedidos) {
-    const previo = unicos[unicos.length - 1];
-    const m1 = aMinutos(p.hora);
-    const m0 = previo ? aMinutos(previo.hora) : null;
-    const seguido = m1 !== null && m0 !== null && m1 - m0 <= MINUTOS_REPETIDO && m1 >= m0;
-    if (previo && previo.monto === p.monto && seguido) posiblesRepetidos.push(p);
-    else unicos.push(p);
-  }
-
   const libres = [...registrados];
+  const calzados: MovimientoLeido[] = [];
   const resto: MovimientoLeido[] = [];
-  for (const p of unicos) {
+  for (const p of pedidos) {
     const i = libres.indexOf(p.monto);
-    if (i >= 0) libres.splice(i, 1);
-    else resto.push(p);
+    if (i >= 0) {
+      libres.splice(i, 1);
+      calzados.push(p);
+    } else resto.push(p);
   }
 
-  const faltantes: MovimientoLeido[] = [];
+  const sinCalce: MovimientoLeido[] = [];
   for (const p of [...resto].sort((a, b) => b.monto - a.monto)) {
     const partes = buscarPartes(libres, p.monto);
-    if (partes) for (const i of [...partes].sort((a, b) => b - a)) libres.splice(i, 1);
+    if (partes) {
+      for (const i of [...partes].sort((a, b) => b - a)) libres.splice(i, 1);
+      calzados.push(p);
+    } else sinCalce.push(p);
+  }
+
+  // Luis a veces manda la cuenta con el monto y enseguida lo confirma: es un
+  // solo movimiento. Pero también pide dos veces el mismo monto seguido para
+  // dos personas distintas, y eso sí son dos. Los distingue la app: si el
+  // gemelo cercano SI tiene registro y este no, el repetido es este.
+  const posiblesRepetidos: MovimientoLeido[] = [];
+  const faltantes: MovimientoLeido[] = [];
+  for (const p of sinCalce) {
+    const m1 = aMinutos(p.hora);
+    const gemelo =
+      m1 !== null &&
+      calzados.some((c) => {
+        const m0 = aMinutos(c.hora);
+        return c.monto === p.monto && m0 !== null && Math.abs(m1 - m0) <= MINUTOS_REPETIDO;
+      });
+    if (gemelo) posiblesRepetidos.push(p);
     else faltantes.push(p);
   }
 
+  const contados = pedidos.filter((p) => !posiblesRepetidos.includes(p));
   return {
     faltantes: faltantes.sort((a, b) => (a.hora ?? "").localeCompare(b.hora ?? "")),
     sobrantes: libres.sort((a, b) => b - a),
     posiblesRepetidos,
-    totalChat: unicos.reduce((s, p) => s + p.monto, 0),
+    totalChat: contados.reduce((s, p) => s + p.monto, 0),
     totalApp: registrados.reduce((s, v) => s + v, 0),
   };
 }
@@ -308,6 +354,8 @@ export function leerListaWhatsApp(texto: string, fechaPorDefecto: string): Resul
       cuerpo = resto.trim();
     }
     if (cab) ({ fecha: fechaMsg, hora, de } = cab);
+    // Se quita la marca de la foto pero se conserva el pie: ahí viene el monto.
+    cuerpo = cuerpo.replace(RE_ADJUNTO, " ").trim();
     if (!cuerpo) continue;
 
     if (
