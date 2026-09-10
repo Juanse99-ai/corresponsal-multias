@@ -8,6 +8,7 @@ import {
   Vault,
   ClockCounterClockwise,
   ArrowsDownUp,
+  ShieldCheck,
 } from "@phosphor-icons/react/dist/ssr";
 
 export type Grupo = "main" | "admin";
@@ -26,6 +27,7 @@ export const NAV: NavItem[] = [
   { href: "/movimientos", label: "Movimientos", icon: ArrowsDownUp, grupo: "main" },
   { href: "/luis", label: "Cuenta de Sr. Luis", icon: Wallet, grupo: "main" },
   { href: "/prestamos", label: "Préstamos", icon: HandCoins, grupo: "main" },
+  { href: "/auditoria", label: "Auditoría", icon: ShieldCheck, grupo: "admin", adminOnly: true },
   { href: "/general", label: "Control general", icon: Vault, grupo: "admin", adminOnly: true },
   { href: "/historial", label: "Historial", icon: ChartLineUp, grupo: "admin", adminOnly: true },
   { href: "/bitacora", label: "Bitácora", icon: ClockCounterClockwise, grupo: "admin", adminOnly: true },

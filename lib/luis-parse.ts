@@ -81,6 +81,13 @@ const RE_RUTA = /(^|\s)(\/[^\s/]|~\/|[a-z]:\\|file:\/\/)/i;
 /** Bloques hexadecimales tipo UUID: no son plata. */
 const RE_UUID = /[0-9a-f]{8}-[0-9a-f]{4}/i;
 
+// Sr. Luis a veces pide en florines y manda aparte la conversión en pesos. La
+// consignación se hace SIEMPRE por el valor en pesos, así que la línea en
+// florines se descarta: contar las dos infla el día.
+const RE_FLORIN = /\bflor[ií]n(?:es)?\b|\bfl\b/i;
+// "500xcg", "3,000xcg" es la tasa de cambio, no un monto.
+const RE_TASA = /\d[\d.,']*\s*x\s*cg\b/gi;
+
 function normalizarHora(h: string, m: string, sufijo?: string): string | null {
   let hh = Number(h);
   const mm = Number(m);
@@ -124,7 +131,15 @@ function enteroDe(cruda: string): number | null {
 
 /** Convierte "1.580.000", "310,000", "1'000.000", "310 mil", "1.5 millones" a entero. */
 function leerMonto(fragmento: string): { monto: number; crudo: string } | null {
-  const t = fragmento.toLowerCase();
+  const t = fragmento.toLowerCase().replace(RE_TASA, " ");
+
+  // Compuesto: "1 millón 343 mil pesos" son 1.343.000, no 1.000.000. Va primero
+  // porque las dos reglas de abajo lo partirían y se quedarían con la mitad.
+  const compuesto = t.match(/(\d+)\s*mill(?:ones|ón|on)\s*(?:y\s+)?(\d{1,3})\s*mil\b/);
+  if (compuesto) {
+    const monto = Number(compuesto[1]) * 1_000_000 + Number(compuesto[2]) * 1_000;
+    return monto <= MONTO_MAXIMO ? { monto, crudo: compuesto[0] } : null;
+  }
 
   // "1.5 millones" / "2 millones" / "1 millón"
   const mill = t.match(/(\d+(?:[.,]\d+)?)\s*(millones|millón|millon)/);
@@ -137,9 +152,12 @@ function leerMonto(fragmento: string): { monto: number; crudo: string } | null {
   const mil = t.match(/(\d+(?:[.,]\d+)?)\s*(mil\b|k\b)/);
   if (mil) return { monto: Math.round(Number(mil[1].replace(",", ".")) * 1_000), crudo: mil[0] };
 
-  // Número con separadores: la corrida numérica más larga que aún sea un monto.
-  // Celulares (3027661514) y cuentas (58454555561) pasan el tope y se descartan.
-  const corridas = t.match(/\d[\d.,']*\d|\d/g);
+  // SOLO números con separador de miles ("1.565.000", "310,000", "1'000.000").
+  // Un número pelado no se acepta: los mensajes de Luis vienen llenos de
+  // celulares, cédulas y cuentas ("PPT: 5923066", "320 6286634") y sin esta
+  // regla se leen como plata. Él siempre escribe los montos con separador o
+  // con palabra ("65 mil"), así que no se pierde nada real.
+  const corridas = t.match(/\d{1,3}(?:[.,']\d{3})+/g);
   if (!corridas) return null;
   const candidatas = corridas
     .map((c) => ({ crudo: c, monto: enteroDe(c) }))
@@ -172,6 +190,99 @@ function normalizarTexto(texto: string): string {
  * usa solo para los mensajes que no traen encabezado (al copiar una burbuja
  * suelta). Los que sí lo traen conservan su propio día.
  */
+// ===== Conciliación: lo que Luis pidió por el grupo contra lo registrado =====
+
+export interface Conciliacion {
+  /** Pedidos del chat que no tienen contraparte registrada. */
+  faltantes: MovimientoLeido[];
+  /** Montos registrados en la app que nadie pidió por el grupo. */
+  sobrantes: number[];
+  /** Pedidos repetidos en mensajes seguidos: Luis manda la cuenta y luego confirma. */
+  posiblesRepetidos: MovimientoLeido[];
+  totalChat: number;
+  totalApp: number;
+}
+
+/** Dos mensajes con el mismo monto y menos de esto entre ellos: es el mismo pedido. */
+const MINUTOS_REPETIDO = 3;
+/** Tope del datáfono por consignación: de ahí sale en cuántas tirillas cabe un pedido. */
+const TOPE_TIRILLA = 3_000_000;
+/**
+ * Un pedido de $4.000.000 sale en dos tirillas ($3.000.000 + $1.000.000), no en
+ * ocho pedacitos. Sin este límite el emparejador arma cualquier monto sumando
+ * registros sueltos que no tienen nada que ver y tapa faltantes reales.
+ */
+function maxPartes(monto: number): number {
+  return Math.ceil(monto / TOPE_TIRILLA) + 1;
+}
+
+function aMinutos(hora: string | null): number | null {
+  if (!hora) return null;
+  const [h, m] = hora.split(":").map(Number);
+  return Number.isFinite(h) && Number.isFinite(m) ? h * 60 + m : null;
+}
+
+/** Índices de un subconjunto de `libres` que suma exactamente `objetivo`. */
+function buscarPartes(libres: number[], objetivo: number): number[] | null {
+  const n = Math.min(maxPartes(objetivo), libres.length);
+  const buscar = (desde: number, faltante: number, tomados: number[]): number[] | null => {
+    if (faltante === 0) return tomados;
+    if (tomados.length === n || desde >= libres.length) return null;
+    for (let i = desde; i < libres.length; i++) {
+      if (libres[i] > faltante) continue;
+      const r = buscar(i + 1, faltante - libres[i], [...tomados, i]);
+      if (r) return r;
+    }
+    return null;
+  };
+  return buscar(0, objetivo, []);
+}
+
+/**
+ * Cruza los pedidos de un día contra los montos registrados.
+ *
+ * El orden importa: PRIMERO todos los calces exactos y solo después las sumas
+ * de partes. Al revés, un pedido grande se come piezas que le pertenecen a otro
+ * y aparecen faltantes que no existen.
+ */
+export function conciliarDia(pedidos: MovimientoLeido[], registrados: number[]): Conciliacion {
+  // Luis suele mandar la cuenta con el monto y enseguida confirmarlo: es un
+  // solo movimiento. Se marca el segundo y no se cuenta.
+  const posiblesRepetidos: MovimientoLeido[] = [];
+  const unicos: MovimientoLeido[] = [];
+  for (const p of pedidos) {
+    const previo = unicos[unicos.length - 1];
+    const m1 = aMinutos(p.hora);
+    const m0 = previo ? aMinutos(previo.hora) : null;
+    const seguido = m1 !== null && m0 !== null && m1 - m0 <= MINUTOS_REPETIDO && m1 >= m0;
+    if (previo && previo.monto === p.monto && seguido) posiblesRepetidos.push(p);
+    else unicos.push(p);
+  }
+
+  const libres = [...registrados];
+  const resto: MovimientoLeido[] = [];
+  for (const p of unicos) {
+    const i = libres.indexOf(p.monto);
+    if (i >= 0) libres.splice(i, 1);
+    else resto.push(p);
+  }
+
+  const faltantes: MovimientoLeido[] = [];
+  for (const p of [...resto].sort((a, b) => b.monto - a.monto)) {
+    const partes = buscarPartes(libres, p.monto);
+    if (partes) for (const i of [...partes].sort((a, b) => b - a)) libres.splice(i, 1);
+    else faltantes.push(p);
+  }
+
+  return {
+    faltantes: faltantes.sort((a, b) => (a.hora ?? "").localeCompare(b.hora ?? "")),
+    sobrantes: libres.sort((a, b) => b - a),
+    posiblesRepetidos,
+    totalChat: unicos.reduce((s, p) => s + p.monto, 0),
+    totalApp: registrados.reduce((s, v) => s + v, 0),
+  };
+}
+
 export function leerListaWhatsApp(texto: string, fechaPorDefecto: string): ResultadoLectura {
   const movimientos: MovimientoLeido[] = [];
   const ignoradas: string[] = [];
@@ -204,7 +315,8 @@ export function leerListaWhatsApp(texto: string, fechaPorDefecto: string): Resul
       RE_RESUMEN.test(cuerpo) ||
       RE_ARCHIVO.test(cuerpo) ||
       RE_RUTA.test(cuerpo) ||
-      RE_UUID.test(cuerpo)
+      RE_UUID.test(cuerpo) ||
+      RE_FLORIN.test(cuerpo)
     ) {
       ignoradas.push(linea);
       continue;

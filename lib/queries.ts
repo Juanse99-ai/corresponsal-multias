@@ -1,4 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
+import {
+  buscarSobreTope,
+  buscarDuplicados,
+  buscarDiasSinCuadre,
+  ordenarHallazgos,
+  type Hallazgo,
+} from "@/lib/auditoria";
 import type {
   CuadreRow,
   ConsignacionLuisRow,
@@ -373,3 +380,34 @@ export async function getAuditLog(limit = 250): Promise<AuditEntry[]> {
 // no romper los imports existentes desde "@/lib/queries").
 export type { PersonaSaldo, PersonaGrupo } from "@/lib/prestamos";
 export { agruparDeudasPorPersona, agruparPorPersona, resumenPorPersona } from "@/lib/prestamos";
+
+// ===== Auditoría de la cuenta de Sr. Luis =====
+
+/** Revisiones automáticas sobre las consignaciones y los cuadres. */
+export async function getHallazgosAuditoria(desde: string): Promise<Hallazgo[]> {
+  const sb = await createClient();
+  const [consig, cuadres] = await Promise.all([
+    sb.from("corr_consignaciones_luis").select("id, fecha, hora, monto").gte("fecha", desde),
+    sb.from("corr_cuadres").select("fecha").gte("fecha", desde),
+  ]);
+  const movs = consig.data ?? [];
+  return ordenarHallazgos([
+    ...buscarSobreTope(movs),
+    ...buscarDuplicados(movs),
+    ...buscarDiasSinCuadre(
+      movs.map((m) => m.fecha),
+      (cuadres.data ?? []).map((c) => c.fecha),
+    ),
+  ]);
+}
+
+/** Consignaciones de un día, solo los montos, para cruzarlas contra el grupo. */
+export async function getMontosConsignados(fecha: string): Promise<number[]> {
+  const sb = await createClient();
+  const { data } = await sb
+    .from("corr_consignaciones_luis")
+    .select("monto")
+    .eq("fecha", fecha)
+    .order("hora", { ascending: true, nullsFirst: false });
+  return (data ?? []).map((r) => r.monto);
+}

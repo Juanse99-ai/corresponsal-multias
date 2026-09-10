@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState, useTransition, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Trash, PencilSimple, Clock, ArrowDown, Receipt, CheckCircle, WhatsappLogo, ClipboardText, FileArrowUp } from "@phosphor-icons/react/dist/ssr";
+import { Plus, Trash, PencilSimple, Clock, ArrowDown, Receipt, CheckCircle, WhatsappLogo, ClipboardText, FileArrowUp, Warning } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/field";
@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatCOP, formatFechaCorta, formatHora, horaBogotaHHMM } from "@/lib/format";
+import { TOPE_CONSIGNACION, TOPE_COMPENSACION } from "@/lib/auditoria";
 import { reduced } from "@/components/fx/reduced";
 
 const botonMini =
@@ -153,6 +154,8 @@ export function MovimientosSection({
 
   const total = items.reduce((s, c) => s + c.monto, 0);
   const Icon = tono === "consig" ? ArrowDown : Receipt;
+  // Topes reales del negocio: el datáfono por consignación, el banco por transferencia.
+  const tope = tono === "consig" ? TOPE_CONSIGNACION : TOPE_COMPENSACION;
 
   function avisarOk(texto: string) {
     setOkMsg(texto);
@@ -311,6 +314,14 @@ export function MovimientosSection({
       <div className="mt-4 flex flex-col gap-1.5">
         <Label htmlFor={`monto-${tono}`}>Monto</Label>
         <MoneyInput id={`monto-${tono}`} size="lg" value={monto} onValueChange={setMonto} onEnter={() => !pending && registrar()} />
+        {monto > tope && (
+          <p className="flex items-start gap-1.5 text-[0.76rem] text-danger">
+            <Warning size={13} weight="fill" className="mt-0.5 shrink-0" />
+            {tono === "consig"
+              ? "El datáfono no pasa de $3.000.000 por consignación: si fue un monto grande, va partido en varias."
+              : "Las transferencias de Sr. Luis topan en $9.999.999: si mandó más, van en varias."}
+          </p>
+        )}
       </div>
       {/* flex-wrap y no grid: en iOS el input de hora tiene un ancho nativo propio
           (12h con "a. m.") que no respeta la columna y se montaba sobre la nota.
