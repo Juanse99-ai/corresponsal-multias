@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, useTransition } from "react";
+import { Fragment, useId, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -10,6 +10,7 @@ import {
   CaretDown,
   CheckCircle,
   ArrowCounterClockwise,
+  Tag,
 } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,7 +25,15 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatCOP, formatFecha, hoyISO } from "@/lib/format";
 import { PERSONAS_PRESET } from "@/lib/personas";
 import type { DeudaConSaldo, PersonaGrupo } from "@/lib/queries";
-import { crearDeuda, agregarAbono, eliminarDeuda, reabrirPrestamo } from "@/app/(app)/prestamos/actions";
+import type { AbonoRow } from "@/lib/database.types";
+import { claveNombre, origenesUsados, resumenOrigenes } from "@/lib/prestamos";
+import {
+  crearDeuda,
+  agregarAbono,
+  eliminarDeuda,
+  reabrirPrestamo,
+  etiquetarAbono,
+} from "@/app/(app)/prestamos/actions";
 
 const CONCEPTOS = ["Préstamo personal", "Adelanto", "Gasto", "Otro"];
 
@@ -46,6 +55,11 @@ export function PrestamosManager({
   const deben = grupos.filter((g) => g.saldo > 0);
   const alDia = grupos.filter((g) => g.saldo <= 0);
   const totalPendiente = deben.reduce((s, g) => s + g.saldo, 0);
+  // Los orígenes que ya se usaron en cualquier préstamo, para no reescribirlos.
+  const origenes = useMemo(
+    () => origenesUsados(grupos.flatMap((g) => g.deudas.flatMap((d) => d.abonos))),
+    [grupos],
+  );
 
   return (
     <div className="grid gap-5 lg:grid-cols-[1fr_400px] lg:items-start">
@@ -75,6 +89,7 @@ export function PrestamosManager({
                   key={g.key}
                   grupo={g}
                   isAdmin={isAdmin}
+                  origenes={origenes}
                   defaultOpen={i === 0 && deben.length <= 3}
                 />
               ))}
@@ -90,7 +105,7 @@ export function PrestamosManager({
             </summary>
             <div className="mt-3 flex flex-col gap-3">
               {alDia.map((g) => (
-                <PersonaCard key={g.key} grupo={g} isAdmin={isAdmin} defaultOpen={false} />
+                <PersonaCard key={g.key} grupo={g} isAdmin={isAdmin} origenes={origenes} defaultOpen={false} />
               ))}
             </div>
           </details>
@@ -302,10 +317,12 @@ function AddDeudaForm() {
 function PersonaCard({
   grupo,
   isAdmin,
+  origenes,
   defaultOpen,
 }: {
   grupo: PersonaGrupo;
   isAdmin: boolean;
+  origenes: string[];
   defaultOpen: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
@@ -392,7 +409,7 @@ function PersonaCard({
             >
               <ul className="flex flex-col divide-y divide-line border-t border-line">
                 {grupo.deudas.map((d) => (
-                  <DeudaRow key={d.id} deuda={d} isAdmin={isAdmin} />
+                  <DeudaRow key={d.id} deuda={d} isAdmin={isAdmin} origenes={origenes} />
                 ))}
               </ul>
             </motion.div>
@@ -403,29 +420,189 @@ function PersonaCard({
   );
 }
 
-function DeudaRow({ deuda, isAdmin }: { deuda: DeudaConSaldo; isAdmin: boolean }) {
+/**
+ * De dónde sale la plata. Las fichas son los orígenes ya usados; tocar una llena
+ * el campo y volver a tocarla lo vacía. El texto es la única fuente de verdad.
+ */
+function OrigenPicker({
+  id,
+  value,
+  onChange,
+  sugeridos,
+  onEnter,
+}: {
+  id: string;
+  value: string;
+  onChange: (v: string) => void;
+  sugeridos: string[];
+  onEnter?: () => void;
+}) {
+  const clave = claveNombre(value);
+  return (
+    <div className="flex flex-col gap-2">
+      <Label htmlFor={id}>¿De dónde sale la plata?</Label>
+      {sugeridos.length > 0 && (
+        <div role="group" aria-label="Orígenes usados antes" className="flex flex-wrap gap-1.5">
+          {sugeridos.slice(0, 8).map((o) => {
+            const activo = clave !== "" && claveNombre(o) === clave;
+            return (
+              <button
+                key={o}
+                type="button"
+                aria-pressed={activo}
+                onClick={() => onChange(activo ? "" : o)}
+                className={cn(
+                  "rounded-full border px-3 py-1.5 text-[0.8rem] font-medium transition-colors",
+                  activo ? "lg-glass-accent text-glass-ink-accent" : "border-line-strong text-muted hover:text-text",
+                )}
+              >
+                {o}
+              </button>
+            );
+          })}
+        </div>
+      )}
+      <Input
+        id={id}
+        value={value}
+        maxLength={40}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={sugeridos.length > 0 ? "U otro origen" : "Ej: taller, perfumes, sueldo"}
+        onEnter={onEnter}
+      />
+    </div>
+  );
+}
+
+/** Un abono del historial. Tocar la etiqueta abre el editor del origen. */
+function AbonoItem({ abono, origenes }: { abono: AbonoRow; origenes: string[] }) {
+  const router = useRouter();
+  const id = useId();
+  const [pending, startTransition] = useTransition();
+  const [editando, setEditando] = useState(false);
+  const [valor, setValor] = useState(abono.origen ?? "");
+  const [err, setErr] = useState<string | null>(null);
+
+  function guardar(nuevo: string) {
+    setErr(null);
+    startTransition(async () => {
+      const res = await etiquetarAbono({ id: abono.id, origen: nuevo });
+      if (!res.ok) {
+        setErr(res.error ?? "No se pudo guardar el origen.");
+        return;
+      }
+      setEditando(false);
+      router.refresh();
+    });
+  }
+
+  return (
+    <li className="py-2">
+      <div className="flex items-center gap-2 text-[0.8rem]">
+        <span className="shrink-0 text-faint">{formatFecha(abono.fecha)}</span>
+        <button
+          type="button"
+          aria-expanded={editando}
+          onClick={() => {
+            setValor(abono.origen ?? "");
+            setErr(null);
+            setEditando((v) => !v);
+          }}
+          className={cn(
+            "flex min-w-0 items-center gap-1 rounded-full border px-2.5 py-1 text-[0.72rem] font-medium transition-colors",
+            abono.origen
+              ? "border-line-strong bg-surface-2 text-muted hover:text-text"
+              : "border-dashed border-line-strong text-faint hover:text-muted",
+          )}
+        >
+          <Tag size={12} className="shrink-0" />
+          <span className="truncate">{abono.origen ?? "Poner origen"}</span>
+        </button>
+        <span className="tnum ml-auto shrink-0 text-success">+{formatCOP(abono.monto)}</span>
+      </div>
+
+      <AnimatePresence initial={false}>
+        {editando && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="mt-2 flex flex-col gap-3 rounded-card border border-line bg-surface-2/60 p-3">
+              <OrigenPicker
+                id={id}
+                value={valor}
+                onChange={setValor}
+                sugeridos={origenes}
+                onEnter={() => !pending && guardar(valor)}
+              />
+              <div className="flex flex-wrap items-center gap-2">
+                <Button size="sm" onClick={() => guardar(valor)} disabled={pending}>
+                  {pending ? "Guardando…" : "Guardar"}
+                </Button>
+                {abono.origen && (
+                  <Button size="sm" variant="secondary" onClick={() => guardar("")} disabled={pending}>
+                    Quitar origen
+                  </Button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setEditando(false)}
+                  className="ml-auto px-1 text-[0.76rem] text-faint hover:text-muted"
+                >
+                  Cancelar
+                </button>
+              </div>
+              <ErrorNotice message={err} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </li>
+  );
+}
+
+function DeudaRow({
+  deuda,
+  isAdmin,
+  origenes,
+}: {
+  deuda: DeudaConSaldo;
+  isAdmin: boolean;
+  origenes: string[];
+}) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [abonoOpen, setAbonoOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [abono, setAbono] = useState(0);
+  const [origen, setOrigen] = useState("");
   const [err, setErr] = useState<string | null>(null);
   // Confirmación propia para las dos acciones destructivas de la fila.
   const [confirmando, setConfirmando] = useState<null | "borrar" | "reabrir">(null);
 
   const pct = deuda.monto > 0 ? Math.min(100, (deuda.abonado / deuda.monto) * 100) : 0;
   const saldada = deuda.saldo <= 0;
+  const porOrigen = resumenOrigenes(deuda.abonos);
+  const hayOrigen = porOrigen.some((o) => o.origen !== null);
 
   function abonar() {
     if (abono <= 0) return;
     setErr(null);
     startTransition(async () => {
-      const res = await agregarAbono({ deuda_id: deuda.id, monto: Math.min(abono, deuda.saldo), nota: null });
+      const res = await agregarAbono({
+        deuda_id: deuda.id,
+        monto: Math.min(abono, deuda.saldo),
+        nota: null,
+        origen: origen || null,
+      });
       if (res && !res.ok) {
         setErr(res.error ?? "No se pudo registrar el abono.");
         return;
       }
       setAbono(0);
+      setOrigen("");
       setAbonoOpen(false);
       router.refresh();
     });
@@ -486,6 +663,25 @@ function DeudaRow({ deuda, isAdmin }: { deuda: DeudaConSaldo; isAdmin: boolean }
           </div>
         )}
 
+        {/* Solo cuando hay al menos un origen: si todo está sin etiqueta no dice nada nuevo. */}
+        {hayOrigen && (
+          <p className="mt-2 text-[0.72rem] leading-relaxed text-faint">
+            Pagado con{" "}
+            {porOrigen.map((o, i) => (
+              // El separador va por fuera: así la línea puede partir entre orígenes.
+              <Fragment key={o.origen ?? "sin-origen"}>
+                {i > 0 && " · "}
+                <span className="tnum whitespace-nowrap">
+                  <span className={o.origen ? "font-medium text-muted" : undefined}>
+                    {o.origen ?? "sin origen"}
+                  </span>{" "}
+                  {formatCOP(o.monto)}
+                </span>
+              </Fragment>
+            ))}
+          </p>
+        )}
+
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {saldada ? (
             <Button size="sm" variant="secondary" onClick={() => setConfirmando("reabrir")} disabled={pending}>
@@ -526,15 +722,20 @@ function DeudaRow({ deuda, isAdmin }: { deuda: DeudaConSaldo; isAdmin: boolean }
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden"
             >
-              <div className="mt-3 flex items-end gap-2 border-t border-line pt-3">
-                <div className="flex-1">
+              <div className="mt-3 flex flex-col gap-3 border-t border-line pt-3">
+                <div className="flex flex-col gap-1.5">
                   <Label htmlFor={`ab-${deuda.id}`}>Abono</Label>
-                  <div className="mt-1.5">
-                    <MoneyInput id={`ab-${deuda.id}`} value={abono} onValueChange={setAbono} onEnter={() => !pending && abonar()} />
-                  </div>
+                  <MoneyInput id={`ab-${deuda.id}`} value={abono} onValueChange={setAbono} onEnter={() => !pending && abonar()} />
                 </div>
-                <Button size="md" onClick={abonar} disabled={pending}>
-                  {pending ? "…" : "Confirmar"}
+                <OrigenPicker
+                  id={`or-${deuda.id}`}
+                  value={origen}
+                  onChange={setOrigen}
+                  sugeridos={origenes}
+                  onEnter={() => !pending && abonar()}
+                />
+                <Button size="md" onClick={abonar} disabled={pending} className="w-full sm:w-auto sm:self-end">
+                  {pending ? "Registrando…" : "Confirmar abono"}
                 </Button>
               </div>
             </motion.div>
@@ -553,10 +754,7 @@ function DeudaRow({ deuda, isAdmin }: { deuda: DeudaConSaldo; isAdmin: boolean }
             >
               <ul className="mt-3 flex flex-col divide-y divide-line border-t border-line pt-1">
                 {deuda.abonos.map((a) => (
-                  <li key={a.id} className="flex items-center justify-between py-2 text-[0.8rem]">
-                    <span className="text-faint">{formatFecha(a.fecha)}</span>
-                    <span className="tnum text-success">+{formatCOP(a.monto)}</span>
-                  </li>
+                  <AbonoItem key={a.id} abono={a} origenes={origenes} />
                 ))}
               </ul>
             </motion.div>

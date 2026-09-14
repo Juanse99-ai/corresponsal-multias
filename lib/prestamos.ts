@@ -67,6 +67,57 @@ export function agruparDeudasPorPersona(deudas: DeudaConSaldo[]): PersonaGrupo[]
   return [...grupos.values()].sort((a, b) => b.saldo - a.saldo || a.persona.localeCompare(b.persona, "es"));
 }
 
+// ===== Origen de los abonos: de dónde sale la plata con la que se paga =====
+
+export interface OrigenMonto {
+  /** null = abonos sin etiqueta. */
+  origen: string | null;
+  monto: number;
+  abonos: number;
+}
+
+/** La forma más usada de cada nombre; si empatan, la más larga (suele traer tilde). */
+function variantePreferida(conteo: Map<string, number>): string {
+  return [...conteo].sort((a, b) => b[1] - a[1] || b[0].length - a[0].length)[0][0];
+}
+
+/**
+ * Orígenes ya usados en cualquier abono, para ofrecerlos como fichas. Unifica
+ * "taller" y "Taller " igual que los nombres de persona; los más usados primero.
+ */
+export function origenesUsados(abonos: { origen: string | null }[]): string[] {
+  const grupos = new Map<string, Map<string, number>>();
+  for (const a of abonos) {
+    const nombre = a.origen?.trim();
+    if (!nombre) continue;
+    const key = claveNombre(nombre);
+    const v = grupos.get(key) ?? new Map<string, number>();
+    v.set(nombre, (v.get(nombre) ?? 0) + 1);
+    grupos.set(key, v);
+  }
+  return [...grupos.values()]
+    .map((v) => ({ nombre: variantePreferida(v), usos: [...v.values()].reduce((s, n) => s + n, 0) }))
+    .sort((a, b) => b.usos - a.usos || a.nombre.localeCompare(b.nombre, "es"))
+    .map((o) => o.nombre);
+}
+
+/** Cuánto se ha pagado de cada origen: el más grande primero y lo sin etiqueta al final. */
+export function resumenOrigenes(abonos: { origen: string | null; monto: number }[]): OrigenMonto[] {
+  const grupos = new Map<string, { variantes: Map<string, number>; monto: number; abonos: number }>();
+  for (const a of abonos) {
+    const nombre = a.origen?.trim() || "";
+    const key = nombre ? claveNombre(nombre) : "";
+    const g = grupos.get(key) ?? { variantes: new Map<string, number>(), monto: 0, abonos: 0 };
+    if (nombre) g.variantes.set(nombre, (g.variantes.get(nombre) ?? 0) + 1);
+    g.monto += a.monto;
+    g.abonos += 1;
+    grupos.set(key, g);
+  }
+  return [...grupos.entries()]
+    .map(([key, g]) => ({ origen: key ? variantePreferida(g.variantes) : null, monto: g.monto, abonos: g.abonos }))
+    .sort((a, b) => Number(a.origen === null) - Number(b.origen === null) || b.monto - a.monto);
+}
+
 /** Resumen por persona, sin el detalle de cada préstamo (para el panel). */
 export function agruparPorPersona(deudas: DeudaConSaldo[]): PersonaSaldo[] {
   return agruparDeudasPorPersona(deudas).map(({ persona, saldo, total, abonado }) => ({

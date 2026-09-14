@@ -43,10 +43,19 @@ export async function crearDeuda(raw: unknown): Promise<{ ok: boolean; error?: s
   return { ok: true };
 }
 
+/** De dónde sale la plata del abono. Vacío = sin etiqueta. */
+const origenSchema = z
+  .string()
+  .max(40)
+  .transform((s) => s.replace(/\s+/g, " ").trim() || null)
+  .nullable()
+  .optional();
+
 const abonoSchema = z.object({
   deuda_id: z.string().uuid(),
   monto: z.number().int().positive(),
   nota: z.string().max(200).nullable().optional(),
+  origen: origenSchema,
 });
 
 /** Saldo aún pendiente de una deuda (monto − suma de abonos), leído del servidor. */
@@ -80,12 +89,36 @@ export async function agregarAbono(raw: unknown): Promise<{ ok: boolean; error?:
     deuda_id: p.data.deuda_id,
     monto,
     nota: p.data.nota?.trim() || null,
+    origen: p.data.origen ?? null,
     created_by: session.id,
   });
   if (error) return { ok: false, error: "No se pudo registrar el abono." };
 
   revalidatePath("/prestamos");
   revalidatePath("/panel");
+  return { ok: true };
+}
+
+const etiquetaSchema = z.object({ id: z.string().uuid(), origen: origenSchema });
+
+/**
+ * Pone, cambia o quita el origen de un abono ya registrado. No se bloquea por
+ * día cerrado: es una etiqueta, no mueve ningún monto.
+ */
+export async function etiquetarAbono(raw: unknown): Promise<{ ok: boolean; error?: string }> {
+  await requireSession();
+  const p = etiquetaSchema.safeParse(raw);
+  if (!p.success) return { ok: false, error: "El origen puede tener máximo 40 letras." };
+
+  const sb = await createClient();
+  const { data, error } = await sb
+    .from("corr_abonos")
+    .update({ origen: p.data.origen ?? null })
+    .eq("id", p.data.id)
+    .select("id");
+  if (error || !data?.length) return { ok: false, error: "No se pudo guardar el origen." };
+
+  revalidatePath("/prestamos");
   return { ok: true };
 }
 
