@@ -68,6 +68,7 @@ const CAMPO: Record<string, string> = {
   hora: "Hora",
   medio: "Medio",
   nota: "Nota",
+  origen: "Origen",
   convenio: "Convenio",
   abonado: "Abonado",
   cliente: "Cliente",

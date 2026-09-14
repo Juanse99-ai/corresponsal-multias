@@ -61,9 +61,9 @@ export type Database = {
         Relationships: [];
       };
       corr_abonos: {
-        Row: { id: string; deuda_id: string; monto: number; fecha: string; nota: string | null; created_by: string | null; created_at: string };
-        Insert: { id?: string; deuda_id: string; monto: number; fecha?: string; nota?: string | null; created_by?: string | null; created_at?: string };
-        Update: { id?: string; deuda_id?: string; monto?: number; fecha?: string; nota?: string | null; created_by?: string | null; created_at?: string };
+        Row: { id: string; deuda_id: string; monto: number; fecha: string; nota: string | null; origen: string | null; created_by: string | null; created_at: string };
+        Insert: { id?: string; deuda_id: string; monto: number; fecha?: string; nota?: string | null; origen?: string | null; created_by?: string | null; created_at?: string };
+        Update: { id?: string; deuda_id?: string; monto?: number; fecha?: string; nota?: string | null; origen?: string | null; created_by?: string | null; created_at?: string };
         Relationships: [];
       };
       corr_soportes: {
