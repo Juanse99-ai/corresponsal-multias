@@ -112,7 +112,6 @@ export function GeneralEditor({
           </Campo>
           <Campo label="Deudas de terceros" id="deudas_terceros">
             <MoneyInput id="deudas_terceros" value={vals.deudas_terceros} onValueChange={set("deudas_terceros")} />
-            <p className="mt-1 text-[0.7rem] text-faint">Plata de Luis prestada a terceros (Juan, taller, otros), por cobrar. Resta.</p>
           </Campo>
         </div>
 

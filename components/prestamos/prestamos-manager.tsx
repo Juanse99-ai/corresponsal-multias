@@ -119,7 +119,6 @@ export function PrestamosManager({
             <p className="mt-2 text-4xl font-semibold tracking-tight text-text">
               <AnimatedMoney value={totalPendiente} />
             </p>
-            <p className="mt-1 text-[0.78rem] text-faint">Suma de saldos vivos del fondo</p>
           </Card>
         )}
         <AddDeudaForm />
@@ -277,11 +276,6 @@ function AddDeudaForm() {
           >
             Solo registro · no afecta el cuadre
           </button>
-          <p className="text-[0.7rem] text-faint">
-            {medio === "registro"
-              ? "Queda como préstamo por cobrar, pero no entra ni a la tirilla ni a la caja."
-              : "Transferencia entra al cuadre; efectivo va al arqueo de caja."}
-          </p>
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto]">

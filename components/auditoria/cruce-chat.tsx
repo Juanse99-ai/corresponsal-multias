@@ -93,10 +93,6 @@ export function CruceChat({
   return (
     <Card className="p-5 sm:p-6">
       <h3 className="text-[0.95rem] font-semibold tracking-tight text-text">Cruce con el grupo</h3>
-      <p className="mt-0.5 text-[0.78rem] text-muted">
-        Pega el chat exportado y elige un día. Comparo lo que Sr. Luis pidió contra lo que quedó
-        registrado. No guardo nada.
-      </p>
 
       <div className="mt-3 flex gap-2">
         <button type="button" onClick={pegar} className={botonMini}>
@@ -209,10 +205,6 @@ export function CruceChat({
                           </li>
                         ))}
                       </ul>
-                      <p className="mt-1.5 text-[0.72rem] text-faint">
-                        Puede ser una consignación sin apuntar, o un pedido que no se ejecutó. Los
-                        volantes de ese día lo confirman.
-                      </p>
                     </div>
                   )}
 
@@ -224,19 +216,15 @@ export function CruceChat({
                       <p className="mt-1.5 tnum text-[0.84rem] text-text">
                         {cruce.sobrantes.map((v) => formatCOP(v)).join(" · ")}
                       </p>
-                      <p className="mt-1 text-[0.72rem] text-faint">
-                        Si el grupo es el único canal, esto merece revisión: puede ser un registro
-                        de más o un pedido escrito de una forma que no entendí.
-                      </p>
                     </div>
                   )}
 
                   {cruce.posiblesRepetidos.length > 0 && (
                     <p className="flex items-start gap-1.5 text-[0.74rem] text-muted">
                       <Warning size={13} weight="fill" className="mt-0.5 shrink-0" />
-                      No conté {cruce.posiblesRepetidos.length}{" "}
-                      {cruce.posiblesRepetidos.length === 1 ? "mensaje" : "mensajes"} con el mismo
-                      monto seguidos: Luis suele mandar la cuenta y confirmarla enseguida.
+                      {cruce.posiblesRepetidos.length}{" "}
+                      {cruce.posiblesRepetidos.length === 1 ? "mensaje repetido" : "mensajes repetidos"}{" "}
+                      sin contar
                     </p>
                   )}
                 </div>

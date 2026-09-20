@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
-import { formatCOP, formatFechaCorta, formatHora, horaBogotaHHMM } from "@/lib/format";
+import { formatCOP, formatHora, horaBogotaHHMM } from "@/lib/format";
 import type { ComprobanteLeido } from "@/app/(app)/luis/actions";
 
 /** Lo que se guarda como nota del movimiento: qué fue y para quién. */
@@ -120,10 +120,6 @@ export function ComprobantesLector({
           <h3 className="text-[0.95rem] font-semibold tracking-tight text-text">
             Llenar consignaciones desde las fotos
           </h3>
-          <p className="mt-0.5 text-[0.78rem] text-muted">
-            Leo el monto, la hora y el titular de cada tirilla del {formatFechaCorta(fecha)}. Nada se
-            guarda sin que lo revises.
-          </p>
         </div>
         {!items && (
           <Button onClick={leer} disabled={pending} className="shrink-0">

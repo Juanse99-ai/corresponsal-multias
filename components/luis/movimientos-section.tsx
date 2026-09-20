@@ -384,10 +384,6 @@ export function MovimientosSection({
           >
             <div className="mt-4 rounded-[1rem] border border-accent/25 bg-accent-soft/30 p-4">
               <p className="text-[0.88rem] font-semibold text-text">Chat de WhatsApp</p>
-              <p className="mt-0.5 text-[0.76rem] text-muted">
-                Exporta el chat del grupo sin archivos y súbelo, o pega los mensajes. De cada uno
-                tomo el monto, el día, la hora y la nota. Van a su día aunque sean de varias fechas.
-              </p>
               <div className="mt-2.5 flex gap-2">
                 <button type="button" onClick={pegarDelPortapapeles} className={botonMini}>
                   <ClipboardText size={15} />

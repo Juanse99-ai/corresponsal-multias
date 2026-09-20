@@ -285,11 +285,6 @@ export function PrestamosDia({
             >
               Solo registro · no afecta el cuadre
             </button>
-            <p className="text-[0.7rem] text-faint">
-              {medio === "registro"
-                ? "Queda como préstamo por cobrar, pero no entra ni a la tirilla ni a la caja del cuadre."
-                : "Transferencia entra al cuadre (tirilla); efectivo va a la caja (arqueo)."}
-            </p>
           </div>
 
           <ErrorNotice message={error} className="mt-4" />
