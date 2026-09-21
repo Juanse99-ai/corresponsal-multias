@@ -10,6 +10,7 @@ import {
   Receipt,
   UploadSimple,ArrowSquareOut } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
+import { baseInteractiva } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -238,13 +239,19 @@ export function SoportesSection({
                   </div>
 
                   {/* En táctil no existe hover: el botón debe verse siempre (pointer-coarse). */}
+                  {/* Va sobre la foto: el vidrio claro se perdería, así que lleva fondo
+                      oscuro propio, con la misma forma y respuesta que los demás. */}
                   <button
+                    type="button"
                     onClick={() => setPorBorrar(s.id)}
                     title="Eliminar"
                     aria-label="Eliminar soporte"
-                    className="absolute right-1.5 top-1.5 flex h-9 w-9 items-center justify-center rounded-lg bg-black/55 text-white/85 opacity-0 backdrop-blur-sm transition-opacity hover:text-danger group-hover:opacity-100 pointer-coarse:opacity-100"
+                    className={cn(
+                      baseInteractiva,
+                      "absolute right-1.5 top-1.5 h-9 w-9 bg-[oklch(0.22_0.03_258/0.62)] text-[oklch(0.97_0.01_260/0.9)] opacity-0 backdrop-blur-sm transition-[opacity,transform,color] hover:text-[oklch(0.8_0.14_25)] group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100",
+                    )}
                   >
-                    <Trash size={15} />
+                    <Trash size={16} />
                   </button>
                 </motion.div>
               );

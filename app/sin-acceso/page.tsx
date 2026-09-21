@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Prohibit } from "@phosphor-icons/react/dist/ssr";
+import { Prohibit, SignOut } from "@phosphor-icons/react/dist/ssr";
+import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/brand";
 import { signOutAction } from "@/app/login/actions";
 
@@ -24,12 +25,10 @@ export default function SinAccesoPage() {
           </p>
         </div>
         <form action={signOutAction} className="w-full">
-          <button
-            type="submit"
-            className="h-11 w-full rounded-full border border-line bg-surface text-sm font-medium text-text transition-colors hover:bg-surface-2"
-          >
+          <Button type="submit" variant="secondary" className="w-full">
+            <SignOut size={17} />
             Cerrar sesión
-          </button>
+          </Button>
         </form>
       </div>
     </main>

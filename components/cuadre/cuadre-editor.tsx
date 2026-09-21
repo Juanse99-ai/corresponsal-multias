@@ -343,27 +343,26 @@ export function CuadreEditor({
         </Link>
 
         {(movCount > 0 || prestamosCount > 0) && (
-          <button
-            type="button"
+          <Button
+            variant="secondary"
             onClick={(e) => {
               ripple(e);
               traerDeMovimientos();
             }}
-            className="relative mt-4 flex w-full items-center justify-between overflow-hidden rounded-card border border-accent/25 bg-accent-soft/40 px-4 py-2.5 text-[0.82rem] transition-colors hover:bg-accent-soft"
+            title={[
+              movCount > 0 ? `${movCount} movimiento${movCount === 1 ? "" : "s"}` : null,
+              prestamosCount > 0 ? `${prestamosCount} préstamo${prestamosCount === 1 ? "" : "s"}` : null,
+            ]
+              .filter(Boolean)
+              .join(" y ")}
+            className="mt-4 w-full"
           >
-            <span className="flex items-center gap-2 text-muted">
-              <ArrowClockwise size={14} className="text-accent" />
-              Traer totales de{" "}
-              {[
-                movCount > 0 ? `${movCount} movimiento${movCount === 1 ? "" : "s"}` : null,
-                prestamosCount > 0 ? `${prestamosCount} préstamo${prestamosCount === 1 ? "" : "s"}` : null,
-              ]
-                .filter(Boolean)
-                .join(" y ")}{" "}
-              del día
+            <ArrowClockwise size={16} weight="bold" />
+            Traer totales del día
+            <span className="tnum rounded-full bg-accent-soft px-2 py-0.5 text-[0.72rem] font-semibold text-accent-strong">
+              {movCount + prestamosCount}
             </span>
-            <span className="font-medium text-accent-strong">Aplicar</span>
-          </button>
+          </Button>
         )}
 
         {/* Desglose electrónico (lo que pasó por Bancolombia) */}
@@ -374,16 +373,16 @@ export function CuadreEditor({
           <Campo label="Bancolombia" id="bancolombia_e">
             <MoneyInput id="bancolombia_e" value={vals.bancolombia} onValueChange={set("bancolombia")} />
           </Campo>
-          <Campo label="Recaudos" id="recaudos_e" hint="Pagos de convenios">
+          <Campo label="Recaudos" id="recaudos_e">
             <MoneyInput id="recaudos_e" value={vals.recaudos} onValueChange={set("recaudos")} />
           </Campo>
-          <Campo label="Préstamos por transferencia" id="prestamos_consignaciones" hint="Los que diste por transferencia">
+          <Campo label="Préstamos por transferencia" id="prestamos_consignaciones">
             <MoneyInput id="prestamos_consignaciones" value={vals.prestamos_consignaciones} onValueChange={set("prestamos_consignaciones")} />
           </Campo>
-          <Campo label="Compensado" id="compensado" hint="Efectivo propio que llevas al banco">
+          <Campo label="Compensado" id="compensado">
             <MoneyInput id="compensado" value={vals.compensado} onValueChange={set("compensado")} />
           </Campo>
-          <Campo label="Retiros" id="ret_real" hint="Efectivo que sale">
+          <Campo label="Retiros" id="ret_real">
             <MoneyInput id="ret_real" value={vals.ret_real} onValueChange={set("ret_real")} />
           </Campo>
         </div>
@@ -395,10 +394,10 @@ export function CuadreEditor({
             <h3 className="text-[0.85rem] font-semibold text-text">Arqueo de caja</h3>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <Campo label="Fondo en caja" id="fondo_caja" hint="Base que dejas (varía)">
+            <Campo label="Fondo en caja" id="fondo_caja">
               <MoneyInput id="fondo_caja" value={vals.fondo_caja} onValueChange={set("fondo_caja")} />
             </Campo>
-            <Campo label="Efectivo contado" id="efectivo_contado" hint="Lo que cuentas físico">
+            <Campo label="Efectivo contado" id="efectivo_contado">
               <MoneyInput id="efectivo_contado" value={vals.efectivo_contado} onValueChange={set("efectivo_contado")} />
             </Campo>
           </div>
@@ -547,10 +546,12 @@ export function CuadreEditor({
                 {(["abierto", "cerrado"] as const).map((e) => (
                   <button
                     key={e}
+                    type="button"
+                    aria-pressed={estado === e}
                     onClick={() => setEstado(e)}
                     className={cn(
-                      "relative flex-1 rounded-full py-2 text-[0.8rem] font-medium capitalize transition-colors",
-                      estado === e ? "text-glass-ink" : "text-faint hover:text-muted",
+                      "relative flex h-10 flex-1 items-center justify-center rounded-full text-[0.84rem] font-medium capitalize transition-[color,transform] duration-200 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/45",
+                      estado === e ? "text-glass-ink" : "text-muted hover:text-text",
                     )}
                   >
                     {estado === e && (
@@ -560,7 +561,10 @@ export function CuadreEditor({
                         transition={{ type: "spring", stiffness: 360, damping: 30 }}
                       />
                     )}
-                    <span className="relative z-10">{e}</span>
+                    <span className="relative z-10 inline-flex items-center gap-1.5">
+                      {e === "abierto" ? <LockOpen size={15} /> : <Lock size={15} />}
+                      {e}
+                    </span>
                   </button>
                 ))}
               </div>
@@ -620,24 +624,11 @@ export function CuadreEditor({
   );
 }
 
-function Campo({
-  label,
-  id,
-  hint,
-  children,
-}: {
-  label: string;
-  id: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
+function Campo({ label, id, children }: { label: string; id: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-2">
-      {/* La ayuda va DEBAJO del input: compartiendo fila con el rótulo, ambos se
-          apretaban a dos líneas en campos de nombre largo. */}
       <Label htmlFor={id}>{label}</Label>
       {children}
-      {hint && <span className="text-[0.68rem] leading-tight text-faint">{hint}</span>}
     </div>
   );
 }

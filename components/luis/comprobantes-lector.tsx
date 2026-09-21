@@ -3,9 +3,10 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkle, CheckCircle, Warning } from "@phosphor-icons/react/dist/ssr";
+import { Sparkle, CheckCircle, Warning, Check, X } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/ui/icon-button";
 import { cn } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
 import { formatCOP, formatHora, horaBogotaHHMM } from "@/lib/format";
@@ -230,26 +231,22 @@ export function ComprobantesLector({
                 </p>
               )}
 
-              <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+              <div className="mt-4 flex items-center gap-2">
                 <Button
                   onClick={guardar}
                   disabled={pending || seleccion.length === 0}
-                  className="w-full sm:w-auto"
+                  className="flex-1 sm:flex-none"
                 >
+                  <Check size={17} weight="bold" />
                   {pending
                     ? "Guardando…"
                     : seleccion.length === 0
                       ? "Guardar"
                       : `Guardar ${seleccion.length} ${seleccion.length === 1 ? "consignación" : "consignaciones"}`}
                 </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => setItems(null)}
-                  disabled={pending}
-                  className="w-full sm:w-auto"
-                >
-                  Cancelar
-                </Button>
+                <IconButton label="Cancelar" onClick={() => setItems(null)} disabled={pending}>
+                  <X size={17} />
+                </IconButton>
               </div>
             </div>
           </motion.div>

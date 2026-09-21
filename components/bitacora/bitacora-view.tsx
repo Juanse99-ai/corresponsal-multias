@@ -17,11 +17,13 @@ import {
   HandCoins,
   Paperclip,
   Vault,
+  X,
 } from "@phosphor-icons/react/dist/ssr";
 import type { Icon } from "@phosphor-icons/react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { ChoiceChip } from "@/components/ui/choice-chip";
 import { cn } from "@/lib/utils";
 import { formatCOP, formatFecha, formatHoraISO } from "@/lib/format";
 import type { AuditEntry } from "@/lib/queries";
@@ -268,7 +270,7 @@ export function BitacoraView({ entries }: { entries: AuditEntry[] }) {
             <Campo label="Hasta">
               <Input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} className="h-10 w-full min-w-0 sm:w-[8.8rem]" />
             </Campo>
-            <Button variant="secondary" size="sm" onClick={exportar} disabled={filtrados.length === 0} className="h-10 shrink-0">
+            <Button variant="secondary" size="sm" onClick={exportar} disabled={filtrados.length === 0} className="shrink-0">
               <DownloadSimple size={16} weight="bold" />
               Excel
             </Button>
@@ -310,9 +312,10 @@ export function BitacoraView({ entries }: { entries: AuditEntry[] }) {
             </>
           )}
           {hayFiltro && (
-            <button onClick={limpiar} className="ml-auto text-[0.78rem] font-medium text-accent-strong hover:underline">
-              Limpiar filtros
-            </button>
+            <Button size="sm" variant="ghost" onClick={limpiar} className="ml-auto">
+              <X size={16} />
+              Limpiar
+            </Button>
           )}
         </div>
       </Card>
@@ -355,7 +358,11 @@ function Fila({ e, abierto, onToggle }: { e: AuditEntry; abierto: boolean; onTog
 
   return (
     <li className={cn("rounded-lg", e.accion === "DELETE" && "bg-danger-soft/25")}>
-      <button onClick={onToggle} className="flex w-full items-center gap-3 px-2 py-2.5 text-left sm:px-2.5">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-surface-2 active:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/45 sm:px-2.5"
+      >
         <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-full", acc.bg, acc.color)}>
           <Icono size={16} weight="bold" />
         </div>
@@ -438,16 +445,9 @@ function Campo({ label, children }: { label: string; children: React.ReactNode }
 
 function Chip({ active, onClick, icon: Icono, children }: { active: boolean; onClick: () => void; icon?: Icon; children: React.ReactNode }) {
   return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[0.8rem] font-medium transition-colors",
-        active ? "lg-glass-accent text-glass-ink-accent" : "border-line-strong text-muted hover:text-text",
-      )}
-    >
-      {Icono && <Icono size={13} weight="bold" />}
+    <ChoiceChip selected={active} onClick={onClick} icon={Icono && <Icono size={15} weight="bold" />}>
       {children}
-    </button>
+    </ChoiceChip>
   );
 }
 
@@ -463,16 +463,10 @@ function AccionChip({
   children: React.ReactNode;
 }) {
   const a = tipo === "todas" ? null : ACCION[tipo];
-  const activeCls = a ? cn(a.bg, a.color, "border-transparent") : "lg-glass-accent text-glass-ink-accent";
+  const Icono = a?.icon;
   return (
-    <button
-      onClick={onClick}
-      className={cn(
-        "rounded-full border px-3 py-1.5 text-[0.78rem] font-medium transition-colors",
-        active ? activeCls : "border-line-strong text-muted hover:text-text",
-      )}
-    >
+    <ChoiceChip selected={active} onClick={onClick} icon={Icono && <Icono size={15} weight="bold" />}>
       {children}
-    </button>
+    </ChoiceChip>
   );
 }

@@ -3,9 +3,12 @@
 import { useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { HandCoins, Plus, Trash, PencilSimple, Check, Clock,CheckCircle, Lock, ArrowCounterClockwise } from "@phosphor-icons/react/dist/ssr";
+import { HandCoins, Plus, Trash, PencilSimple, Check, Clock, CheckCircle, Lock, ArrowCounterClockwise, X } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/ui/icon-button";
+import { ChoiceChip } from "@/components/ui/choice-chip";
+import { MedioPicker, ICONO_MEDIO, NOMBRE_MEDIO, type Medio } from "@/components/prestamos/medio-picker";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -189,20 +192,9 @@ export function PrestamosDia({
               <Label id="grp-persona-dia">A quién</Label>
               <div role="group" aria-labelledby="grp-persona-dia" className="flex flex-wrap gap-2">
                 {[...PERSONAS_PRESET, "Otro"].map((p) => (
-                  <button
-                    key={p}
-                    type="button"
-                    aria-pressed={persona === p}
-                    onClick={() => setPersona(p)}
-                    className={cn(
-                      "rounded-full border px-3 py-1.5 text-[0.8rem] font-medium transition-colors",
-                      persona === p
-                        ? "lg-glass-accent text-glass-ink-accent"
-                        : "border-line-strong text-muted hover:text-text",
-                    )}
-                  >
+                  <ChoiceChip key={p} selected={persona === p} onClick={() => setPersona(p)}>
                     {p}
-                  </button>
+                  </ChoiceChip>
                 ))}
               </div>
               {persona === "Otro" && (
@@ -230,61 +222,21 @@ export function PrestamosDia({
               <MoneyInput id="pr-monto" size="lg" value={monto} onValueChange={setMonto} onEnter={() => !pending && !bloqueado && registrar()} />
             </div>
             <div className="flex flex-col gap-2">
-              <Label>¿Ya lo devolvió?</Label>
-              <button
-                type="button"
-                onClick={() => setPagado((v) => !v)}
-                className={cn(
-                  "flex h-[2.75rem] items-center gap-2.5 rounded-card border px-3.5 text-[0.85rem] transition-colors",
-                  pagado
-                    ? "border-success/40 bg-success-soft text-success"
-                    : "border-line-strong text-muted hover:text-text",
-                )}
-              >
-                <span
-                  className={cn(
-                    "flex h-4 w-4 items-center justify-center rounded border transition-colors",
-                    pagado ? "border-success bg-success text-white" : "border-line-strong",
-                  )}
-                >
-                  {pagado && <Check size={11} weight="bold" />}
-                </span>
-                {pagado ? "Sí, devuelto hoy" : "Sigue pendiente"}
-              </button>
+              <Label id="grp-devuelto">¿Ya lo devolvió?</Label>
+              <div role="group" aria-labelledby="grp-devuelto" className="grid grid-cols-2 gap-2">
+                <ChoiceChip selected={!pagado} onClick={() => setPagado(false)} icon={<Clock size={15} />} className="w-full">
+                  Pendiente
+                </ChoiceChip>
+                <ChoiceChip selected={pagado} onClick={() => setPagado(true)} icon={<CheckCircle size={15} />} className="w-full">
+                  Devuelto
+                </ChoiceChip>
+              </div>
             </div>
           </div>
 
           <div className="mt-4 flex flex-col gap-2">
             <Label id="grp-medio-dia">¿Cómo se lo diste?</Label>
-            <div className="flex gap-2">
-              {(["efectivo", "transferencia"] as const).map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => setMedio(m)}
-                  className={cn(
-                    "flex-1 rounded-card border px-3 py-2.5 text-[0.82rem] font-medium transition-colors",
-                    medio === m
-                      ? "lg-glass-accent text-glass-ink-accent"
-                      : "border-line-strong text-muted hover:text-text",
-                  )}
-                >
-                  {m === "efectivo" ? "Efectivo" : "Transferencia"}
-                </button>
-              ))}
-            </div>
-            <button
-              type="button"
-              onClick={() => setMedio("registro")}
-              className={cn(
-                "rounded-card border px-3 py-2.5 text-[0.82rem] font-medium transition-colors",
-                medio === "registro"
-                  ? "lg-glass-accent text-glass-ink-accent"
-                  : "border-line-strong text-muted hover:text-text",
-              )}
-            >
-              Solo registro · no afecta el cuadre
-            </button>
+            <MedioPicker medio={medio} onChange={setMedio} labelledBy="grp-medio-dia" efectivoPrimero />
           </div>
 
           <ErrorNotice message={error} className="mt-4" />
@@ -326,19 +278,9 @@ export function PrestamosDia({
                         <div className="flex flex-col gap-2.5">
                           <div className="flex flex-wrap gap-1.5">
                             {[...PERSONAS_PRESET, "Otro"].map((p) => (
-                              <button
-                                key={p}
-                                type="button"
-                                onClick={() => setEPersona(p)}
-                                className={cn(
-                                  "rounded-full border px-2.5 py-1 text-[0.74rem] font-medium transition-colors",
-                                  ePersona === p
-                                    ? "lg-glass-accent text-glass-ink-accent"
-                                    : "border-line-strong text-muted hover:text-text",
-                                )}
-                              >
+                              <ChoiceChip key={p} selected={ePersona === p} onClick={() => setEPersona(p)}>
                                 {p}
-                              </button>
+                              </ChoiceChip>
                             ))}
                           </div>
                           {ePersona === "Otro" && (
@@ -348,13 +290,14 @@ export function PrestamosDia({
                             <Input value={eConcepto} onChange={(e) => setEConcepto(e.target.value)} placeholder="Concepto" />
                             <MoneyInput value={eMonto} onValueChange={setEMonto} />
                           </div>
-                          <div className="flex gap-2">
+                          <div className="flex items-center gap-2">
                             <Button size="sm" onClick={guardarEdicion} disabled={pending}>
+                              <Check size={16} weight="bold" />
                               Guardar
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={() => setEditId(null)} disabled={pending}>
-                              Cancelar
-                            </Button>
+                            <IconButton label="Cancelar" onClick={() => setEditId(null)} disabled={pending}>
+                              <X size={17} />
+                            </IconButton>
                           </div>
                         </div>
                       ) : (
@@ -378,35 +321,33 @@ export function PrestamosDia({
                               </p>
                             </div>
                           </div>
-                          <div className="flex w-full shrink-0 flex-wrap items-center justify-end gap-2 sm:w-auto">
-                            <button
-                              type="button"
-                              onClick={() => cambiarMedio(d)}
-                              disabled={pending || bloqueado}
-                              title="Cambiar: efectivo, transferencia o solo registro" aria-label="Cambiar: efectivo, transferencia o solo registro"
-                              className={cn(
-                                "shrink-0 whitespace-nowrap rounded-full border px-2.5 py-1 text-[0.68rem] font-medium transition-colors disabled:opacity-50",
-                                d.medio === "transferencia"
-                                  ? "border-accent/30 bg-accent-soft text-accent-strong"
-                                  : d.medio === "registro"
-                                    ? "border-line-strong text-faint"
-                                    : "border-line-strong text-muted hover:text-text",
-                              )}
-                            >
-                              {d.medio === "transferencia" ? "Transf." : d.medio === "registro" ? "Solo reg." : "Efectivo"}
-                            </button>
+                          <div className="flex w-full shrink-0 flex-wrap items-center justify-end gap-1.5 sm:w-auto">
+                            {(() => {
+                              // Mismo ícono que en el formulario: así se reconoce sin leer.
+                              const m = (d.medio in ICONO_MEDIO ? d.medio : "efectivo") as Medio;
+                              const Icono = ICONO_MEDIO[m];
+                              return (
+                                <IconButton
+                                  label={`${NOMBRE_MEDIO[m]} · tocar para cambiar`}
+                                  tone={m === "transferencia" ? "accent" : "plain"}
+                                  onClick={() => cambiarMedio(d)}
+                                  disabled={pending || bloqueado}
+                                >
+                                  <Icono size={17} />
+                                </IconButton>
+                              );
+                            })()}
                             {saldado ? (
                               <>
                                 <Badge tone="success">Devuelto</Badge>
                                 {!bloqueado && (
-                                  <button
+                                  <IconButton
+                                    label="Deshacer pago"
                                     onClick={() => setConfirmar({ tipo: "reabrir", d })}
                                     disabled={pending}
-                                    className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-accent-soft hover:text-accent-strong disabled:opacity-40"
-                                    title="Deshacer pago (volver a pendiente)" aria-label="Deshacer pago (volver a pendiente)"
                                   >
-                                    <ArrowCounterClockwise size={14} />
-                                  </button>
+                                    <ArrowCounterClockwise size={17} />
+                                  </IconButton>
                                 )}
                               </>
                             ) : (
@@ -416,34 +357,33 @@ export function PrestamosDia({
                                     queda {formatCOP(d.saldo)}
                                   </span>
                                 )}
-                                <button
+                                {/* En celular va de último y a lo ancho: así los íconos no se parten en dos filas. */}
+                                <Button
+                                  size="sm"
+                                  variant="secondary"
                                   onClick={() => pagar(d)}
                                   disabled={pending || bloqueado}
-                                  className="shrink-0 whitespace-nowrap rounded-full border border-success/30 bg-success-soft px-2.5 py-1 text-[0.72rem] font-medium text-success transition-colors hover:bg-success/15 disabled:opacity-40"
+                                  className="order-last w-full sm:order-none sm:w-auto"
                                 >
+                                  <CheckCircle size={16} weight="bold" className="text-success" />
                                   Marcar devuelto
-                                </button>
+                                </Button>
                               </>
                             )}
                             {!bloqueado && (
-                              <button
-                                onClick={() => abrirEdicion(d)}
-                                disabled={pending}
-                                className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-accent-soft hover:text-accent-strong disabled:opacity-40"
-                                title="Editar" aria-label="Editar"
-                              >
-                                <PencilSimple size={15} />
-                              </button>
+                              <IconButton label="Editar" onClick={() => abrirEdicion(d)} disabled={pending}>
+                                <PencilSimple size={17} />
+                              </IconButton>
                             )}
                             {isAdmin && (
-                              <button
+                              <IconButton
+                                label="Eliminar"
+                                tone="danger"
                                 onClick={() => setConfirmar({ tipo: "borrar", d })}
                                 disabled={pending || bloqueado}
-                                className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
-                                title="Eliminar" aria-label="Eliminar"
                               >
-                                <Trash size={15} />
-                              </button>
+                                <Trash size={17} />
+                              </IconButton>
                             )}
                           </div>
                         </div>

@@ -12,7 +12,7 @@ import {
   ArrowClockwise,
 } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, baseInteractiva } from "@/components/ui/button";
 import { Label } from "@/components/ui/field";
 import { MoneyInput } from "@/components/ui/money-input";
 import { Textarea } from "@/components/ui/textarea";
@@ -79,20 +79,21 @@ export function GeneralEditor({
     <div className="grid gap-5 lg:grid-cols-[1fr_380px] lg:items-start">
       <Card className="p-5 sm:p-6">
         <h2 className="text-[0.95rem] font-semibold tracking-tight text-text">Balance del día</h2>
-        <p className="text-sm text-muted">El saldo de Luis debe estar respaldado por el cupo, el efectivo y lo prestado a terceros.</p>
 
         <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Campo label="Saldo Luis" id="saldo_luis">
             <MoneyInput id="saldo_luis" value={vals.saldo_luis} onValueChange={set("saldo_luis")} />
             {vals.saldo_luis !== saldoLuisSugerido && (
-              <button
-                type="button"
+              <Button
+                size="sm"
+                variant="ghost"
                 onClick={() => set("saldo_luis")(saldoLuisSugerido)}
-                className="mt-1 flex items-center gap-1 self-start text-[0.7rem] text-accent-strong hover:underline"
+                title="Usar el saldo del módulo de Luis"
+                className="mt-1 self-start"
               >
-                <ArrowClockwise size={11} />
-                Usar saldo del módulo de Luis: {formatCOP(saldoLuisSugerido)}
-              </button>
+                <ArrowClockwise size={16} />
+                Usar <span className="tnum">{formatCOP(saldoLuisSugerido)}</span>
+              </Button>
             )}
           </Campo>
 
@@ -132,9 +133,6 @@ export function GeneralEditor({
           <p className="text-[0.78rem] font-medium uppercase tracking-wide text-faint">Saldo total</p>
           <p className={cn("mt-2 text-4xl font-semibold tracking-tight", total < 0 ? "text-danger" : "text-text")}>
             <AnimatedMoney value={total} />
-          </p>
-          <p className="mt-2 text-[0.82rem] text-muted">
-            (Luis + Cristian) − (cupo + efectivo + nequis + monedas + deudas de terceros). Debería ser $0.
           </p>
         </Card>
 
@@ -193,22 +191,26 @@ function CampoSigned({
     <div className="flex flex-col gap-2">
       <Label htmlFor={id}>{label}</Label>
       <div className="flex gap-2">
-        <div className="flex rounded-card border border-line-strong bg-surface-2 p-0.5">
+        <div role="group" aria-label={`Signo de ${label}`} className="flex items-center rounded-full border border-line-strong bg-surface-2 p-0.5">
           <button
             type="button"
+            aria-pressed={!negativo}
             onClick={() => onChange(magnitud)}
-            className={cn("flex w-9 items-center justify-center rounded-[0.6rem] transition-colors", !negativo ? "bg-elevated text-accent" : "text-faint")}
+            className={cn(baseInteractiva, "h-10 w-10", !negativo ? "lg-glass text-accent-strong" : "text-muted hover:text-text")}
             title="A favor"
+            aria-label="A favor"
           >
-            <Plus size={15} weight="bold" />
+            <Plus size={16} weight="bold" />
           </button>
           <button
             type="button"
+            aria-pressed={negativo}
             onClick={() => onChange(-magnitud)}
-            className={cn("flex w-9 items-center justify-center rounded-[0.6rem] transition-colors", negativo ? "bg-elevated text-danger" : "text-faint")}
+            className={cn(baseInteractiva, "h-10 w-10", negativo ? "lg-glass text-danger" : "text-muted hover:text-text")}
             title="En contra"
+            aria-label="En contra"
           >
-            <Minus size={15} weight="bold" />
+            <Minus size={16} weight="bold" />
           </button>
         </div>
         <div className="flex-1">

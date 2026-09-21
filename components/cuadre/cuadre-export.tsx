@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Export, DownloadSimple, ShareNetwork, X } from "@phosphor-icons/react/dist/ssr";
 import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/ui/icon-button";
 import { formatCOP } from "@/lib/format";
 
 interface Linea {
@@ -199,14 +200,9 @@ export function CuadreExport({
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-1.5 rounded-lg border border-line bg-surface px-3 py-1.5 text-[0.8rem] font-medium text-muted transition-colors hover:text-text"
-      >
-        <Export size={15} weight="bold" />
-        Descargar
-      </button>
+      <IconButton label="Descargar o compartir el cuadre" onClick={() => setOpen(true)}>
+        <Export size={18} weight="bold" />
+      </IconButton>
       {mounted ? createPortal(modal, document.body) : null}
     </>
   );

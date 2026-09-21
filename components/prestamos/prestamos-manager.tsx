@@ -11,9 +11,16 @@ import {
   CheckCircle,
   ArrowCounterClockwise,
   Tag,
+  Check,
+  X,
+  Eraser,
+  ClockCounterClockwise,
 } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/ui/icon-button";
+import { ChoiceChip } from "@/components/ui/choice-chip";
+import { MedioPicker } from "@/components/prestamos/medio-picker";
 import { Label } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -99,7 +106,7 @@ export function PrestamosManager({
 
         {alDia.length > 0 && (
           <details className="group mt-5">
-            <summary className="flex cursor-pointer items-center gap-2 px-1 text-[0.82rem] text-faint hover:text-muted">
+            <summary className="flex min-h-10 cursor-pointer items-center gap-2 rounded-full px-2 text-[0.84rem] text-muted transition-colors hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/45">
               <CaretDown size={14} className="transition-transform group-open:rotate-180" />
               {alDia.length} persona{alDia.length === 1 ? "" : "s"} al día
             </summary>
@@ -184,20 +191,9 @@ function AddDeudaForm() {
           <Label id="grp-persona">Persona</Label>
           <div role="group" aria-labelledby="grp-persona" className="flex flex-wrap gap-2">
             {[...PERSONAS_PRESET, "Otro"].map((p) => (
-              <button
-                key={p}
-                type="button"
-                aria-pressed={persona === p}
-                onClick={() => setPersona(p)}
-                className={cn(
-                  "rounded-full border px-3 py-1.5 text-[0.8rem] font-medium transition-colors",
-                  persona === p
-                    ? "lg-glass-accent text-glass-ink-accent"
-                    : "border-line-strong text-muted hover:text-text",
-                )}
-              >
+              <ChoiceChip key={p} selected={persona === p} onClick={() => setPersona(p)}>
                 {p}
-              </button>
+              </ChoiceChip>
             ))}
           </div>
           {persona === "Otro" && (
@@ -214,20 +210,9 @@ function AddDeudaForm() {
           <Label id="grp-concepto">Concepto</Label>
           <div role="group" aria-labelledby="grp-concepto" className="flex flex-wrap gap-2">
             {CONCEPTOS.map((c) => (
-              <button
-                key={c}
-                type="button"
-                aria-pressed={concepto === c}
-                onClick={() => setConcepto(c)}
-                className={cn(
-                  "rounded-full border px-3 py-1.5 text-[0.8rem] font-medium transition-colors",
-                  concepto === c
-                    ? "lg-glass-accent text-glass-ink-accent"
-                    : "border-line-strong text-muted hover:text-text",
-                )}
-              >
+              <ChoiceChip key={c} selected={concepto === c} onClick={() => setConcepto(c)}>
                 {c}
-              </button>
+              </ChoiceChip>
             ))}
           </div>
           {concepto === "Otro" && (
@@ -247,35 +232,7 @@ function AddDeudaForm() {
 
         <div className="flex flex-col gap-2">
           <Label id="grp-medio">¿Cómo se lo diste?</Label>
-          <div className="flex gap-2">
-            {(["transferencia", "efectivo"] as const).map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => setMedio(m)}
-                className={cn(
-                  "flex-1 rounded-card border px-3 py-2 text-[0.8rem] font-medium transition-colors",
-                  medio === m
-                    ? "lg-glass-accent text-glass-ink-accent"
-                    : "border-line-strong text-muted hover:text-text",
-                )}
-              >
-                {m === "efectivo" ? "Efectivo" : "Transferencia"}
-              </button>
-            ))}
-          </div>
-          <button
-            type="button"
-            onClick={() => setMedio("registro")}
-            className={cn(
-              "rounded-card border px-3 py-2 text-[0.8rem] font-medium transition-colors",
-              medio === "registro"
-                ? "lg-glass-accent text-glass-ink-accent"
-                : "border-line-strong text-muted hover:text-text",
-            )}
-          >
-            Solo registro · no afecta el cuadre
-          </button>
+          <MedioPicker medio={medio} onChange={setMedio} labelledBy="grp-medio" />
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto]">
@@ -332,7 +289,7 @@ function PersonaCard({
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-controls={panelId}
-          className="flex w-full items-center gap-3 p-4 text-left transition-colors hover:bg-surface-2 sm:p-5"
+          className="flex w-full items-center gap-3 p-4 text-left transition-colors hover:bg-surface-2 active:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/45 sm:p-5"
         >
           <span
             aria-hidden="true"
@@ -440,18 +397,9 @@ function OrigenPicker({
           {sugeridos.slice(0, 8).map((o) => {
             const activo = clave !== "" && claveNombre(o) === clave;
             return (
-              <button
-                key={o}
-                type="button"
-                aria-pressed={activo}
-                onClick={() => onChange(activo ? "" : o)}
-                className={cn(
-                  "rounded-full border px-3 py-1.5 text-[0.8rem] font-medium transition-colors",
-                  activo ? "lg-glass-accent text-glass-ink-accent" : "border-line-strong text-muted hover:text-text",
-                )}
-              >
+              <ChoiceChip key={o} selected={activo} onClick={() => onChange(activo ? "" : o)}>
                 {o}
-              </button>
+              </ChoiceChip>
             );
           })}
         </div>
@@ -494,24 +442,20 @@ function AbonoItem({ abono, origenes }: { abono: AbonoRow; origenes: string[] })
     <li className="py-2">
       <div className="flex items-center gap-2 text-[0.8rem]">
         <span className="shrink-0 text-faint">{formatFecha(abono.fecha)}</span>
-        <button
-          type="button"
+        <Button
+          size="sm"
+          variant={abono.origen ? "secondary" : "ghost"}
           aria-expanded={editando}
           onClick={() => {
             setValor(abono.origen ?? "");
             setErr(null);
             setEditando((v) => !v);
           }}
-          className={cn(
-            "flex min-w-0 items-center gap-1 rounded-full border px-2.5 py-1 text-[0.72rem] font-medium transition-colors",
-            abono.origen
-              ? "border-line-strong bg-surface-2 text-muted hover:text-text"
-              : "border-dashed border-line-strong text-faint hover:text-muted",
-          )}
+          className="min-w-0 max-w-[60%]"
         >
-          <Tag size={12} className="shrink-0" />
+          <Tag size={15} className="shrink-0" />
           <span className="truncate">{abono.origen ?? "Poner origen"}</span>
-        </button>
+        </Button>
         <span className="tnum ml-auto shrink-0 text-success">+{formatCOP(abono.monto)}</span>
       </div>
 
@@ -533,20 +477,18 @@ function AbonoItem({ abono, origenes }: { abono: AbonoRow; origenes: string[] })
               />
               <div className="flex flex-wrap items-center gap-2">
                 <Button size="sm" onClick={() => guardar(valor)} disabled={pending}>
+                  <Check size={16} weight="bold" />
                   {pending ? "Guardando…" : "Guardar"}
                 </Button>
                 {abono.origen && (
                   <Button size="sm" variant="secondary" onClick={() => guardar("")} disabled={pending}>
+                    <Eraser size={16} />
                     Quitar origen
                   </Button>
                 )}
-                <button
-                  type="button"
-                  onClick={() => setEditando(false)}
-                  className="ml-auto px-1 text-[0.76rem] text-faint hover:text-muted"
-                >
-                  Cancelar
-                </button>
+                <IconButton label="Cancelar" onClick={() => setEditando(false)} className="ml-auto">
+                  <X size={17} />
+                </IconButton>
               </div>
               <ErrorNotice message={err} />
             </div>
@@ -683,28 +625,29 @@ function DeudaRow({
               Reabrir
             </Button>
           ) : (
-            <Button size="sm" variant="secondary" onClick={() => setAbonoOpen((v) => !v)} disabled={pending}>
+            <Button size="sm" variant="secondary" onClick={() => setAbonoOpen((v) => !v)} disabled={pending} aria-expanded={abonoOpen}>
+              <Plus size={16} weight="bold" />
               Abonar
             </Button>
           )}
           {deuda.abonos.length > 0 && (
-            <button
+            <Button
+              size="sm"
+              variant="ghost"
               onClick={() => setHistoryOpen((v) => !v)}
-              className="flex items-center gap-1 px-1 text-[0.76rem] text-faint hover:text-muted"
+              aria-expanded={historyOpen}
+              aria-label={`${historyOpen ? "Ocultar" : "Ver"} ${deuda.abonos.length} abono${deuda.abonos.length === 1 ? "" : "s"}`}
+              title="Abonos"
             >
+              <ClockCounterClockwise size={16} />
+              <span className="tnum">{deuda.abonos.length}</span>
               <CaretDown size={13} className={cn("transition-transform", historyOpen && "rotate-180")} />
-              {deuda.abonos.length} abono{deuda.abonos.length === 1 ? "" : "s"}
-            </button>
+            </Button>
           )}
           {isAdmin && (
-            <button
-              onClick={() => setConfirmando("borrar")}
-              disabled={pending}
-              title="Eliminar préstamo" aria-label="Eliminar préstamo"
-              className="ml-auto flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
-            >
-              <Trash size={15} />
-            </button>
+            <IconButton label="Eliminar préstamo" tone="danger" onClick={() => setConfirmando("borrar")} disabled={pending} className="ml-auto">
+              <Trash size={17} />
+            </IconButton>
           )}
         </div>
 
@@ -729,6 +672,7 @@ function DeudaRow({
                   onEnter={() => !pending && abonar()}
                 />
                 <Button size="md" onClick={abonar} disabled={pending} className="w-full sm:w-auto sm:self-end">
+                  <Check size={17} weight="bold" />
                   {pending ? "Registrando…" : "Confirmar abono"}
                 </Button>
               </div>

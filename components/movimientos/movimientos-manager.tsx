@@ -13,11 +13,17 @@ import {
   ArrowUp,
   DeviceMobile,
   Bank,
-  Receipt,ArrowRight,
-  Lock } from "@phosphor-icons/react/dist/ssr";
+  Receipt,
+  ArrowRight,
+  Lock,
+  Check,
+  X,
+} from "@phosphor-icons/react/dist/ssr";
 import type { Icon } from "@phosphor-icons/react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/ui/icon-button";
+import { ChoiceChip } from "@/components/ui/choice-chip";
 import { Label } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { MoneyInput } from "@/components/ui/money-input";
@@ -151,21 +157,10 @@ export function MovimientosManager({
           <div className={cn("mt-4 flex flex-wrap gap-2", bloqueado && "pointer-events-none opacity-50")}>
             {(Object.keys(TIPOS) as Tipo[]).map((t) => {
               const Ti = TIPOS[t];
-              const active = tipo === t;
               return (
-                <button
-                  key={t}
-                  onClick={() => setTipo(t)}
-                  className={cn(
-                    "flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[0.8rem] font-medium transition-colors",
-                    active
-                      ? "lg-glass-accent text-glass-ink-accent"
-                      : "border-line-strong text-muted hover:text-text",
-                  )}
-                >
-                  <Ti.icon size={14} weight="bold" />
+                <ChoiceChip key={t} selected={tipo === t} onClick={() => setTipo(t)} icon={<Ti.icon size={15} weight="bold" />}>
                   {Ti.label}
-                </button>
+                </ChoiceChip>
               );
             })}
           </div>
@@ -228,20 +223,9 @@ export function MovimientosManager({
                             {(Object.keys(TIPOS) as Tipo[]).map((t) => {
                               const Te = TIPOS[t];
                               return (
-                                <button
-                                  key={t}
-                                  type="button"
-                                  onClick={() => setETipo(t)}
-                                  className={cn(
-                                    "flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.74rem] font-medium transition-colors",
-                                    eTipo === t
-                                      ? "lg-glass-accent text-glass-ink-accent"
-                                      : "border-line-strong text-muted hover:text-text",
-                                  )}
-                                >
-                                  <Te.icon size={12} weight="bold" />
+                                <ChoiceChip key={t} selected={eTipo === t} onClick={() => setETipo(t)} icon={<Te.icon size={15} weight="bold" />}>
                                   {Te.corto}
-                                </button>
+                                </ChoiceChip>
                               );
                             })}
                           </div>
@@ -261,13 +245,14 @@ export function MovimientosManager({
                               inputMode="numeric"
                             />
                           )}
-                          <div className="flex gap-2">
+                          <div className="flex items-center gap-2">
                             <Button size="sm" onClick={guardarEdicion} disabled={pending}>
+                              <Check size={16} weight="bold" />
                               Guardar
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={() => setEditId(null)} disabled={pending}>
-                              Cancelar
-                            </Button>
+                            <IconButton label="Cancelar" onClick={() => setEditId(null)} disabled={pending}>
+                              <X size={17} />
+                            </IconButton>
                           </div>
                         </div>
                       ) : (
@@ -298,24 +283,19 @@ export function MovimientosManager({
                           </div>
                           <div className="flex shrink-0 items-center gap-1">
                             {!bloqueado && (
-                              <button
-                                onClick={() => abrirEdicion(m)}
-                                disabled={pending}
-                                className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-accent-soft hover:text-accent-strong disabled:opacity-40"
-                                title="Editar" aria-label="Editar"
-                              >
-                                <PencilSimple size={15} />
-                              </button>
+                              <IconButton label="Editar" onClick={() => abrirEdicion(m)} disabled={pending}>
+                                <PencilSimple size={17} />
+                              </IconButton>
                             )}
                             {isAdmin && (
-                              <button
+                              <IconButton
+                                label="Eliminar"
+                                tone="danger"
                                 onClick={() => setPorBorrar({ id: m.id, monto: m.monto })}
                                 disabled={pending || bloqueado}
-                                className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
-                                title="Eliminar" aria-label="Eliminar"
                               >
-                                <Trash size={15} />
-                              </button>
+                                <Trash size={17} />
+                              </IconButton>
                             )}
                           </div>
                         </div>

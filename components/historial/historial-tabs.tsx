@@ -63,10 +63,12 @@ export function HistorialTabs({ cuadres, luis }: { cuadres: CuadreRow[]; luis: L
           return (
             <button
               key={t.id}
+              type="button"
+              aria-pressed={tab === t.id}
               onClick={() => setTab(t.id)}
               className={cn(
-                "relative flex items-center gap-2 rounded-full px-4 py-1.5 text-[0.82rem] font-medium transition-colors",
-                tab === t.id ? "text-glass-ink" : "text-faint hover:text-muted",
+                "relative flex h-10 items-center gap-2 rounded-full px-4 text-[0.84rem] font-medium transition-[color,transform] duration-200 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/45",
+                tab === t.id ? "text-glass-ink" : "text-muted hover:text-text",
               )}
             >
               {tab === t.id && (

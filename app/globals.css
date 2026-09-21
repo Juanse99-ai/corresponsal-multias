@@ -60,6 +60,14 @@
   --glass-ink-accent: oklch(0.42 0.18 258);
   --glass-ink-danger: oklch(0.50 0.2 25);
 
+  /* Tinta para texto sobre el vidrio translúcido de <Button> (.lg-liquid). A
+     diferencia de .lg-glass (casi opaco), este deja ver el fondo: en claro se ve
+     blanco; en oscuro, gris medio. Por eso estos SÍ se redefinen en .dark. */
+  --liquid-ink: var(--glass-ink);
+  --liquid-ink-muted: var(--glass-ink-muted);
+  --liquid-ink-accent: var(--glass-ink-accent);
+  --liquid-ink-danger: var(--glass-ink-danger);
+
   color-scheme: light;
 }
 
@@ -90,6 +98,14 @@
 
   --danger: oklch(0.7 0.165 25);
   --danger-soft: oklch(0.36 0.085 25);
+
+  /* Sobre fondo oscuro el vidrio blanco translúcido queda gris MEDIO: la tinta
+     clara contrasta ~3:1 y la oscura de siempre ~3.5:1. Una tinta más profunda
+     llega a ~4.5-5:1 sin tocar el vidrio. */
+  --liquid-ink: oklch(0.2 0.025 258);
+  --liquid-ink-muted: oklch(0.27 0.025 258);
+  --liquid-ink-accent: oklch(0.3 0.15 262);
+  --liquid-ink-danger: oklch(0.3 0.12 25);
 
   /* Los tokens nav-* (menú overlay + hero del login) NO se redefinen aquí:
      el menú usa el mismo fondo navy en claro y en oscuro. */
@@ -138,6 +154,10 @@
   --color-glass-ink-muted: var(--glass-ink-muted);
   --color-glass-ink-accent: var(--glass-ink-accent);
   --color-glass-ink-danger: var(--glass-ink-danger);
+  --color-liquid-ink: var(--liquid-ink);
+  --color-liquid-ink-muted: var(--liquid-ink-muted);
+  --color-liquid-ink-accent: var(--liquid-ink-accent);
+  --color-liquid-ink-danger: var(--liquid-ink-danger);
 }
 
 * {

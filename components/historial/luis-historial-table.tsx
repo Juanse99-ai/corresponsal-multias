@@ -3,9 +3,10 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { DownloadSimple, MagnifyingGlass, CaretRight, Wallet } from "@phosphor-icons/react/dist/ssr";
+import { DownloadSimple, MagnifyingGlass, CaretRight, Wallet, X } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/ui/icon-button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { formatCOP, formatFecha } from "@/lib/format";
@@ -68,14 +69,14 @@ export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
               <Input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} className="h-10 w-full min-w-0 sm:w-[9.5rem]" />
             </div>
             {(desde || hasta) && (
-              <button onClick={() => { setDesde(""); setHasta(""); }} className="h-10 px-2 text-[0.78rem] text-faint hover:text-muted">
-                Limpiar
-              </button>
+              <IconButton label="Limpiar fechas" onClick={() => { setDesde(""); setHasta(""); }}>
+                <X size={17} />
+              </IconButton>
             )}
           </div>
           <Button variant="secondary" size="sm" onClick={exportar} disabled={filtrados.length === 0}>
             <DownloadSimple size={16} weight="bold" />
-            Exportar Excel
+            Excel
           </Button>
         </div>
       </Card>

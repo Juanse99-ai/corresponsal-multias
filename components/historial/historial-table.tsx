@@ -3,9 +3,10 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { DownloadSimple, MagnifyingGlass, Trash, CheckCircle, Warning } from "@phosphor-icons/react/dist/ssr";
+import { DownloadSimple, MagnifyingGlass, Trash, CheckCircle, Warning, X } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/ui/icon-button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -75,14 +76,14 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
               <Input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} className="h-10 w-full min-w-0 sm:w-[9.5rem]" />
             </div>
             {(desde || hasta) && (
-              <button onClick={() => { setDesde(""); setHasta(""); }} className="h-10 px-2 text-[0.78rem] text-faint hover:text-muted">
-                Limpiar
-              </button>
+              <IconButton label="Limpiar fechas" onClick={() => { setDesde(""); setHasta(""); }}>
+                <X size={17} />
+              </IconButton>
             )}
           </div>
           <Button variant="secondary" size="sm" onClick={exportar} disabled={filtrados.length === 0}>
             <DownloadSimple size={16} weight="bold" />
-            Exportar Excel
+            Excel
           </Button>
         </div>
 
@@ -153,15 +154,9 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
                   </div>
                   {isAdmin && (
                     <div className="flex justify-end">
-                      <button
-                        onClick={(e) => borrar(c.id, e)}
-                        disabled={pending}
-                        title="Eliminar cierre"
-                        aria-label="Eliminar cierre"
-                        className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger"
-                      >
-                        <Trash size={14} />
-                      </button>
+                      <IconButton label="Eliminar cierre" tone="danger" onClick={(e) => borrar(c.id, e)} disabled={pending}>
+                        <Trash size={17} />
+                      </IconButton>
                     </div>
                   )}
                 </div>
@@ -211,13 +206,9 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
                       </td>
                       {isAdmin && (
                         <td className="pr-3">
-                          <button
-                            onClick={(e) => borrar(c.id, e)}
-                            disabled={pending}
-                            className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger"
-                          >
-                            <Trash size={14} />
-                          </button>
+                          <IconButton label="Eliminar cierre" tone="danger" size="sm" onClick={(e) => borrar(c.id, e)} disabled={pending}>
+                            <Trash size={16} />
+                          </IconButton>
                         </td>
                       )}
                     </motion.tr>

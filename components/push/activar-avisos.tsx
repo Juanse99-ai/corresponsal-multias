@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { BellRinging, BellSlash, CircleNotch } from "@phosphor-icons/react/dist/ssr";
 import { cn } from "@/lib/utils";
+import { baseInteractiva } from "@/components/ui/button";
 import { VAPID_PUBLIC_KEY } from "@/lib/push-config";
 
 type State = "loading" | "unsupported" | "denied" | "off" | "on" | "working";
@@ -90,7 +91,8 @@ export function ActivarAvisos() {
       disabled={working}
       aria-pressed={on}
       className={cn(
-        "inline-flex h-9 items-center gap-2 rounded-full border px-3.5 text-[0.8rem] font-medium transition-colors disabled:opacity-60",
+        baseInteractiva,
+        "h-10 gap-2 border px-4 text-[0.84rem] font-medium focus-visible:ring-offset-nav-bg",
         on
           ? "border-transparent bg-nav-accent/20 text-nav-accent"
           : "border-nav-line text-nav-muted hover:bg-nav-active hover:text-nav-text",

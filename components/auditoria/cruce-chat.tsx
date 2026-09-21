@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState, useTransition, type ChangeEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ClipboardText, FileArrowUp, CheckCircle, Warning } from "@phosphor-icons/react/dist/ssr";
+import { ClipboardText, FileArrowUp, CheckCircle, Warning, ArrowsLeftRight } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/field";
@@ -12,9 +12,6 @@ import { ErrorNotice } from "@/components/ui/error-notice";
 import { cn } from "@/lib/utils";
 import { formatCOP, formatFechaCorta, formatHora, hoyISO } from "@/lib/format";
 import { leerListaWhatsApp, conciliarDia, type Conciliacion } from "@/lib/luis-parse";
-
-const botonMini =
-  "flex h-9 items-center gap-1.5 whitespace-nowrap rounded-full border border-line-strong bg-surface px-3 text-[0.78rem] font-medium text-muted transition-colors hover:text-text";
 
 /**
  * Cruza lo que Sr. Luis pidió por el grupo contra lo que quedó registrado ese día.
@@ -95,14 +92,14 @@ export function CruceChat({
       <h3 className="text-[0.95rem] font-semibold tracking-tight text-text">Cruce con el grupo</h3>
 
       <div className="mt-3 flex gap-2">
-        <button type="button" onClick={pegar} className={botonMini}>
-          <ClipboardText size={15} />
+        <Button size="sm" variant="secondary" onClick={pegar}>
+          <ClipboardText size={16} />
           Pegar
-        </button>
-        <button type="button" onClick={() => archivoRef.current?.click()} className={botonMini}>
-          <FileArrowUp size={15} />
-          Subir chat
-        </button>
+        </Button>
+        <Button size="sm" variant="secondary" onClick={() => archivoRef.current?.click()}>
+          <FileArrowUp size={16} />
+          Subir
+        </Button>
         <input ref={archivoRef} type="file" accept=".txt,text/plain" onChange={subir} className="hidden" aria-label="Subir chat exportado" />
       </div>
 
@@ -144,6 +141,7 @@ export function CruceChat({
               />
             </div>
             <Button onClick={cruzar} disabled={pending || pedidos.length === 0}>
+              <ArrowsLeftRight size={17} weight="bold" />
               {pending ? "Cruzando…" : `Cruzar ${pedidos.length} ${pedidos.length === 1 ? "pedido" : "pedidos"}`}
             </Button>
           </div>

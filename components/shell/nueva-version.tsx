@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowClockwise } from "@phosphor-icons/react/dist/ssr";
+import { Button } from "@/components/ui/button";
 
 /** Cada cuánto se pregunta si hay versión nueva, con la app abierta. */
 const CADA = 10 * 60 * 1000;
@@ -66,14 +67,10 @@ export function NuevaVersion() {
           <p className="min-w-0 flex-1 text-[0.84rem] text-text">
             Hay una versión nueva de la app.
           </p>
-          <button
-            type="button"
-            onClick={actualizar}
-            className="flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-accent px-3.5 text-[0.8rem] font-medium text-accent-ink"
-          >
-            <ArrowClockwise size={15} weight="bold" />
+          <Button size="sm" onClick={actualizar} className="shrink-0">
+            <ArrowClockwise size={16} weight="bold" />
             Actualizar
-          </button>
+          </Button>
         </motion.div>
       )}
     </AnimatePresence>

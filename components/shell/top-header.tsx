@@ -16,6 +16,8 @@ import {
   X,
 } from "@phosphor-icons/react/dist/ssr";
 import { Logo } from "@/components/brand";
+import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/ui/icon-button";
 import { cn } from "@/lib/utils";
 import { formatCOP, formatFechaLarga, hoyISO, formatFecha, anioBogota } from "@/lib/format";
 import type { HeaderResumen } from "@/lib/queries";
@@ -134,14 +136,10 @@ export function TopHeader({
   return (
     <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-line bg-bg/80 px-3 py-2.5 backdrop-blur-xl sm:px-6 lg:px-8 relative">
       <div className="flex items-center gap-2.5 sm:gap-3.5">
-        <button
-          onClick={onOpenMenu}
-          aria-label="Abrir menú"
-          className="flex h-10 items-center gap-2 rounded-full border border-line bg-surface pl-3 pr-3.5 text-[0.84rem] font-medium text-text transition-colors hover:bg-surface-2"
-        >
+        <Button variant="secondary" size="sm" onClick={onOpenMenu} aria-label="Abrir menú" className="w-10 px-0 sm:w-auto sm:px-4">
           <List size={18} weight="bold" />
           <span className="hidden sm:inline">Menú</span>
-        </button>
+        </Button>
         <Link href="/panel" className="flex items-center gap-2">
           <Logo size={30} />
           <span className="hidden text-sm font-semibold tracking-tight text-text sm:block">Barrio Centro Sabanalarga 18</span>
@@ -202,20 +200,18 @@ function HeaderSearch({ personas }: { personas: string[] }) {
   return (
     <>
       {/* Celular: lupa de 44x44. El buscador completo se abre encima del encabezado. */}
-      <button
-        type="button"
+      <Button
+        variant="secondary"
+        size="icon"
         onClick={() => {
           setMovil(true);
           requestAnimationFrame(() => inputRef.current?.focus());
         }}
         aria-label="Buscar día o persona"
-        className={cn(
-          "flex h-11 w-11 items-center justify-center rounded-full border border-line bg-surface text-muted transition-colors hover:bg-surface-2 sm:hidden",
-          movil && "invisible",
-        )}
+        className={cn("sm:hidden", movil && "invisible")}
       >
         <MagnifyingGlass size={18} />
-      </button>
+      </Button>
 
     <form
       onSubmit={onSubmit}
@@ -245,14 +241,9 @@ function HeaderSearch({ personas }: { personas: string[] }) {
           className="w-full min-w-0 bg-transparent text-base text-text outline-none placeholder:text-faint sm:text-[0.82rem]"
         />
         {movil && (
-          <button
-            type="button"
-            onClick={cerrarMovil}
-            aria-label="Cerrar buscador"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-faint transition-colors hover:text-text sm:hidden"
-          >
-            <X size={16} weight="bold" />
-          </button>
+          <IconButton label="Cerrar buscador" size="sm" onClick={cerrarMovil} className="sm:hidden">
+            <X size={17} weight="bold" />
+          </IconButton>
         )}
       </div>
 
@@ -275,7 +266,7 @@ function HeaderSearch({ personas }: { personas: string[] }) {
                     <button
                       type="button"
                       onClick={() => irAFecha(fechaISO)}
-                      className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left transition-colors hover:bg-surface-2"
+                      className="flex min-h-11 w-full items-center gap-2.5 px-4 py-2.5 text-left transition-colors hover:bg-surface-2 active:bg-surface-2 focus-visible:bg-surface-2 focus-visible:outline-none"
                     >
                       <CalendarBlank size={16} className="text-accent" />
                       <span className="flex-1 text-[0.84rem] text-text">Ver el día {formatFecha(fechaISO)}</span>
@@ -288,7 +279,7 @@ function HeaderSearch({ personas }: { personas: string[] }) {
                     <button
                       type="button"
                       onClick={irAPersona}
-                      className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left transition-colors hover:bg-surface-2"
+                      className="flex min-h-11 w-full items-center gap-2.5 px-4 py-2.5 text-left transition-colors hover:bg-surface-2 active:bg-surface-2 focus-visible:bg-surface-2 focus-visible:outline-none"
                     >
                       <HandCoins size={16} className="text-accent" />
                       <span className="flex-1 text-[0.84rem] text-text">{p}</span>
@@ -319,22 +310,28 @@ export function HeaderAvisos({ avisos, urgentes }: { avisos: Aviso[]; urgentes: 
 
   return (
     <div className="relative">
-      <button
+      <Button
+        variant="secondary"
+        size="icon"
         onClick={() => setOpen((v) => !v)}
         onBlur={() => setTimeout(() => setOpen(false), 150)}
-        title="Avisos" aria-label="Avisos"
-        className="relative flex h-10 w-10 items-center justify-center rounded-[0.7rem] border border-line bg-surface text-muted transition-colors hover:text-text"
+        title="Avisos"
+        aria-label={avisos.length ? `Avisos (${avisos.length})` : "Avisos"}
+        aria-expanded={open}
       >
-        <Bell size={18} weight={avisos.length ? "fill" : "regular"} />
-        {avisos.length > 0 && (
-          <span
-            className={cn(
-              "absolute right-1.5 top-1.5 h-2 w-2 rounded-full ring-2 ring-bg",
-              urgentes ? "bg-danger" : "bg-accent",
-            )}
-          />
-        )}
-      </button>
+        <span className="relative inline-flex">
+          <Bell size={18} weight={avisos.length ? "fill" : "regular"} />
+          {avisos.length > 0 && (
+            <span
+              aria-hidden
+              className={cn(
+                "absolute -right-1 -top-0.5 h-2 w-2 rounded-full ring-2 ring-bg",
+                urgentes ? "bg-danger" : "bg-accent",
+              )}
+            />
+          )}
+        </span>
+      </Button>
 
       <AnimatePresence>
         {open && (

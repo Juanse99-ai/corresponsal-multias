@@ -12,6 +12,7 @@ import {
   ArrowUp,ArrowSquareOut } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/ui/icon-button";
 import { Label } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { MoneyInput } from "@/components/ui/money-input";
@@ -84,17 +85,18 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
         <ArrowsLeftRight size={17} weight="fill" className="text-accent" />
         <h3 className="text-[0.95rem] font-semibold tracking-tight text-text">Mis compensaciones / retiros</h3>
       </div>
-      <p className="text-sm text-muted">Lo que tú compensas en efectivo o retiras, con su anexo.</p>
 
       <div className="mt-5 flex flex-col gap-4">
         <div className="flex rounded-full border border-line bg-surface-2 p-1">
           {(["compensacion", "retiro"] as const).map((t) => (
             <button
               key={t}
+              type="button"
+              aria-pressed={tipo === t}
               onClick={() => setTipo(t)}
               className={cn(
-                "relative flex-1 rounded-full py-2 text-[0.8rem] font-medium capitalize transition-colors",
-                tipo === t ? "text-glass-ink" : "text-faint hover:text-muted",
+                "relative flex h-10 flex-1 items-center justify-center rounded-full text-[0.84rem] font-medium capitalize transition-[color,transform] duration-200 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/45",
+                tipo === t ? "text-glass-ink" : "text-muted hover:text-text",
               )}
             >
               {tipo === t && (
@@ -104,7 +106,10 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
                   transition={{ type: "spring", stiffness: 360, damping: 30 }}
                 />
               )}
-              <span className="relative z-10">{t === "compensacion" ? "Compensación" : "Retiro"}</span>
+              <span className="relative z-10 inline-flex items-center gap-1.5">
+                {t === "compensacion" ? <ArrowsLeftRight size={15} /> : <ArrowUp size={15} />}
+                {t === "compensacion" ? "Compensación" : "Retiro"}
+              </span>
             </button>
           ))}
         </div>
@@ -186,13 +191,9 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
                       <ArrowSquareOut size={15} />
                     </a>
                   )}
-                  <button
-                    onClick={() => setPorBorrar({ id: m.id, monto: m.monto })}
-                    disabled={pending}
-                    className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger"
-                  >
-                    <Trash size={14} />
-                  </button>
+                  <IconButton label="Eliminar" tone="danger" onClick={() => setPorBorrar({ id: m.id, monto: m.monto })} disabled={pending}>
+                    <Trash size={17} />
+                  </IconButton>
                 </div>
               </motion.li>
             ))}

@@ -9,6 +9,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { ActivarAvisos } from "@/components/push/activar-avisos";
 import { signOutAction } from "@/app/login/actions";
 import { cn } from "@/lib/utils";
+import { baseInteractiva } from "@/components/ui/button";
 import { formatCOP, formatFechaLarga, hoyISO } from "@/lib/format";
 import type { Rol } from "@/lib/cuadre";
 import type { HeaderResumen } from "@/lib/queries";
@@ -97,9 +98,11 @@ export function NavOverlay({
               </div>
             </Link>
             <button
+              type="button"
               onClick={onClose}
               aria-label="Cerrar menú"
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-nav-line text-nav-muted transition-colors hover:bg-nav-active hover:text-nav-text"
+              title="Cerrar menú"
+              className={cn(baseInteractiva, "h-11 w-11 border border-nav-line text-nav-muted hover:bg-nav-active hover:text-nav-text focus-visible:ring-offset-nav-bg")}
             >
               <X size={20} weight="bold" />
             </button>
@@ -250,7 +253,7 @@ function ResumenPanel({
             type="submit"
             title="Cerrar sesión"
             aria-label="Cerrar sesión"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-nav-line text-nav-muted transition-colors hover:bg-nav-active hover:text-nav-text"
+            className={cn(baseInteractiva, "h-11 w-11 border border-nav-line text-nav-muted hover:bg-nav-active hover:text-nav-text focus-visible:ring-offset-nav-bg")}
           >
             <SignOut size={17} />
           </button>

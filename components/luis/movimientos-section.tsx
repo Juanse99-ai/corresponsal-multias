@@ -3,9 +3,11 @@
 import { useMemo, useRef, useState, useTransition, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Trash, PencilSimple, Clock, ArrowDown, Receipt, CheckCircle, WhatsappLogo, ClipboardText, FileArrowUp, Warning } from "@phosphor-icons/react/dist/ssr";
+import { Plus, Trash, PencilSimple, Clock, ArrowDown, Receipt, CheckCircle, WhatsappLogo, ClipboardText, FileArrowUp, Warning, Check, X } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/ui/icon-button";
+import { ChoiceChip } from "@/components/ui/choice-chip";
 import { Label } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,9 +20,6 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatCOP, formatFechaCorta, formatHora, horaBogotaHHMM } from "@/lib/format";
 import { TOPE_CONSIGNACION, TOPE_COMPENSACION } from "@/lib/auditoria";
 import { reduced } from "@/components/fx/reduced";
-
-const botonMini =
-  "flex h-9 items-center gap-1.5 whitespace-nowrap rounded-full border border-line-strong bg-surface px-3 text-[0.78rem] font-medium text-muted transition-colors hover:text-text";
 
 /** Acuse del lote: cuántos entraron, en cuántos días y cuántos ya estaban. */
 function resumenLote(insertados: number, dias: number, repetidos: number): string {
@@ -369,7 +368,7 @@ export function MovimientosSection({
             className="w-full sm:w-auto"
           >
             <WhatsappLogo size={17} weight="fill" />
-            Pegar lista de WhatsApp
+            Pegar de WhatsApp
           </Button>
         )}
       </div>
@@ -385,19 +384,19 @@ export function MovimientosSection({
             <div className="mt-4 rounded-[1rem] border border-accent/25 bg-accent-soft/30 p-4">
               <p className="text-[0.88rem] font-semibold text-text">Chat de WhatsApp</p>
               <div className="mt-2.5 flex gap-2">
-                <button type="button" onClick={pegarDelPortapapeles} className={botonMini}>
-                  <ClipboardText size={15} />
+                <Button size="sm" variant="secondary" onClick={pegarDelPortapapeles}>
+                  <ClipboardText size={16} />
                   Pegar
-                </button>
-                <button
-                  type="button"
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
                   onClick={() => archivoRef.current?.click()}
-                  className={botonMini}
                   title="Subir el chat exportado (.txt)"
                 >
-                  <FileArrowUp size={15} />
-                  Subir archivo
-                </button>
+                  <FileArrowUp size={16} />
+                  Subir
+                </Button>
                 <input
                   ref={archivoRef}
                   type="file"
@@ -453,21 +452,10 @@ export function MovimientosSection({
                           {lote.remitentes.map((r) => {
                             const dentro = !remitentesFuera.has(r.nombre);
                             return (
-                              <button
-                                key={r.nombre}
-                                type="button"
-                                onClick={() => alternarRemitente(r.nombre)}
-                                aria-pressed={dentro}
-                                className={cn(
-                                  "flex h-7 items-center gap-1 rounded-full border px-2.5 text-[0.72rem] font-medium transition-colors",
-                                  dentro
-                                    ? "border-accent/40 bg-accent-soft text-accent-strong"
-                                    : "border-line-strong bg-surface text-faint",
-                                )}
-                              >
+                              <ChoiceChip key={r.nombre} selected={dentro} onClick={() => alternarRemitente(r.nombre)}>
                                 {etiquetas.get(r.nombre) ?? r.nombre}
                                 <span className="tnum opacity-70">{r.n}</span>
-                              </button>
+                              </ChoiceChip>
                             );
                           })}
                         </div>
@@ -571,8 +559,9 @@ export function MovimientosSection({
                 </div>
               )}
 
-              <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-                <Button onClick={guardarLote} disabled={pending || seleccionados.length === 0} className="w-full sm:w-auto">
+              <div className="mt-4 flex items-center gap-2">
+                <Button onClick={guardarLote} disabled={pending || seleccionados.length === 0} className="flex-1 sm:flex-none">
+                  <Check size={17} weight="bold" />
                   {pending
                     ? "Guardando…"
                     : seleccionados.length === 0
@@ -580,17 +569,16 @@ export function MovimientosSection({
                       : `Guardar ${seleccionados.length} ${seleccionados.length === 1 ? "movimiento" : "movimientos"}` +
                         (diasSeleccionados > 1 ? ` en ${diasSeleccionados} días` : "")}
                 </Button>
-                <Button
-                  variant="ghost"
+                <IconButton
+                  label="Cancelar"
                   onClick={() => {
                     setLoteAbierto(false);
                     cambiarTexto("");
                   }}
                   disabled={pending}
-                  className="w-full sm:w-auto"
                 >
-                  Cancelar
-                </Button>
+                  <X size={17} />
+                </IconButton>
               </div>
             </div>
           </motion.div>
@@ -624,13 +612,14 @@ export function MovimientosSection({
                       <Input type="time" value={eHora} onChange={(e) => setEHora(e.target.value)} />
                     </div>
                     <Input value={eNota} onChange={(e) => setENota(e.target.value)} placeholder="Nota (opcional)" />
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2">
                       <Button size="sm" onClick={guardarEdicion} disabled={pending}>
+                        <Check size={16} weight="bold" />
                         Guardar
                       </Button>
-                      <Button size="sm" variant="ghost" onClick={() => setEditId(null)} disabled={pending}>
-                        Cancelar
-                      </Button>
+                      <IconButton label="Cancelar" onClick={() => setEditId(null)} disabled={pending}>
+                        <X size={17} />
+                      </IconButton>
                     </div>
                   </div>
                 ) : (
@@ -655,22 +644,12 @@ export function MovimientosSection({
                       </div>
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
-                      <button
-                        onClick={() => abrirEdicion(c)}
-                        disabled={pending}
-                        className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-accent-soft hover:text-accent-strong disabled:opacity-40"
-                        title="Editar" aria-label="Editar"
-                      >
-                        <PencilSimple size={14} />
-                      </button>
-                      <button
-                        onClick={() => setPorBorrar(c)}
-                        disabled={pending}
-                        className="flex h-9 w-9 items-center justify-center rounded-lg text-faint transition-colors hover:bg-danger-soft hover:text-danger disabled:opacity-40"
-                        title="Eliminar" aria-label="Eliminar"
-                      >
-                        <Trash size={14} />
-                      </button>
+                      <IconButton label="Editar" onClick={() => abrirEdicion(c)} disabled={pending}>
+                        <PencilSimple size={17} />
+                      </IconButton>
+                      <IconButton label="Eliminar" tone="danger" onClick={() => setPorBorrar(c)} disabled={pending}>
+                        <Trash size={17} />
+                      </IconButton>
                     </div>
                   </div>
                 )}
