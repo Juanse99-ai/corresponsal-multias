@@ -175,7 +175,7 @@ function leerMonto(fragmento: string): { monto: number; crudo: string } | null {
 
   // SOLO números con separador de miles ("1.565.000", "310,000", "1'000.000").
   // Un número pelado no se acepta: los mensajes de Luis vienen llenos de
-  // celulares, cédulas y cuentas ("PPT: 5923066", "320 6286634") y sin esta
+  // celulares, cédulas y cuentas ("PPT: 4815162", "320 4815162") y sin esta
   // regla se leen como plata. Él siempre escribe los montos con separador o
   // con palabra ("65 mil"), así que no se pierde nada real.
   // Los bordes exigen que no haya más dígitos pegados: en "1'8000.000" (un cero
