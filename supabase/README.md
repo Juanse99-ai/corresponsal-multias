@@ -8,14 +8,6 @@ vive con prefijo `corr_` y su propio RLS. **No tocar las tablas del taller.**
 
 (El endurecimiento de funciones quedó incluido al final del 0001 en esta copia.)
 
-## Usuarios sembrados
-Creados directo en `auth.users` con contraseña cifrada (pgcrypto) + fila en
-`corr_profiles`:
-
-| Rol | Correo | Contraseña inicial |
-|---|---|---|
-| admin | juansebastiancervantespadilla@gmail.com | `(contraseña retirada)` |
-| operador | ivana@multias.co | `(contraseña retirada)` |
-
-Para crear más usuarios: créalos en Supabase Auth y agrega su fila en
-`corr_profiles` con el `rol` correspondiente.
+## Usuarios
+Se crean en Supabase Auth y cada uno lleva su fila en `corr_profiles` con su `rol`
+(`admin` u `operador`). Correos y contraseñas no se escriben en este repo.

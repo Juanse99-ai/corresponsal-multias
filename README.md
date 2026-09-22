@@ -26,13 +26,10 @@ Abre http://localhost:3000
 
 ## Accesos
 
-| Rol | Usuario / correo | Contraseña |
-|---|---|---|
-| Admin (Juan) | juansebastiancervantespadilla@gmail.com | `(contraseña retirada)` |
-| Operador (Ivana) | `ivana` | `(contraseña retirada)` |
-
-> Ivana entra solo con su nombre (`ivana`). El login acepta usuario o correo: si no
-> lleva `@`, se completa con `@multias.co`. Cambien las contraseñas cuando quieran.
+Las cuentas las crea el administrador en Supabase Auth, cada una con su fila en
+`corr_profiles` (`admin` u `operador`). Usuarios y contraseñas se entregan en
+persona: nunca se escriben en este repo, que es público. El login acepta usuario o
+correo; si no lleva `@`, se completa con `@multias.co`.
 
 ## Módulos
 
