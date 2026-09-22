@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# herramientas locales de Claude Code (maquina del dueno)
+.claude/settings.json
+.claude/settings.local.json
+.claude/dev.sh

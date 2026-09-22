@@ -1,7 +1,9 @@
+import "server-only";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { timingSafeEqual } from "node:crypto";
 import webpush from "web-push";
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/config";
+import { SUPABASE_URL } from "@/lib/supabase/config";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -10,25 +12,43 @@ function fmtCOP(n: number) {
   return "$" + Math.round(Math.abs(n)).toLocaleString("es-CO");
 }
 
+// Comparación que tarda lo mismo acierte o no, para que nadie adivine el
+// secreto midiendo cuánto responde el servidor.
+function mismoSecreto(enviado: string, esperado: string) {
+  const a = Buffer.from(enviado);
+  const b = Buffer.from(esperado);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
 type Cuadre = { estado: string; saldo_final: number } | null;
 type Sub = { endpoint: string; p256dh: string; auth: string };
 
 /**
  * Cron de recordatorios (Vercel lo llama a las 21:55 UTC = 4:55 pm Bogotá).
  * Si el cuadre de hoy sigue abierto (o hay descuadre), envía push a todos los
- * suscriptores. No usa service-role: una función SECURITY DEFINER gateada por
- * secreto devuelve los datos.
+ * suscriptores.
+ *
+ * El secreto viaja solo en la cabecera Authorization: en la URL quedaría
+ * guardado en registros e historiales. La consulta va con la llave de servidor
+ * (SUPABASE_SECRET_KEY), que solo existe aquí: la función que devuelve los
+ * datos ya no la puede llamar nadie desde la app.
  */
 export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET;
-  const url = new URL(req.url);
-  const provided =
-    req.headers.get("authorization")?.replace("Bearer ", "") || url.searchParams.get("key");
-  if (!secret || provided !== secret) {
+  const cabecera = req.headers.get("authorization") ?? "";
+  const enviado = cabecera.startsWith("Bearer ") ? cabecera.slice(7) : "";
+  if (!secret || !enviado || !mismoSecreto(enviado, secret)) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const llaveServidor = process.env.SUPABASE_SECRET_KEY;
+  if (!llaveServidor) {
+    return NextResponse.json({ error: "Falta SUPABASE_SECRET_KEY" }, { status: 500 });
+  }
+
+  const sb = createClient(SUPABASE_URL, llaveServidor, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
   const { data, error } = await sb.rpc("corr_cron_targets", { p_secret: secret });
   if (error || !data?.ok) {
     return NextResponse.json({ error: error?.message ?? "RPC falló" }, { status: 500 });
