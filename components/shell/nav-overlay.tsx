@@ -1,25 +1,22 @@
 "use client";
 
-import { useEffect } from "react";
 import Link from "next/link";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { ArrowRight, X, SignOut, CheckCircle, Warning } from "@phosphor-icons/react/dist/ssr";
 import { Logo } from "@/components/brand";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { ActivarAvisos } from "@/components/push/activar-avisos";
 import { signOutAction } from "@/app/login/actions";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/ui/icon-button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { Sheet, SheetClose, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { formatCOP, formatFechaLarga, hoyISO } from "@/lib/format";
 import type { Rol } from "@/lib/cuadre";
 import type { HeaderResumen } from "@/lib/queries";
 import { NAV, isActive, type NavItem } from "@/components/shell/nav-items";
 
-const panel: Variants = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { duration: 0.28, ease: [0.22, 1, 0.36, 1] } },
-  exit: { opacity: 0, transition: { duration: 0.2, ease: [0.4, 0, 1, 1] } },
-};
 const listV: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.05, delayChildren: 0.1 } },
@@ -33,6 +30,11 @@ const asideV: Variants = {
   show: { opacity: 1, x: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1], delay: 0.12 } },
 };
 
+// Botones de ícono sobre el azul marino del menú.
+const navIconBtn =
+  "size-11 border border-nav-line bg-transparent text-nav-muted hover:bg-nav-active hover:text-nav-text focus-visible:ring-nav-accent/50";
+
+/** Menú de pantalla completa: <Sheet> de shadcn (ESC, foco atrapado y scroll bloqueado vienen de Radix). */
 export function NavOverlay({
   open,
   onClose,
@@ -48,83 +50,61 @@ export function NavOverlay({
   pathname: string;
   resumen: HeaderResumen;
 }) {
-  // ESC para cerrar + bloquear scroll del fondo mientras el panel está abierto.
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
-    };
-  }, [open, onClose]);
-
   const items = NAV.filter((i) => !i.adminOnly || isAdmin);
   const main = items.filter((i) => i.grupo === "main");
   const admin = items.filter((i) => i.grupo === "admin");
 
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          key="nav-overlay"
-          variants={panel}
-          initial="hidden"
-          animate="show"
-          exit="exit"
-          className="fixed inset-0 z-[60] flex flex-col overflow-y-auto bg-nav-bg text-nav-text"
-        >
-          {/* Halo de acento (decorativo). */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(48rem 32rem at 85% -8%, oklch(0.74 0.135 258 / 0.22), transparent 60%), radial-gradient(40rem 28rem at -6% 110%, oklch(0.6 0.12 250 / 0.16), transparent 60%)",
-            }}
-          />
+    <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
+      <SheetContent
+        side="left"
+        showCloseButton={false}
+        aria-describedby={undefined}
+        className="inset-0 z-[60] h-[100dvh] w-full max-w-none gap-0 overflow-y-auto border-0 bg-nav-bg text-nav-text shadow-none sm:max-w-none"
+      >
+        <SheetTitle className="sr-only">Menú</SheetTitle>
 
-          {/* Cabecera del panel. */}
-          <div className="relative flex items-center justify-between px-5 py-5 sm:px-8">
-            <Link href="/panel" onClick={onClose} className="flex items-center gap-2.5">
-              <Logo size={34} />
-              <div className="leading-tight">
-                <p className="text-sm font-semibold tracking-tight text-nav-text">Barrio Centro Sabanalarga 18</p>
-                <p className="text-[0.7rem] text-nav-faint">Multidiagnósticos AS</p>
-              </div>
-            </Link>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              aria-label="Cerrar menú"
-              title="Cerrar menú"
-              className="size-11 border border-nav-line bg-transparent text-nav-muted hover:bg-nav-active hover:text-nav-text focus-visible:ring-nav-accent/50"
-            >
+        {/* Halo de acento (decorativo). */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(48rem 32rem at 85% -8%, oklch(0.74 0.135 258 / 0.22), transparent 60%), radial-gradient(40rem 28rem at -6% 110%, oklch(0.6 0.12 250 / 0.16), transparent 60%)",
+          }}
+        />
+
+        {/* Cabecera del panel. */}
+        <div className="relative flex items-center justify-between px-5 py-5 sm:px-8">
+          <Link href="/panel" onClick={onClose} className="flex items-center gap-2.5">
+            <Logo size={34} />
+            <div className="leading-tight">
+              <p className="text-sm font-semibold tracking-tight text-nav-text">Barrio Centro Sabanalarga 18</p>
+              <p className="text-[0.7rem] text-nav-faint">Multidiagnósticos AS</p>
+            </div>
+          </Link>
+          <SheetClose asChild>
+            <IconButton label="Cerrar menú" className={navIconBtn}>
               <X size={20} weight="bold" />
-            </Button>
-          </div>
+            </IconButton>
+          </SheetClose>
+        </div>
 
-          {/* Cuerpo: links grandes + panel de resumen. */}
-          <div className="relative mx-auto grid w-full max-w-[1120px] flex-1 content-start gap-10 px-6 pb-14 pt-4 sm:px-8 lg:grid-cols-[1.45fr_1fr] lg:gap-16 lg:pt-10">
-            <motion.nav variants={listV} initial="hidden" animate="show" className="flex flex-col gap-9">
-              <NavBlock label="Menú principal" items={main} pathname={pathname} onClose={onClose} />
-              {isAdmin && admin.length > 0 && (
-                <NavBlock label="Administración" items={admin} pathname={pathname} onClose={onClose} />
-              )}
-            </motion.nav>
+        {/* Cuerpo: links grandes + panel de resumen. */}
+        <div className="relative mx-auto grid w-full max-w-[1120px] flex-1 content-start gap-10 px-6 pb-14 pt-4 sm:px-8 lg:grid-cols-[1.45fr_1fr] lg:gap-16 lg:pt-10">
+          <motion.nav variants={listV} initial="hidden" animate="show" className="flex flex-col gap-9">
+            <NavBlock label="Menú principal" items={main} pathname={pathname} onClose={onClose} />
+            {isAdmin && admin.length > 0 && (
+              <NavBlock label="Administración" items={admin} pathname={pathname} onClose={onClose} />
+            )}
+          </motion.nav>
 
-            <motion.aside variants={asideV} initial="hidden" animate="show" className="flex flex-col">
-              <ResumenPanel resumen={resumen} profile={profile} />
-            </motion.aside>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          <motion.aside variants={asideV} initial="hidden" animate="show" className="flex flex-col">
+            <ResumenPanel resumen={resumen} profile={profile} />
+          </motion.aside>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }
 
@@ -193,8 +173,9 @@ function ResumenPanel({
       <p className="text-[0.78rem] text-nav-faint">{formatFechaLarga(hoyISO())}</p>
 
       <div className="flex flex-col gap-3">
+        <Separator className="bg-nav-line" />
         {/* Estado del cuadre de hoy. */}
-        <div className="flex items-center justify-between gap-3 border-t border-nav-line pt-3">
+        <div className="flex items-center justify-between gap-3">
           <span className="text-[0.82rem] text-nav-muted">Cuadre de hoy</span>
           {!c ? (
             <span className="inline-flex items-center gap-1.5 text-[0.82rem] font-medium text-nav-accent">
@@ -213,8 +194,9 @@ function ResumenPanel({
           )}
         </div>
 
+        <Separator className="bg-nav-line" />
         {/* Préstamos pendientes. */}
-        <div className="flex items-center justify-between gap-3 border-t border-nav-line pt-3">
+        <div className="flex items-center justify-between gap-3">
           <span className="text-[0.82rem] text-nav-muted">Préstamos pendientes</span>
           <span className="tnum text-[0.82rem] font-semibold text-nav-text">
             {resumen.prestamosCount > 0 ? formatCOP(resumen.prestamosTotal) : "Ninguno"}
@@ -222,8 +204,9 @@ function ResumenPanel({
         </div>
       </div>
 
+      <Separator className="bg-nav-line" />
       {/* Tema claro/oscuro. */}
-      <div className="flex items-center justify-between gap-3 border-t border-nav-line pt-4">
+      <div className="flex items-center justify-between gap-3">
         <div className="leading-tight">
           <p className="text-[0.84rem] font-medium text-nav-text">Tema</p>
           <p className="text-[0.7rem] text-nav-faint">Claro u oscuro</p>
@@ -231,8 +214,9 @@ function ResumenPanel({
         <ThemeToggle />
       </div>
 
+      <Separator className="bg-nav-line" />
       {/* Recordatorios push. */}
-      <div className="flex items-center justify-between gap-3 border-t border-nav-line pt-4">
+      <div className="flex items-center justify-between gap-3">
         <div className="leading-tight">
           <p className="text-[0.84rem] font-medium text-nav-text">Avisos</p>
           <p className="text-[0.7rem] text-nav-faint">Recordatorio para cerrar el día</p>
@@ -240,26 +224,22 @@ function ResumenPanel({
         <ActivarAvisos />
       </div>
 
+      <Separator className="bg-nav-line" />
       {/* Tarjeta de usuario + salir. */}
-      <div className="flex items-center gap-3 border-t border-nav-line pt-4">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-nav-accent/20 text-[0.85rem] font-semibold text-nav-accent">
-          {profile.nombre.slice(0, 1).toUpperCase()}
-        </div>
+      <div className="flex items-center gap-3">
+        <Avatar size="lg">
+          <AvatarFallback className="bg-nav-accent/20 text-[0.85rem] font-semibold text-nav-accent">
+            {profile.nombre.slice(0, 1).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
         <div className="min-w-0 flex-1 leading-tight">
           <p className="truncate text-[0.85rem] font-medium text-nav-text">{profile.nombre}</p>
           <p className="text-[0.7rem] capitalize text-nav-faint">{profile.rol}</p>
         </div>
         <form action={signOutAction}>
-          <Button
-            type="submit"
-            variant="ghost"
-            size="icon"
-            title="Cerrar sesión"
-            aria-label="Cerrar sesión"
-            className="size-11 border border-nav-line bg-transparent text-nav-muted hover:bg-nav-active hover:text-nav-text focus-visible:ring-nav-accent/50"
-          >
+          <IconButton type="submit" label="Cerrar sesión" className={navIconBtn}>
             <SignOut size={17} />
-          </Button>
+          </IconButton>
         </form>
       </div>
     </div>
