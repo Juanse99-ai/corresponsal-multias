@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
   PencilSimple,
@@ -23,6 +22,8 @@ import type { Icon } from "@phosphor-icons/react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChoiceChip } from "@/components/ui/choice-chip";
 import { cn } from "@/lib/utils";
 import { formatCOP, formatFecha, formatHoraISO } from "@/lib/format";
@@ -254,15 +255,17 @@ export function BitacoraView({ entries }: { entries: AuditEntry[] }) {
       {/* Filtros */}
       <Card className="flex flex-col gap-4 p-4 sm:p-5">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <div className="flex h-10 flex-1 items-center gap-2 rounded-card border border-line-strong bg-surface-2 px-3">
-            <MagnifyingGlass size={16} className="shrink-0 text-faint" />
-            <input
+          <InputGroup className="h-10 flex-1">
+            <InputGroupAddon>
+              <MagnifyingGlass className="text-faint" />
+            </InputGroupAddon>
+            <InputGroupInput
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Buscar por nombre, persona, monto…"
-              className="w-full bg-transparent text-sm text-text placeholder:text-faint focus:outline-none"
+              aria-label="Buscar en la bitácora"
             />
-          </div>
+          </InputGroup>
           <div className="flex flex-wrap items-end gap-2">
             <Campo label="Desde">
               <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="h-10 w-full min-w-0 sm:w-[8.8rem]" />
@@ -357,11 +360,9 @@ function Fila({ e, abierto, onToggle }: { e: AuditEntry; abierto: boolean; onTog
   const cambios = cambiosDe(e);
 
   return (
+    <Collapsible asChild open={abierto} onOpenChange={onToggle}>
     <li className={cn("rounded-lg", e.accion === "DELETE" && "bg-danger-soft/25")}>
-      <button
-        type="button"
-        onClick={onToggle}
-        className="flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-surface-2 active:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/45 sm:px-2.5"
+      <CollapsibleTrigger className="flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-surface-2 active:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/45 sm:px-2.5"
       >
         <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-full", acc.bg, acc.color)}>
           <Icono size={16} weight="bold" />
@@ -378,17 +379,9 @@ function Fila({ e, abierto, onToggle }: { e: AuditEntry; abierto: boolean; onTog
           size={14}
           className={cn("shrink-0 text-faint transition-transform", abierto && "rotate-180")}
         />
-      </button>
+      </CollapsibleTrigger>
 
-      <AnimatePresence initial={false}>
-        {abierto && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.22, ease: "easeOut" }}
-            className="overflow-hidden"
-          >
+      <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
             <div className="mb-2 ml-10 mr-2 rounded-card border border-line bg-surface-2/50 p-3 sm:ml-[3rem]">
               {cambios.length === 0 ? (
                 <p className="text-[0.78rem] text-faint">Sin detalle adicional.</p>
@@ -411,10 +404,9 @@ function Fila({ e, abierto, onToggle }: { e: AuditEntry; abierto: boolean; onTog
                 </div>
               )}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      </CollapsibleContent>
     </li>
+    </Collapsible>
   );
 }
 

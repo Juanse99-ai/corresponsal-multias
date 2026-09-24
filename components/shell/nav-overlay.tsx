@@ -9,7 +9,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { ActivarAvisos } from "@/components/push/activar-avisos";
 import { signOutAction } from "@/app/login/actions";
 import { cn } from "@/lib/utils";
-import { baseInteractiva } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { formatCOP, formatFechaLarga, hoyISO } from "@/lib/format";
 import type { Rol } from "@/lib/cuadre";
 import type { HeaderResumen } from "@/lib/queries";
@@ -97,15 +97,16 @@ export function NavOverlay({
                 <p className="text-[0.7rem] text-nav-faint">Multidiagnósticos AS</p>
               </div>
             </Link>
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onClose}
               aria-label="Cerrar menú"
               title="Cerrar menú"
-              className={cn(baseInteractiva, "h-11 w-11 border border-nav-line text-nav-muted hover:bg-nav-active hover:text-nav-text focus-visible:ring-offset-nav-bg")}
+              className="size-11 border border-nav-line bg-transparent text-nav-muted hover:bg-nav-active hover:text-nav-text focus-visible:ring-nav-accent/50"
             >
               <X size={20} weight="bold" />
-            </button>
+            </Button>
           </div>
 
           {/* Cuerpo: links grandes + panel de resumen. */}
@@ -249,14 +250,16 @@ function ResumenPanel({
           <p className="text-[0.7rem] capitalize text-nav-faint">{profile.rol}</p>
         </div>
         <form action={signOutAction}>
-          <button
+          <Button
             type="submit"
+            variant="ghost"
+            size="icon"
             title="Cerrar sesión"
             aria-label="Cerrar sesión"
-            className={cn(baseInteractiva, "h-11 w-11 border border-nav-line text-nav-muted hover:bg-nav-active hover:text-nav-text focus-visible:ring-offset-nav-bg")}
+            className="size-11 border border-nav-line bg-transparent text-nav-muted hover:bg-nav-active hover:text-nav-text focus-visible:ring-nav-accent/50"
           >
             <SignOut size={17} />
-          </button>
+          </Button>
         </form>
       </div>
     </div>

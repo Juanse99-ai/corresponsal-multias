@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import { DownloadSimple, MagnifyingGlass, CaretRight, Wallet, X } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { IconButton } from "@/components/ui/icon-button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { formatCOP, formatFecha } from "@/lib/format";
@@ -69,9 +68,9 @@ export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
               <Input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} className="h-10 w-full min-w-0 sm:w-[9.5rem]" />
             </div>
             {(desde || hasta) && (
-              <IconButton label="Limpiar fechas" onClick={() => { setDesde(""); setHasta(""); }}>
+              <Button variant="ghost" size="icon" aria-label="Limpiar fechas" title="Limpiar fechas" onClick={() => { setDesde(""); setHasta(""); }} className="text-muted hover:text-foreground">
                 <X size={17} />
-              </IconButton>
+              </Button>
             )}
           </div>
           <Button variant="secondary" size="sm" onClick={exportar} disabled={filtrados.length === 0}>

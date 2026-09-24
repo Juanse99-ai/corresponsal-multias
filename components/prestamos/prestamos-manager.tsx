@@ -18,15 +18,16 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { IconButton } from "@/components/ui/icon-button";
+import { Alert, AlertTitle } from "@/components/ui/alert";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChoiceChip } from "@/components/ui/choice-chip";
 import { MedioPicker } from "@/components/prestamos/medio-picker";
-import { Label } from "@/components/ui/field";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { MoneyInput } from "@/components/ui/money-input";
 import { AnimatedMoney } from "@/components/ui/animated-number";
-import { cn } from "@/lib/utils";
+import { cn, esEnter } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatCOP, formatFecha, hoyISO } from "@/lib/format";
@@ -238,7 +239,7 @@ function AddDeudaForm() {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto]">
           <div className="flex flex-col gap-2">
             <Label htmlFor="deuda-desc">Motivo · ¿para qué fue?</Label>
-            <Input id="deuda-desc" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Para qué fue el préstamo" onEnter={() => !pending && registrar()} />
+            <Input id="deuda-desc" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Para qué fue el préstamo" onKeyDown={(e) => esEnter(e) && !pending && registrar()} />
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="deuda-fecha">Fecha</Label>
@@ -247,10 +248,10 @@ function AddDeudaForm() {
         </div>
 
         {msg?.ok ? (
-          <div className="flex items-center gap-2 rounded-card border border-success/30 bg-success-soft px-3.5 py-2.5 text-[0.82rem] text-success">
-            <CheckCircle size={15} weight="fill" />
-            {msg.text}
-          </div>
+          <Alert variant="success" role="status">
+            <CheckCircle weight="fill" />
+            <AlertTitle className="line-clamp-none font-normal">{msg.text}</AlertTitle>
+          </Alert>
         ) : (
           <ErrorNotice message={msg?.text ?? null} />
         )}
@@ -277,19 +278,14 @@ function PersonaCard({
   defaultOpen: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
-  const panelId = useId();
   const alDia = grupo.saldo <= 0;
   const pct = grupo.total > 0 ? Math.min(100, (grupo.abonado / grupo.total) * 100) : 0;
 
   return (
     <motion.div layout initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+      <Collapsible asChild open={open} onOpenChange={setOpen}>
       <Card className="overflow-hidden">
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-          aria-controls={panelId}
-          className="flex w-full items-center gap-3 p-4 text-left transition-colors hover:bg-surface-2 active:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/45 sm:p-5"
+        <CollapsibleTrigger className="flex w-full items-center gap-3 p-4 text-left transition-colors hover:bg-surface-2 active:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/45 sm:p-5"
         >
           <span
             aria-hidden="true"
@@ -304,7 +300,7 @@ function PersonaCard({
           <span className="min-w-0 flex-1">
             <span className="flex min-w-0 items-center gap-2">
               <span className="truncate font-medium text-text">{grupo.persona}</span>
-              {alDia && <Badge tone="success">Al día</Badge>}
+              {alDia && <Badge variant="success">Al día</Badge>}
             </span>
             <span className="mt-0.5 block truncate text-[0.72rem] text-faint">
               {alDia ? (
@@ -335,7 +331,7 @@ function PersonaCard({
             size={16}
             className={cn("shrink-0 text-faint transition-transform", open && "rotate-180")}
           />
-        </button>
+        </CollapsibleTrigger>
 
         {/* Sin abonos la barra es un riel gris decorativo: no se dibuja. */}
         {(grupo.abonado > 0 || alDia) && (
@@ -349,24 +345,15 @@ function PersonaCard({
         </div>
         )}
 
-        <AnimatePresence initial={false}>
-          {open && (
-            <motion.div
-              id={panelId}
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden"
-            >
-              <ul className="flex flex-col divide-y divide-line border-t border-line">
-                {grupo.deudas.map((d) => (
-                  <DeudaRow key={d.id} deuda={d} isAdmin={isAdmin} origenes={origenes} />
-                ))}
-              </ul>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+          <ul className="flex flex-col divide-y divide-line border-t border-line">
+            {grupo.deudas.map((d) => (
+              <DeudaRow key={d.id} deuda={d} isAdmin={isAdmin} origenes={origenes} />
+            ))}
+          </ul>
+        </CollapsibleContent>
       </Card>
+      </Collapsible>
     </motion.div>
   );
 }
@@ -410,7 +397,7 @@ function OrigenPicker({
         maxLength={40}
         onChange={(e) => onChange(e.target.value)}
         placeholder={sugeridos.length > 0 ? "U otro origen" : "Ej: taller, perfumes, sueldo"}
-        onEnter={onEnter}
+        onKeyDown={(e) => esEnter(e) && onEnter?.()}
       />
     </div>
   );
@@ -486,9 +473,9 @@ function AbonoItem({ abono, origenes }: { abono: AbonoRow; origenes: string[] })
                     Quitar origen
                   </Button>
                 )}
-                <IconButton label="Cancelar" onClick={() => setEditando(false)} className="ml-auto">
+                <Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setEditando(false)} className="ml-auto text-muted hover:text-foreground">
                   <X size={17} />
-                </IconButton>
+                </Button>
               </div>
               <ErrorNotice message={err} />
             </div>
@@ -575,8 +562,8 @@ function DeudaRow({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-1.5">
-              {deuda.concepto && <Badge tone="neutral">{deuda.concepto}</Badge>}
-              {saldada && <Badge tone="success">Pagado</Badge>}
+              {deuda.concepto && <Badge variant="secondary">{deuda.concepto}</Badge>}
+              {saldada && <Badge variant="success">Pagado</Badge>}
               <span className="text-[0.72rem] text-faint">{formatFecha(deuda.fecha)}</span>
             </div>
             <p className="mt-1 truncate text-[0.82rem] text-muted">
@@ -645,9 +632,9 @@ function DeudaRow({
             </Button>
           )}
           {isAdmin && (
-            <IconButton label="Eliminar préstamo" tone="danger" onClick={() => setConfirmando("borrar")} disabled={pending} className="ml-auto">
+            <Button variant="ghost" size="icon" aria-label="Eliminar préstamo" title="Eliminar préstamo" onClick={() => setConfirmando("borrar")} disabled={pending} className="ml-auto text-muted hover:text-destructive">
               <Trash size={17} />
-            </IconButton>
+            </Button>
           )}
         </div>
 
@@ -671,7 +658,7 @@ function DeudaRow({
                   sugeridos={origenes}
                   onEnter={() => !pending && abonar()}
                 />
-                <Button size="md" onClick={abonar} disabled={pending} className="w-full sm:w-auto sm:self-end">
+                <Button onClick={abonar} disabled={pending} className="w-full sm:w-auto sm:self-end">
                   <Check size={17} weight="bold" />
                   {pending ? "Registrando…" : "Confirmar abono"}
                 </Button>

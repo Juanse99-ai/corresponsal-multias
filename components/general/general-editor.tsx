@@ -12,8 +12,10 @@ import {
   ArrowClockwise,
 } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
-import { Button, baseInteractiva } from "@/components/ui/button";
-import { Label } from "@/components/ui/field";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertTitle } from "@/components/ui/alert";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Label } from "@/components/ui/label";
 import { MoneyInput } from "@/components/ui/money-input";
 import { Textarea } from "@/components/ui/textarea";
 import { AnimatedMoney } from "@/components/ui/animated-number";
@@ -147,15 +149,11 @@ export function GeneralEditor({
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
-                className={cn(
-                  "flex items-center gap-2 rounded-card px-3.5 py-2.5 text-[0.82rem]",
-                  toast.ok
-                    ? "border border-success/30 bg-success-soft text-success"
-                    : "border border-danger/30 bg-danger-soft text-danger",
-                )}
               >
-                {toast.ok ? <CheckCircle size={16} weight="fill" /> : <Warning size={16} weight="fill" />}
-                {toast.msg}
+                <Alert variant={toast.ok ? "success" : "destructive"}>
+                  {toast.ok ? <CheckCircle weight="fill" /> : <Warning weight="fill" />}
+                  <AlertTitle className="line-clamp-none font-normal">{toast.msg}</AlertTitle>
+                </Alert>
               </motion.div>
             )}
           </AnimatePresence>
@@ -191,28 +189,26 @@ function CampoSigned({
     <div className="flex flex-col gap-2">
       <Label htmlFor={id}>{label}</Label>
       <div className="flex gap-2">
-        <div role="group" aria-label={`Signo de ${label}`} className="flex items-center rounded-full border border-line-strong bg-surface-2 p-0.5">
-          <button
-            type="button"
-            aria-pressed={!negativo}
-            onClick={() => onChange(magnitud)}
-            className={cn(baseInteractiva, "h-10 w-10", !negativo ? "lg-glass text-accent-strong" : "text-muted hover:text-text")}
-            title="A favor"
-            aria-label="A favor"
-          >
-            <Plus size={16} weight="bold" />
-          </button>
-          <button
-            type="button"
-            aria-pressed={negativo}
-            onClick={() => onChange(-magnitud)}
-            className={cn(baseInteractiva, "h-10 w-10", negativo ? "lg-glass text-danger" : "text-muted hover:text-text")}
+        <ToggleGroup
+          type="single"
+          value={negativo ? "menos" : "mas"}
+          onValueChange={(v) => v && onChange(v === "menos" ? -magnitud : magnitud)}
+          aria-label={`Signo de ${label}`}
+          variant="outline"
+          className="h-11 shrink-0"
+        >
+          <ToggleGroupItem value="mas" title="A favor" aria-label="A favor" className="size-11">
+            <Plus weight="bold" />
+          </ToggleGroupItem>
+          <ToggleGroupItem
+            value="menos"
             title="En contra"
             aria-label="En contra"
+            className="size-11 data-[state=on]:border-destructive/30 data-[state=on]:bg-danger-soft data-[state=on]:text-destructive"
           >
-            <Minus size={16} weight="bold" />
-          </button>
-        </div>
+            <Minus weight="bold" />
+          </ToggleGroupItem>
+        </ToggleGroup>
         <div className="flex-1">
           <MoneyInput id={id} value={magnitud} onValueChange={(n) => onChange(negativo ? -n : n)} />
         </div>

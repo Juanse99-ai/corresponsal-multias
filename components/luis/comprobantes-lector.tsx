@@ -6,7 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Sparkle, CheckCircle, Warning, Check, X } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { IconButton } from "@/components/ui/icon-button";
+import { Alert, AlertTitle } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
 import { formatCOP, formatHora, horaBogotaHHMM } from "@/lib/format";
@@ -133,13 +134,10 @@ export function ComprobantesLector({
       <ErrorNotice message={error} className="mt-3" />
 
       {okMsg && (
-        <div
-          role="status"
-          className="mt-3 flex items-center gap-2 rounded-card border border-success/30 bg-success-soft px-3 py-2 text-[0.8rem] text-success"
-        >
-          <CheckCircle size={15} weight="fill" />
-          {okMsg}
-        </div>
+        <Alert variant="success" role="status" className="mt-3">
+          <CheckCircle weight="fill" />
+          <AlertTitle className="line-clamp-none font-normal">{okMsg}</AlertTitle>
+        </Alert>
       )}
 
       <AnimatePresence initial={false}>
@@ -174,12 +172,11 @@ export function ComprobantesLector({
                           !activo && "opacity-45",
                         )}
                       >
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           checked={activo}
                           disabled={!utilizable}
-                          onChange={() => alternar(i)}
-                          className="h-4 w-4 shrink-0 accent-accent"
+                          onCheckedChange={() => alternar(i)}
+                          className="shrink-0"
                           aria-label={`Incluir ${c.monto ? formatCOP(c.monto) : c.nombre ?? "comprobante"}`}
                         />
                         <span className="min-w-0 flex-1 leading-tight">
@@ -244,9 +241,9 @@ export function ComprobantesLector({
                       ? "Guardar"
                       : `Guardar ${seleccion.length} ${seleccion.length === 1 ? "consignación" : "consignaciones"}`}
                 </Button>
-                <IconButton label="Cancelar" onClick={() => setItems(null)} disabled={pending}>
+                <Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setItems(null)} disabled={pending} className="text-muted hover:text-foreground">
                   <X size={17} />
-                </IconButton>
+                </Button>
               </div>
             </div>
           </motion.div>

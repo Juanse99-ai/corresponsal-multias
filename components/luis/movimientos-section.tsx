@@ -6,15 +6,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Trash, PencilSimple, Clock, ArrowDown, Receipt, CheckCircle, WhatsappLogo, ClipboardText, FileArrowUp, Warning, Check, X } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { IconButton } from "@/components/ui/icon-button";
+import { Alert, AlertTitle } from "@/components/ui/alert";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ChoiceChip } from "@/components/ui/choice-chip";
-import { Label } from "@/components/ui/field";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { leerListaWhatsApp } from "@/lib/luis-parse";
 import { MoneyInput } from "@/components/ui/money-input";
 import { AnimatedMoney } from "@/components/ui/animated-number";
-import { cn } from "@/lib/utils";
+import { cn, esEnter } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatCOP, formatFechaCorta, formatHora, horaBogotaHHMM } from "@/lib/format";
@@ -337,7 +338,7 @@ export function MovimientosSection({
             value={nota}
             onChange={(e) => setNota(e.target.value)}
             placeholder="Referencia…"
-            onEnter={() => !pending && registrar()}
+            onKeyDown={(e) => esEnter(e) && !pending && registrar()}
             className="w-full min-w-0"
           />
         </div>
@@ -346,13 +347,10 @@ export function MovimientosSection({
       <ErrorNotice message={error} className="mt-3" />
 
       {okMsg && (
-        <div
-          role="status"
-          className="mt-3 flex items-center gap-2 rounded-card border border-success/30 bg-success-soft px-3 py-2 text-[0.8rem] text-success"
-        >
-          <CheckCircle size={15} weight="fill" />
-          {okMsg}
-        </div>
+        <Alert variant="success" role="status" className="mt-3">
+          <CheckCircle weight="fill" />
+          <AlertTitle className="line-clamp-none font-normal">{okMsg}</AlertTitle>
+        </Alert>
       )}
 
       <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -427,16 +425,13 @@ export function MovimientosSection({
               />
 
               {soltoFotos && (
-                <div
-                  role="status"
-                  className="mt-2 rounded-card border border-line-strong bg-surface px-3 py-2 text-[0.78rem] text-muted"
-                >
+                <Alert role="status" className="mt-2 block text-[0.78rem] text-muted">
                   Aquí va el texto del chat, no las fotos. Las fotos de los comprobantes van en{" "}
                   <a href="#comprobantes" onClick={() => setSoltoFotos(false)} className="font-medium text-accent-strong underline underline-offset-2">
                     Comprobantes del día
                   </a>
                   , al final de esta página.
-                </div>
+                </Alert>
               )}
 
               {loteTexto.trim() && (
@@ -498,11 +493,10 @@ export function MovimientosSection({
                                         !activo && "opacity-45",
                                       )}
                                     >
-                                      <input
-                                        type="checkbox"
+                                      <Checkbox
                                         checked={activo}
-                                        onChange={() => alternarFila(i)}
-                                        className="h-4 w-4 shrink-0 accent-accent"
+                                        onCheckedChange={() => alternarFila(i)}
+                                        className="shrink-0"
                                         aria-label={`Incluir ${formatCOP(m.monto)}`}
                                       />
                                       <span className="min-w-0 flex-1 leading-tight">
@@ -569,16 +563,20 @@ export function MovimientosSection({
                       : `Guardar ${seleccionados.length} ${seleccionados.length === 1 ? "movimiento" : "movimientos"}` +
                         (diasSeleccionados > 1 ? ` en ${diasSeleccionados} días` : "")}
                 </Button>
-                <IconButton
-                  label="Cancelar"
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Cancelar"
+                  title="Cancelar"
                   onClick={() => {
                     setLoteAbierto(false);
                     cambiarTexto("");
                   }}
                   disabled={pending}
+                  className="text-muted hover:text-foreground"
                 >
                   <X size={17} />
-                </IconButton>
+                </Button>
               </div>
             </div>
           </motion.div>
@@ -617,9 +615,9 @@ export function MovimientosSection({
                         <Check size={16} weight="bold" />
                         Guardar
                       </Button>
-                      <IconButton label="Cancelar" onClick={() => setEditId(null)} disabled={pending}>
+                      <Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setEditId(null)} disabled={pending} className="text-muted hover:text-foreground">
                         <X size={17} />
-                      </IconButton>
+                      </Button>
                     </div>
                   </div>
                 ) : (
@@ -644,12 +642,12 @@ export function MovimientosSection({
                       </div>
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
-                      <IconButton label="Editar" onClick={() => abrirEdicion(c)} disabled={pending}>
+                      <Button variant="ghost" size="icon" aria-label="Editar" title="Editar" onClick={() => abrirEdicion(c)} disabled={pending} className="text-muted hover:text-foreground">
                         <PencilSimple size={17} />
-                      </IconButton>
-                      <IconButton label="Eliminar" tone="danger" onClick={() => setPorBorrar(c)} disabled={pending}>
+                      </Button>
+                      <Button variant="ghost" size="icon" aria-label="Eliminar" title="Eliminar" onClick={() => setPorBorrar(c)} disabled={pending} className="text-muted hover:text-destructive">
                         <Trash size={17} />
-                      </IconButton>
+                      </Button>
                     </div>
                   </div>
                 )}

@@ -1,10 +1,17 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import { Warning } from "@phosphor-icons/react/dist/ssr";
-import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { formatCOP } from "@/lib/format";
 
 export interface ConfirmDialogProps {
@@ -19,9 +26,9 @@ export interface ConfirmDialogProps {
 }
 
 /**
- * Confirmación propia para las acciones destructivas. window.confirm se ve como
- * una alerta del sistema (con el dominio arriba) y en la PWA de iOS corta del todo.
- * El foco arranca en Cancelar y Escape cierra.
+ * Confirmación de las acciones destructivas, con el <AlertDialog> de shadcn.
+ * window.confirm se ve como una alerta del sistema y en la PWA de iOS falla.
+ * El foco arranca en Cancelar y Escape cierra (lo hace Radix).
  */
 export function ConfirmDialog({
   open,
@@ -32,70 +39,43 @@ export function ConfirmDialog({
   onConfirmar,
   onCancelar,
 }: ConfirmDialogProps) {
-  const cancelRef = useRef<HTMLButtonElement>(null);
+  return (
+    <AlertDialog open={open} onOpenChange={(abierto) => !abierto && onCancelar()}>
+      <AlertDialogContent
+        onOpenAutoFocus={(e) => {
+          // Enfocar Cancelar, no la acción destructiva.
+          e.preventDefault();
+          (e.currentTarget as HTMLElement).querySelector<HTMLElement>("[data-slot=alert-dialog-cancel]")?.focus();
+        }}
+      >
+        <AlertDialogHeader>
+          <AlertDialogMedia className="size-12 rounded-full bg-danger-soft text-destructive">
+            <Warning weight="fill" className="size-6" />
+          </AlertDialogMedia>
+          <AlertDialogTitle>{titulo}</AlertDialogTitle>
+          {detalle && <AlertDialogDescription>{detalle}</AlertDialogDescription>}
+        </AlertDialogHeader>
 
-  useEffect(() => {
-    if (!open) return;
-    cancelRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onCancelar();
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open, onCancelar]);
+        {typeof monto === "number" && (
+          <p className="tnum text-center text-3xl font-semibold tracking-tight text-foreground sm:text-left">
+            {formatCOP(monto)}
+          </p>
+        )}
 
-  if (typeof document === "undefined") return null;
-
-  return createPortal(
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
-          className="fixed inset-0 z-50 flex items-end justify-center bg-text/25 p-4 backdrop-blur-[3px] sm:items-center"
-          onClick={onCancelar}
-        >
-          <motion.div
-            role="alertdialog"
-            aria-modal="true"
-            aria-labelledby="confirm-titulo"
-            initial={{ opacity: 0, y: 16, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.98 }}
-            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            onClick={(e) => e.stopPropagation()}
-            className="lg-panel lg-panel-thick w-full max-w-[26rem] rounded-[1.75rem] p-5 sm:p-6"
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={onCancelar}>Cancelar</AlertDialogCancel>
+          <AlertDialogAction
+            variant="destructive"
+            onClick={(e) => {
+              // Sin esto Radix cierra solo y dispara también onCancelar.
+              e.preventDefault();
+              onConfirmar();
+            }}
           >
-            <div className="flex items-start gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-danger-soft text-danger">
-                <Warning size={20} weight="fill" />
-              </span>
-              <div className="min-w-0">
-                <h2 id="confirm-titulo" className="text-[0.98rem] font-semibold tracking-tight text-text">
-                  {titulo}
-                </h2>
-                {detalle && <p className="mt-1 text-[0.85rem] leading-relaxed text-muted">{detalle}</p>}
-              </div>
-            </div>
-
-            {typeof monto === "number" && (
-              <p className="tnum mt-4 text-3xl font-semibold tracking-tight text-text">{formatCOP(monto)}</p>
-            )}
-
-            <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-              <Button ref={cancelRef} variant="secondary" onClick={onCancelar} className="w-full sm:w-auto">
-                Cancelar
-              </Button>
-              <Button variant="danger" onClick={onConfirmar} className="w-full sm:w-auto">
-                {confirmar}
-              </Button>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>,
-    document.body,
+            {confirmar}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

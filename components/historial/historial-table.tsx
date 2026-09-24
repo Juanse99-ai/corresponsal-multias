@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import { DownloadSimple, MagnifyingGlass, Trash, CheckCircle, Warning, X } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { IconButton } from "@/components/ui/icon-button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -76,9 +75,9 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
               <Input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} className="h-10 w-full min-w-0 sm:w-[9.5rem]" />
             </div>
             {(desde || hasta) && (
-              <IconButton label="Limpiar fechas" onClick={() => { setDesde(""); setHasta(""); }}>
+              <Button variant="ghost" size="icon" aria-label="Limpiar fechas" title="Limpiar fechas" onClick={() => { setDesde(""); setHasta(""); }} className="text-muted hover:text-foreground">
                 <X size={17} />
-              </IconButton>
+              </Button>
             )}
           </div>
           <Button variant="secondary" size="sm" onClick={exportar} disabled={filtrados.length === 0}>
@@ -126,7 +125,7 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
                   <div className="min-w-0">
                     <p className="text-[0.95rem] font-semibold text-text">{formatFecha(c.fecha)}</p>
                     <div className="mt-1">
-                      <Badge tone={descuadre ? "danger" : c.estado === "cerrado" ? "success" : "neutral"}>
+                      <Badge variant={descuadre ? "danger" : c.estado === "cerrado" ? "success" : "secondary"}>
                         {descuadre ? <Warning size={11} weight="fill" /> : <CheckCircle size={11} weight="fill" />}
                         {descuadre ? "Descuadre" : c.estado === "cerrado" ? "Cerrado" : "Abierto"}
                       </Badge>
@@ -154,9 +153,9 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
                   </div>
                   {isAdmin && (
                     <div className="flex justify-end">
-                      <IconButton label="Eliminar cierre" tone="danger" onClick={(e) => borrar(c.id, e)} disabled={pending}>
+                      <Button variant="ghost" size="icon" aria-label="Eliminar cierre" title="Eliminar cierre" onClick={(e) => borrar(c.id, e)} disabled={pending} className="text-muted hover:text-destructive">
                         <Trash size={17} />
-                      </IconButton>
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -199,16 +198,16 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
                         {formatCOP(c.saldo_final)}
                       </td>
                       <td className="px-5 py-3 text-right">
-                        <Badge tone={descuadre ? "danger" : c.estado === "cerrado" ? "success" : "neutral"}>
+                        <Badge variant={descuadre ? "danger" : c.estado === "cerrado" ? "success" : "secondary"}>
                           {descuadre ? <Warning size={11} weight="fill" /> : <CheckCircle size={11} weight="fill" />}
                           {descuadre ? "Descuadre" : c.estado === "cerrado" ? "Cerrado" : "Abierto"}
                         </Badge>
                       </td>
                       {isAdmin && (
                         <td className="pr-3">
-                          <IconButton label="Eliminar cierre" tone="danger" size="sm" onClick={(e) => borrar(c.id, e)} disabled={pending}>
+                          <Button variant="ghost" size="icon-sm" aria-label="Eliminar cierre" title="Eliminar cierre" onClick={(e) => borrar(c.id, e)} disabled={pending} className="text-muted hover:text-destructive">
                             <Trash size={16} />
-                          </IconButton>
+                          </Button>
                         </td>
                       )}
                     </motion.tr>

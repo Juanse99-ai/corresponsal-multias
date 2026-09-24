@@ -51,7 +51,7 @@ export function LuisManager({
               <AnimatedMoney value={acumulado} />
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <Badge tone={acumulado === 0 ? "success" : "accent"}>{favor(acumulado)}</Badge>
+              <Badge variant={acumulado === 0 ? "success" : "info"}>{favor(acumulado)}</Badge>
             </div>
           </div>
 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { BellRinging, BellSlash, CircleNotch } from "@phosphor-icons/react/dist/ssr";
 import { cn } from "@/lib/utils";
-import { baseInteractiva } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { VAPID_PUBLIC_KEY } from "@/lib/push-config";
 
 type State = "loading" | "unsupported" | "denied" | "off" | "on" | "working";
@@ -85,16 +85,16 @@ export function ActivarAvisos() {
   const on = state === "on";
   const working = state === "working";
   return (
-    <button
-      type="button"
+    <Button
+      variant="ghost"
+      size="sm"
       onClick={on ? desactivar : activar}
       disabled={working}
       aria-pressed={on}
       className={cn(
-        baseInteractiva,
-        "h-10 gap-2 border px-4 text-[0.84rem] font-medium focus-visible:ring-offset-nav-bg",
+        "border text-[0.84rem] focus-visible:ring-nav-accent/50",
         on
-          ? "border-transparent bg-nav-accent/20 text-nav-accent"
+          ? "border-transparent bg-nav-accent/20 text-nav-accent hover:bg-nav-accent/25 hover:text-nav-accent"
           : "border-nav-line text-nav-muted hover:bg-nav-active hover:text-nav-text",
       )}
     >
@@ -106,6 +106,6 @@ export function ActivarAvisos() {
         <BellSlash size={15} />
       )}
       {working ? "…" : on ? "Activados" : "Activar"}
-    </button>
+    </Button>
   );
 }

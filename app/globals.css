@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 /* Modo oscuro por clase en <html> (next-themes attribute="class"). */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -51,23 +52,6 @@
   /* Fuente única tipo iOS: SF Pro vía la pila del sistema de Apple. */
   --font-ios: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
 
-  /* Tinta para texto SOBRE vidrio (.lg-glass* / .lg-liquid*). El vidrio es claro
-     en ambos temas, así que su texto debe ser oscuro SIEMPRE: por eso estos
-     tokens NO se redefinen en .dark. Sin esto, en oscuro el texto se aclara y
-     queda ilegible sobre la píldora clara (contraste ~1.2:1). */
-  --glass-ink: oklch(0.30 0.032 258);
-  --glass-ink-muted: oklch(0.44 0.03 258);
-  --glass-ink-accent: oklch(0.42 0.18 258);
-  --glass-ink-danger: oklch(0.50 0.2 25);
-
-  /* Tinta para texto sobre el vidrio translúcido de <Button> (.lg-liquid). A
-     diferencia de .lg-glass (casi opaco), este deja ver el fondo: en claro se ve
-     blanco; en oscuro, gris medio. Por eso estos SÍ se redefinen en .dark. */
-  --liquid-ink: var(--glass-ink);
-  --liquid-ink-muted: var(--glass-ink-muted);
-  --liquid-ink-accent: var(--glass-ink-accent);
-  --liquid-ink-danger: var(--glass-ink-danger);
-
   color-scheme: light;
 }
 
@@ -99,13 +83,6 @@
   --danger: oklch(0.7 0.165 25);
   --danger-soft: oklch(0.36 0.085 25);
 
-  /* Sobre fondo oscuro el vidrio blanco translúcido queda gris MEDIO: la tinta
-     clara contrasta ~3:1 y la oscura de siempre ~3.5:1. Una tinta más profunda
-     llega a ~4.5-5:1 sin tocar el vidrio. */
-  --liquid-ink: oklch(0.2 0.025 258);
-  --liquid-ink-muted: oklch(0.27 0.025 258);
-  --liquid-ink-accent: oklch(0.3 0.15 262);
-  --liquid-ink-danger: oklch(0.3 0.12 25);
 
   /* Los tokens nav-* (menú overlay + hero del login) NO se redefinen aquí:
      el menú usa el mismo fondo navy en claro y en oscuro. */
@@ -150,14 +127,28 @@
 
   --radius-card: var(--radius);
 
-  --color-glass-ink: var(--glass-ink);
-  --color-glass-ink-muted: var(--glass-ink-muted);
-  --color-glass-ink-accent: var(--glass-ink-accent);
-  --color-glass-ink-danger: var(--glass-ink-danger);
-  --color-liquid-ink: var(--liquid-ink);
-  --color-liquid-ink-muted: var(--liquid-ink-muted);
-  --color-liquid-ink-accent: var(--liquid-ink-accent);
-  --color-liquid-ink-danger: var(--liquid-ink-danger);
+  /* ===== Tokens de shadcn/ui, apuntando a la paleta de la app =====
+     Los componentes de components/ui salen de shadcn/ui y usan estos nombres
+     (bg-primary, bg-background, border-input...). Ojo: shadcn también usa
+     "muted" y "accent", pero aquí ya significan otra cosa (texto gris y azul
+     de marca). Por eso en los componentes copiados de shadcn se cambia:
+       bg-muted → bg-surface-2 · text-muted-foreground → text-muted
+       bg-accent / text-accent-foreground (hover suave) → bg-surface-2 / text-text */
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--text);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--text);
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--accent-ink);
+  --color-secondary: var(--surface-2);
+  --color-secondary-foreground: var(--text);
+  --color-destructive: var(--danger);
+  --color-border: var(--line);
+  --color-input: var(--line-strong);
+  --color-ring: var(--accent);
+
 }
 
 * {
@@ -233,110 +224,6 @@ input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 input[type="number"] { -moz-appearance: textfield; }
 
-@keyframes shimmer {
-  100% { transform: translateX(100%); }
-}
-.skeleton {
-  position: relative;
-  overflow: hidden;
-  background: var(--surface-2);
-}
-.skeleton::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, oklch(1 0 0 / 0.55), transparent);
-  animation: shimmer 1.6s infinite;
-}
-
-/* ===== Liquid Glass: pill esmerilada (botones y toggles) ===== */
-.lg-glass,
-.lg-glass-accent,
-.lg-glass-danger {
-  -webkit-backdrop-filter: blur(14px) saturate(1.7);
-  backdrop-filter: blur(14px) saturate(1.7);
-  box-shadow:
-    0 8px 26px -8px oklch(0.3 0.03 258 / 0.18),
-    inset 0 1px 0 oklch(1 0 0 / 0.7),
-    inset 0 0 0 0.5px oklch(0.3 0.03 258 / 0.08);
-}
-.lg-glass {
-  background: linear-gradient(180deg, oklch(1 0 0 / 0.86), oklch(0.965 0.005 255 / 0.72));
-}
-.lg-glass:hover {
-  background: linear-gradient(180deg, oklch(1 0 0 / 0.97), oklch(0.972 0.005 255 / 0.83));
-}
-.lg-glass-accent {
-  background: linear-gradient(180deg, oklch(0.93 0.05 258 / 0.92), oklch(0.895 0.066 258 / 0.8));
-}
-.lg-glass-accent:hover {
-  background: linear-gradient(180deg, oklch(0.945 0.055 258 / 0.97), oklch(0.91 0.07 258 / 0.87));
-}
-.lg-glass-danger {
-  background: linear-gradient(180deg, oklch(0.95 0.05 25 / 0.92), oklch(0.93 0.06 25 / 0.8));
-}
-.lg-glass-danger:hover {
-  background: linear-gradient(180deg, oklch(0.96 0.055 25 / 0.97), oklch(0.94 0.066 25 / 0.87));
-}
-
-/* ===== Liquid Glass avanzado (botones): bisel refractado ===== */
-.lg-liquid {
-  background: linear-gradient(180deg, oklch(1 0 0 / 0.5), oklch(0.97 0.006 255 / 0.32));
-  -webkit-backdrop-filter: blur(5px) saturate(1.7);
-  backdrop-filter: blur(5px) saturate(1.7);
-  box-shadow:
-    0 0 6px oklch(0.2 0.04 258 / 0.04),
-    0 3px 10px oklch(0.2 0.04 258 / 0.12),
-    inset 2.5px 2.5px 0.5px -2.5px oklch(1 0 0 / 0.95),
-    inset -2.5px -2.5px 0.5px -2.5px oklch(0.2 0.04 258 / 0.5),
-    inset 1px 1px 1px -0.5px oklch(1 0 0 / 0.75),
-    inset -1px -1px 1px -0.5px oklch(0.2 0.04 258 / 0.3),
-    inset 0 0 8px 7px oklch(1 0 0 / 0.12),
-    inset 0 0 2px 2px oklch(1 0 0 / 0.08),
-    0 0 12px oklch(1 0 0 / 0.2);
-  transition: background 0.2s ease, box-shadow 0.2s ease;
-}
-button:hover > .lg-liquid {
-  background: linear-gradient(180deg, oklch(1 0 0 / 0.62), oklch(0.97 0.006 255 / 0.44));
-  box-shadow:
-    0 0 6px oklch(0.2 0.04 258 / 0.05),
-    0 5px 14px oklch(0.2 0.04 258 / 0.16),
-    inset 2.5px 2.5px 0.5px -2.5px oklch(1 0 0 / 1),
-    inset -2.5px -2.5px 0.5px -2.5px oklch(0.2 0.04 258 / 0.55),
-    inset 1px 1px 1px -0.5px oklch(1 0 0 / 0.85),
-    inset -1px -1px 1px -0.5px oklch(0.2 0.04 258 / 0.35),
-    inset 0 0 8px 7px oklch(1 0 0 / 0.16),
-    inset 0 0 2px 2px oklch(1 0 0 / 0.1),
-    0 0 14px oklch(1 0 0 / 0.25);
-}
-/* Tinte sutil para mantener jerarquía del primario / peligro. */
-.lg-liquid-accent {
-  background: linear-gradient(180deg, oklch(0.93 0.05 258 / 0.5), oklch(0.9 0.06 258 / 0.34));
-}
-button:hover > .lg-liquid-accent {
-  background: linear-gradient(180deg, oklch(0.94 0.055 258 / 0.62), oklch(0.91 0.066 258 / 0.46));
-}
-.lg-liquid-danger {
-  background: linear-gradient(180deg, oklch(0.95 0.05 25 / 0.5), oklch(0.93 0.06 25 / 0.34));
-}
-button:hover > .lg-liquid-danger {
-  background: linear-gradient(180deg, oklch(0.96 0.055 25 / 0.62), oklch(0.94 0.066 25 / 0.46));
-}
-/* Vidrio "puro": casi sin relleno, solo bisel + blur (para <LiquidButton>). */
-.lg-liquid-clear {
-  background: linear-gradient(180deg, oklch(1 0 0 / 0.16), oklch(0.97 0.006 255 / 0.06));
-}
-button:hover > .lg-liquid-clear {
-  background: linear-gradient(180deg, oklch(1 0 0 / 0.26), oklch(0.97 0.006 255 / 0.12));
-}
-
-/* Refracción real (Firefox; en Chrome/Safari se ignora sin romper nada). */
-.lg-liquid-refract {
-  -webkit-backdrop-filter: url("#container-glass");
-  backdrop-filter: url("#container-glass");
-}
-
 /* ===== Liquid Glass de superficie (equivalente web de GlassEffect de iOS) =====
    Solo para la capa que FLOTA sobre el contenido: barra superior, menús
    desplegables, hojas de confirmación y el compositor del chat. Las tarjetas
@@ -362,21 +249,9 @@ button:hover > .lg-liquid-clear {
     inset 0 1px 0 oklch(1 0 0 / 0.1),
     inset 0 -1px 0 oklch(0 0 0 / 0.15);
 }
-/* Menús y hojas: se abren encima de texto, así que van casi opacos para que lo
-   de atrás no compita con lo que se lee. Además, un menú que nace dentro de la
-   barra (que ya es vidrio) no puede desenfocar la página: el navegador corta el
-   backdrop-filter anidado. Por eso el cuerpo lo da el relleno, no el blur. */
-.lg-panel-thick {
-  background: linear-gradient(180deg, oklch(1 0.002 255 / 0.97), oklch(0.985 0.004 255 / 0.95));
-  -webkit-backdrop-filter: blur(30px) saturate(1.8);
-  backdrop-filter: blur(30px) saturate(1.8);
-}
-.dark .lg-panel-thick {
-  background: linear-gradient(180deg, oklch(0.31 0.024 260 / 0.97), oklch(0.28 0.022 260 / 0.95));
-}
 /* Sin backdrop-filter (navegadores viejos) el vidrio sería ilegible: se vuelve sólido. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .lg-panel, .lg-panel-thick { background: var(--surface); }
+  .lg-panel { background: var(--surface); }
 }
 
 /* Burbujas del chat: entrante neutra (como el grupo de WhatsApp) con la cola
@@ -403,9 +278,6 @@ button:hover > .lg-liquid-clear {
   --shake-dur-a: 80ms;
   --shake-dur-b: 60ms;
   --shake-ease: cubic-bezier(0.22, 1, 0.36, 1);
-  /* Skeleton (receta 14; en loading.tsx pulsa en bucle hasta que llega la página) */
-  --pulse-dur: 1000ms;
-  --pulse-min: 0.5;
 }
 
 /* Error shake: se aplica al aviso de error completo (banner), no a un input.
@@ -444,14 +316,6 @@ button:hover > .lg-liquid-clear {
   to   { transform: scaleY(1); }
 }
 
-/* Skeleton de carga: fantasmas grises que pulsan mientras el servidor responde. */
-.t-skel-pulse {
-  animation: t-skel-pulse var(--pulse-dur) ease-in-out infinite;
-}
-@keyframes t-skel-pulse {
-  0%, 100% { opacity: 1; }
-  50%      { opacity: var(--pulse-min); }
-}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

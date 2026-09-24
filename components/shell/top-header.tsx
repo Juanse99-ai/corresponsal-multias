@@ -3,7 +3,6 @@
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   MagnifyingGlass,
   Bell,
@@ -17,7 +16,8 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import { Logo } from "@/components/brand";
 import { Button } from "@/components/ui/button";
-import { IconButton } from "@/components/ui/icon-button";
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
+import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { formatCOP, formatFechaLarga, hoyISO, formatFecha, anioBogota } from "@/lib/format";
 import type { HeaderResumen } from "@/lib/queries";
@@ -223,14 +223,13 @@ function HeaderSearch({ personas }: { personas: string[] }) {
         movil ? "absolute inset-x-1.5 top-1.5 z-30 sm:static sm:inset-auto" : "hidden sm:block",
       )}
     >
-      <div
-        className={cn(
-          "flex h-11 items-center gap-2 rounded-full border px-4 transition-colors sm:h-10 sm:w-[240px]",
-          open ? "border-accent/50 bg-surface" : "border-line/70 bg-surface-2/60",
-        )}
-      >
-        <MagnifyingGlass size={16} className="shrink-0 text-faint" />
-        <input
+      <Popover open={open && !!q.trim()}>
+      <PopoverAnchor asChild>
+      <InputGroup className="rounded-full sm:h-10 sm:w-[240px]">
+        <InputGroupAddon>
+          <MagnifyingGlass className="text-faint" />
+        </InputGroupAddon>
+        <InputGroupInput
           ref={inputRef}
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -241,60 +240,52 @@ function HeaderSearch({ personas }: { personas: string[] }) {
           placeholder="Buscar día, persona…"
           aria-label="Buscar día o persona"
           /* text-base en celular: con menos de 16px iOS hace zoom al enfocar. */
-          className="w-full min-w-0 bg-transparent text-base text-text outline-none placeholder:text-faint sm:text-[0.82rem]"
+          className="text-base placeholder:text-faint sm:text-[0.82rem]"
         />
         {movil && (
-          <IconButton label="Cerrar buscador" size="sm" onClick={cerrarMovil} className="sm:hidden">
-            <X size={17} weight="bold" />
-          </IconButton>
+          <InputGroupAddon align="inline-end" className="sm:hidden">
+            <InputGroupButton size="icon-sm" aria-label="Cerrar buscador" title="Cerrar buscador" onClick={cerrarMovil}>
+              <X weight="bold" />
+            </InputGroupButton>
+          </InputGroupAddon>
         )}
-      </div>
+      </InputGroup>
+      </PopoverAnchor>
 
-      <AnimatePresence>
-        {open && q.trim() && (
-          <motion.div
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.14 }}
-            className="absolute right-0 top-[3.25rem] z-30 w-[min(20rem,80vw)] overflow-hidden lg-panel lg-panel-thick rounded-[1.25rem]"
-            onMouseDown={() => blurTimer.current && clearTimeout(blurTimer.current)}
-          >
+      <PopoverContent
+        align="end"
+        sideOffset={8}
+        // El foco se queda en el campo: se sigue escribiendo mientras sale la lista.
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        onMouseDown={() => blurTimer.current && clearTimeout(blurTimer.current)}
+        className="w-[min(20rem,80vw)] overflow-hidden p-0"
+      >
             {!hayResultados ? (
               <p className="px-4 py-3 text-[0.8rem] text-faint">Escribe una fecha (17/06) o el nombre de una persona.</p>
             ) : (
               <ul className="flex flex-col py-1">
                 {fechaISO && (
                   <li>
-                    <button
-                      type="button"
-                      onClick={() => irAFecha(fechaISO)}
-                      className="flex min-h-11 w-full items-center gap-2.5 px-4 py-2.5 text-left transition-colors hover:bg-surface-2/70 active:bg-surface-2/70 focus-visible:bg-surface-2/70 focus-visible:outline-none"
-                    >
+                    <Button variant="ghost" onClick={() => irAFecha(fechaISO)} className="h-auto min-h-11 w-full justify-start gap-2.5 rounded-none px-4 py-2.5 text-left font-normal hover:bg-surface-2/70">
                       <CalendarBlank size={16} className="text-accent" />
                       <span className="flex-1 text-[0.84rem] text-text">Ver el día {formatFecha(fechaISO)}</span>
                       <ArrowRight size={14} className="text-faint" />
-                    </button>
+                    </Button>
                   </li>
                 )}
                 {personasMatch.map((p) => (
                   <li key={p}>
-                    <button
-                      type="button"
-                      onClick={irAPersona}
-                      className="flex min-h-11 w-full items-center gap-2.5 px-4 py-2.5 text-left transition-colors hover:bg-surface-2/70 active:bg-surface-2/70 focus-visible:bg-surface-2/70 focus-visible:outline-none"
-                    >
+                    <Button variant="ghost" onClick={irAPersona} className="h-auto min-h-11 w-full justify-start gap-2.5 rounded-none px-4 py-2.5 text-left font-normal hover:bg-surface-2/70">
                       <HandCoins size={16} className="text-accent" />
                       <span className="flex-1 text-[0.84rem] text-text">{p}</span>
                       <span className="text-[0.7rem] text-faint">Préstamos</span>
-                    </button>
+                    </Button>
                   </li>
                 ))}
               </ul>
             )}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      </PopoverContent>
+      </Popover>
     </form>
     </>
   );
@@ -312,15 +303,13 @@ export function HeaderAvisos({ avisos, urgentes }: { avisos: Aviso[]; urgentes: 
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="relative">
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
       <Button
         variant="secondary"
         size="icon"
-        onClick={() => setOpen((v) => !v)}
-        onBlur={() => setTimeout(() => setOpen(false), 150)}
         title="Avisos"
         aria-label={avisos.length ? `Avisos (${avisos.length})` : "Avisos"}
-        aria-expanded={open}
       >
         <span className="relative inline-flex">
           <Bell size={18} weight={avisos.length ? "fill" : "regular"} />
@@ -335,16 +324,9 @@ export function HeaderAvisos({ avisos, urgentes }: { avisos: Aviso[]; urgentes: 
           )}
         </span>
       </Button>
+      </PopoverTrigger>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: -6, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -6, scale: 0.98 }}
-            transition={{ duration: 0.15 }}
-            className="absolute right-0 top-[3.25rem] z-30 w-[min(22rem,84vw)] overflow-hidden lg-panel lg-panel-thick rounded-[1.25rem]"
-          >
+      <PopoverContent align="end" sideOffset={10} className="w-[min(22rem,84vw)] overflow-hidden p-0">
             <div className="flex items-center justify-between border-b border-line/60 px-4 py-3">
               <p className="text-[0.84rem] font-semibold text-text">Avisos</p>
               <span className="text-[0.72rem] text-faint">{avisos.length}</span>
@@ -379,9 +361,7 @@ export function HeaderAvisos({ avisos, urgentes }: { avisos: Aviso[]; urgentes: 
                 })}
               </ul>
             )}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+      </PopoverContent>
+    </Popover>
   );
 }

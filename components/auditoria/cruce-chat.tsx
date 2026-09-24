@@ -5,9 +5,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ClipboardText, FileArrowUp, CheckCircle, Warning, ArrowsLeftRight, ChatsCircle } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/field";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { IconButton } from "@/components/ui/icon-button";
 import { ErrorNotice } from "@/components/ui/error-notice";
 import { cn } from "@/lib/utils";
 import { formatCOP, formatFechaCorta, formatHora, hoyISO } from "@/lib/format";
@@ -111,16 +112,16 @@ export function CruceChat({
           {remitentes.length > 1 && (
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="quien">Pedidos de</Label>
-              <select
+              <NativeSelect
                 id="quien"
                 value={nombreLuis ?? ""}
                 onChange={(e) => { setQuien(e.target.value); setRegistrados(null); }}
-                className="h-11 max-w-[11rem] rounded-full border border-line-strong bg-surface-2 px-3 text-[0.9rem] text-text"
+                className="max-w-[11rem]"
               >
                 {remitentes.map((r) => (
-                  <option key={r.nombre} value={r.nombre}>{r.nombre} ({r.n})</option>
+                  <NativeSelectOption key={r.nombre} value={r.nombre}>{r.nombre} ({r.n})</NativeSelectOption>
                 ))}
-              </select>
+              </NativeSelect>
             </div>
           )}
           <div className="flex w-[10.5rem] shrink-0 flex-col gap-1.5">
@@ -251,14 +252,14 @@ export function CruceChat({
       <div className="relative -mt-24 px-2 pb-2 sm:px-3 sm:pb-3">
         <ErrorNotice message={error} className="mb-2" />
         <div className="lg-panel flex items-end gap-1.5 rounded-[1.6rem] p-1.5">
-          <IconButton label="Pegar el chat" onClick={pegar}>
+          <Button variant="ghost" size="icon" aria-label="Pegar el chat" title="Pegar el chat" onClick={pegar} className="text-muted hover:text-foreground">
             <ClipboardText size={19} />
-          </IconButton>
-          <IconButton label="Subir chat exportado (.txt)" onClick={() => archivoRef.current?.click()}>
+          </Button>
+          <Button variant="ghost" size="icon" aria-label="Subir chat exportado (.txt)" title="Subir chat exportado (.txt)" onClick={() => archivoRef.current?.click()} className="text-muted hover:text-foreground">
             <FileArrowUp size={19} />
-          </IconButton>
+          </Button>
           <input ref={archivoRef} type="file" accept=".txt,text/plain" onChange={subir} className="hidden" aria-label="Subir chat exportado" />
-          <textarea
+          <Textarea
             value={texto}
             onChange={(e) => { setTexto(e.target.value); setRegistrados(null); }}
             rows={1}
@@ -268,7 +269,7 @@ export function CruceChat({
             aria-label="Chat del grupo"
             placeholder="Pega aquí el chat del grupo…"
             /* text-base: con menos de 16px iOS hace zoom al enfocar. */
-            className="h-11 min-w-0 flex-1 resize-none overflow-y-auto bg-transparent px-2 py-0 text-base text-text outline-none placeholder:text-faint"
+            className="field-sizing-fixed h-11 min-h-0 min-w-0 flex-1 resize-none overflow-y-auto rounded-none border-0 bg-transparent px-2 py-0 shadow-none focus-visible:bg-transparent focus-visible:ring-0 dark:bg-transparent"
           />
           <Button
             onClick={cruzar}

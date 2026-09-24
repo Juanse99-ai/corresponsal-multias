@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import { DownloadSimple, Trash } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { IconButton } from "@/components/ui/icon-button";
 import { cn } from "@/lib/utils";
 import { formatCOP, formatFecha } from "@/lib/format";
 import { computeSaldoTotal } from "@/lib/general";
@@ -150,9 +149,9 @@ export function GeneralTable({ entries }: { entries: GeneralRow[] }) {
                   <td className="tnum px-3 py-2.5 text-right text-muted">{formatCOP(e.deudas_terceros)}</td>
                   <td className={cn("tnum px-3 py-2.5 text-right font-semibold", total < 0 ? "text-danger" : "text-text")}>{formatCOP(total)}</td>
                   <td className="pr-3">
-                    <IconButton label="Eliminar registro" tone="danger" size="sm" onClick={(ev) => borrar(e.id, ev)} disabled={pending}>
+                    <Button variant="ghost" size="icon-sm" aria-label="Eliminar registro" title="Eliminar registro" onClick={(ev) => borrar(e.id, ev)} disabled={pending} className="text-muted hover:text-destructive">
                       <Trash size={16} />
-                    </IconButton>
+                    </Button>
                   </td>
                 </motion.tr>
               );

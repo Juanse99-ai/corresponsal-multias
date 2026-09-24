@@ -150,7 +150,7 @@ export function ReporteLuisButton({
 
   return (
     <>
-      <Button variant="accent" onClick={() => setOpen(true)}>
+      <Button onClick={() => setOpen(true)}>
         <Export size={17} weight="bold" />
         Reporte para Luis
       </Button>
