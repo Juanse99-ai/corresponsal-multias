@@ -80,7 +80,9 @@ export function CuadreExport({
       const file = new File([blob], `cuadre-${fecha}.png`, { type: "image/png" });
       const nav = navigator as Navigator & { canShare?: (d: unknown) => boolean };
       if (nav.canShare && nav.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: `Cuadre ${fechaDMY(fecha)}` });
+        // Solo el archivo: con title, iOS lo toma como un segundo elemento y
+        // "Copiar" pega doble en WhatsApp.
+        await navigator.share({ files: [file] });
       } else {
         await descargar();
       }
