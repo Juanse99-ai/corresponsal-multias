@@ -134,7 +134,9 @@ export function TopHeader({
 }) {
   const avisos = useMemo(() => buildAvisos(resumen), [resumen]);
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-line bg-bg/80 px-3 py-2.5 backdrop-blur-xl sm:px-6 lg:px-8 relative">
+    // Barra flotante de vidrio: el contenido pasa por debajo al hacer scroll.
+    <header className="sticky top-0 z-20 px-2 pt-2 sm:px-4 lg:px-6" style={{ paddingTop: "max(0.5rem, env(safe-area-inset-top))" }}>
+      <div className="lg-panel relative mx-auto flex max-w-[1240px] items-center justify-between gap-3 rounded-[1.6rem] px-2 py-1.5 sm:px-3">
       <div className="flex items-center gap-2.5 sm:gap-3.5">
         <Button variant="secondary" size="sm" onClick={onOpenMenu} aria-label="Abrir menú" className="w-10 px-0 sm:w-auto sm:px-4">
           <List size={18} weight="bold" />
@@ -149,6 +151,7 @@ export function TopHeader({
       <div className="flex items-center gap-2.5">
         <HeaderSearch personas={isAdmin ? resumen.personas : []} />
         <HeaderAvisos avisos={avisos} urgentes={avisosUrgentes(avisos)} />
+      </div>
       </div>
     </header>
   );
@@ -217,13 +220,13 @@ function HeaderSearch({ personas }: { personas: string[] }) {
       onSubmit={onSubmit}
       className={cn(
         "relative",
-        movil ? "absolute inset-x-3 top-2.5 z-30 sm:static sm:inset-auto" : "hidden sm:block",
+        movil ? "absolute inset-x-1.5 top-1.5 z-30 sm:static sm:inset-auto" : "hidden sm:block",
       )}
     >
       <div
         className={cn(
-          "flex h-11 items-center gap-2 rounded-[0.7rem] border bg-surface px-3 transition-colors sm:h-10 sm:w-[240px]",
-          open ? "border-accent/50 bg-surface" : "border-line",
+          "flex h-11 items-center gap-2 rounded-full border px-4 transition-colors sm:h-10 sm:w-[240px]",
+          open ? "border-accent/50 bg-surface" : "border-line/70 bg-surface-2/60",
         )}
       >
         <MagnifyingGlass size={16} className="shrink-0 text-faint" />
@@ -254,7 +257,7 @@ function HeaderSearch({ personas }: { personas: string[] }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.14 }}
-            className="absolute right-0 top-12 z-30 w-[min(20rem,80vw)] overflow-hidden rounded-[1rem] border border-line bg-surface shadow-[0_18px_40px_-18px_oklch(0.4_0.07_258/0.35)]"
+            className="absolute right-0 top-[3.25rem] z-30 w-[min(20rem,80vw)] overflow-hidden lg-panel lg-panel-thick rounded-[1.25rem]"
             onMouseDown={() => blurTimer.current && clearTimeout(blurTimer.current)}
           >
             {!hayResultados ? (
@@ -266,7 +269,7 @@ function HeaderSearch({ personas }: { personas: string[] }) {
                     <button
                       type="button"
                       onClick={() => irAFecha(fechaISO)}
-                      className="flex min-h-11 w-full items-center gap-2.5 px-4 py-2.5 text-left transition-colors hover:bg-surface-2 active:bg-surface-2 focus-visible:bg-surface-2 focus-visible:outline-none"
+                      className="flex min-h-11 w-full items-center gap-2.5 px-4 py-2.5 text-left transition-colors hover:bg-surface-2/70 active:bg-surface-2/70 focus-visible:bg-surface-2/70 focus-visible:outline-none"
                     >
                       <CalendarBlank size={16} className="text-accent" />
                       <span className="flex-1 text-[0.84rem] text-text">Ver el día {formatFecha(fechaISO)}</span>
@@ -279,7 +282,7 @@ function HeaderSearch({ personas }: { personas: string[] }) {
                     <button
                       type="button"
                       onClick={irAPersona}
-                      className="flex min-h-11 w-full items-center gap-2.5 px-4 py-2.5 text-left transition-colors hover:bg-surface-2 active:bg-surface-2 focus-visible:bg-surface-2 focus-visible:outline-none"
+                      className="flex min-h-11 w-full items-center gap-2.5 px-4 py-2.5 text-left transition-colors hover:bg-surface-2/70 active:bg-surface-2/70 focus-visible:bg-surface-2/70 focus-visible:outline-none"
                     >
                       <HandCoins size={16} className="text-accent" />
                       <span className="flex-1 text-[0.84rem] text-text">{p}</span>
@@ -340,9 +343,9 @@ export function HeaderAvisos({ avisos, urgentes }: { avisos: Aviso[]; urgentes: 
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.98 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 top-12 z-30 w-[min(22rem,84vw)] overflow-hidden rounded-[1rem] border border-line bg-surface shadow-[0_18px_40px_-18px_oklch(0.4_0.07_258/0.35)]"
+            className="absolute right-0 top-[3.25rem] z-30 w-[min(22rem,84vw)] overflow-hidden lg-panel lg-panel-thick rounded-[1.25rem]"
           >
-            <div className="flex items-center justify-between border-b border-line px-4 py-3">
+            <div className="flex items-center justify-between border-b border-line/60 px-4 py-3">
               <p className="text-[0.84rem] font-semibold text-text">Avisos</p>
               <span className="text-[0.72rem] text-faint">{avisos.length}</span>
             </div>
@@ -360,7 +363,7 @@ export function HeaderAvisos({ avisos, urgentes }: { avisos: Aviso[]; urgentes: 
                       <Link
                         href={a.href}
                         onClick={() => setOpen(false)}
-                        className="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-surface-2"
+                        className="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-surface-2/70"
                       >
                         <span className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full", T.wrap)}>
                           <T.icon size={15} weight="fill" />

@@ -37,3 +37,12 @@ para estado negativo, verde solo para "cuadrado". El riel lateral azul marino da
 ## Anti-slop
 - Nada de negro puro ni "fintech navy+gold" (era el tema viejo).
 - Sin gradient-text, sin glassmorphism decorativo, sin bordes laterales de color.
+
+## Liquid Glass (capa flotante)
+Equivalente web del GlassEffect de iOS. El vidrio es para lo que FLOTA sobre el
+contenido, nunca para el contenido mismo (tarjetas con cifras siguen sólidas):
+- `.lg-panel`: barra superior (cápsula flotante), píldora de fecha del chat y
+  compositor del Cruce con el grupo. Sigue el tema; texto con tokens normales.
+- `.lg-panel .lg-panel-thick`: menús desplegables y hoja de confirmación. Casi
+  opaco, porque se abre encima de texto y un vidrio dentro de otro no desenfoca.
+- `.lg-glass*` / `.lg-liquid*`: botones y toggles (ya existían).

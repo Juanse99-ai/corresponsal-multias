@@ -337,6 +337,59 @@ button:hover > .lg-liquid-clear {
   backdrop-filter: url("#container-glass");
 }
 
+/* ===== Liquid Glass de superficie (equivalente web de GlassEffect de iOS) =====
+   Solo para la capa que FLOTA sobre el contenido: barra superior, menús
+   desplegables, hojas de confirmación y el compositor del chat. Las tarjetas
+   con cifras siguen sólidas: el vidrio es navegación, no contenido.
+   A diferencia de .lg-glass (casi opaco, siempre claro), este sigue el tema:
+   el texto encima usa los tokens normales (text, muted). */
+.lg-panel {
+  background: linear-gradient(180deg, oklch(1 0.002 255 / 0.72), oklch(0.975 0.005 255 / 0.6));
+  -webkit-backdrop-filter: blur(22px) saturate(1.8);
+  backdrop-filter: blur(22px) saturate(1.8);
+  border: 0.5px solid oklch(1 0 0 / 0.7);
+  box-shadow:
+    0 10px 30px -12px oklch(0.3 0.05 258 / 0.22),
+    0 1px 2px oklch(0.3 0.05 258 / 0.06),
+    inset 0 1px 0 oklch(1 0 0 / 0.85),
+    inset 0 -1px 0 oklch(0.3 0.03 258 / 0.05);
+}
+.dark .lg-panel {
+  background: linear-gradient(180deg, oklch(0.32 0.024 260 / 0.66), oklch(0.26 0.022 260 / 0.58));
+  border-color: oklch(1 0 0 / 0.1);
+  box-shadow:
+    0 12px 32px -12px oklch(0.08 0.02 260 / 0.6),
+    inset 0 1px 0 oklch(1 0 0 / 0.1),
+    inset 0 -1px 0 oklch(0 0 0 / 0.15);
+}
+/* Menús y hojas: se abren encima de texto, así que van casi opacos para que lo
+   de atrás no compita con lo que se lee. Además, un menú que nace dentro de la
+   barra (que ya es vidrio) no puede desenfocar la página: el navegador corta el
+   backdrop-filter anidado. Por eso el cuerpo lo da el relleno, no el blur. */
+.lg-panel-thick {
+  background: linear-gradient(180deg, oklch(1 0.002 255 / 0.97), oklch(0.985 0.004 255 / 0.95));
+  -webkit-backdrop-filter: blur(30px) saturate(1.8);
+  backdrop-filter: blur(30px) saturate(1.8);
+}
+.dark .lg-panel-thick {
+  background: linear-gradient(180deg, oklch(0.31 0.024 260 / 0.97), oklch(0.28 0.022 260 / 0.95));
+}
+/* Sin backdrop-filter (navegadores viejos) el vidrio sería ilegible: se vuelve sólido. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .lg-panel, .lg-panel-thick { background: var(--surface); }
+}
+
+/* Burbujas del chat: entrante neutra (como el grupo de WhatsApp) con la cola
+   arriba a la izquierda. El color de estado va en la marca, no en la burbuja. */
+.chat-bubble {
+  border-radius: 1.15rem 1.15rem 1.15rem 0.35rem;
+  background: var(--surface);
+  box-shadow: 0 1px 3px oklch(0.3 0.05 258 / 0.12), 0 0 0 0.5px var(--line-strong);
+}
+.dark .chat-bubble {
+  background: var(--surface-2);
+}
+
 /* ===== Movimiento (transitions.dev) ===================================== */
 /* Tokens compartidos: toda animación nueva debe leer de aquí, no hardcodear. */
 :root {
