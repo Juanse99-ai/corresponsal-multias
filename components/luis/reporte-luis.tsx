@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { useRef, useState } from "react";
 import { Export, DownloadSimple, ShareNetwork, X } from "@phosphor-icons/react/dist/ssr";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { IconButton } from "@/components/ui/icon-button";
 import { formatCOP, formatHora } from "@/lib/format";
 import type { MovimientoItem } from "@/components/luis/movimientos-section";
 
@@ -28,10 +28,7 @@ export function ReporteLuisButton({
 }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => setMounted(true), []);
 
   const totalConsig = consignaciones.reduce((s, c) => s + c.monto, 0);
   // El arrastre del día anterior es la primera compensación a favor de Luis.
@@ -78,24 +75,15 @@ export function ReporteLuisButton({
     }
   }
 
+  // Dialog de shadcn sin caja propia: el contenido es la imagen del reporte.
   const modal = (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={() => setOpen(false)}
-          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur-sm sm:items-center"
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.97, y: 8 }}
-            transition={{ type: "spring", stiffness: 260, damping: 26 }}
-            onClick={(e) => e.stopPropagation()}
-            className="my-auto w-full max-w-[460px]"
-          >
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent
+        showCloseButton={false}
+        className="max-h-[calc(100dvh-2rem)] max-w-[460px] gap-0 overflow-y-auto rounded-none border-0 bg-transparent p-0 shadow-none sm:max-w-[460px]"
+      >
+        <DialogTitle className="sr-only">Reporte para Sr. Luis {fechaDMY(fecha)}</DialogTitle>
+        <DialogDescription className="sr-only">Descargar o compartir la imagen del reporte.</DialogDescription>
             <div
               ref={ref}
               style={{ fontFamily: "var(--font-ios)" }}
@@ -130,22 +118,20 @@ export function ReporteLuisButton({
             </div>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <Button onClick={descargar} disabled={busy} className="basis-full text-white sm:flex-1 sm:basis-0">
+              <Button onClick={descargar} disabled={busy} className="basis-full sm:flex-1 sm:basis-0">
                 <DownloadSimple size={17} weight="bold" />
                 {busy ? "Generando…" : "Descargar imagen"}
               </Button>
-              <Button variant="secondary" onClick={compartir} disabled={busy} className="text-white">
+              <Button variant="secondary" onClick={compartir} disabled={busy}>
                 <ShareNetwork size={17} />
                 Compartir
               </Button>
-              <Button variant="ghost" size="icon" onClick={() => setOpen(false)} aria-label="Cerrar" className="text-white">
+              <IconButton label="Cerrar" variant="secondary" onClick={() => setOpen(false)}>
                 <X size={18} />
-              </Button>
+              </IconButton>
             </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+      </DialogContent>
+    </Dialog>
   );
 
   return (
@@ -154,7 +140,7 @@ export function ReporteLuisButton({
         <Export size={17} weight="bold" />
         Reporte para Luis
       </Button>
-      {mounted ? createPortal(modal, document.body) : null}
+      {modal}
     </>
   );
 }

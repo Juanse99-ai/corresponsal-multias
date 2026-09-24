@@ -8,9 +8,12 @@ import {
   Trash,
   FilePdf,
   Receipt,
-  UploadSimple,ArrowSquareOut } from "@phosphor-icons/react/dist/ssr";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+  ArrowSquareOut } from "@phosphor-icons/react/dist/ssr";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { IconButton } from "@/components/ui/icon-button";
+import { Progress } from "@/components/ui/progress";
+import { Spinner } from "@/components/ui/spinner";
+import { Item, ItemFooter, ItemGroup, ItemMedia } from "@/components/ui/item";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -134,14 +137,20 @@ export function SoportesSection({
   }
 
   return (
-    <Card className="mt-5 p-5 sm:p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+    <Card className="mt-5">
+      <CardHeader className="items-center">
+        <CardTitle className="flex items-center gap-2 self-center text-text">
           <Paperclip size={17} className="text-accent" weight="fill" />
-          <h3 className="text-[0.95rem] font-semibold tracking-tight text-text">{titulo}</h3>
-        </div>
-        {soportes.length > 0 && <Badge variant="secondary">{soportes.length}</Badge>}
-      </div>
+          <h3>{titulo}</h3>
+        </CardTitle>
+        {soportes.length > 0 && (
+          <CardAction className="self-center">
+            <Badge variant="secondary">{soportes.length}</Badge>
+          </CardAction>
+        )}
+      </CardHeader>
+
+      <CardContent className="pt-1">
 
       <label
         onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
@@ -177,9 +186,7 @@ export function SoportesSection({
         />
         <div className="flex h-11 w-11 items-center justify-center rounded-full bg-surface-2 text-accent">
           {subiendo ? (
-            <motion.span animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 0.9, ease: "linear" }}>
-              <UploadSimple size={19} weight="bold" />
-            </motion.span>
+            <Spinner size={19} weight="bold" className="size-[19px]" />
           ) : (
             <Receipt size={19} weight="fill" />
           )}
@@ -193,21 +200,18 @@ export function SoportesSection({
             : "Toca para escoger, o arrastra las fotos aquí · varias a la vez"}
         </p>
         {progreso && (
-          <span className="mt-1 h-1 w-40 overflow-hidden rounded-full bg-surface-2">
-            <motion.span
-              className="block h-full rounded-full bg-accent"
-              initial={false}
-              animate={{ width: `${Math.round((progreso.hechos / progreso.total) * 100)}%` }}
-              transition={{ type: "spring", stiffness: 200, damping: 30 }}
-            />
-          </span>
+          <Progress
+            value={Math.round((progreso.hechos / progreso.total) * 100)}
+            aria-label="Avance de la subida"
+            className="mt-1 h-1 w-40 bg-surface-2"
+          />
         )}
       </label>
 
       <ErrorNotice message={error} className="mt-3" />
 
       {soportes.length > 0 && (
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+        <ItemGroup className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
           <AnimatePresence initial={false}>
             {soportes.map((s) => {
               const esImagen = (s.mime ?? "").startsWith("image/");
@@ -219,12 +223,17 @@ export function SoportesSection({
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ type: "spring", stiffness: 320, damping: 28 }}
-                  className="group relative aspect-[3/4] overflow-hidden rounded-[0.9rem] border border-line bg-surface-2"
+                  role="listitem"
                 >
+                <Item
+                  variant="outline"
+                  className="relative block aspect-[3/4] overflow-hidden rounded-[0.9rem] border-line bg-surface-2 p-0"
+                >
+                  <ItemMedia variant="image" className="size-full rounded-none group-has-[[data-slot=item-description]]/item:translate-y-0">
                   <a href={s.url ?? "#"} target="_blank" rel="noopener noreferrer" className="block h-full w-full">
                     {esImagen && s.url ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={s.url} alt={s.nombre ?? "soporte"} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                      <img src={s.url} alt={s.nombre ?? "soporte"} className="h-full w-full object-cover transition-transform duration-500 group-hover/item:scale-105" />
                     ) : (
                       <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-3 text-center">
                         <FilePdf size={28} className="text-danger" weight="fill" />
@@ -232,30 +241,30 @@ export function SoportesSection({
                       </div>
                     )}
                   </a>
+                  </ItemMedia>
 
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-center justify-between gap-1 bg-gradient-to-t from-black/70 to-transparent px-2 py-1.5">
-                    <span className="truncate text-[0.62rem] text-white/80">{pesoArchivo(s.tamano)}</span>
-                    <ArrowSquareOut size={12} className="text-white/70" />
-                  </div>
+                  <ItemFooter className="pointer-events-none absolute inset-x-0 bottom-0 gap-1 bg-gradient-to-t from-[oklch(0.22_0.03_258/0.7)] to-transparent px-2 py-1.5">
+                    <span className="truncate text-[0.62rem] text-[oklch(0.97_0.01_260/0.8)]">{pesoArchivo(s.tamano)}</span>
+                    <ArrowSquareOut size={12} className="text-[oklch(0.97_0.01_260/0.7)]" />
+                  </ItemFooter>
 
                   {/* En táctil no existe hover: el botón debe verse siempre (pointer-coarse). */}
                   {/* Va sobre la foto: el vidrio claro se perdería, así que lleva fondo
                       oscuro propio, con la misma forma y respuesta que los demás. */}
-                  <Button
-                    variant="ghost"
+                  <IconButton
+                    label="Eliminar soporte"
                     size="icon-sm"
                     onClick={() => setPorBorrar(s.id)}
-                    title="Eliminar"
-                    aria-label="Eliminar soporte"
-                    className="absolute right-1.5 top-1.5 bg-[oklch(0.22_0.03_258/0.62)] text-[oklch(0.97_0.01_260/0.9)] opacity-0 backdrop-blur-sm hover:bg-[oklch(0.22_0.03_258/0.75)] hover:text-[oklch(0.8_0.14_25)] group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100"
+                    className="absolute right-1.5 top-1.5 bg-[oklch(0.22_0.03_258/0.62)] text-[oklch(0.97_0.01_260/0.9)] opacity-0 backdrop-blur-sm hover:bg-[oklch(0.22_0.03_258/0.75)] hover:text-[oklch(0.8_0.14_25)] group-hover/item:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100"
                   >
                     <Trash size={16} />
-                  </Button>
+                  </IconButton>
+                </Item>
                 </motion.div>
               );
             })}
           </AnimatePresence>
-        </div>
+        </ItemGroup>
       )}
       <ConfirmDialog
         open={!!porBorrar}
@@ -264,6 +273,7 @@ export function SoportesSection({
         onConfirmar={() => porBorrar && borrar(porBorrar)}
         onCancelar={() => setPorBorrar(null)}
       />
+      </CardContent>
     </Card>
   );
 }

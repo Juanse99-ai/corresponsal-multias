@@ -52,6 +52,25 @@
   /* Fuente única tipo iOS: SF Pro vía la pila del sistema de Apple. */
   --font-ios: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
 
+  /* Nombres crudos de shadcn/ui, para los componentes que leen var(--primary)
+     y compañía directo en su CSS (sonner, bubble). Apuntan a la paleta de
+     arriba, así que siguen solos al modo oscuro (.dark está en el mismo <html>).
+     "muted" y "accent" NO se definen: en esta app significan otra cosa. */
+  --background: var(--bg);
+  --foreground: var(--text);
+  --card: var(--surface);
+  --card-foreground: var(--text);
+  --popover: var(--surface);
+  --popover-foreground: var(--text);
+  --primary: var(--accent);
+  --primary-foreground: var(--accent-ink);
+  --secondary: var(--surface-2);
+  --secondary-foreground: var(--text);
+  --destructive: var(--danger);
+  --border: var(--line);
+  --input: var(--line-strong);
+  --ring: var(--accent);
+
   color-scheme: light;
 }
 
@@ -254,16 +273,6 @@ input[type="number"] { -moz-appearance: textfield; }
   .lg-panel { background: var(--surface); }
 }
 
-/* Burbujas del chat: entrante neutra (como el grupo de WhatsApp) con la cola
-   arriba a la izquierda. El color de estado va en la marca, no en la burbuja. */
-.chat-bubble {
-  border-radius: 1.15rem 1.15rem 1.15rem 0.35rem;
-  background: var(--surface);
-  box-shadow: 0 1px 3px oklch(0.3 0.05 258 / 0.12), 0 0 0 0.5px var(--line-strong);
-}
-.dark .chat-bubble {
-  background: var(--surface-2);
-}
 
 /* ===== Movimiento (transitions.dev) ===================================== */
 /* Tokens compartidos: toda animación nueva debe leer de aquí, no hardcodear. */
@@ -305,16 +314,6 @@ input[type="number"] { -moz-appearance: textfield; }
   to   { background-color: transparent; }
 }
 
-/* Barras del gráfico de cierres: crecen desde la base. En CSS y no en Framer
-   porque dentro de un árbol con variantes la animación del hijo no dispara. */
-.t-bar-rise {
-  transform-origin: bottom;
-  animation: t-bar-rise var(--duration-slow) var(--ease-smooth-out) both;
-}
-@keyframes t-bar-rise {
-  from { transform: scaleY(0); }
-  to   { transform: scaleY(1); }
-}
 
 
 @media (prefers-reduced-motion: reduce) {

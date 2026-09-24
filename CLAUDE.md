@@ -57,7 +57,17 @@
     `Badge` y `success`/`muted` en `Alert`.
   - Composiciones de la app hechas con shadcn: `ConfirmDialog` (AlertDialog),
     `ErrorNotice` (Alert), `MoneyInput` (Input), `ChoiceChip` (Toggle),
-    `ThemeToggle` (Switch), `AreaTendencia` (Chart). Enter en un `Input`:
+    `ThemeToggle` (Switch), `AreaTendencia` (Chart), `DatePicker` (Popover +
+    Calendar, fechas ISO, en español), `IconButton` (Button + Tooltip).
+  - Cuál usar: tablas → `Table`; filas de listas → `Item`; iniciales → `Avatar`;
+    barras de avance → `Progress`; "no hay nada" → `Empty`; fechas →
+    `DatePicker`; ventanas → `Dialog` (o `AlertDialog` si es confirmar algo
+    destructivo); menú → `Sheet`; avisos efímeros → `toast` de sonner (el
+    `<Toaster>` y el `TooltipProvider` ya están en `app/providers.tsx`); chat →
+    `Message` + `Bubble`.
+  - Fuera de shadcn solo quedan los efectos de pantalla completa de
+    `components/fx` y las imágenes que se exportan como PNG (fondo blanco a
+    propósito). Enter en un `Input`:
     `onKeyDown={(e) => esEnter(e) && fn()}` (`lib/utils.ts`).
 - Módulos por carpeta. Montos enteros (COP) y
   `lib/format.ts` para formato. Números con clase `.tnum` (misma fuente con

@@ -4,12 +4,21 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { DownloadSimple, MagnifyingGlass, CaretRight, Wallet, X } from "@phosphor-icons/react/dist/ssr";
-import { Card } from "@/components/ui/card";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { IconButton } from "@/components/ui/icon-button";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia } from "@/components/ui/empty";
+import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/ui/item";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { formatCOP, formatFecha } from "@/lib/format";
 import type { LuisHistDia } from "@/lib/queries";
+
+// Fila de tabla de shadcn animada con Framer (React 19 pasa la ref como prop).
+const MotionRow = motion.create(TableRow);
 
 export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
   const router = useRouter();
@@ -43,34 +52,34 @@ export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
     <div className="flex flex-col gap-5">
       {/* Acumulado vigente + filtros */}
       <Card className="flex flex-col gap-4 p-4 sm:p-5">
-        <div className="flex items-center gap-3 rounded-[1rem] border border-accent/25 bg-accent-soft/40 p-4">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-accent-soft text-accent-strong">
+        <Item variant="outline" className="gap-3 rounded-[1rem] border-accent/25 bg-accent-soft/40 p-4">
+          <ItemMedia className="h-11 w-11 rounded-full bg-accent-soft text-accent-strong">
             <Wallet size={20} weight="fill" />
-          </div>
-          <div className="leading-tight">
-            <p className="text-[0.74rem] font-medium uppercase tracking-wide text-faint">
+          </ItemMedia>
+          <ItemContent className="gap-0.5 leading-tight">
+            <ItemDescription className="text-[0.74rem] font-medium uppercase tracking-wide text-faint">
               Saldo acumulado a favor de Luis
-            </p>
-            <p className="tnum mt-0.5 text-2xl font-semibold tracking-tight text-text">
+            </ItemDescription>
+            <ItemTitle className="tnum text-2xl font-semibold tracking-tight text-text">
               {formatCOP(acumuladoActual)}
-            </p>
-          </div>
-        </div>
+            </ItemTitle>
+          </ItemContent>
+        </Item>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex flex-wrap items-end gap-3">
             <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-none">
-              <label className="text-[0.72rem] text-faint">Desde</label>
-              <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="h-10 w-full min-w-0 sm:w-[9.5rem]" />
+              <Label htmlFor="luis-desde" className="text-[0.72rem] font-normal text-faint">Desde</Label>
+              <DatePicker id="luis-desde" value={desde} onChange={setDesde} placeholder="Desde" className="h-10 w-full min-w-0 sm:w-[9.5rem]" />
             </div>
             <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-none">
-              <label className="text-[0.72rem] text-faint">Hasta</label>
-              <Input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} className="h-10 w-full min-w-0 sm:w-[9.5rem]" />
+              <Label htmlFor="luis-hasta" className="text-[0.72rem] font-normal text-faint">Hasta</Label>
+              <DatePicker id="luis-hasta" value={hasta} onChange={setHasta} placeholder="Hasta" className="h-10 w-full min-w-0 sm:w-[9.5rem]" />
             </div>
             {(desde || hasta) && (
-              <Button variant="ghost" size="icon" aria-label="Limpiar fechas" title="Limpiar fechas" onClick={() => { setDesde(""); setHasta(""); }} className="text-muted hover:text-foreground">
+              <IconButton label="Limpiar fechas" onClick={() => { setDesde(""); setHasta(""); }} className="text-muted hover:text-foreground">
                 <X size={17} />
-              </Button>
+              </IconButton>
             )}
           </div>
           <Button variant="secondary" size="sm" onClick={exportar} disabled={filtrados.length === 0}>
@@ -81,11 +90,15 @@ export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
       </Card>
 
       {filtrados.length === 0 ? (
-        <Card className="flex flex-col items-center gap-2 py-16 text-center">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-surface-2 text-faint">
-            <MagnifyingGlass size={20} />
-          </div>
-          <p className="text-sm text-muted">No hay movimientos de Luis en este rango.</p>
+        <Card>
+          <Empty className="py-16 md:py-16">
+            <EmptyHeader>
+              <EmptyMedia variant="icon" className="rounded-full text-faint">
+                <MagnifyingGlass size={20} />
+              </EmptyMedia>
+              <EmptyDescription>No hay movimientos de Luis en este rango.</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         </Card>
       ) : (
         <>
@@ -94,7 +107,7 @@ export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
           {filtrados.map((d) => (
             <Card
               key={d.fecha}
-              className="p-4"
+              className="cursor-pointer"
               role="link"
               tabIndex={0}
               onClick={() => router.push(`/luis?fecha=${d.fecha}`)}
@@ -105,70 +118,71 @@ export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
                 }
               }}
             >
-              <div className="flex items-start justify-between gap-3">
-                <p className="text-[0.95rem] font-semibold text-text">{formatFecha(d.fecha)}</p>
-                <div className="shrink-0 text-right">
+              <CardHeader className="px-4 pt-4 pb-3 sm:px-4 sm:pt-4">
+                <CardTitle className="text-text">{formatFecha(d.fecha)}</CardTitle>
+                <CardAction className="text-right">
                   <p className="text-[0.66rem] uppercase tracking-wide text-faint">Acumulado a favor</p>
                   <p className="tnum text-[1.35rem] font-semibold text-text">{formatCOP(d.acumulado)}</p>
+                </CardAction>
+              </CardHeader>
+              <CardContent className="px-4 pb-4 sm:px-4 sm:pb-4">
+                <Separator />
+                <div className="grid grid-cols-2 gap-x-3.5 gap-y-2 pt-3 text-[0.8rem]">
+                  <div className="flex min-w-0 items-baseline justify-between gap-2">
+                    <span className="text-faint">Consignaciones</span>
+                    <span className="tnum text-text">{formatCOP(d.consignaciones)}</span>
+                  </div>
+                  <div className="flex min-w-0 items-baseline justify-between gap-2">
+                    <span className="text-faint">Cupo</span>
+                    <span className="tnum text-text">{formatCOP(d.compensaciones)}</span>
+                  </div>
+                  <div className="col-span-2 flex min-w-0 items-baseline justify-between gap-2">
+                    <span className="text-faint">Del día</span>
+                    <span className="tnum font-medium text-text">{formatCOP(d.saldoDia)}</span>
+                  </div>
                 </div>
-              </div>
-              <div className="mt-3 grid grid-cols-2 gap-x-3.5 gap-y-2 border-t border-line pt-3 text-[0.8rem]">
-                <div className="flex min-w-0 items-baseline justify-between gap-2">
-                  <span className="text-faint">Consignaciones</span>
-                  <span className="tnum text-text">{formatCOP(d.consignaciones)}</span>
-                </div>
-                <div className="flex min-w-0 items-baseline justify-between gap-2">
-                  <span className="text-faint">Cupo</span>
-                  <span className="tnum text-text">{formatCOP(d.compensaciones)}</span>
-                </div>
-                <div className="col-span-2 flex min-w-0 items-baseline justify-between gap-2">
-                  <span className="text-faint">Del día</span>
-                  <span className="tnum font-medium text-text">{formatCOP(d.saldoDia)}</span>
-                </div>
-              </div>
+              </CardContent>
             </Card>
           ))}
         </div>
 
         <Card className="hidden overflow-hidden p-0 md:block">
-          <div>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-line text-left text-[0.72rem] uppercase tracking-wide text-faint">
-                  <th className="px-5 py-3 font-medium">Fecha</th>
-                  <th className="px-3 py-3 text-right font-medium">Consignaciones</th>
-                  <th className="px-3 py-3 text-right font-medium">Compensaciones</th>
-                  <th className="px-3 py-3 text-right font-medium">Saldo del día</th>
-                  <th className="px-3 py-3 text-right font-medium">Acumulado a favor</th>
-                  <th className="w-10" />
-                </tr>
-              </thead>
-              <tbody>
-                {filtrados.map((d, i) => (
-                  <motion.tr
-                    key={d.fecha}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: Math.min(i * 0.02, 0.3) }}
-                    onClick={() => router.push(`/luis?fecha=${d.fecha}`)}
-                    className="cursor-pointer border-b border-line/60 transition-colors hover:bg-surface-2"
-                    title="Ver el día y abrir el reporte" aria-label="Ver el día y abrir el reporte"
-                  >
-                    <td className="whitespace-nowrap px-5 py-3 font-medium text-text">{formatFecha(d.fecha)}</td>
-                    <td className="tnum px-3 py-3 text-right text-muted">{formatCOP(d.consignaciones)}</td>
-                    <td className="tnum px-3 py-3 text-right text-muted">{formatCOP(d.compensaciones)}</td>
-                    <td className={cn("tnum px-3 py-3 text-right font-medium", d.saldoDia < 0 ? "text-danger" : "text-text")}>
-                      {formatCOP(d.saldoDia)}
-                    </td>
-                    <td className="tnum px-3 py-3 text-right font-semibold text-text">{formatCOP(d.acumulado)}</td>
-                    <td className="pr-4 text-right">
-                      <CaretRight size={15} className="text-faint" />
-                    </td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <Table>
+            <TableHeader>
+              <TableRow className="border-line text-[0.72rem] uppercase tracking-wide hover:bg-transparent">
+                <TableHead className="h-auto px-5 py-3 text-faint">Fecha</TableHead>
+                <TableHead className="h-auto px-3 py-3 text-right text-faint">Consignaciones</TableHead>
+                <TableHead className="h-auto px-3 py-3 text-right text-faint">Compensaciones</TableHead>
+                <TableHead className="h-auto px-3 py-3 text-right text-faint">Saldo del día</TableHead>
+                <TableHead className="h-auto px-3 py-3 text-right text-faint">Acumulado a favor</TableHead>
+                <TableHead className="w-10" />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtrados.map((d, i) => (
+                <MotionRow
+                  key={d.fecha}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: Math.min(i * 0.02, 0.3) }}
+                  onClick={() => router.push(`/luis?fecha=${d.fecha}`)}
+                  className="cursor-pointer border-line/60 hover:bg-surface-2"
+                  title="Ver el día y abrir el reporte" aria-label="Ver el día y abrir el reporte"
+                >
+                  <TableCell className="px-5 py-3 font-medium text-text">{formatFecha(d.fecha)}</TableCell>
+                  <TableCell className="tnum px-3 py-3 text-right text-muted">{formatCOP(d.consignaciones)}</TableCell>
+                  <TableCell className="tnum px-3 py-3 text-right text-muted">{formatCOP(d.compensaciones)}</TableCell>
+                  <TableCell className={cn("tnum px-3 py-3 text-right font-medium", d.saldoDia < 0 ? "text-danger" : "text-text")}>
+                    {formatCOP(d.saldoDia)}
+                  </TableCell>
+                  <TableCell className="tnum px-3 py-3 text-right font-semibold text-text">{formatCOP(d.acumulado)}</TableCell>
+                  <TableCell className="pr-4 text-right">
+                    <CaretRight size={15} className="text-faint" />
+                  </TableCell>
+                </MotionRow>
+              ))}
+            </TableBody>
+          </Table>
         </Card>
         </>
       )}

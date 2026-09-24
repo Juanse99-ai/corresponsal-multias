@@ -4,6 +4,7 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { Logo } from "@/components/brand";
+import { Item, ItemActions, ItemContent, ItemMedia } from "@/components/ui/item";
 import { formatCOP } from "@/lib/format";
 import { reduced } from "@/components/fx/reduced";
 
@@ -65,16 +66,21 @@ export function LoginHero() {
         <div className="absolute inset-0 flex flex-col px-2 pt-8">
           <div className="lh-track flex flex-col gap-3">
             {[...STREAM, ...STREAM].map((s, i) => (
-              <div
+              <Item
                 key={i}
-                className="flex items-center justify-between rounded-2xl border border-[oklch(1_0_0/0.12)] bg-[oklch(1_0_0/0.06)] px-4 py-3"
+                size="sm"
+                className="flex-nowrap gap-2 rounded-2xl border-[oklch(1_0_0/0.12)] bg-[oklch(1_0_0/0.06)] px-4 py-3"
               >
-                <div className="flex items-center gap-2">
+                <ItemMedia>
                   <span className="h-1.5 w-1.5 rounded-full bg-nav-accent" />
+                </ItemMedia>
+                <ItemContent>
                   <span className="tnum text-[0.72rem] text-nav-faint">{s.hora}</span>
-                </div>
-                <span className="tnum text-[0.82rem] font-medium text-nav-text">{formatCOP(s.monto)}</span>
-              </div>
+                </ItemContent>
+                <ItemActions>
+                  <span className="tnum text-[0.82rem] font-medium text-nav-text">{formatCOP(s.monto)}</span>
+                </ItemActions>
+              </Item>
             ))}
           </div>
         </div>

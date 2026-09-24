@@ -8,7 +8,14 @@ import { Button } from "@/components/ui/button";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
+import { IconButton } from "@/components/ui/icon-button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { MessageGroup, Message, MessageContent, MessageFooter } from "@/components/ui/message";
+import { Bubble, BubbleContent } from "@/components/ui/bubble";
+import { Empty, EmptyHeader, EmptyMedia, EmptyDescription } from "@/components/ui/empty";
 import { ErrorNotice } from "@/components/ui/error-notice";
 import { cn } from "@/lib/utils";
 import { formatCOP, formatFechaCorta, formatHora, hoyISO } from "@/lib/format";
@@ -100,13 +107,14 @@ export function CruceChat({
   // Al llegar el resultado, bajar al resumen como en un chat.
   const hiloRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const el = hiloRef.current;
+    // El que hace scroll es el viewport interno del ScrollArea.
+    const el = hiloRef.current?.querySelector<HTMLElement>("[data-slot=scroll-area-viewport]");
     if (cruce && el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [cruce]);
 
   return (
     <Card className="flex flex-col overflow-hidden p-0">
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-line px-5 py-4 sm:items-center sm:px-6">
+      <div className="flex flex-wrap items-end justify-between gap-3 px-5 py-4 sm:items-center sm:px-6">
         <h3 className="text-[0.95rem] font-semibold tracking-tight text-text">Cruce con el grupo</h3>
         <div className="flex flex-wrap items-end gap-2">
           {remitentes.length > 1 && (
@@ -126,33 +134,41 @@ export function CruceChat({
           )}
           <div className="flex w-[10.5rem] shrink-0 flex-col gap-1.5">
             <Label htmlFor="fecha-cruce">Día a revisar</Label>
-            <Input
+            <DatePicker
               id="fecha-cruce"
-              type="date"
               value={fecha}
-              onChange={(e) => { setFecha(e.target.value); setRegistrados(null); }}
+              onChange={(iso) => { setFecha(iso); setRegistrados(null); }}
               className="w-full min-w-0"
             />
           </div>
         </div>
       </div>
+      <Separator />
 
       {/* Hilo: los pedidos se leen como en el grupo de WhatsApp. */}
-      <div ref={hiloRef} className="relative max-h-[30rem] min-h-[14rem] overflow-y-auto bg-surface-2 px-3 pb-28 pt-4 sm:px-5">
+      <ScrollArea
+        ref={hiloRef}
+        className="bg-surface-2 [&>[data-slot=scroll-area-viewport]]:max-h-[30rem] [&>[data-slot=scroll-area-viewport]]:min-h-[14rem]"
+      >
+       <div className="px-3 pb-28 pt-4 sm:px-5">
         {lectura.movimientos.length === 0 ? (
-          <div className="flex min-h-[10rem] flex-col items-center justify-center gap-2 text-center">
-            <ChatsCircle size={28} className="text-faint" />
-            <p className="max-w-[18rem] text-[0.84rem] text-muted">
-              Pega o sube el chat del grupo para ver los pedidos de Sr. Luis.
-            </p>
-          </div>
+          <Empty className="min-h-[10rem] gap-2 p-0 md:p-0">
+            <EmptyHeader>
+              <EmptyMedia className="mb-0 text-faint">
+                <ChatsCircle size={28} />
+              </EmptyMedia>
+              <EmptyDescription className="max-w-[18rem] text-[0.84rem]">
+                Pega o sube el chat del grupo para ver los pedidos de Sr. Luis.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         ) : (
           <>
             <div className="sticky top-0 z-10 mb-3 flex justify-center">
-              <span className="lg-panel rounded-full px-3 py-1 text-[0.72rem] font-medium text-muted">
+              <Badge variant="outline" className="lg-panel px-3 py-1 text-[0.72rem] text-muted">
                 {formatFechaCorta(fecha)}
                 {nombreLuis ? ` · ${nombreLuis}` : ""}
-              </span>
+              </Badge>
             </div>
 
             {pedidos.length === 0 ? (
@@ -160,29 +176,39 @@ export function CruceChat({
                 El chat no trae pedidos del {formatFechaCorta(fecha)}. Cambia la fecha.
               </p>
             ) : (
-              <ul className="flex flex-col gap-1.5">
+              <MessageGroup role="list" className="gap-1.5">
                 {pedidos.map((p, i) => {
                   const est = estadoDe(p);
                   return (
-                    <motion.li
+                    <motion.div
                       key={i}
+                      role="listitem"
                       initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: est === "repetido" ? 0.55 : 1, y: 0 }}
                       transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1], delay: Math.min(i, 12) * 0.02 }}
-                      className="flex items-end gap-2"
                     >
-                      <div className="chat-bubble max-w-[85%] px-3.5 py-2 sm:max-w-[70%]">
-                        <p className={cn("tnum text-[0.95rem] font-semibold text-text", est === "repetido" && "line-through")}>
-                          {formatCOP(p.monto)}
-                        </p>
-                        {p.nota && <p className="text-[0.8rem] leading-snug text-muted">{p.nota}</p>}
-                        <p className="tnum mt-0.5 text-right text-[0.68rem] text-faint">{p.hora ? formatHora(p.hora) : ""}</p>
-                      </div>
-                      {est && <Marca estado={est} />}
-                    </motion.li>
+                      <Message className="items-end">
+                        <MessageContent className="w-auto max-w-[85%] gap-0.5 sm:max-w-[70%]">
+                          <Bubble variant="outline" className="max-w-full">
+                            <BubbleContent className="rounded-2xl rounded-bl-md px-3.5 shadow-xs">
+                              <p className={cn("tnum text-[0.95rem] font-semibold text-text", est === "repetido" && "line-through")}>
+                                {formatCOP(p.monto)}
+                              </p>
+                              {p.nota && <p className="text-[0.8rem] leading-snug text-muted">{p.nota}</p>}
+                            </BubbleContent>
+                          </Bubble>
+                          {p.hora && (
+                            <MessageFooter className="tnum text-[0.68rem] font-normal text-faint">
+                              {formatHora(p.hora)}
+                            </MessageFooter>
+                          )}
+                        </MessageContent>
+                        {est && <Marca estado={est} />}
+                      </Message>
+                    </motion.div>
                   );
                 })}
-              </ul>
+              </MessageGroup>
             )}
 
             <AnimatePresence initial={false}>
@@ -192,8 +218,9 @@ export function CruceChat({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 6 }}
                   transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                  className="mx-auto mt-5 max-w-[26rem] rounded-[1.4rem] border border-line bg-surface p-4"
+                  className="mx-auto mt-5 max-w-[26rem]"
                 >
+                 <Card className="rounded-[1.4rem] p-4 shadow-none">
                   <div className="grid grid-cols-3 gap-3 text-center">
                     <div>
                       <p className="text-[0.68rem] uppercase tracking-wide text-faint">Pidió</p>
@@ -241,23 +268,25 @@ export function CruceChat({
                       sin contar
                     </p>
                   )}
+                 </Card>
                 </motion.div>
               )}
             </AnimatePresence>
           </>
         )}
-      </div>
+       </div>
+      </ScrollArea>
 
       {/* Compositor flotante de vidrio, como la barra de escribir de un chat. */}
       <div className="relative -mt-24 px-2 pb-2 sm:px-3 sm:pb-3">
         <ErrorNotice message={error} className="mb-2" />
         <div className="lg-panel flex items-end gap-1.5 rounded-[1.6rem] p-1.5">
-          <Button variant="ghost" size="icon" aria-label="Pegar el chat" title="Pegar el chat" onClick={pegar} className="text-muted hover:text-foreground">
+          <IconButton label="Pegar el chat" onClick={pegar} className="text-muted hover:text-foreground">
             <ClipboardText size={19} />
-          </Button>
-          <Button variant="ghost" size="icon" aria-label="Subir chat exportado (.txt)" title="Subir chat exportado (.txt)" onClick={() => archivoRef.current?.click()} className="text-muted hover:text-foreground">
+          </IconButton>
+          <IconButton label="Subir chat exportado (.txt)" onClick={() => archivoRef.current?.click()} className="text-muted hover:text-foreground">
             <FileArrowUp size={19} />
-          </Button>
+          </IconButton>
           <input ref={archivoRef} type="file" accept=".txt,text/plain" onChange={subir} className="hidden" aria-label="Subir chat exportado" />
           <Textarea
             value={texto}
@@ -294,10 +323,14 @@ function Marca({ estado }: { estado: "ok" | "falta" | "repetido" }) {
     return <CheckCircle size={18} weight="fill" className="mb-1 shrink-0 text-success" aria-label="Registrado" />;
   if (estado === "falta")
     return (
-      <span className="mb-1 inline-flex shrink-0 items-center gap-1 rounded-full bg-danger-soft px-2 py-0.5 text-[0.7rem] font-medium text-danger">
-        <Warning size={12} weight="fill" />
+      <Badge variant="danger" className="mb-1 text-[0.7rem]">
+        <Warning weight="fill" />
         Falta
-      </span>
+      </Badge>
     );
-  return <span className="mb-1 shrink-0 text-[0.7rem] text-faint">Repetido</span>;
+  return (
+    <Badge variant="ghost" className="mb-1 px-0 text-[0.7rem] font-normal text-faint">
+      Repetido
+    </Badge>
+  );
 }

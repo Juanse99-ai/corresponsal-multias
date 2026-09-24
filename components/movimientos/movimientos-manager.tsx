@@ -20,8 +20,11 @@ import {
   X,
 } from "@phosphor-icons/react/dist/ssr";
 import type { Icon } from "@phosphor-icons/react";
-import { Card } from "@/components/ui/card";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/ui/icon-button";
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { ChoiceChip } from "@/components/ui/choice-chip";
 import { Label } from "@/components/ui/label";
@@ -144,8 +147,13 @@ export function MovimientosManager({
     <div className="grid gap-5 lg:grid-cols-[1fr_400px] lg:items-start">
       {/* Registro + lista */}
       <div className="flex flex-col gap-5">
-        <Card className="p-5 sm:p-6">
-          <h2 className="text-[0.95rem] font-semibold tracking-tight text-text">Registrar movimiento</h2>
+        <Card>
+          <CardHeader className="pb-0">
+            <CardTitle className="text-text">
+              <h2>Registrar movimiento</h2>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
 
           {bloqueado && (
             <Alert variant="muted" className="mt-4">
@@ -188,37 +196,46 @@ export function MovimientosManager({
             <Plus size={18} weight="bold" />
             {pending ? "Registrando…" : `Registrar ${TIPOS[tipo].corto.toLowerCase()}`}
           </Button>
+          </CardContent>
         </Card>
 
-        <Card className="p-5 sm:p-6">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-[0.95rem] font-semibold tracking-tight text-text">Movimientos de hoy</h3>
-            <span className="text-[0.72rem] text-faint">{movimientos.length}</span>
-          </div>
+        <Card>
+          <CardHeader className="items-center pb-3">
+            <CardTitle className="text-text">
+              <h3>Movimientos de hoy</h3>
+            </CardTitle>
+            <CardAction className="row-span-1 self-center text-[0.72rem] text-faint">{movimientos.length}</CardAction>
+          </CardHeader>
+          <CardContent>
 
           {movimientos.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 rounded-[1rem] border border-dashed border-line-strong py-12 text-center">
-              <ArrowDown size={20} className="text-faint" />
-              <p className="text-sm text-muted">Aún no hay movimientos registrados.</p>
-            </div>
+            <Empty className="gap-2 rounded-[1rem] border border-dashed border-line-strong py-12 md:py-12">
+              <EmptyHeader>
+                <EmptyMedia className="mb-0 text-faint">
+                  <ArrowDown size={20} />
+                </EmptyMedia>
+                <EmptyTitle className="text-sm font-normal tracking-normal text-muted">Aún no hay movimientos registrados.</EmptyTitle>
+              </EmptyHeader>
+            </Empty>
           ) : (
-            <ul className="flex flex-col divide-y divide-line">
+            <ItemGroup className="divide-y divide-line">
               <AnimatePresence initial={false}>
                 {movimientos.map((m) => {
                   const Ti = TIPOS[m.tipo as Tipo] ?? TIPOS.consignacion_nequi;
                   const nuevo = !yaEstaban.has(m.id) && !reduced();
                   return (
-                    <motion.li
+                    <motion.div
                       key={m.id}
+                      role="listitem"
                       layout
                       initial={{ opacity: 0, y: -8 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ type: "spring", stiffness: 320, damping: 30 }}
-                      className={cn("rounded-lg py-2.5", nuevo && "t-flash-ok")}
+                      className={cn("rounded-lg", nuevo && "t-flash-ok")}
                     >
                       {editId === m.id ? (
-                        <div className="flex flex-col gap-2.5">
+                        <div className="flex flex-col gap-2.5 py-2.5">
                           <div className="flex flex-wrap gap-1.5">
                             {(Object.keys(TIPOS) as Tipo[]).map((t) => {
                               const Te = TIPOS[t];
@@ -250,25 +267,24 @@ export function MovimientosManager({
                               <Check size={16} weight="bold" />
                               Guardar
                             </Button>
-                            <Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setEditId(null)} disabled={pending} className="text-muted hover:text-foreground">
+                            <IconButton label="Cancelar" onClick={() => setEditId(null)} disabled={pending} className="text-muted hover:text-foreground">
                               <X size={17} />
-                            </Button>
+                            </IconButton>
                           </div>
                         </div>
                       ) : (
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="flex min-w-0 flex-1 items-center gap-3">
-                            <div
+                        <Item className="flex-nowrap gap-3 rounded-none px-0 py-2.5">
+                            <ItemMedia
                               className={cn(
-                                "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
+                                "size-9 rounded-full",
                                 Ti.salida ? "bg-danger-soft text-danger" : "bg-accent-soft text-accent-strong",
                               )}
                             >
                               <Ti.icon size={15} weight="bold" />
-                            </div>
-                            <div className="min-w-0 leading-tight">
-                              <p className="tnum text-[0.92rem] font-medium text-text">{formatCOP(m.monto)}</p>
-                              <p className="flex items-center gap-1.5 text-[0.7rem] text-faint">
+                            </ItemMedia>
+                            <ItemContent className="min-w-0 gap-0 leading-tight">
+                              <ItemTitle className="tnum text-[0.92rem] leading-tight text-text">{formatCOP(m.monto)}</ItemTitle>
+                              <ItemDescription className="flex items-center gap-1.5 text-[0.7rem] leading-tight text-faint">
                                 <span className="truncate">{Ti.corto}</span>
                                 {m.hora && (
                                   <span className="inline-flex shrink-0 items-center gap-1">
@@ -278,68 +294,77 @@ export function MovimientosManager({
                                 )}
                                 {m.convenio && <span className="truncate">· conv. {m.convenio}</span>}
                                 {m.cliente && <span className="truncate">· {m.cliente}</span>}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex shrink-0 items-center gap-1">
+                              </ItemDescription>
+                            </ItemContent>
+                          <ItemActions className="shrink-0 gap-1">
                             {!bloqueado && (
-                              <Button variant="ghost" size="icon" aria-label="Editar" title="Editar" onClick={() => abrirEdicion(m)} disabled={pending} className="text-muted hover:text-foreground">
+                              <IconButton label="Editar" onClick={() => abrirEdicion(m)} disabled={pending} className="text-muted hover:text-foreground">
                                 <PencilSimple size={17} />
-                              </Button>
+                              </IconButton>
                             )}
                             {isAdmin && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                aria-label="Eliminar"
-                                title="Eliminar"
+                              <IconButton
+                                label="Eliminar"
                                 onClick={() => setPorBorrar({ id: m.id, monto: m.monto })}
                                 disabled={pending || bloqueado}
                                 className="text-muted hover:text-destructive"
                               >
                                 <Trash size={17} />
-                              </Button>
+                              </IconButton>
                             )}
-                          </div>
-                        </div>
+                          </ItemActions>
+                        </Item>
                       )}
-                    </motion.li>
+                    </motion.div>
                   );
                 })}
               </AnimatePresence>
-            </ul>
+            </ItemGroup>
           )}
+          </CardContent>
         </Card>
       </div>
 
       {/* Totales por canal */}
       <div className="flex flex-col gap-4 lg:sticky lg:top-8">
-        <Card className="p-5 sm:p-6">
-          <p className="mb-3 text-[0.78rem] font-medium uppercase tracking-wide text-faint">Totales del día</p>
-          <div className="flex flex-col divide-y divide-line">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-[0.78rem] font-medium uppercase tracking-wide text-faint">Totales del día</CardTitle>
+          </CardHeader>
+          <CardContent>
+          <ItemGroup className="divide-y divide-line">
             {(Object.keys(TIPOS) as Tipo[]).map((t) => {
               const Ti = TIPOS[t];
               return (
-                <div key={t} className="flex items-center justify-between py-2.5">
-                  <span className="flex min-w-0 items-center gap-2 text-sm text-muted">
+                <Item key={t} role="listitem" className="flex-nowrap gap-2 rounded-none px-0 py-2.5">
+                  <ItemMedia>
                     <Ti.icon size={15} className={cn("shrink-0", Ti.salida ? "text-danger" : "text-accent")} />
-                    <span className="truncate">{Ti.label}</span>
-                  </span>
-                  <span className="tnum shrink-0 text-[0.92rem] font-semibold text-text">
+                  </ItemMedia>
+                  <ItemContent className="min-w-0">
+                    <ItemTitle className="block w-full truncate font-normal text-muted">{Ti.label}</ItemTitle>
+                  </ItemContent>
+                  <ItemActions className="tnum shrink-0 text-[0.92rem] font-semibold text-text">
                     <AnimatedMoney value={totales[t]} />
-                  </span>
-                </div>
+                  </ItemActions>
+                </Item>
               );
             })}
-          </div>
+          </ItemGroup>
+          </CardContent>
         </Card>
 
-        <Link href="/cuadre" className="group">
-          <Card className="flex items-center justify-between p-5 transition-colors hover:border-line-strong">
-            <p className="text-[0.88rem] font-medium text-text">Cuadre del día</p>
-            <ArrowRight size={18} className="text-accent transition-transform group-hover:translate-x-1" />
-          </Card>
-        </Link>
+        <Card className="group transition-colors hover:border-line-strong">
+          <Item asChild className="rounded-[inherit] p-5">
+            <Link href="/cuadre">
+              <ItemContent>
+                <ItemTitle className="text-[0.88rem] text-text">Cuadre del día</ItemTitle>
+              </ItemContent>
+              <ItemActions>
+                <ArrowRight size={18} className="text-accent transition-transform group-hover:translate-x-1" />
+              </ItemActions>
+            </Link>
+          </Item>
+        </Card>
       </div>
 
       <ConfirmDialog

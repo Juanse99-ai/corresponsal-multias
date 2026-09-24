@@ -8,7 +8,6 @@ import {
   Trash,
   HandCoins,
   CaretDown,
-  CheckCircle,
   ArrowCounterClockwise,
   Tag,
   Check,
@@ -16,9 +15,26 @@ import {
   Eraser,
   ClockCounterClockwise,
 } from "@phosphor-icons/react/dist/ssr";
-import { Card } from "@/components/ui/card";
+import { toast } from "sonner";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertTitle } from "@/components/ui/alert";
+import { IconButton } from "@/components/ui/icon-button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemFooter,
+  ItemGroup,
+  ItemSeparator,
+  ItemTitle,
+} from "@/components/ui/item";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChoiceChip } from "@/components/ui/choice-chip";
 import { MedioPicker } from "@/components/prestamos/medio-picker";
@@ -82,12 +98,16 @@ export function PrestamosManager({
         </div>
 
         {deben.length === 0 ? (
-          <Card className="flex flex-col items-center gap-2 py-14 text-center">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-surface-2 text-faint">
-              <HandCoins size={20} />
-            </div>
-            <p className="text-sm text-muted">Nadie tiene préstamos pendientes.</p>
-            <p className="text-[0.78rem] text-faint">Registra uno en el panel de la derecha.</p>
+          <Card>
+            <Empty className="py-14 md:py-14">
+              <EmptyHeader>
+                <EmptyMedia variant="icon" className="rounded-full text-faint">
+                  <HandCoins size={20} />
+                </EmptyMedia>
+                <EmptyTitle className="text-sm font-normal text-muted">Nadie tiene préstamos pendientes.</EmptyTitle>
+                <EmptyDescription className="text-[0.78rem] text-faint">Registra uno en el panel de la derecha.</EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           </Card>
         ) : (
           <div className="flex flex-col gap-3">
@@ -106,17 +126,19 @@ export function PrestamosManager({
         )}
 
         {alDia.length > 0 && (
-          <details className="group mt-5">
-            <summary className="flex min-h-10 cursor-pointer items-center gap-2 rounded-full px-2 text-[0.84rem] text-muted transition-colors hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/45">
-              <CaretDown size={14} className="transition-transform group-open:rotate-180" />
-              {alDia.length} persona{alDia.length === 1 ? "" : "s"} al día
-            </summary>
-            <div className="mt-3 flex flex-col gap-3">
+          <Collapsible className="group/aldia mt-5">
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" size="sm" className="rounded-full px-2 text-[0.84rem] font-normal text-muted hover:text-text">
+                <CaretDown size={14} className="transition-transform group-data-[state=open]/aldia:rotate-180" />
+                {alDia.length} persona{alDia.length === 1 ? "" : "s"} al día
+              </Button>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="mt-3 flex flex-col gap-3">
               {alDia.map((g) => (
                 <PersonaCard key={g.key} grupo={g} isAdmin={isAdmin} origenes={origenes} defaultOpen={false} />
               ))}
-            </div>
-          </details>
+            </CollapsibleContent>
+          </Collapsible>
         )}
       </div>
 
@@ -148,17 +170,17 @@ function AddDeudaForm() {
   const [medio, setMedio] = useState<"efectivo" | "transferencia" | "registro" | null>(null);
   const [descripcion, setDescripcion] = useState("");
   const [fecha, setFecha] = useState(hoyISO());
-  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
 
   const personaFinal = persona === "Otro" ? otro.trim() : persona;
   const conceptoFinal = concepto === "Otro" ? conceptoOtro.trim() : concepto;
 
   function registrar() {
-    if (!personaFinal) return setMsg({ ok: false, text: "Indica la persona." });
-    if (monto <= 0) return setMsg({ ok: false, text: "Ingresa un monto." });
-    if (concepto === "Otro" && !conceptoOtro.trim()) return setMsg({ ok: false, text: "Especifica el concepto." });
-    if (!descripcion.trim()) return setMsg({ ok: false, text: "Escribe el motivo (para qué fue el préstamo)." });
-    if (!medio) return setMsg({ ok: false, text: "Indica cómo se lo diste: efectivo, transferencia o solo registro." });
+    if (!personaFinal) return setMsg("Indica la persona.");
+    if (monto <= 0) return setMsg("Ingresa un monto.");
+    if (concepto === "Otro" && !conceptoOtro.trim()) return setMsg("Especifica el concepto.");
+    if (!descripcion.trim()) return setMsg("Escribe el motivo (para qué fue el préstamo).");
+    if (!medio) return setMsg("Indica cómo se lo diste: efectivo, transferencia o solo registro.");
     setMsg(null);
     startTransition(async () => {
       const res = await crearDeuda({
@@ -175,19 +197,21 @@ function AddDeudaForm() {
         setOtro("");
         setConceptoOtro("");
         setMedio(null);
-        setMsg({ ok: true, text: "Préstamo registrado." });
+        toast.success("Préstamo registrado.");
         router.refresh();
       } else {
-        setMsg({ ok: false, text: res.error ?? "Error." });
+        setMsg(res.error ?? "Error.");
       }
     });
   }
 
   return (
-    <Card className="p-5 sm:p-6">
-      <h3 className="text-[0.95rem] font-semibold tracking-tight text-text">Nuevo préstamo</h3>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-text">Nuevo préstamo</CardTitle>
+      </CardHeader>
 
-      <div className="mt-5 flex flex-col gap-4">
+      <CardContent className="mt-2 flex flex-col gap-4">
         <div className="flex flex-col gap-2">
           <Label id="grp-persona">Persona</Label>
           <div role="group" aria-labelledby="grp-persona" className="flex flex-wrap gap-2">
@@ -243,24 +267,17 @@ function AddDeudaForm() {
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="deuda-fecha">Fecha</Label>
-            <Input id="deuda-fecha" type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} className="w-full sm:w-[9.5rem]" />
+            <DatePicker id="deuda-fecha" value={fecha} onChange={setFecha} className="w-full sm:w-[9.5rem]" />
           </div>
         </div>
 
-        {msg?.ok ? (
-          <Alert variant="success" role="status">
-            <CheckCircle weight="fill" />
-            <AlertTitle className="line-clamp-none font-normal">{msg.text}</AlertTitle>
-          </Alert>
-        ) : (
-          <ErrorNotice message={msg?.text ?? null} />
-        )}
+        <ErrorNotice message={msg} />
 
         <Button onClick={registrar} disabled={pending}>
           <Plus size={18} weight="bold" />
           {pending ? "Registrando…" : "Registrar préstamo"}
         </Button>
-      </div>
+      </CardContent>
     </Card>
   );
 }
@@ -287,15 +304,16 @@ function PersonaCard({
       <Card className="overflow-hidden">
         <CollapsibleTrigger className="flex w-full items-center gap-3 p-4 text-left transition-colors hover:bg-surface-2 active:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/45 sm:p-5"
         >
-          <span
-            aria-hidden="true"
-            className={cn(
-              "flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[0.78rem] font-semibold",
-              alDia ? "bg-success-soft text-success" : "bg-accent-soft text-accent-strong",
-            )}
-          >
-            {iniciales(grupo.persona)}
-          </span>
+          <Avatar size="lg" aria-hidden="true">
+            <AvatarFallback
+              className={cn(
+                "text-[0.78rem] font-semibold",
+                alDia ? "bg-success-soft text-success" : "bg-accent-soft text-accent-strong",
+              )}
+            >
+              {iniciales(grupo.persona)}
+            </AvatarFallback>
+          </Avatar>
 
           <span className="min-w-0 flex-1">
             <span className="flex min-w-0 items-center gap-2">
@@ -335,22 +353,26 @@ function PersonaCard({
 
         {/* Sin abonos la barra es un riel gris decorativo: no se dibuja. */}
         {(grupo.abonado > 0 || alDia) && (
-        <div className="mx-4 mb-4 h-1.5 overflow-hidden rounded-full bg-surface-2 sm:mx-5 sm:mb-5">
-          <motion.div
-            className={cn("h-full rounded-full", alDia ? "bg-success" : "bg-accent")}
-            initial={{ width: 0 }}
-            animate={{ width: `${pct}%` }}
-            transition={{ type: "spring", stiffness: 120, damping: 22 }}
+          <Progress
+            value={pct}
+            aria-label={`Abonado ${Math.round(pct)}%`}
+            className={cn(
+              "mx-4 mb-4 h-1.5 w-auto bg-surface-2 sm:mx-5 sm:mb-5 [&>[data-slot=progress-indicator]]:rounded-full [&>[data-slot=progress-indicator]]:duration-500",
+              alDia ? "[&>[data-slot=progress-indicator]]:bg-success" : "[&>[data-slot=progress-indicator]]:bg-accent",
+            )}
           />
-        </div>
         )}
 
         <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-          <ul className="flex flex-col divide-y divide-line border-t border-line">
-            {grupo.deudas.map((d) => (
-              <DeudaRow key={d.id} deuda={d} isAdmin={isAdmin} origenes={origenes} />
+          <Separator />
+          <ItemGroup>
+            {grupo.deudas.map((d, i) => (
+              <Fragment key={d.id}>
+                {i > 0 && <ItemSeparator />}
+                <DeudaRow deuda={d} isAdmin={isAdmin} origenes={origenes} />
+              </Fragment>
             ))}
-          </ul>
+          </ItemGroup>
         </CollapsibleContent>
       </Card>
       </Collapsible>
@@ -426,8 +448,8 @@ function AbonoItem({ abono, origenes }: { abono: AbonoRow; origenes: string[] })
   }
 
   return (
-    <li className="py-2">
-      <div className="flex items-center gap-2 text-[0.8rem]">
+    <Item role="listitem" size="sm" className="gap-0 rounded-none px-0 py-2">
+      <div className="flex basis-full items-center gap-2 text-[0.8rem]">
         <span className="shrink-0 text-faint">{formatFecha(abono.fecha)}</span>
         <Button
           size="sm"
@@ -452,7 +474,7 @@ function AbonoItem({ abono, origenes }: { abono: AbonoRow; origenes: string[] })
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="overflow-hidden"
+            className="basis-full overflow-hidden"
           >
             <div className="mt-2 flex flex-col gap-3 rounded-card border border-line bg-surface-2/60 p-3">
               <OrigenPicker
@@ -473,16 +495,16 @@ function AbonoItem({ abono, origenes }: { abono: AbonoRow; origenes: string[] })
                     Quitar origen
                   </Button>
                 )}
-                <Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setEditando(false)} className="ml-auto text-muted hover:text-foreground">
+                <IconButton label="Cancelar" onClick={() => setEditando(false)} className="ml-auto text-muted hover:text-foreground">
                   <X size={17} />
-                </Button>
+                </IconButton>
               </div>
               <ErrorNotice message={err} />
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </li>
+    </Item>
   );
 }
 
@@ -558,32 +580,33 @@ function DeudaRow({
   }
 
   return (
-    <li className="p-4 sm:px-5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-1.5">
+    <Item role="listitem" className="items-start gap-x-3 gap-y-0 rounded-none p-4 sm:px-5">
+          <ItemContent className="min-w-0 gap-0">
+            <ItemTitle className="flex-wrap gap-1.5 font-normal">
               {deuda.concepto && <Badge variant="secondary">{deuda.concepto}</Badge>}
               {saldada && <Badge variant="success">Pagado</Badge>}
               <span className="text-[0.72rem] text-faint">{formatFecha(deuda.fecha)}</span>
-            </div>
-            <p className="mt-1 truncate text-[0.82rem] text-muted">
+            </ItemTitle>
+            <ItemDescription className="mt-1 line-clamp-1 text-[0.82rem]">
               {deuda.descripcion || "Sin motivo anotado"}
-            </p>
-          </div>
-          <div className="shrink-0 text-right">
+            </ItemDescription>
+          </ItemContent>
+          <ItemActions className="block shrink-0 text-right">
             <p className={cn("tnum text-[0.95rem] font-semibold", saldada ? "text-success" : "text-text")}>
               {saldada ? formatCOP(0) : formatCOP(deuda.saldo)}
             </p>
             {deuda.abonado > 0 && (
               <p className="text-[0.68rem] text-faint">de {formatCOP(deuda.monto)}</p>
             )}
-          </div>
-        </div>
+          </ItemActions>
 
+        <div className="min-w-0 basis-full">
         {deuda.abonado > 0 && !saldada && (
-          <div className="mt-2.5 h-1 w-full overflow-hidden rounded-full bg-surface-2">
-            <div className="h-full rounded-full bg-success transition-[width] duration-500" style={{ width: `${pct}%` }} />
-          </div>
+          <Progress
+            value={pct}
+            aria-label={`Abonado ${Math.round(pct)}%`}
+            className="mt-2.5 h-1 bg-surface-2 [&>[data-slot=progress-indicator]]:rounded-full [&>[data-slot=progress-indicator]]:bg-success [&>[data-slot=progress-indicator]]:duration-500"
+          />
         )}
 
         {/* Solo cuando hay al menos un origen: si todo está sin etiqueta no dice nada nuevo. */}
@@ -605,7 +628,7 @@ function DeudaRow({
           </p>
         )}
 
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+        <ItemFooter className="mt-3 flex-wrap justify-start">
           {saldada ? (
             <Button size="sm" variant="secondary" onClick={() => setConfirmando("reabrir")} disabled={pending}>
               <ArrowCounterClockwise size={15} weight="bold" />
@@ -618,25 +641,29 @@ function DeudaRow({
             </Button>
           )}
           {deuda.abonos.length > 0 && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => setHistoryOpen((v) => !v)}
-              aria-expanded={historyOpen}
-              aria-label={`${historyOpen ? "Ocultar" : "Ver"} ${deuda.abonos.length} abono${deuda.abonos.length === 1 ? "" : "s"}`}
-              title="Abonos"
-            >
-              <ClockCounterClockwise size={16} />
-              <span className="tnum">{deuda.abonos.length}</span>
-              <CaretDown size={13} className={cn("transition-transform", historyOpen && "rotate-180")} />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setHistoryOpen((v) => !v)}
+                  aria-expanded={historyOpen}
+                  aria-label={`${historyOpen ? "Ocultar" : "Ver"} ${deuda.abonos.length} abono${deuda.abonos.length === 1 ? "" : "s"}`}
+                >
+                  <ClockCounterClockwise size={16} />
+                  <span className="tnum">{deuda.abonos.length}</span>
+                  <CaretDown size={13} className={cn("transition-transform", historyOpen && "rotate-180")} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Abonos</TooltipContent>
+            </Tooltip>
           )}
           {isAdmin && (
-            <Button variant="ghost" size="icon" aria-label="Eliminar préstamo" title="Eliminar préstamo" onClick={() => setConfirmando("borrar")} disabled={pending} className="ml-auto text-muted hover:text-destructive">
+            <IconButton label="Eliminar préstamo" onClick={() => setConfirmando("borrar")} disabled={pending} className="ml-auto text-muted hover:text-destructive">
               <Trash size={17} />
-            </Button>
+            </IconButton>
           )}
-        </div>
+        </ItemFooter>
 
         <AnimatePresence>
           {abonoOpen && !saldada && (
@@ -646,7 +673,8 @@ function DeudaRow({
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden"
             >
-              <div className="mt-3 flex flex-col gap-3 border-t border-line pt-3">
+              <Separator className="mt-3" />
+              <div className="flex flex-col gap-3 pt-3">
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor={`ab-${deuda.id}`}>Abono</Label>
                   <MoneyInput id={`ab-${deuda.id}`} value={abono} onValueChange={setAbono} onEnter={() => !pending && abonar()} />
@@ -677,14 +705,19 @@ function DeudaRow({
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden"
             >
-              <ul className="mt-3 flex flex-col divide-y divide-line border-t border-line pt-1">
-                {deuda.abonos.map((a) => (
-                  <AbonoItem key={a.id} abono={a} origenes={origenes} />
+              <Separator className="mt-3" />
+              <ItemGroup className="pt-1">
+                {deuda.abonos.map((a, i) => (
+                  <Fragment key={a.id}>
+                    {i > 0 && <ItemSeparator />}
+                    <AbonoItem abono={a} origenes={origenes} />
+                  </Fragment>
                 ))}
-              </ul>
+              </ItemGroup>
             </motion.div>
           )}
         </AnimatePresence>
+        </div>
 
       <ConfirmDialog
         open={confirmando !== null}
@@ -699,6 +732,6 @@ function DeudaRow({
         onConfirmar={confirmando === "reabrir" ? reabrir : borrar}
         onCancelar={() => setConfirmando(null)}
       />
-    </li>
+    </Item>
   );
 }

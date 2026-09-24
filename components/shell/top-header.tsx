@@ -16,6 +16,18 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import { Logo } from "@/components/brand";
 import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/ui/icon-button";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia } from "@/components/ui/empty";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemGroup,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item";
+import { Separator } from "@/components/ui/separator";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -203,18 +215,17 @@ function HeaderSearch({ personas }: { personas: string[] }) {
   return (
     <>
       {/* Celular: lupa de 44x44. El buscador completo se abre encima del encabezado. */}
-      <Button
+      <IconButton
         variant="secondary"
-        size="icon"
+        label="Buscar día o persona"
         onClick={() => {
           setMovil(true);
           requestAnimationFrame(() => inputRef.current?.focus());
         }}
-        aria-label="Buscar día o persona"
         className={cn("sm:hidden", movil && "invisible")}
       >
         <MagnifyingGlass size={18} />
-      </Button>
+      </IconButton>
 
     <form
       onSubmit={onSubmit}
@@ -244,7 +255,7 @@ function HeaderSearch({ personas }: { personas: string[] }) {
         />
         {movil && (
           <InputGroupAddon align="inline-end" className="sm:hidden">
-            <InputGroupButton size="icon-sm" aria-label="Cerrar buscador" title="Cerrar buscador" onClick={cerrarMovil}>
+            <InputGroupButton size="icon-sm" aria-label="Cerrar buscador" onClick={cerrarMovil}>
               <X weight="bold" />
             </InputGroupButton>
           </InputGroupAddon>
@@ -263,26 +274,38 @@ function HeaderSearch({ personas }: { personas: string[] }) {
             {!hayResultados ? (
               <p className="px-4 py-3 text-[0.8rem] text-faint">Escribe una fecha (17/06) o el nombre de una persona.</p>
             ) : (
-              <ul className="flex flex-col py-1">
+              <ItemGroup className="py-1">
                 {fechaISO && (
-                  <li>
-                    <Button variant="ghost" onClick={() => irAFecha(fechaISO)} className="h-auto min-h-11 w-full justify-start gap-2.5 rounded-none px-4 py-2.5 text-left font-normal hover:bg-surface-2/70">
-                      <CalendarBlank size={16} className="text-accent" />
-                      <span className="flex-1 text-[0.84rem] text-text">Ver el día {formatFecha(fechaISO)}</span>
-                      <ArrowRight size={14} className="text-faint" />
+                  <Item size="sm" asChild className={filaResultado}>
+                    <Button variant="ghost" onClick={() => irAFecha(fechaISO)}>
+                      <ItemMedia>
+                        <CalendarBlank size={16} className="text-accent" />
+                      </ItemMedia>
+                      <ItemContent>
+                        <ItemTitle className="text-[0.84rem] font-normal text-text">Ver el día {formatFecha(fechaISO)}</ItemTitle>
+                      </ItemContent>
+                      <ItemActions>
+                        <ArrowRight size={14} className="text-faint" />
+                      </ItemActions>
                     </Button>
-                  </li>
+                  </Item>
                 )}
                 {personasMatch.map((p) => (
-                  <li key={p}>
-                    <Button variant="ghost" onClick={irAPersona} className="h-auto min-h-11 w-full justify-start gap-2.5 rounded-none px-4 py-2.5 text-left font-normal hover:bg-surface-2/70">
-                      <HandCoins size={16} className="text-accent" />
-                      <span className="flex-1 text-[0.84rem] text-text">{p}</span>
-                      <span className="text-[0.7rem] text-faint">Préstamos</span>
+                  <Item key={p} size="sm" asChild className={filaResultado}>
+                    <Button variant="ghost" onClick={irAPersona}>
+                      <ItemMedia>
+                        <HandCoins size={16} className="text-accent" />
+                      </ItemMedia>
+                      <ItemContent>
+                        <ItemTitle className="text-[0.84rem] font-normal text-text">{p}</ItemTitle>
+                      </ItemContent>
+                      <ItemActions>
+                        <span className="text-[0.7rem] text-faint">Préstamos</span>
+                      </ItemActions>
                     </Button>
-                  </li>
+                  </Item>
                 ))}
-              </ul>
+              </ItemGroup>
             )}
       </PopoverContent>
       </Popover>
@@ -290,6 +313,10 @@ function HeaderSearch({ personas }: { personas: string[] }) {
     </>
   );
 }
+
+// Fila de resultado del buscador: <Item> sobre un <Button> fantasma a todo el ancho.
+const filaResultado =
+  "h-auto min-h-11 w-full flex-nowrap justify-start rounded-none border-0 text-left font-normal hover:bg-surface-2/70";
 
 const TONE: Record<Tone, { wrap: string; icon: typeof Warning }> = {
   danger: { wrap: "bg-danger-soft text-danger", icon: Warning },
@@ -305,12 +332,7 @@ export function HeaderAvisos({ avisos, urgentes }: { avisos: Aviso[]; urgentes: 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-      <Button
-        variant="secondary"
-        size="icon"
-        title="Avisos"
-        aria-label={avisos.length ? `Avisos (${avisos.length})` : "Avisos"}
-      >
+      <IconButton variant="secondary" label={avisos.length ? `Avisos (${avisos.length})` : "Avisos"}>
         <span className="relative inline-flex">
           <Bell size={18} weight={avisos.length ? "fill" : "regular"} />
           {avisos.length > 0 && (
@@ -323,43 +345,46 @@ export function HeaderAvisos({ avisos, urgentes }: { avisos: Aviso[]; urgentes: 
             />
           )}
         </span>
-      </Button>
+      </IconButton>
       </PopoverTrigger>
 
       <PopoverContent align="end" sideOffset={10} className="w-[min(22rem,84vw)] overflow-hidden p-0">
-            <div className="flex items-center justify-between border-b border-line/60 px-4 py-3">
+            <div className="flex items-center justify-between px-4 py-3">
               <p className="text-[0.84rem] font-semibold text-text">Avisos</p>
               <span className="text-[0.72rem] text-faint">{avisos.length}</span>
             </div>
+            <Separator className="bg-line/60" />
             {avisos.length === 0 ? (
-              <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
-                <CheckCircle size={22} weight="fill" className="text-success" />
-                <p className="text-[0.84rem] text-muted">Todo al día. Sin pendientes.</p>
-              </div>
+              <Empty className="gap-2 px-4 py-8 md:px-4 md:py-8">
+                <EmptyHeader className="gap-2">
+                  <EmptyMedia className="mb-0">
+                    <CheckCircle size={22} weight="fill" className="text-success" />
+                  </EmptyMedia>
+                  <EmptyDescription className="text-[0.84rem] text-muted">Todo al día. Sin pendientes.</EmptyDescription>
+                </EmptyHeader>
+              </Empty>
             ) : (
-              <ul className="flex flex-col">
+              <ItemGroup>
                 {avisos.map((a) => {
                   const T = TONE[a.tone];
                   return (
-                    <li key={a.id}>
-                      <Link
-                        href={a.href}
-                        onClick={() => setOpen(false)}
-                        className="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-surface-2/70"
-                      >
-                        <span className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full", T.wrap)}>
+                    <Item key={a.id} size="sm" asChild className="flex-nowrap items-start gap-3 rounded-none border-0 hover:bg-surface-2/70">
+                      <Link href={a.href} onClick={() => setOpen(false)}>
+                        <ItemMedia className={cn("size-8 rounded-full", T.wrap)}>
                           <T.icon size={15} weight="fill" />
-                        </span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block text-[0.85rem] font-medium text-text">{a.title}</span>
-                          <span className="block text-[0.76rem] text-faint">{a.detail}</span>
-                        </span>
-                        <ArrowRight size={14} className="mt-1 shrink-0 text-faint" />
+                        </ItemMedia>
+                        <ItemContent className="min-w-0 gap-0">
+                          <ItemTitle className="text-[0.85rem] font-medium text-text">{a.title}</ItemTitle>
+                          <ItemDescription className="text-[0.76rem] text-faint">{a.detail}</ItemDescription>
+                        </ItemContent>
+                        <ItemActions className="mt-1 self-start">
+                          <ArrowRight size={14} className="shrink-0 text-faint" />
+                        </ItemActions>
                       </Link>
-                    </li>
+                    </Item>
                   );
                 })}
-              </ul>
+              </ItemGroup>
             )}
       </PopoverContent>
     </Popover>

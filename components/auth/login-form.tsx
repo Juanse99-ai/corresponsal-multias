@@ -5,6 +5,9 @@ import { ArrowRight, Info } from "@phosphor-icons/react/dist/ssr";
 import { signInAction, type LoginState } from "@/app/login/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { ErrorNotice } from "@/components/ui/error-notice";
 import { cn } from "@/lib/utils";
@@ -16,7 +19,7 @@ const initial: LoginState = { error: null };
 const campo =
   "h-full w-0 min-w-0 flex-1 rounded-none border-0 bg-transparent px-0 shadow-none focus-visible:bg-transparent focus-visible:ring-0 dark:bg-transparent";
 const fila = "flex h-[3.375rem] items-center gap-2.5 px-4";
-const etiqueta = "w-[5.75rem] shrink-0 text-[0.95rem] font-medium text-text";
+const etiqueta = "w-[5.75rem] shrink-0 text-[0.95rem] leading-normal font-medium text-text";
 
 // Con un campo enfocado en el celular la banda de arriba se encoge. Si al tocar un
 // botón el campo soltara el foco, la banda crecería y el botón se correría antes de
@@ -38,7 +41,7 @@ export function LoginForm() {
       {/* Usuario y contraseña en un solo recuadro, como los ajustes del iPhone. */}
       <div className="overflow-hidden rounded-[1.1rem] border border-line-strong bg-surface shadow-[0_1px_2px_oklch(0.4_0.05_258/0.06)] transition-[border-color,box-shadow] duration-200 focus-within:border-accent/60 focus-within:shadow-[0_0_0_3px_oklch(0.515_0.172_258/0.12)]">
         <div className={fila}>
-          <label htmlFor="email" className={etiqueta}>Usuario</label>
+          <Label htmlFor="email" className={etiqueta}>Usuario</Label>
           <Input
             ref={usuarioRef}
             id="email"
@@ -53,8 +56,9 @@ export function LoginForm() {
             className={campo}
           />
         </div>
-        <div className={cn(fila, "border-t border-line", state.error && "bg-danger/5")}>
-          <label htmlFor="password" className={etiqueta}>Contraseña</label>
+        <Separator className="bg-line" />
+        <div className={cn(fila, state.error && "bg-danger/5")}>
+          <Label htmlFor="password" className={etiqueta}>Contraseña</Label>
           <Input
             id="password"
             name="password"
@@ -77,10 +81,10 @@ export function LoginForm() {
 
       <div aria-live="polite">
         {olvido && (
-          <p className="mt-2.5 flex items-start gap-2 px-1 text-[0.85rem] leading-snug text-muted">
-            <Info size={16} weight="fill" className="mt-px shrink-0 text-faint" />
-            Pídele a Juan que te la restablezca.
-          </p>
+          <Alert variant="muted" className="mt-2.5">
+            <Info weight="fill" />
+            <AlertDescription className="text-[0.85rem] leading-snug">Pídele a Juan que te la restablezca.</AlertDescription>
+          </Alert>
         )}
       </div>
 

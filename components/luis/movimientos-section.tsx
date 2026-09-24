@@ -1,12 +1,28 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition, type ChangeEvent } from "react";
+import { Fragment, useMemo, useRef, useState, useTransition, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Trash, PencilSimple, Clock, ArrowDown, Receipt, CheckCircle, WhatsappLogo, ClipboardText, FileArrowUp, Warning, Check, X } from "@phosphor-icons/react/dist/ssr";
-import { Card } from "@/components/ui/card";
+import { toast } from "sonner";
+import { Plus, Trash, PencilSimple, Clock, ArrowDown, Receipt, WhatsappLogo, ClipboardText, FileArrowUp, Warning, Check, X, CaretDown } from "@phosphor-icons/react/dist/ssr";
+import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertTitle } from "@/components/ui/alert";
+import { IconButton } from "@/components/ui/icon-button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import { Empty, EmptyHeader, EmptyMedia, EmptyDescription } from "@/components/ui/empty";
+import {
+  ItemGroup,
+  Item,
+  ItemMedia,
+  ItemContent,
+  ItemTitle,
+  ItemDescription,
+  ItemActions,
+  ItemSeparator,
+} from "@/components/ui/item";
+import { Alert } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ChoiceChip } from "@/components/ui/choice-chip";
 import { Label } from "@/components/ui/label";
@@ -93,8 +109,6 @@ export function MovimientosSection({
   const [hora, setHora] = useState(horaBogotaHHMM);
   const [nota, setNota] = useState("");
   const [error, setError] = useState<string | null>(null);
-  // Acuse visible: el destello de fila dura un segundo y con reduced-motion no existe.
-  const [okMsg, setOkMsg] = useState<string | null>(null);
   // Confirmación propia en vez de window.confirm (que en la PWA de iOS corta del todo).
   const [porBorrar, setPorBorrar] = useState<MovimientoItem | null>(null);
 
@@ -157,15 +171,14 @@ export function MovimientosSection({
   // Topes reales del negocio: el datáfono por consignación, el banco por transferencia.
   const tope = tono === "consig" ? TOPE_CONSIGNACION : TOPE_COMPENSACION;
 
+  // Acuse visible: el destello de fila dura un segundo y con reduced-motion no existe.
   function avisarOk(texto: string) {
-    setOkMsg(texto);
-    setTimeout(() => setOkMsg(null), 4000);
+    toast.success(texto);
   }
 
   function registrar() {
     if (monto <= 0) return setError("Ingresa un monto mayor a cero.");
     setError(null);
-    setOkMsg(null);
     startTransition(async () => {
       const res = await agregar({ fecha, monto, hora: hora || null, nota: nota || null });
       if (res.ok) {
@@ -229,7 +242,6 @@ export function MovimientosSection({
   function guardarLote() {
     if (seleccionados.length === 0) return;
     setError(null);
-    setOkMsg(null);
     // Si el mensaje no trae hora, queda con la de registro (como al agregar a mano).
     const ahora = horaBogotaHHMM();
     startTransition(async () => {
@@ -295,19 +307,18 @@ export function MovimientosSection({
   }
 
   return (
-    <Card className="flex flex-col p-5 sm:p-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <h3 className="text-[0.95rem] font-semibold tracking-tight text-text">{titulo}</h3>
-          <p className="text-sm text-muted">{subtitulo}</p>
-        </div>
-        <div className="text-right">
+    <Card className="flex flex-col p-0">
+      <CardHeader className="pb-0">
+        <CardTitle className="text-text">{titulo}</CardTitle>
+        <CardDescription>{subtitulo}</CardDescription>
+        <CardAction className="text-right">
           <p className="tnum text-lg font-semibold text-text">
             <AnimatedMoney value={total} />
           </p>
           <p className="text-[0.68rem] text-faint">{items.length} {items.length === 1 ? "movimiento" : "movimientos"}</p>
-        </div>
-      </div>
+        </CardAction>
+      </CardHeader>
+      <CardContent className="flex flex-col">
 
       {/* Monto protagonista y el resto compacto: en celular el teclado numérico de
           iOS no tiene Enter, así que "Agregar" debe quedar cerca y a todo lo ancho. */}
@@ -346,13 +357,6 @@ export function MovimientosSection({
 
       <ErrorNotice message={error} className="mt-3" />
 
-      {okMsg && (
-        <Alert variant="success" role="status" className="mt-3">
-          <CheckCircle weight="fill" />
-          <AlertTitle className="line-clamp-none font-normal">{okMsg}</AlertTitle>
-        </Alert>
-      )}
-
       <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
         <Button onClick={registrar} disabled={pending} className="w-full sm:w-auto">
           <Plus size={16} weight="bold" />
@@ -386,15 +390,15 @@ export function MovimientosSection({
                   <ClipboardText size={16} />
                   Pegar
                 </Button>
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={() => archivoRef.current?.click()}
-                  title="Subir el chat exportado (.txt)"
-                >
-                  <FileArrowUp size={16} />
-                  Subir
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button size="sm" variant="secondary" onClick={() => archivoRef.current?.click()}>
+                      <FileArrowUp size={16} />
+                      Subir
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Subir el chat exportado (.txt)</TooltipContent>
+                </Tooltip>
                 <input
                   ref={archivoRef}
                   type="file"
@@ -469,9 +473,9 @@ export function MovimientosSection({
 
                       {/* Cada fila se puede desmarcar: en el grupo también escriben
                           otros y a veces Luis corrige un monto. */}
-                      <ul className="mt-2 max-h-72 overflow-y-auto rounded-[0.8rem] border border-line bg-surface">
+                      <ScrollArea className="mt-2 overflow-hidden rounded-[0.8rem] border border-line bg-surface [&>[data-slot=scroll-area-viewport]]:max-h-72">
                         {lote.dias.map((d) => (
-                          <li key={d.fecha}>
+                          <div key={d.fecha}>
                             {variosDias && (
                               <p className="sticky top-0 flex items-baseline justify-between gap-2 border-b border-line bg-surface-2 px-3 py-1.5 text-[0.72rem] font-medium text-muted">
                                 <span className={cn(d.fecha === fecha && "text-accent-strong")}>
@@ -481,49 +485,57 @@ export function MovimientosSection({
                                 <span className="tnum shrink-0">{formatCOP(d.total)}</span>
                               </p>
                             )}
-                            <ul>
-                              {d.movimientos.map((m) => {
+                            <ItemGroup>
+                              {d.movimientos.map((m, k) => {
                                 const i = indiceDe.get(m) ?? -1;
                                 const activo = estaMarcado(i);
                                 return (
-                                  <li key={i} className="border-b border-line last:border-b-0">
-                                    <label
+                                  <Fragment key={i}>
+                                    {k > 0 && <ItemSeparator />}
+                                    <Item
+                                      asChild
+                                      size="sm"
+                                      role="listitem"
                                       className={cn(
-                                        "flex cursor-pointer items-center gap-2.5 px-3 py-2 text-[0.84rem] transition-opacity",
+                                        "cursor-pointer flex-nowrap gap-2.5 rounded-none px-3 py-2 text-[0.84rem] transition-opacity",
                                         !activo && "opacity-45",
                                       )}
                                     >
-                                      <Checkbox
-                                        checked={activo}
-                                        onCheckedChange={() => alternarFila(i)}
-                                        className="shrink-0"
-                                        aria-label={`Incluir ${formatCOP(m.monto)}`}
-                                      />
-                                      <span className="min-w-0 flex-1 leading-tight">
-                                        <span className="flex items-baseline justify-between gap-2">
-                                          <span className="tnum font-medium text-text">{formatCOP(m.monto)}</span>
-                                          <span className="tnum shrink-0 text-[0.74rem] text-faint">
-                                            {m.hora ? formatHora(m.hora) : "sin hora"}
-                                          </span>
-                                        </span>
-                                        {(m.nota || repetidos.has(i) || lote.remitentes.length > 1) && (
-                                          <span className="block truncate text-[0.74rem] text-muted">
-                                            {repetidos.has(i) && <span className="font-medium text-text">Ya está · </span>}
-                                            {lote.remitentes.length > 1 && m.de && (
-                                              <span className="text-faint">{m.de.split(" ")[0]} · </span>
-                                            )}
-                                            {m.nota ?? ""}
-                                          </span>
-                                        )}
-                                      </span>
-                                    </label>
-                                  </li>
+                                      <label>
+                                        <ItemMedia>
+                                          <Checkbox
+                                            checked={activo}
+                                            onCheckedChange={() => alternarFila(i)}
+                                            className="shrink-0"
+                                            aria-label={`Incluir ${formatCOP(m.monto)}`}
+                                          />
+                                        </ItemMedia>
+                                        <ItemContent className="min-w-0 gap-0 leading-tight">
+                                          <ItemTitle className="w-full items-baseline justify-between gap-2 leading-tight">
+                                            <span className="tnum font-medium text-text">{formatCOP(m.monto)}</span>
+                                            <span className="tnum shrink-0 text-[0.74rem] font-normal text-faint">
+                                              {m.hora ? formatHora(m.hora) : "sin hora"}
+                                            </span>
+                                          </ItemTitle>
+                                          {(m.nota || repetidos.has(i) || lote.remitentes.length > 1) && (
+                                            <ItemDescription className="line-clamp-none truncate text-[0.74rem] leading-tight">
+                                              {repetidos.has(i) && <span className="font-medium text-text">Ya está · </span>}
+                                              {lote.remitentes.length > 1 && m.de && (
+                                                <span className="text-faint">{m.de.split(" ")[0]} · </span>
+                                              )}
+                                              {m.nota ?? ""}
+                                            </ItemDescription>
+                                          )}
+                                        </ItemContent>
+                                      </label>
+                                    </Item>
+                                  </Fragment>
                                 );
                               })}
-                            </ul>
-                          </li>
+                            </ItemGroup>
+                          </div>
                         ))}
-                      </ul>
+                      </ScrollArea>
                     </>
                   )}
                   {repetidos.size > 0 && (
@@ -534,21 +546,32 @@ export function MovimientosSection({
                     </p>
                   )}
                   {lote.ignoradas.length > 0 && (
-                    <details className="mt-2 text-[0.72rem] text-faint">
-                      <summary className="cursor-pointer select-none">
-                        No tomé en cuenta {lote.ignoradas.length} {lote.ignoradas.length === 1 ? "línea" : "líneas"} (fotos,
-                        números de cuenta, texto sin monto)
-                      </summary>
-                      {/* El chat exportado trae miles de líneas: se muestran unas pocas. */}
-                      <ul className="mt-1 max-h-32 overflow-y-auto pl-3">
-                        {lote.ignoradas.slice(0, 25).map((l, i) => (
-                          <li key={i} className="truncate">
-                            {l}
-                          </li>
-                        ))}
-                        {lote.ignoradas.length > 25 && <li>y {lote.ignoradas.length - 25} más</li>}
-                      </ul>
-                    </details>
+                    <Collapsible className="mt-2 text-[0.72rem] text-faint">
+                      <CollapsibleTrigger asChild>
+                        <Button
+                          variant="link"
+                          size="xs"
+                          className="group/ign h-auto min-h-0 whitespace-normal p-0 text-left text-[0.72rem] font-normal text-faint"
+                        >
+                          <CaretDown className="size-3 transition-transform group-data-[state=closed]/ign:-rotate-90" />
+                          No tomé en cuenta {lote.ignoradas.length} {lote.ignoradas.length === 1 ? "línea" : "líneas"} (fotos,
+                          números de cuenta, texto sin monto)
+                        </Button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        {/* El chat exportado trae miles de líneas: se muestran unas pocas. */}
+                        <ScrollArea className="mt-1 [&>[data-slot=scroll-area-viewport]]:max-h-32">
+                          <ul className="pl-3">
+                            {lote.ignoradas.slice(0, 25).map((l, i) => (
+                              <li key={i} className="truncate">
+                                {l}
+                              </li>
+                            ))}
+                            {lote.ignoradas.length > 25 && <li>y {lote.ignoradas.length - 25} más</li>}
+                          </ul>
+                        </ScrollArea>
+                      </CollapsibleContent>
+                    </Collapsible>
                   )}
                 </div>
               )}
@@ -563,11 +586,8 @@ export function MovimientosSection({
                       : `Guardar ${seleccionados.length} ${seleccionados.length === 1 ? "movimiento" : "movimientos"}` +
                         (diasSeleccionados > 1 ? ` en ${diasSeleccionados} días` : "")}
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label="Cancelar"
-                  title="Cancelar"
+                <IconButton
+                  label="Cancelar"
                   onClick={() => {
                     setLoteAbierto(false);
                     cambiarTexto("");
@@ -576,7 +596,7 @@ export function MovimientosSection({
                   className="text-muted hover:text-foreground"
                 >
                   <X size={17} />
-                </Button>
+                </IconButton>
               </div>
             </div>
           </motion.div>
@@ -584,27 +604,32 @@ export function MovimientosSection({
       </AnimatePresence>
 
       {items.length === 0 ? (
-        <div className="mt-5 flex flex-col items-center gap-1 rounded-[1rem] border border-dashed border-line-strong py-9 text-center">
-          <Icon size={18} className="text-faint" />
-          <p className="text-[0.82rem] text-muted">{emptyText}</p>
-        </div>
+        <Empty className="mt-5 gap-1 rounded-[1rem] border border-dashed border-line-strong py-9 md:py-9">
+          <EmptyHeader className="gap-1">
+            <EmptyMedia className="mb-0 text-faint">
+              <Icon size={18} />
+            </EmptyMedia>
+            <EmptyDescription className="text-[0.82rem]">{emptyText}</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       ) : (
-        <ul className="mt-4 flex flex-col divide-y divide-line">
+        <ItemGroup className="mt-4">
           <AnimatePresence initial={false}>
-            {items.map((c) => {
+            {items.map((c, idx) => {
               const nuevo = !yaEstaban.has(c.id) && !reduced();
               return (
-              <motion.li
+              <motion.div
                 key={c.id}
+                role="listitem"
                 layout
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ type: "spring", stiffness: 320, damping: 30 }}
-                className={cn("rounded-lg py-2.5", nuevo && "t-flash-ok")}
               >
+                {idx > 0 && <ItemSeparator />}
                 {editId === c.id ? (
-                  <div className="flex flex-col gap-2.5">
+                  <div className="flex flex-col gap-2.5 py-2.5">
                     <div className="grid gap-2 sm:grid-cols-[1fr_120px]">
                       <MoneyInput value={eMonto} onValueChange={setEMonto} autoFocus />
                       <Input type="time" value={eHora} onChange={(e) => setEHora(e.target.value)} />
@@ -615,47 +640,48 @@ export function MovimientosSection({
                         <Check size={16} weight="bold" />
                         Guardar
                       </Button>
-                      <Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setEditId(null)} disabled={pending} className="text-muted hover:text-foreground">
+                      <IconButton label="Cancelar" onClick={() => setEditId(null)} disabled={pending} className="text-muted hover:text-foreground">
                         <X size={17} />
-                      </Button>
+                      </IconButton>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex min-w-0 flex-1 items-center gap-2.5">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent-strong">
-                        <Icon size={13} weight="bold" />
-                      </div>
-                      <div className="min-w-0 leading-tight">
-                        <p className="tnum text-[0.88rem] font-medium text-text">{formatCOP(c.monto)}</p>
-                        {(c.hora || c.nota) && (
-                          <p className="flex min-w-0 items-center gap-1 text-[0.7rem] text-faint">
-                            {c.hora && (
-                              <span className="flex shrink-0 items-center gap-1">
-                                <Clock size={10} />
-                                {formatHora(c.hora)}
-                              </span>
-                            )}
-                            {c.nota && <span className="truncate">· {c.nota}</span>}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-1">
-                      <Button variant="ghost" size="icon" aria-label="Editar" title="Editar" onClick={() => abrirEdicion(c)} disabled={pending} className="text-muted hover:text-foreground">
+                  <Item
+                    role="presentation"
+                    className={cn("flex-nowrap gap-3 rounded-lg px-0 py-2.5", nuevo && "t-flash-ok")}
+                  >
+                    <ItemMedia className="size-8 self-center rounded-full bg-accent-soft text-accent-strong group-has-[[data-slot=item-description]]/item:translate-y-0 group-has-[[data-slot=item-description]]/item:self-center">
+                      <Icon size={13} weight="bold" />
+                    </ItemMedia>
+                    <ItemContent className="min-w-0 gap-0 leading-tight">
+                      <ItemTitle className="tnum text-[0.88rem] leading-tight text-text">{formatCOP(c.monto)}</ItemTitle>
+                      {(c.hora || c.nota) && (
+                        <ItemDescription className="line-clamp-none flex min-w-0 items-center gap-1 text-[0.7rem] leading-tight text-faint">
+                          {c.hora && (
+                            <span className="flex shrink-0 items-center gap-1">
+                              <Clock size={10} />
+                              {formatHora(c.hora)}
+                            </span>
+                          )}
+                          {c.nota && <span className="truncate">· {c.nota}</span>}
+                        </ItemDescription>
+                      )}
+                    </ItemContent>
+                    <ItemActions className="shrink-0 gap-1">
+                      <IconButton label="Editar" onClick={() => abrirEdicion(c)} disabled={pending} className="text-muted hover:text-foreground">
                         <PencilSimple size={17} />
-                      </Button>
-                      <Button variant="ghost" size="icon" aria-label="Eliminar" title="Eliminar" onClick={() => setPorBorrar(c)} disabled={pending} className="text-muted hover:text-destructive">
+                      </IconButton>
+                      <IconButton label="Eliminar" onClick={() => setPorBorrar(c)} disabled={pending} className="text-muted hover:text-destructive">
                         <Trash size={17} />
-                      </Button>
-                    </div>
-                  </div>
+                      </IconButton>
+                    </ItemActions>
+                  </Item>
                 )}
-              </motion.li>
+              </motion.div>
               );
             })}
           </AnimatePresence>
-        </ul>
+        </ItemGroup>
       )}
 
       <ConfirmDialog
@@ -666,6 +692,7 @@ export function MovimientosSection({
         onConfirmar={confirmarBorrado}
         onCancelar={() => setPorBorrar(null)}
       />
+      </CardContent>
     </Card>
   );
 }

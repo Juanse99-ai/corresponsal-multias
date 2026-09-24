@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BellRinging, BellSlash, CircleNotch } from "@phosphor-icons/react/dist/ssr";
+import { BellRinging, BellSlash } from "@phosphor-icons/react/dist/ssr";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { VAPID_PUBLIC_KEY } from "@/lib/push-config";
 
 type State = "loading" | "unsupported" | "denied" | "off" | "on" | "working";
@@ -99,7 +100,7 @@ export function ActivarAvisos() {
       )}
     >
       {working ? (
-        <CircleNotch size={15} weight="bold" className="animate-spin" />
+        <Spinner weight="bold" className="size-[15px]" aria-hidden />
       ) : on ? (
         <BellRinging size={15} weight="fill" />
       ) : (
