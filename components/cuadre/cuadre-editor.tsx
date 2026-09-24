@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import {
   FloppyDisk,
   Wallet,
@@ -23,6 +23,16 @@ import { Label } from "@/components/ui/label";
 import { MoneyInput } from "@/components/ui/money-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemMedia,
+  ItemTitle,
+} from "@/components/ui/item";
 import { SaldoVivo } from "@/components/fx/saldo-vivo";
 import { CelebracionCierre } from "@/components/fx/celebracion-cierre";
 import { ripple } from "@/components/fx/ripple";
@@ -88,7 +98,6 @@ export function CuadreEditor({
 }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [toast, setToast] = useState<{ ok: boolean; msg: string } | null>(null);
   const [celebrar, setCelebrar] = useState(0);
   const [confirmarCierre, setConfirmarCierre] = useState(false);
 
@@ -221,16 +230,15 @@ export function CuadreEditor({
 
   function onGuardar(nuevoEstado?: EstadoCuadre) {
     const estadoFinal = nuevoEstado ?? estado;
-    setToast(null);
     if (estadoFinal === "cerrado") {
       if (soportesCount === 0) {
-        setToast({ ok: false, msg: "Adjunta la tirilla del datáfono (abajo) antes de cerrar el día." });
+        toast.error("Adjunta la tirilla del datáfono (abajo) antes de cerrar el día.");
         return;
       }
       if (descuadre || !cajaCuadra) {
         // Exige explicación escrita (queda para Juan) y confirmación antes de cerrar descuadrado.
         if (!nota.trim()) {
-          setToast({ ok: false, msg: "El día no cuadra. Escribe en la nota por qué, antes de cerrarlo." });
+          toast.error("El día no cuadra. Escribe en la nota por qué, antes de cerrarlo.");
           return;
         }
         setConfirmarCierre(true);
@@ -257,13 +265,10 @@ export function CuadreEditor({
         }
         setEstado(estadoFinal);
         if (estadoFinal === "cerrado") setCelebrar((c) => c + 1);
-        setToast({
-          ok: true,
-          msg: estadoFinal === "cerrado" ? "Día cerrado y guardado." : "Cuadre guardado.",
-        });
+        toast.success(estadoFinal === "cerrado" ? "Día cerrado y guardado." : "Cuadre guardado.");
         router.refresh();
       } else {
-        setToast({ ok: false, msg: res.error ?? "No se pudo guardar." });
+        toast.error(res.error ?? "No se pudo guardar.");
       }
     });
   }
@@ -323,48 +328,55 @@ export function CuadreEditor({
         </div>
 
         {/* Sr. Luis (lectura) */}
-        <Link
-          href="/luis"
-          className="group mt-4 flex items-center justify-between rounded-[1rem] border border-line bg-surface-2 p-4 transition-colors hover:border-line-strong"
+        <Item
+          asChild
+          variant="outline"
+          className="mt-4 flex-nowrap gap-3 rounded-[1rem] border-line bg-surface-2 hover:border-line-strong"
         >
-          <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent-strong">
+          <Link href="/luis">
+            <ItemMedia className="h-10 w-10 rounded-full bg-accent-soft text-accent-strong group-has-[[data-slot=item-description]]/item:translate-y-0 group-has-[[data-slot=item-description]]/item:self-center">
               <Wallet size={18} weight="fill" />
-            </div>
-            <div className="min-w-0 leading-tight">
-              <p className="text-[0.82rem] font-medium text-text">Sr. Luis</p>
-              <p className="truncate text-[0.72rem] text-faint">
+            </ItemMedia>
+            <ItemContent className="min-w-0 gap-0 leading-tight">
+              <ItemTitle className="text-[0.82rem] leading-tight text-text">Sr. Luis</ItemTitle>
+              <ItemDescription className="truncate text-[0.72rem] leading-tight text-faint">
                 {consignacionesCount} {consignacionesCount === 1 ? "consignación" : "consignaciones"} · toca para registrar
-              </p>
-            </div>
-          </div>
-          <div className="flex shrink-0 items-center gap-2 pl-2">
-            <span className="tnum text-base font-semibold text-text">{formatCOP(srLuis)}</span>
-            <ArrowUpRight size={16} className="text-faint transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </div>
-        </Link>
+              </ItemDescription>
+            </ItemContent>
+            <ItemActions className="shrink-0 pl-2">
+              <span className="tnum text-base font-semibold text-text">{formatCOP(srLuis)}</span>
+              <ArrowUpRight size={16} className="text-faint transition-transform group-hover/item:translate-x-0.5 group-hover/item:-translate-y-0.5" />
+            </ItemActions>
+          </Link>
+        </Item>
 
         {(movCount > 0 || prestamosCount > 0) && (
-          <Button
-            variant="secondary"
-            onClick={(e) => {
-              ripple(e);
-              traerDeMovimientos();
-            }}
-            title={[
-              movCount > 0 ? `${movCount} movimiento${movCount === 1 ? "" : "s"}` : null,
-              prestamosCount > 0 ? `${prestamosCount} préstamo${prestamosCount === 1 ? "" : "s"}` : null,
-            ]
-              .filter(Boolean)
-              .join(" y ")}
-            className="mt-4 w-full"
-          >
-            <ArrowClockwise size={16} weight="bold" />
-            Traer totales del día
-            <span className="tnum rounded-full bg-accent-soft px-2 py-0.5 text-[0.72rem] font-semibold text-accent-strong">
-              {movCount + prestamosCount}
-            </span>
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="secondary"
+                onClick={(e) => {
+                  ripple(e);
+                  traerDeMovimientos();
+                }}
+                className="mt-4 w-full"
+              >
+                <ArrowClockwise size={16} weight="bold" />
+                Traer totales del día
+                <Badge variant="info" className="tnum text-[0.72rem] font-semibold">
+                  {movCount + prestamosCount}
+                </Badge>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {[
+                movCount > 0 ? `${movCount} movimiento${movCount === 1 ? "" : "s"}` : null,
+                prestamosCount > 0 ? `${prestamosCount} préstamo${prestamosCount === 1 ? "" : "s"}` : null,
+              ]
+                .filter(Boolean)
+                .join(" y ")}
+            </TooltipContent>
+          </Tooltip>
         )}
 
         {/* Desglose electrónico (lo que pasó por Bancolombia) */}
@@ -512,7 +524,8 @@ export function CuadreEditor({
 
           {/* La resta completa: sin esto había que hacer la cuenta de cabeza para
               conectar la lista con el saldo de arriba. */}
-          <div className="mt-3 flex flex-col divide-y divide-line border-t border-line pt-1">
+          <Separator className="mt-3 bg-line" />
+          <div className="flex flex-col divide-y divide-line pt-1">
             <div className="flex items-center justify-between py-2 text-sm">
               <span className="text-muted">Total tirilla</span>
               <span className="tnum text-text">{formatCOP(vals.total_tirilla)}</span>
@@ -522,7 +535,8 @@ export function CuadreEditor({
               <span className="tnum text-text">{formatCOP(suma)}</span>
             </div>
           </div>
-          <div className="mt-1 flex items-center justify-between border-t-[1.5px] border-line-strong pt-2.5">
+          <Separator className="mt-1 bg-line-strong data-[orientation=horizontal]:h-[1.5px]" />
+          <div className="flex items-center justify-between pt-2.5">
             <span className="text-[0.85rem] font-semibold text-text">Saldo final</span>
             <span
               className={cn(
@@ -576,21 +590,6 @@ export function CuadreEditor({
               )}
             </>
           )}
-
-          <AnimatePresence>
-            {toast && (
-              <motion.div
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-              >
-                <Alert variant={toast.ok ? "success" : "destructive"}>
-                  {toast.ok ? <CheckCircle weight="fill" /> : <Warning weight="fill" />}
-                  <AlertTitle className="line-clamp-none font-normal">{toast.msg}</AlertTitle>
-                </Alert>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </Card>
       </div>
 

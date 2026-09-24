@@ -4,8 +4,11 @@ import { useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { HandCoins, Plus, Trash, PencilSimple, Check, Clock, CheckCircle, Lock, ArrowCounterClockwise, X } from "@phosphor-icons/react/dist/ssr";
-import { Card } from "@/components/ui/card";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/ui/icon-button";
+import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { ChoiceChip } from "@/components/ui/choice-chip";
 import { MedioPicker, ICONO_MEDIO, NOMBRE_MEDIO, type Medio } from "@/components/prestamos/medio-picker";
@@ -172,13 +175,16 @@ export function PrestamosDia({
     <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_400px] lg:items-start">
       {/* Registro + lista */}
       <div className="flex flex-col gap-5">
-        <Card className="p-5 sm:p-6">
-          <div className="flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-soft text-accent-strong">
-              <HandCoins size={15} weight="bold" />
-            </span>
-            <h2 className="text-[0.95rem] font-semibold tracking-tight text-text">Préstamos del día</h2>
-          </div>
+        <Card>
+          <CardHeader className="pb-0">
+            <CardTitle className="flex items-center gap-2 text-text">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-soft text-accent-strong">
+                <HandCoins size={15} weight="bold" />
+              </span>
+              <h2>Préstamos del día</h2>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
 
           {bloqueado && (
             <Alert variant="muted" className="mt-4">
@@ -245,37 +251,46 @@ export function PrestamosDia({
             <Plus size={18} weight="bold" />
             {pending ? "Registrando…" : "Registrar préstamo"}
           </Button>
+          </CardContent>
         </Card>
 
-        <Card className="p-5 sm:p-6">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-[0.95rem] font-semibold tracking-tight text-text">Préstamos de hoy</h3>
-            <span className="text-[0.72rem] text-faint">{prestamos.length}</span>
-          </div>
+        <Card>
+          <CardHeader className="items-center pb-3">
+            <CardTitle className="text-text">
+              <h3>Préstamos de hoy</h3>
+            </CardTitle>
+            <CardAction className="row-span-1 self-center text-[0.72rem] text-faint">{prestamos.length}</CardAction>
+          </CardHeader>
+          <CardContent>
 
           {prestamos.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 rounded-[1rem] border border-dashed border-line-strong py-12 text-center">
-              <HandCoins size={20} className="text-faint" />
-              <p className="text-sm text-muted">Aún no hay préstamos registrados.</p>
-            </div>
+            <Empty className="gap-2 rounded-[1rem] border border-dashed border-line-strong py-12 md:py-12">
+              <EmptyHeader>
+                <EmptyMedia className="mb-0 text-faint">
+                  <HandCoins size={20} />
+                </EmptyMedia>
+                <EmptyTitle className="text-sm font-normal tracking-normal text-muted">Aún no hay préstamos registrados.</EmptyTitle>
+              </EmptyHeader>
+            </Empty>
           ) : (
-            <ul className="flex flex-col divide-y divide-line">
+            <ItemGroup className="divide-y divide-line">
               <AnimatePresence initial={false}>
                 {prestamos.map((d) => {
                   const saldado = d.saldo === 0;
                   const nuevo = !yaEstaban.has(d.id) && !reduced();
                   return (
-                    <motion.li
+                    <motion.div
                       key={d.id}
+                      role="listitem"
                       layout
                       initial={{ opacity: 0, y: -8 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ type: "spring", stiffness: 320, damping: 30 }}
-                      className={cn("rounded-lg py-2.5", nuevo && "t-flash-ok")}
+                      className={cn("rounded-lg", nuevo && "t-flash-ok")}
                     >
                       {editId === d.id ? (
-                        <div className="flex flex-col gap-2.5">
+                        <div className="flex flex-col gap-2.5 py-2.5">
                           <div className="flex flex-wrap gap-1.5">
                             {[...PERSONAS_PRESET, "Otro"].map((p) => (
                               <ChoiceChip key={p} selected={ePersona === p} onClick={() => setEPersona(p)}>
@@ -295,66 +310,60 @@ export function PrestamosDia({
                               <Check size={16} weight="bold" />
                               Guardar
                             </Button>
-                            <Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setEditId(null)} disabled={pending} className="text-muted hover:text-foreground">
+                            <IconButton label="Cancelar" onClick={() => setEditId(null)} disabled={pending} className="text-muted hover:text-foreground">
                               <X size={17} />
-                            </Button>
+                            </IconButton>
                           </div>
                         </div>
                       ) : (
-                        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+                        <Item className="justify-between gap-x-3 gap-y-2 rounded-none px-0 py-2.5">
                           <div className="flex min-w-0 flex-1 items-center gap-3">
-                            <div
+                            <ItemMedia
                               className={cn(
-                                "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
+                                "size-9 rounded-full",
                                 saldado ? "bg-success-soft text-success" : "bg-accent-soft text-accent-strong",
                               )}
                             >
                               {saldado ? <CheckCircle size={16} weight="bold" /> : <HandCoins size={15} weight="bold" />}
-                            </div>
-                            <div className="min-w-0 leading-tight">
-                              <p className="tnum text-[0.92rem] font-medium text-text">{formatCOP(d.monto)}</p>
-                              <p className="flex items-center gap-1.5 truncate text-[0.7rem] text-faint">
+                            </ItemMedia>
+                            <ItemContent className="min-w-0 gap-0 leading-tight">
+                              <ItemTitle className="tnum text-[0.92rem] leading-tight text-text">{formatCOP(d.monto)}</ItemTitle>
+                              <ItemDescription className="flex items-center gap-1.5 truncate text-[0.7rem] leading-tight text-faint">
                                 <span className="truncate text-muted">{d.persona}</span>
                                 {d.concepto && <span className="truncate">· {d.concepto}</span>}
                                 <Clock size={10} />
                                 {formatHoraISO(d.created_at)}
-                              </p>
-                            </div>
+                              </ItemDescription>
+                            </ItemContent>
                           </div>
-                          <div className="flex w-full shrink-0 flex-wrap items-center justify-end gap-1.5 sm:w-auto">
+                          <ItemActions className="w-full shrink-0 flex-wrap justify-end gap-1.5 sm:w-auto">
                             {(() => {
                               // Mismo ícono que en el formulario: así se reconoce sin leer.
                               const m = (d.medio in ICONO_MEDIO ? d.medio : "efectivo") as Medio;
                               const Icono = ICONO_MEDIO[m];
                               return (
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  aria-label={`${NOMBRE_MEDIO[m]} · tocar para cambiar`}
-                                  title={`${NOMBRE_MEDIO[m]} · tocar para cambiar`}
+                                <IconButton
+                                  label={`${NOMBRE_MEDIO[m]} · tocar para cambiar`}
                                   onClick={() => cambiarMedio(d)}
                                   disabled={pending || bloqueado}
                                   className={m === "transferencia" ? "text-accent-strong" : "text-muted hover:text-foreground"}
                                 >
                                   <Icono size={17} />
-                                </Button>
+                                </IconButton>
                               );
                             })()}
                             {saldado ? (
                               <>
                                 <Badge variant="success">Devuelto</Badge>
                                 {!bloqueado && (
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    aria-label="Deshacer pago"
-                                    title="Deshacer pago"
+                                  <IconButton
+                                    label="Deshacer pago"
                                     onClick={() => setConfirmar({ tipo: "reabrir", d })}
                                     disabled={pending}
                                     className="text-muted hover:text-foreground"
                                   >
                                     <ArrowCounterClockwise size={17} />
-                                  </Button>
+                                  </IconButton>
                                 )}
                               </>
                             ) : (
@@ -378,32 +387,30 @@ export function PrestamosDia({
                               </>
                             )}
                             {!bloqueado && (
-                              <Button variant="ghost" size="icon" aria-label="Editar" title="Editar" onClick={() => abrirEdicion(d)} disabled={pending} className="text-muted hover:text-foreground">
+                              <IconButton label="Editar" onClick={() => abrirEdicion(d)} disabled={pending} className="text-muted hover:text-foreground">
                                 <PencilSimple size={17} />
-                              </Button>
+                              </IconButton>
                             )}
                             {isAdmin && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                aria-label="Eliminar"
-                                title="Eliminar"
+                              <IconButton
+                                label="Eliminar"
                                 onClick={() => setConfirmar({ tipo: "borrar", d })}
                                 disabled={pending || bloqueado}
                                 className="text-muted hover:text-destructive"
                               >
                                 <Trash size={17} />
-                              </Button>
+                              </IconButton>
                             )}
-                          </div>
-                        </div>
+                          </ItemActions>
+                        </Item>
                       )}
-                    </motion.li>
+                    </motion.div>
                   );
                 })}
               </AnimatePresence>
-            </ul>
+            </ItemGroup>
           )}
+          </CardContent>
         </Card>
       </div>
 
@@ -414,16 +421,16 @@ export function PrestamosDia({
           <p className="tnum mt-1 text-[1.9rem] font-semibold tracking-tight text-text">
             <AnimatedMoney value={pendiente} />
           </p>
-          <div className="mt-4 flex flex-col divide-y divide-line text-[0.82rem]">
-            <div className="flex items-center justify-between py-2">
+          <ItemGroup className="mt-4 divide-y divide-line text-[0.82rem]">
+            <Item role="listitem" className="justify-between rounded-none p-0 py-2 text-[0.82rem]">
               <span className="text-muted">Prestado</span>
               <span className="tnum font-medium text-text">{formatCOP(prestado)}</span>
-            </div>
-            <div className="flex items-center justify-between py-2">
+            </Item>
+            <Item role="listitem" className="justify-between rounded-none p-0 py-2 text-[0.82rem]">
               <span className="text-muted">Devuelto hoy</span>
               <span className="tnum font-medium text-success">{formatCOP(devuelto)}</span>
-            </div>
-          </div>
+            </Item>
+          </ItemGroup>
         </Card>
       </div>
       <ConfirmDialog

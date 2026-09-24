@@ -2,18 +2,16 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import {
   FloppyDisk,
-  CheckCircle,
-  Warning,
   Plus,
   Minus,
   ArrowClockwise,
 } from "@phosphor-icons/react/dist/ssr";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertTitle } from "@/components/ui/alert";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Label } from "@/components/ui/label";
 import { MoneyInput } from "@/components/ui/money-input";
@@ -48,7 +46,6 @@ export function GeneralEditor({
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [toast, setToast] = useState<{ ok: boolean; msg: string } | null>(null);
 
   const [vals, setVals] = useState({
     saldo_luis: inicial.saldo_luis,
@@ -65,37 +62,44 @@ export function GeneralEditor({
   const total = useMemo(() => computeSaldoTotal(vals), [vals]);
 
   function guardar() {
-    setToast(null);
     startTransition(async () => {
       const res = await guardarGeneral({ fecha, ...vals, nota: nota.trim() || null });
       if (res.ok) {
-        setToast({ ok: true, msg: "Control general guardado." });
+        toast.success("Control general guardado.");
         router.refresh();
       } else {
-        setToast({ ok: false, msg: res.error ?? "No se pudo guardar." });
+        toast.error(res.error ?? "No se pudo guardar.");
       }
     });
   }
 
   return (
     <div className="grid gap-5 lg:grid-cols-[1fr_380px] lg:items-start">
-      <Card className="p-5 sm:p-6">
-        <h2 className="text-[0.95rem] font-semibold tracking-tight text-text">Balance del día</h2>
-
-        <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-text">
+            <h2>Balance del día</h2>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+        <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Campo label="Saldo Luis" id="saldo_luis">
             <MoneyInput id="saldo_luis" value={vals.saldo_luis} onValueChange={set("saldo_luis")} />
             {vals.saldo_luis !== saldoLuisSugerido && (
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => set("saldo_luis")(saldoLuisSugerido)}
-                title="Usar el saldo del módulo de Luis"
-                className="mt-1 self-start"
-              >
-                <ArrowClockwise size={16} />
-                Usar <span className="tnum">{formatCOP(saldoLuisSugerido)}</span>
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => set("saldo_luis")(saldoLuisSugerido)}
+                    className="mt-1 self-start"
+                  >
+                    <ArrowClockwise size={16} />
+                    Usar <span className="tnum">{formatCOP(saldoLuisSugerido)}</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Usar el saldo del módulo de Luis</TooltipContent>
+              </Tooltip>
             )}
           </Campo>
 
@@ -128,6 +132,7 @@ export function GeneralEditor({
             placeholder="Observación…"
           />
         </div>
+        </CardContent>
       </Card>
 
       <div className="flex flex-col gap-4 lg:sticky lg:top-8">
@@ -143,20 +148,6 @@ export function GeneralEditor({
             <FloppyDisk size={18} weight="fill" />
             {pending ? "Guardando…" : existente ? "Guardar cambios" : "Guardar día"}
           </Button>
-          <AnimatePresence>
-            {toast && (
-              <motion.div
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-              >
-                <Alert variant={toast.ok ? "success" : "destructive"}>
-                  {toast.ok ? <CheckCircle weight="fill" /> : <Warning weight="fill" />}
-                  <AlertTitle className="line-clamp-none font-normal">{toast.msg}</AlertTitle>
-                </Alert>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </Card>
       </div>
     </div>
@@ -197,17 +188,26 @@ function CampoSigned({
           variant="outline"
           className="h-11 shrink-0"
         >
-          <ToggleGroupItem value="mas" title="A favor" aria-label="A favor" className="size-11">
-            <Plus weight="bold" />
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            value="menos"
-            title="En contra"
-            aria-label="En contra"
-            className="size-11 data-[state=on]:border-destructive/30 data-[state=on]:bg-danger-soft data-[state=on]:text-destructive"
-          >
-            <Minus weight="bold" />
-          </ToggleGroupItem>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <ToggleGroupItem value="mas" aria-label="A favor" className="size-11">
+                <Plus weight="bold" />
+              </ToggleGroupItem>
+            </TooltipTrigger>
+            <TooltipContent>A favor</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <ToggleGroupItem
+                value="menos"
+                aria-label="En contra"
+                className="size-11 data-[state=on]:border-destructive/30 data-[state=on]:bg-danger-soft data-[state=on]:text-destructive"
+              >
+                <Minus weight="bold" />
+              </ToggleGroupItem>
+            </TooltipTrigger>
+            <TooltipContent>En contra</TooltipContent>
+          </Tooltip>
         </ToggleGroup>
         <div className="flex-1">
           <MoneyInput id={id} value={magnitud} onValueChange={(n) => onChange(negativo ? -n : n)} />

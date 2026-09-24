@@ -1,10 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { useRef, useState } from "react";
 import { Export, DownloadSimple, ShareNetwork, X } from "@phosphor-icons/react/dist/ssr";
 import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/ui/icon-button";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { formatCOP } from "@/lib/format";
 
 interface Linea {
@@ -48,10 +53,7 @@ export function CuadreExport({
 }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => setMounted(true), []);
 
   async function generar(): Promise<Blob | null> {
     if (!ref.current) return null;
@@ -101,24 +103,17 @@ export function CuadreExport({
     </div>
   );
 
+  // AlertDialog de shadcn a pantalla completa y transparente: el contenido es la
+  // imagen del cuadre; tocar fuera de ella cierra, como antes.
   const modal = (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={() => setOpen(false)}
-          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/70 p-4 backdrop-blur-sm sm:items-center"
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.97, y: 8 }}
-            transition={{ type: "spring", stiffness: 260, damping: 26 }}
-            onClick={(e) => e.stopPropagation()}
-            className="my-auto w-full max-w-[420px]"
-          >
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogContent
+        onClick={() => setOpen(false)}
+        className="top-0 left-0 flex h-dvh max-w-none translate-x-0 translate-y-0 items-start justify-center overflow-y-auto rounded-none border-0 bg-transparent p-4 shadow-none data-[size=default]:sm:max-w-none sm:items-center"
+      >
+        <AlertDialogTitle className="sr-only">Cuadre {fechaDMY(fecha)}</AlertDialogTitle>
+        <AlertDialogDescription className="sr-only">Descargar o compartir la imagen del cuadre.</AlertDialogDescription>
+          <div onClick={(e) => e.stopPropagation()} className="my-auto w-full max-w-[420px]">
             <div
               ref={ref}
               style={{ fontFamily: "var(--font-ios)" }}
@@ -179,30 +174,29 @@ export function CuadreExport({
             </div>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <Button onClick={descargar} disabled={busy} className="basis-full text-white sm:flex-1 sm:basis-0">
+              <Button onClick={descargar} disabled={busy} className="basis-full sm:flex-1 sm:basis-0">
                 <DownloadSimple size={17} weight="bold" />
                 {busy ? "Generando…" : "Descargar imagen"}
               </Button>
-              <Button variant="secondary" onClick={compartir} disabled={busy} className="text-white">
+              <Button variant="secondary" onClick={compartir} disabled={busy}>
                 <ShareNetwork size={17} />
                 Compartir
               </Button>
-              <Button variant="ghost" size="icon" onClick={() => setOpen(false)} aria-label="Cerrar" className="text-white">
+              <IconButton label="Cerrar" variant="secondary" onClick={() => setOpen(false)}>
                 <X size={18} />
-              </Button>
+              </IconButton>
             </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </div>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 
   return (
     <>
-      <Button variant="ghost" size="icon" aria-label="Descargar o compartir el cuadre" title="Descargar o compartir el cuadre" onClick={() => setOpen(true)} className="text-muted hover:text-foreground">
+      <IconButton label="Descargar o compartir el cuadre" onClick={() => setOpen(true)} className="text-muted hover:text-foreground">
         <Export size={18} weight="bold" />
-      </Button>
-      {mounted ? createPortal(modal, document.body) : null}
+      </IconButton>
+      {modal}
     </>
   );
 }
