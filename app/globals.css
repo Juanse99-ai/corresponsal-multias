@@ -170,6 +170,12 @@
 
 }
 
+/* Reglas base en @layer base: fuera de una capa le ganan a TODAS las clases
+   de Tailwind (que viven en @layer utilities). Pasó con el borde: "*" pintaba
+   una línea en cada componente de shadcn que pide border-transparent (filas
+   de lista, pestañas...), y "font: inherit" pisaba el tamaño y grosor de
+   letra de los botones. */
+@layer base {
 * {
   border-color: var(--line);
 }
@@ -190,6 +196,7 @@ body {
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
   padding-bottom: env(safe-area-inset-bottom);
+}
 }
 
 /* Cifras tabulares monoespaciadas para columnas de pesos. */
@@ -237,7 +244,9 @@ body {
 
 ::selection { background: var(--accent-soft); color: var(--accent-strong); }
 
-input, button, textarea, select { font: inherit; }
+@layer base {
+  input, button, textarea, select { font: inherit; }
+}
 
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
