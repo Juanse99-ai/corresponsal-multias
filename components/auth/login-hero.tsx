@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { Logo } from "@/components/brand";
 import { formatCOP } from "@/lib/format";
+import { reduced } from "@/components/fx/reduced";
 
 const STREAM = [
   { hora: "08:14", monto: 2000000 },
@@ -21,6 +22,8 @@ export function LoginHero() {
 
   useGSAP(
     () => {
+      // Con "reducir movimiento" todo queda quieto en su sitio final.
+      if (reduced()) return;
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
       tl.from(".lh-top", { y: 16, opacity: 0, duration: 0.7 })
         .from(".lh-line", { yPercent: 110, opacity: 0, duration: 0.85, stagger: 0.12 }, "-=0.25")
@@ -43,8 +46,8 @@ export function LoginHero() {
         </div>
       </div>
 
-      <div className="relative z-10 max-w-md xl:max-w-lg">
-        <h1 className="text-[clamp(2.4rem,4.2vw,3.7rem)] font-semibold leading-[1.03] tracking-tight text-nav-text">
+      <div className="relative z-10 max-w-md xl:max-w-[24rem]">
+        <h1 className="text-[clamp(2.4rem,3.8vw,3.4rem)] font-semibold leading-[1.03] tracking-tight text-nav-text">
           <span className="block overflow-hidden">
             <span className="lh-line block">El cuadre del día,</span>
           </span>
@@ -53,8 +56,7 @@ export function LoginHero() {
           </span>
         </h1>
         <p className="lh-sub mt-5 max-w-md text-[0.98rem] leading-relaxed text-nav-muted">
-          Cupo de Luis, efectivo, Nequis y préstamos en un solo lugar. El compensado se arrastra
-          solo y el saldo final se calcula en vivo.
+          Cupo de Luis, efectivo, Nequis y préstamos en un solo lugar.
         </p>
       </div>
 
@@ -65,7 +67,7 @@ export function LoginHero() {
             {[...STREAM, ...STREAM].map((s, i) => (
               <div
                 key={i}
-                className="flex items-center justify-between rounded-2xl border border-[oklch(1_0_0/0.12)] bg-[oklch(1_0_0/0.06)] px-4 py-3 backdrop-blur-sm"
+                className="flex items-center justify-between rounded-2xl border border-[oklch(1_0_0/0.12)] bg-[oklch(1_0_0/0.06)] px-4 py-3"
               >
                 <div className="flex items-center gap-2">
                   <span className="h-1.5 w-1.5 rounded-full bg-nav-accent" />
