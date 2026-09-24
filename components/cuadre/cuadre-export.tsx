@@ -4,12 +4,7 @@ import { useRef, useState } from "react";
 import { Export, DownloadSimple, ShareNetwork, X } from "@phosphor-icons/react/dist/ssr";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { formatCOP } from "@/lib/format";
 
 interface Linea {
@@ -103,17 +98,17 @@ export function CuadreExport({
     </div>
   );
 
-  // AlertDialog de shadcn a pantalla completa y transparente: el contenido es la
-  // imagen del cuadre; tocar fuera de ella cierra, como antes.
+  // Dialog de shadcn sin caja propia: el contenido es la imagen del cuadre.
+  // Tocar fuera de ella cierra (lo hace el Dialog).
   const modal = (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogContent
-        onClick={() => setOpen(false)}
-        className="top-0 left-0 flex h-dvh max-w-none translate-x-0 translate-y-0 items-start justify-center overflow-y-auto rounded-none border-0 bg-transparent p-4 shadow-none data-[size=default]:sm:max-w-none sm:items-center"
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent
+        showCloseButton={false}
+        className="max-h-[calc(100dvh-2rem)] max-w-[420px] gap-0 overflow-y-auto rounded-none border-0 bg-transparent p-0 shadow-none sm:max-w-[420px]"
       >
-        <AlertDialogTitle className="sr-only">Cuadre {fechaDMY(fecha)}</AlertDialogTitle>
-        <AlertDialogDescription className="sr-only">Descargar o compartir la imagen del cuadre.</AlertDialogDescription>
-          <div onClick={(e) => e.stopPropagation()} className="my-auto w-full max-w-[420px]">
+        <DialogTitle className="sr-only">Cuadre {fechaDMY(fecha)}</DialogTitle>
+        <DialogDescription className="sr-only">Descargar o compartir la imagen del cuadre.</DialogDescription>
+          <div className="w-full">
             <div
               ref={ref}
               style={{ fontFamily: "var(--font-ios)" }}
@@ -187,8 +182,8 @@ export function CuadreExport({
               </IconButton>
             </div>
           </div>
-      </AlertDialogContent>
-    </AlertDialog>
+      </DialogContent>
+    </Dialog>
   );
 
   return (

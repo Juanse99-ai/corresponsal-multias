@@ -60,6 +60,12 @@ export function NavOverlay({
         side="left"
         showCloseButton={false}
         aria-describedby={undefined}
+        // Enfocar el panel y no el botón de cerrar: si no, su tooltip se abre solo
+        // y el primer Escape cierra el tooltip en vez del menú.
+        onOpenAutoFocus={(e) => {
+          e.preventDefault();
+          (e.currentTarget as HTMLElement).focus();
+        }}
         className="inset-0 z-[60] h-[100dvh] w-full max-w-none gap-0 overflow-y-auto border-0 bg-nav-bg text-nav-text shadow-none sm:max-w-none"
       >
         <SheetTitle className="sr-only">Menú</SheetTitle>

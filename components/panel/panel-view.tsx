@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { motion, type Variants } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { motion, useReducedMotion, type Variants } from "framer-motion";
+import { Bar, BarChart, Cell, Pie, PieChart, XAxis } from "recharts";
 import {
   Calculator,
   Wallet,
@@ -13,7 +15,16 @@ import {
   TrendUp,
   ChartPie,
 } from "@phosphor-icons/react/dist/ssr";
-import { Card } from "@/components/ui/card";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
+import { IconButton } from "@/components/ui/icon-button";
 import { Badge } from "@/components/ui/badge";
 import { AnimatedMoney } from "@/components/ui/animated-number";
 import { cn } from "@/lib/utils";
@@ -45,6 +56,9 @@ export interface PanelData {
   deudas: { totalPendiente: number; personas: PersonaSaldo[] } | null;
 }
 
+/** Rótulo de tarjeta: ícono azul + nombre en gris, pequeño. */
+const TITULO = "flex items-center gap-2 text-[0.82rem] font-medium tracking-normal text-muted";
+
 const container: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.07, delayChildren: 0.04 } },
@@ -71,7 +85,7 @@ export function PanelView({ data }: { data: PanelData }) {
           <Link href="/cuadre" className="group block h-full">
             <Card
               className={cn(
-                "relative h-full overflow-hidden p-6 transition-colors sm:p-7",
+                "relative flex h-full flex-col overflow-hidden transition-colors",
                 data.cuadreHoy && !sinTirilla
                   ? descuadreHoy
                     ? "border-danger/40"
@@ -79,12 +93,12 @@ export function PanelView({ data }: { data: PanelData }) {
                   : "hover:border-line-strong",
               )}
             >
-              <div className="relative flex h-full flex-col">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-muted">
-                    <Calculator size={18} weight="fill" className="text-accent" />
-                    <span className="text-[0.82rem] font-medium">Cuadre de hoy</span>
-                  </div>
+              <CardHeader className="items-center">
+                <CardTitle className={TITULO}>
+                  <Calculator size={18} weight="fill" className="text-accent" />
+                  Cuadre de hoy
+                </CardTitle>
+                <CardAction>
                   {!data.cuadreHoy ? (
                     <Badge variant="secondary">Sin abrir</Badge>
                   ) : sinTirilla ? (
@@ -95,68 +109,68 @@ export function PanelView({ data }: { data: PanelData }) {
                       {descuadreHoy ? "Descuadre" : "Cuadrado"}
                     </Badge>
                   )}
-                </div>
+                </CardAction>
+              </CardHeader>
 
-                <div className="mt-8">
-                  {data.cuadreHoy && sinTirilla ? (
-                    <>
-                      <p className="text-[0.74rem] uppercase tracking-wide text-faint">Saldo final</p>
-                      <p className="tnum mt-1 text-4xl font-semibold tracking-tight text-faint sm:text-5xl">—</p>
-                      <p className="mt-1 text-sm text-muted">Escribe el total de la tirilla para ver si el día cuadra.</p>
-                    </>
-                  ) : data.cuadreHoy ? (
-                    <>
-                      <p className="text-[0.74rem] uppercase tracking-wide text-faint">Saldo final</p>
-                      <p
-                        className={cn(
-                          "mt-1 text-4xl font-semibold tracking-tight sm:text-5xl",
-                          descuadreHoy ? "text-danger" : "text-success",
-                        )}
-                      >
-                        <AnimatedMoney value={data.cuadreHoy.saldo_final} />
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-3xl font-semibold tracking-tight text-text">Aún sin cuadrar</p>
-                      <p className="mt-1 text-sm text-muted">Abre el cuadre cuando tengas la tirilla.</p>
-                    </>
-                  )}
-                </div>
+              <CardContent className="mt-5">
+                {data.cuadreHoy && sinTirilla ? (
+                  <>
+                    <p className="text-[0.74rem] uppercase tracking-wide text-faint">Saldo final</p>
+                    <p className="tnum mt-1 text-4xl font-semibold tracking-tight text-faint sm:text-5xl">—</p>
+                    <p className="mt-1 text-sm text-muted">Escribe el total de la tirilla para ver si el día cuadra.</p>
+                  </>
+                ) : data.cuadreHoy ? (
+                  <>
+                    <p className="text-[0.74rem] uppercase tracking-wide text-faint">Saldo final</p>
+                    <p
+                      className={cn(
+                        "mt-1 text-4xl font-semibold tracking-tight sm:text-5xl",
+                        descuadreHoy ? "text-danger" : "text-success",
+                      )}
+                    >
+                      <AnimatedMoney value={data.cuadreHoy.saldo_final} />
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-3xl font-semibold tracking-tight text-text">Aún sin cuadrar</p>
+                    <p className="mt-1 text-sm text-muted">Abre el cuadre cuando tengas la tirilla.</p>
+                  </>
+                )}
+              </CardContent>
 
-                <div className="mt-auto flex items-center gap-1.5 pt-6 text-[0.82rem] font-medium text-accent-strong">
-                  {data.cuadreHoy ? "Ver cuadre" : "Abrir cuadre"}
-                  <ArrowRight size={15} weight="bold" className="transition-transform group-hover:translate-x-1" />
-                </div>
-              </div>
+              <CardFooter className="mt-auto gap-1.5 pt-1 text-[0.82rem] font-medium text-accent-strong">
+                {data.cuadreHoy ? "Ver cuadre" : "Abrir cuadre"}
+                <ArrowRight size={15} weight="bold" className="transition-transform group-hover:translate-x-1" />
+              </CardFooter>
             </Card>
           </Link>
         </motion.div>
 
         <motion.div variants={item}>
           <Link href="/luis" className="group block h-full">
-            <Card className="relative h-full overflow-hidden p-6 transition-colors hover:border-line-strong">
-              <div className="relative flex h-full flex-col">
-                <div className="flex items-center gap-2 text-muted">
+            <Card className="relative flex h-full flex-col overflow-hidden transition-colors hover:border-line-strong">
+              <CardHeader>
+                <CardTitle className={TITULO}>
                   <Wallet size={18} weight="fill" className="text-accent" />
-                  <span className="text-[0.82rem] font-medium">Sr. Luis · hoy</span>
-                </div>
-                <div className="mt-8">
-                  <p className="text-[0.74rem] uppercase tracking-wide text-faint">Consignado hoy</p>
-                  <p className="mt-1 text-3xl font-semibold tracking-tight text-text sm:text-4xl">
-                    <AnimatedMoney value={data.srLuisHoy} />
-                  </p>
-                  <p className="mt-2 text-[0.82rem] text-muted">
-                    {data.consignacionesHoyCount}{" "}
-                    {data.consignacionesHoyCount === 1 ? "consignación" : "consignaciones"} · saldo de Sr. Luis{" "}
-                    <span className="tnum text-text">{formatCOP(data.saldoLuisAcumulado)}</span>
-                  </p>
-                </div>
-                <div className="mt-auto flex items-center gap-1.5 pt-6 text-[0.82rem] font-medium text-accent-strong">
-                  Registrar consignación
-                  <ArrowRight size={15} weight="bold" className="transition-transform group-hover:translate-x-1" />
-                </div>
-              </div>
+                  Sr. Luis · hoy
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="mt-5">
+                <p className="text-[0.74rem] uppercase tracking-wide text-faint">Consignado hoy</p>
+                <p className="mt-1 text-3xl font-semibold tracking-tight text-text sm:text-4xl">
+                  <AnimatedMoney value={data.srLuisHoy} />
+                </p>
+                <p className="mt-2 text-[0.82rem] text-muted">
+                  {data.consignacionesHoyCount}{" "}
+                  {data.consignacionesHoyCount === 1 ? "consignación" : "consignaciones"} · saldo de Sr. Luis{" "}
+                  <span className="tnum text-text">{formatCOP(data.saldoLuisAcumulado)}</span>
+                </p>
+              </CardContent>
+              <CardFooter className="mt-auto gap-1.5 pt-1 text-[0.82rem] font-medium text-accent-strong">
+                Registrar consignación
+                <ArrowRight size={15} weight="bold" className="transition-transform group-hover:translate-x-1" />
+              </CardFooter>
             </Card>
           </Link>
         </motion.div>
@@ -170,46 +184,54 @@ export function PanelView({ data }: { data: PanelData }) {
 
         <motion.div variants={item}>
           {data.deudas ? (
-            <Card className="h-full p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-muted">
+            <Card className="h-full">
+              <CardHeader className="items-center">
+                <CardTitle className={TITULO}>
                   <HandCoins size={18} weight="fill" className="text-accent" />
-                  <span className="text-[0.82rem] font-medium">Préstamos</span>
+                  Préstamos
+                </CardTitle>
+                <CardAction>
+                  <IconButton label="Ver préstamos" size="icon-sm" className="text-faint hover:text-accent-strong" asChild>
+                    <Link href="/prestamos">
+                      <ArrowRight size={16} />
+                    </Link>
+                  </IconButton>
+                </CardAction>
+              </CardHeader>
+              <CardContent className="mt-2">
+                <p className="text-[0.74rem] uppercase tracking-wide text-faint">Total pendiente</p>
+                <p className="mt-1 text-3xl font-semibold tracking-tight text-text">
+                  <AnimatedMoney value={data.deudas.totalPendiente} />
+                </p>
+                <div className="mt-5 flex flex-col gap-2.5">
+                  {data.deudas.personas.filter((p) => p.saldo > 0).slice(0, 4).map((p) => (
+                    <div key={p.persona} className="flex items-center justify-between text-[0.82rem]">
+                      <span className="text-muted">{p.persona}</span>
+                      <span className="tnum text-text">{formatCOP(p.saldo)}</span>
+                    </div>
+                  ))}
+                  {data.deudas.personas.filter((p) => p.saldo > 0).length === 0 && (
+                    <p className="text-[0.82rem] text-success">Nadie debe al fondo.</p>
+                  )}
                 </div>
-                <Link href="/prestamos" className="text-faint transition-colors hover:text-accent-strong">
-                  <ArrowRight size={16} />
-                </Link>
-              </div>
-              <p className="mt-6 text-[0.74rem] uppercase tracking-wide text-faint">Total pendiente</p>
-              <p className="mt-1 text-3xl font-semibold tracking-tight text-text">
-                <AnimatedMoney value={data.deudas.totalPendiente} />
-              </p>
-              <div className="mt-5 flex flex-col gap-2.5">
-                {data.deudas.personas.filter((p) => p.saldo > 0).slice(0, 4).map((p) => (
-                  <div key={p.persona} className="flex items-center justify-between text-[0.82rem]">
-                    <span className="text-muted">{p.persona}</span>
-                    <span className="tnum text-text">{formatCOP(p.saldo)}</span>
-                  </div>
-                ))}
-                {data.deudas.personas.filter((p) => p.saldo > 0).length === 0 && (
-                  <p className="text-[0.82rem] text-success">Nadie debe al fondo.</p>
-                )}
-              </div>
+              </CardContent>
             </Card>
           ) : (
             <Link href="/prestamos" className="group block h-full">
-              <Card className="flex h-full flex-col justify-between p-6 transition-colors hover:border-line-strong">
-                <div className="flex items-center gap-2 text-muted">
-                  <HandCoins size={18} weight="fill" className="text-accent" />
-                  <span className="text-[0.82rem] font-medium">Préstamos</span>
-                </div>
-                <div>
+              <Card className="flex h-full flex-col justify-between transition-colors hover:border-line-strong">
+                <CardHeader>
+                  <CardTitle className={TITULO}>
+                    <HandCoins size={18} weight="fill" className="text-accent" />
+                    Préstamos
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
                   <p className="text-lg font-semibold text-text">Registrar un préstamo</p>
-                </div>
-                <div className="flex items-center gap-1.5 text-[0.82rem] font-medium text-accent-strong">
+                </CardContent>
+                <CardFooter className="gap-1.5 text-[0.82rem] font-medium text-accent-strong">
                   <Plus size={15} weight="bold" />
                   Nuevo préstamo
-                </div>
+                </CardFooter>
               </Card>
             </Link>
           )}
@@ -218,13 +240,13 @@ export function PanelView({ data }: { data: PanelData }) {
 
       {/* Fila terciaria: últimos cierres a lo ancho (más compacta que las de arriba) */}
       <motion.div variants={item}>
-        <Card className="p-5 sm:p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-muted">
+        <Card>
+          <CardHeader className="items-center">
+            <CardTitle className={TITULO}>
               <TrendUp size={18} weight="fill" className="text-accent" />
-              <span className="text-[0.82rem] font-medium">Últimos cierres</span>
-            </div>
-            <div className="flex items-center gap-3 text-[0.74rem]">
+              Últimos cierres
+            </CardTitle>
+            <CardAction className="flex items-center gap-3 text-[0.74rem]">
               <span className="flex items-center gap-1 text-success">
                 <span className="h-2 w-2 rounded-full bg-success" />
                 {data.stats.cuadrados}
@@ -233,13 +255,15 @@ export function PanelView({ data }: { data: PanelData }) {
                 <span className="h-2 w-2 rounded-full bg-danger" />
                 {data.stats.descuadres}
               </span>
-            </div>
-          </div>
-          {data.recientes.length === 0 ? (
-            <p className="mt-8 text-sm text-muted">Todavía no hay cierres registrados.</p>
-          ) : (
-            <RecientesChart recientes={data.recientes} />
-          )}
+            </CardAction>
+          </CardHeader>
+          <CardContent>
+            {data.recientes.length === 0 ? (
+              <p className="mt-5 text-sm text-muted">Todavía no hay cierres registrados.</p>
+            ) : (
+              <RecientesChart recientes={data.recientes} />
+            )}
+          </CardContent>
         </Card>
       </motion.div>
       </motion.div>
@@ -248,6 +272,7 @@ export function PanelView({ data }: { data: PanelData }) {
 }
 
 function DistribucionCard({ distribucion, tirilla }: { distribucion: { label: string; value: number }[]; tirilla: number }) {
+  const reducir = useReducedMotion();
   // Rampa de un solo tono (el azul de la casa) por claridad: la torta muestra
   // composición, no estado. Solo "Retiros" va en rojo porque es plata que sale.
   const SEG: Record<string, string> = {
@@ -262,44 +287,55 @@ function DistribucionCard({ distribucion, tirilla }: { distribucion: { label: st
   const activos = distribucion.filter((s) => s.value > 0);
   const total = activos.reduce((a, b) => a + b.value, 0);
 
-  let background = "var(--surface-2)";
-  let legend: { label: string; pct: string; color: string }[] = distribucion
-    .slice(0, 5)
-    .map((s) => ({ label: s.label, pct: "—", color: "var(--line)" }));
-  if (total > 0) {
-    let acc = 0;
-    const stops: string[] = [];
-    for (const s of activos) {
-      const a = (acc / total) * 100;
-      acc += s.value;
-      const b = (acc / total) * 100;
-      const col = SEG[s.label] ?? "oklch(0.6 0.05 258)";
-      stops.push(`${col} ${a.toFixed(2)}% ${b.toFixed(2)}%`);
-    }
-    background = `conic-gradient(${stops.join(",")})`;
-    legend = activos.map((s) => ({
-      label: s.label,
-      pct: `${Math.round((s.value / total) * 100)}%`,
-      color: SEG[s.label] ?? "oklch(0.6 0.05 258)",
-    }));
-  }
+  const colorDe = (label: string) => SEG[label] ?? "oklch(0.6 0.05 258)";
+  // Torta de shadcn (ChartContainer + recharts PieChart). Sin montos, un aro gris.
+  const porcion = total > 0
+    ? activos.map((s) => ({ label: s.label, value: s.value, fill: colorDe(s.label) }))
+    : [{ label: "vacío", value: 1, fill: "var(--surface-2)" }];
+  const legend: { label: string; pct: string; color: string }[] = total > 0
+    ? activos.map((s) => ({ label: s.label, pct: `${Math.round((s.value / total) * 100)}%`, color: colorDe(s.label) }))
+    : distribucion.slice(0, 5).map((s) => ({ label: s.label, pct: "—", color: "var(--line)" }));
+  const configTorta = Object.fromEntries(
+    activos.map((s) => [s.label, { label: s.label, color: colorDe(s.label) }]),
+  ) satisfies ChartConfig;
 
   return (
-    <Card className="h-full p-6">
-      <div className="flex items-center gap-2 text-muted">
-        <ChartPie size={18} weight="fill" className="text-accent" />
-        <span className="text-[0.82rem] font-medium">Distribución del día</span>
-      </div>
+    <Card className="h-full">
+      <CardHeader>
+        <CardTitle className={TITULO}>
+          <ChartPie size={18} weight="fill" className="text-accent" />
+          Distribución del día
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
       {distribucion.length === 0 ? (
-        <div className="mt-6 flex flex-col items-center gap-3 py-7 text-center">
+        <div className="mt-3 flex flex-col items-center gap-3 py-7 text-center">
           <div className="h-24 w-24 rounded-full border-[11px] border-line" />
           <p className="text-[0.82rem] text-muted">Abre el cuadre de hoy para ver la distribución.</p>
         </div>
       ) : (
-        <div className="mt-5 flex items-center gap-4 sm:gap-5">
+        <div className="mt-2 flex items-center gap-4 sm:gap-5">
           <div className="relative h-32 w-32 shrink-0">
-            <div className="h-full w-full rounded-full" style={{ background }} />
-            <div className="absolute inset-[18px] flex flex-col items-center justify-center rounded-full bg-surface">
+            <ChartContainer config={configTorta} className="aspect-square h-full w-full">
+              <PieChart>
+                {total > 0 && (
+                  <ChartTooltip
+                    cursor={false}
+                    content={<ChartTooltipContent hideLabel nameKey="label" formatter={(v, n) => `${n} · ${formatCOP(Number(v))}`} />}
+                  />
+                )}
+                <Pie
+                  data={porcion}
+                  dataKey="value"
+                  nameKey="label"
+                  innerRadius={46}
+                  outerRadius={64}
+                  strokeWidth={0}
+                  isAnimationActive={!reducir}
+                />
+              </PieChart>
+            </ChartContainer>
+            <div className="pointer-events-none absolute inset-[18px] flex flex-col items-center justify-center rounded-full">
               <span className="text-[0.6rem] font-semibold uppercase tracking-wide text-faint">Tirilla</span>
               <span className="tnum text-sm font-semibold text-text">{formatCompactCOP(tirilla)}</span>
             </div>
@@ -315,43 +351,64 @@ function DistribucionCard({ distribucion, tirilla }: { distribucion: { label: st
           </div>
         </div>
       )}
+      </CardContent>
     </Card>
   );
 }
 
+const chartConfig = {
+  cuadrado: { label: "Cuadrado", color: "var(--success)" },
+  descuadre: { label: "Descuadre", color: "var(--danger)" },
+} satisfies ChartConfig;
+
+/** Tooltip del gráfico: fecha corta y total de la tirilla (lo que antes iba en el title). */
+function TooltipCierre({ active, payload }: { active?: boolean; payload?: { payload?: Reciente }[] }) {
+  const r = payload?.[0]?.payload;
+  if (!active || !r) return null;
+  return (
+    <div className="rounded-xl border bg-popover px-3 py-2 text-popover-foreground shadow-md">
+      <p className="text-[0.7rem] text-faint">{formatFechaCorta(r.fecha)}</p>
+      <p className="tnum mt-0.5 text-[0.85rem] font-semibold">{formatCOP(r.total_tirilla)}</p>
+    </div>
+  );
+}
+
 function RecientesChart({ recientes }: { recientes: Reciente[] }) {
+  const router = useRouter();
+  const reduce = useReducedMotion();
   const orden = [...recientes].reverse(); // antiguo -> reciente
-  const max = Math.max(...orden.map((r) => r.total_tirilla), 1);
 
   return (
     <div>
-      {/* items-stretch (no items-end): si el enlace no se estira queda con alto
-          automático y el alto en % de la barra resuelve a cero (barras invisibles). */}
-      <div className="mt-6 flex h-28 items-stretch gap-1.5">
-        {orden.map((r) => {
-          const descuadre = Math.round(r.saldo_final) !== 0;
-          const h = Math.max(8, (r.total_tirilla / max) * 100);
-          return (
-            <Link
-              key={r.fecha}
-              href={`/cuadre?fecha=${r.fecha}`}
-              className="group/bar relative flex h-full flex-1 flex-col items-center justify-end"
-              title={`${formatFechaCorta(r.fecha)} · ${formatCOP(r.total_tirilla)}`}
-            >
-              {/* Alto en style (% contra el enlace, ya estirado) y entrada con
-                  la clase CSS .t-bar-rise: animar height no funcionaba (Framer no
-                  interpola 0px -> "45%") y además es animar layout. */}
-              <span
-                style={{ height: `${h}%` }}
-                className={cn(
-                  "t-bar-rise block w-full rounded-md transition-opacity group-hover/bar:opacity-100",
-                  descuadre ? "bg-danger/70" : "bg-success/60",
-                )}
-              />
-            </Link>
-          );
-        })}
-      </div>
+      <ChartContainer config={chartConfig} className="mt-3 aspect-auto h-28 w-full">
+        <BarChart data={orden} margin={{ top: 0, right: 0, bottom: 0, left: 0 }} barCategoryGap={3}>
+          <XAxis dataKey="fecha" hide />
+          <ChartTooltip content={<TooltipCierre />} cursor={false} />
+          <Bar
+            dataKey="total_tirilla"
+            radius={6}
+            // Alto mínimo visible (antes 8 %) aunque la tirilla sea pequeña.
+            minPointSize={9}
+            isAnimationActive={!reduce}
+            animationDuration={600}
+            className="cursor-pointer"
+            onClick={(d: { payload?: Reciente }) => {
+              if (d.payload) router.push(`/cuadre?fecha=${d.payload.fecha}`);
+            }}
+          >
+            {orden.map((r) => {
+              const descuadre = Math.round(r.saldo_final) !== 0;
+              return (
+                <Cell
+                  key={r.fecha}
+                  fill={descuadre ? "var(--color-descuadre)" : "var(--color-cuadrado)"}
+                  fillOpacity={descuadre ? 0.7 : 0.6}
+                />
+              );
+            })}
+          </Bar>
+        </BarChart>
+      </ChartContainer>
       <div className="mt-2 flex justify-between text-[0.66rem] text-faint">
         <span>{formatFechaCorta(orden[0].fecha)}</span>
         <span>{formatFechaCorta(orden[orden.length - 1].fecha)}</span>

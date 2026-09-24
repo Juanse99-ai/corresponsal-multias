@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import {
   Plus,
   PencilSimple,
@@ -20,8 +20,20 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import type { Icon } from "@phosphor-icons/react";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia } from "@/components/ui/empty";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemGroup,
+  ItemMedia,
+  ItemSeparator,
+  ItemTitle,
+} from "@/components/ui/item";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChoiceChip } from "@/components/ui/choice-chip";
@@ -233,11 +245,15 @@ export function BitacoraView({ entries }: { entries: AuditEntry[] }) {
 
   if (entries.length === 0) {
     return (
-      <Card className="flex flex-col items-center gap-2 py-14 text-center">
-        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-surface-2 text-faint">
-          <ShieldCheck size={20} />
-        </div>
-        <p className="text-sm text-muted">Aún no hay movimientos registrados.</p>
+      <Card>
+        <Empty className="py-14 md:py-14">
+          <EmptyHeader>
+            <EmptyMedia variant="icon" className="rounded-full text-faint">
+              <ShieldCheck size={20} />
+            </EmptyMedia>
+            <EmptyDescription>Aún no hay movimientos registrados.</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       </Card>
     );
   }
@@ -267,11 +283,11 @@ export function BitacoraView({ entries }: { entries: AuditEntry[] }) {
             />
           </InputGroup>
           <div className="flex flex-wrap items-end gap-2">
-            <Campo label="Desde">
-              <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="h-10 w-full min-w-0 sm:w-[8.8rem]" />
+            <Campo label="Desde" htmlFor="bit-desde">
+              <DatePicker id="bit-desde" value={desde} onChange={setDesde} placeholder="Desde" className="h-10 w-full min-w-0 sm:w-[8.8rem]" />
             </Campo>
-            <Campo label="Hasta">
-              <Input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} className="h-10 w-full min-w-0 sm:w-[8.8rem]" />
+            <Campo label="Hasta" htmlFor="bit-hasta">
+              <DatePicker id="bit-hasta" value={hasta} onChange={setHasta} placeholder="Hasta" className="h-10 w-full min-w-0 sm:w-[8.8rem]" />
             </Campo>
             <Button variant="secondary" size="sm" onClick={exportar} disabled={filtrados.length === 0} className="shrink-0">
               <DownloadSimple size={16} weight="bold" />
@@ -280,7 +296,8 @@ export function BitacoraView({ entries }: { entries: AuditEntry[] }) {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2 border-t border-line pt-3">
+        <Separator />
+        <div className="-mt-1 flex flex-wrap gap-2">
           <Chip active={modulo === "todos"} onClick={() => setModulo("todos")}>
             Todos
           </Chip>
@@ -325,11 +342,15 @@ export function BitacoraView({ entries }: { entries: AuditEntry[] }) {
 
       {/* Lista agrupada por día */}
       {filtrados.length === 0 ? (
-        <Card className="flex flex-col items-center gap-2 py-12 text-center">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-surface-2 text-faint">
-            <MagnifyingGlass size={20} />
-          </div>
-          <p className="text-sm text-muted">Ningún registro con estos filtros.</p>
+        <Card>
+          <Empty className="py-12 md:py-12">
+            <EmptyHeader>
+              <EmptyMedia variant="icon" className="rounded-full text-faint">
+                <MagnifyingGlass size={20} />
+              </EmptyMedia>
+              <EmptyDescription>Ningún registro con estos filtros.</EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         </Card>
       ) : (
         grupos.map(([dia, items]) => (
@@ -339,11 +360,14 @@ export function BitacoraView({ entries }: { entries: AuditEntry[] }) {
               <span className="text-[0.72rem] text-faint">{items.length} {items.length === 1 ? "movimiento" : "movimientos"}</span>
             </div>
             <Card className="p-1.5 sm:p-2">
-              <ul className="flex flex-col divide-y divide-line">
-                {items.map((e) => (
-                  <Fila key={e.id} e={e} abierto={abiertos.has(e.id)} onToggle={() => toggle(e.id)} />
+              <ItemGroup>
+                {items.map((e, i) => (
+                  <Fragment key={e.id}>
+                    {i > 0 && <ItemSeparator />}
+                    <Fila e={e} abierto={abiertos.has(e.id)} onToggle={() => toggle(e.id)} />
+                  </Fragment>
                 ))}
-              </ul>
+              </ItemGroup>
             </Card>
           </div>
         ))
@@ -361,24 +385,29 @@ function Fila({ e, abierto, onToggle }: { e: AuditEntry; abierto: boolean; onTog
 
   return (
     <Collapsible asChild open={abierto} onOpenChange={onToggle}>
-    <li className={cn("rounded-lg", e.accion === "DELETE" && "bg-danger-soft/25")}>
+    <Item
+      role="listitem"
+      className={cn("flex-col items-stretch gap-0 rounded-lg p-0", e.accion === "DELETE" && "bg-danger-soft/25")}
+    >
       <CollapsibleTrigger className="flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-surface-2 active:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/45 sm:px-2.5"
       >
-        <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-full", acc.bg, acc.color)}>
+        <ItemMedia className={cn("h-9 w-9 rounded-full", acc.bg, acc.color)}>
           <Icono size={16} weight="bold" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-[0.88rem] text-text">
+        </ItemMedia>
+        <ItemContent className="min-w-0">
+          <ItemTitle className="block w-auto text-[0.88rem] font-normal text-text">
             <span className="font-semibold">{e.actorNombre}</span> <span className={acc.color}>{acc.verbo}</span> {tabla}
             {e.fecha_dato && <span className="text-muted"> del {formatFecha(e.fecha_dato)}</span>}
             {monto != null && <span className="tnum text-muted"> · {formatCOP(monto)}</span>}
-          </p>
-        </div>
-        <span className="shrink-0 whitespace-nowrap text-[0.72rem] text-faint">{formatHoraISO(e.created_at)}</span>
-        <CaretDown
-          size={14}
-          className={cn("shrink-0 text-faint transition-transform", abierto && "rotate-180")}
-        />
+          </ItemTitle>
+        </ItemContent>
+        <ItemActions className="shrink-0 gap-3">
+          <span className="whitespace-nowrap text-[0.72rem] text-faint">{formatHoraISO(e.created_at)}</span>
+          <CaretDown
+            size={14}
+            className={cn("shrink-0 text-faint transition-transform", abierto && "rotate-180")}
+          />
+        </ItemActions>
       </CollapsibleTrigger>
 
       <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
@@ -386,9 +415,11 @@ function Fila({ e, abierto, onToggle }: { e: AuditEntry; abierto: boolean; onTog
               {cambios.length === 0 ? (
                 <p className="text-[0.78rem] text-faint">Sin detalle adicional.</p>
               ) : (
-                <div className="flex flex-col divide-y divide-line/70">
-                  {cambios.map((c) => (
-                    <div key={c.campo} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-1.5 text-[0.78rem]">
+                <div className="flex flex-col">
+                  {cambios.map((c, i) => (
+                    <Fragment key={c.campo}>
+                    {i > 0 && <Separator className="bg-line/70" />}
+                    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-1.5 text-[0.78rem]">
                       <span className="shrink-0 text-muted">{CAMPO[c.campo] ?? c.campo}</span>
                       {c.valor != null ? (
                         <span className="tnum min-w-0 break-words text-right text-text">{c.valor}</span>
@@ -400,12 +431,13 @@ function Fila({ e, abierto, onToggle }: { e: AuditEntry; abierto: boolean; onTog
                         </span>
                       )}
                     </div>
+                    </Fragment>
                   ))}
                 </div>
               )}
             </div>
       </CollapsibleContent>
-    </li>
+    </Item>
     </Collapsible>
   );
 }
@@ -426,10 +458,10 @@ function Stat({ label, value, tone }: { label: string; value: number; tone?: "su
   );
 }
 
-function Campo({ label, children }: { label: string; children: React.ReactNode }) {
+function Campo({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) {
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-none">
-      <label className="text-[0.72rem] text-faint">{label}</label>
+      <Label htmlFor={htmlFor} className="text-[0.72rem] font-normal text-faint">{label}</Label>
       {children}
     </div>
   );

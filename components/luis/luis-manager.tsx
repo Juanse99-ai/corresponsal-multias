@@ -3,6 +3,7 @@
 import { Wallet, TrendUp } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { AnimatedMoney } from "@/components/ui/animated-number";
 import { formatCOP } from "@/lib/format";
 import type { ConsignacionLuisRow, CompensacionLuisRow } from "@/lib/database.types";
@@ -71,7 +72,8 @@ export function LuisManager({
         </div>
 
         {/* Resumen del día */}
-        <div className="relative mt-6 grid grid-cols-1 divide-y divide-line sm:grid-cols-3 sm:divide-x sm:divide-y-0 border-t border-line pt-4">
+        <Separator className="mt-6" />
+        <div className="relative grid grid-cols-1 divide-y divide-line pt-4 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
           <DiaStat label="Cupo de hoy" value={totalComp} />
           <DiaStat label="Consignaciones" value={totalConsig} />
           <DiaStat label="Del día" value={saldoDia} />
