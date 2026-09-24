@@ -1,26 +1,17 @@
-import * as React from "react";
-import { cn } from "@/lib/utils";
+import * as React from "react"
+import { cn } from "@/lib/utils"
 
-/**
- * Área de texto con el lenguaje Liquid Glass de la app: superficie esmerilada,
- * esquinas suaves y un halo de acento al enfocar. Cifras y texto en tono `text`.
- */
-export const Textarea = React.forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttributes<HTMLTextAreaElement>>(
-  ({ className, ...props }, ref) => (
+function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
+  return (
     <textarea
-      ref={ref}
+      data-slot="textarea"
       className={cn(
-        // text-base (16px): con menos, iOS hace zoom automático al enfocar el campo.
-        "w-full resize-none rounded-2xl border border-line-strong bg-surface-2/80 px-4 py-3 text-base text-text",
-        "placeholder:text-faint shadow-[inset_0_1px_0_oklch(1_0_0/0.6)]",
-        "transition-[color,background-color,border-color,box-shadow] duration-200",
-        "focus:outline-none focus:border-accent/60 focus:bg-surface",
-        "focus:shadow-[0_0_0_3px_oklch(0.515_0.172_258/0.12),inset_0_1px_0_oklch(1_0_0/0.7)]",
-        "disabled:opacity-50 disabled:pointer-events-none",
-        className,
+        "flex field-sizing-content min-h-16 w-full rounded-xl border border-input bg-surface-2/60 px-3.5 py-2.5 text-base text-foreground shadow-xs transition-[color,box-shadow] outline-none placeholder:text-faint focus-visible:border-ring focus-visible:bg-background focus-visible:ring-[3px] focus-visible:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40",
+        className
       )}
       {...props}
     />
-  ),
-);
-Textarea.displayName = "Textarea";
+  )
+}
+
+export { Textarea }

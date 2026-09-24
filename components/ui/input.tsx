@@ -1,34 +1,20 @@
-import * as React from "react";
-import { cn } from "@/lib/utils";
+import * as React from "react"
+import { cn } from "@/lib/utils"
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  /** Se dispara al presionar Enter (sin composición IME). Útil para enviar el formulario. */
-  onEnter?: () => void;
-}
-
-export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, onEnter, onKeyDown, ...props }, ref) => (
+function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+  return (
     <input
-      ref={ref}
+      type={type}
+      data-slot="input"
       className={cn(
-        // text-base explícito: si un input queda bajo 16px, iOS hace zoom al enfocarlo.
-        "h-11 w-full rounded-2xl border border-line-strong bg-surface-2/80 px-3.5 text-base text-text",
-        "placeholder:text-faint shadow-[inset_0_1px_0_oklch(1_0_0/0.6)]",
-        "transition-[color,background-color,border-color,box-shadow] duration-200",
-        "focus:outline-none focus:border-accent/60 focus:bg-surface",
-        "focus:shadow-[0_0_0_3px_oklch(0.515_0.172_258/0.12),inset_0_1px_0_oklch(1_0_0/0.7)]",
-        "disabled:opacity-50 disabled:pointer-events-none",
-        className,
+        "h-11 w-full min-w-0 rounded-xl border border-input bg-surface-2/60 px-3.5 py-1 text-base text-foreground shadow-xs transition-[color,box-shadow] outline-none selection:bg-primary selection:text-primary-foreground file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-faint disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30",
+        "focus-visible:border-ring focus-visible:bg-background focus-visible:ring-[3px] focus-visible:ring-ring/20",
+        "aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
+        className
       )}
-      onKeyDown={(e) => {
-        onKeyDown?.(e);
-        if (onEnter && e.key === "Enter" && !e.nativeEvent.isComposing) {
-          e.preventDefault();
-          onEnter();
-        }
-      }}
       {...props}
     />
-  ),
-);
-Input.displayName = "Input";
+  )
+}
+
+export { Input }

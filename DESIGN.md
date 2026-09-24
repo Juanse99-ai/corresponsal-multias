@@ -23,6 +23,12 @@ Estrategia de color: **restrained-committed** — neutros claros + azul como ace
 para estado negativo, verde solo para "cuadrado". El riel lateral azul marino da el contraste
 "riel oscuro / lienzo claro" sin usar negro.
 
+## Componentes
+Todos los componentes de interfaz salen de **shadcn/ui** (`components/ui`),
+pintados con esta paleta: primario = azul del logo, destructivo = rojo, bordes y
+fondos de los neutros entintados. Botón principal sólido azul; secundario gris
+claro; los de ícono, fantasma. Nada de botones hechos a mano en las pantallas.
+
 ## Reglas
 - Nunca `#000`/`#fff`; todo entintado al azul.
 - Sombras suaves tintadas al azul (no negro duro).
@@ -43,6 +49,6 @@ Equivalente web del GlassEffect de iOS. El vidrio es para lo que FLOTA sobre el
 contenido, nunca para el contenido mismo (tarjetas con cifras siguen sólidas):
 - `.lg-panel`: barra superior (cápsula flotante), píldora de fecha del chat y
   compositor del Cruce con el grupo. Sigue el tema; texto con tokens normales.
-- `.lg-panel .lg-panel-thick`: menús desplegables y hoja de confirmación. Casi
-  opaco, porque se abre encima de texto y un vidrio dentro de otro no desenfoca.
-- `.lg-glass*` / `.lg-liquid*`: botones y toggles (ya existían).
+- Menús desplegables y diálogos: `Popover` y `AlertDialog` de shadcn, sólidos,
+  porque se abren encima de texto.
+- Botones y controles: los de shadcn/ui (ver CLAUDE.md), sólidos, sin vidrio.

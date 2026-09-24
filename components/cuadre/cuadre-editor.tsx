@@ -17,7 +17,9 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/field";
+import { Alert, AlertTitle } from "@/components/ui/alert";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
 import { MoneyInput } from "@/components/ui/money-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -293,7 +295,7 @@ export function CuadreEditor({
                 diferencia: diferenciaCaja,
               }}
             />
-            <Badge tone={estado === "cerrado" ? "success" : "neutral"}>
+            <Badge variant={estado === "cerrado" ? "success" : "secondary"}>
               {estado === "cerrado" ? <Lock size={12} weight="fill" /> : <LockOpen size={12} />}
               {estado === "cerrado" ? "Cerrado" : "Abierto"}
             </Badge>
@@ -301,10 +303,10 @@ export function CuadreEditor({
         </div>
 
         {locked && (
-          <div className="mb-4 flex items-center gap-2 rounded-card border border-line-strong bg-surface-2 px-3.5 py-2.5 text-[0.82rem] text-muted">
-            <Lock size={15} weight="fill" className="text-accent" />
-            Día cerrado. Solo Juan puede reabrirlo para editar.
-          </div>
+          <Alert variant="muted" className="mb-4">
+            <Lock weight="fill" />
+            <AlertTitle className="line-clamp-none font-normal">Día cerrado. Solo Juan puede reabrirlo para editar.</AlertTitle>
+          </Alert>
         )}
 
         <fieldset disabled={locked} className="contents">
@@ -536,38 +538,24 @@ export function CuadreEditor({
         {/* Estado + guardar */}
         <Card className="flex flex-col gap-3 p-5">
           {locked ? (
-            <div className="flex items-center gap-2 rounded-card border border-line-strong bg-surface-2 px-3.5 py-3 text-[0.82rem] text-muted">
-              <Lock size={16} weight="fill" className="text-accent" />
-              Día cerrado. Solo Juan puede reabrirlo.
-            </div>
+            <Alert variant="muted">
+              <Lock weight="fill" />
+              <AlertTitle className="line-clamp-none font-normal">Día cerrado. Solo Juan puede reabrirlo.</AlertTitle>
+            </Alert>
           ) : (
             <>
-              <div className="flex rounded-full border border-line bg-surface-2 p-1">
-                {(["abierto", "cerrado"] as const).map((e) => (
-                  <button
-                    key={e}
-                    type="button"
-                    aria-pressed={estado === e}
-                    onClick={() => setEstado(e)}
-                    className={cn(
-                      "relative flex h-10 flex-1 items-center justify-center rounded-full text-[0.84rem] font-medium capitalize transition-[color,transform] duration-200 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/45",
-                      estado === e ? "text-glass-ink" : "text-muted hover:text-text",
-                    )}
-                  >
-                    {estado === e && (
-                      <motion.span
-                        layoutId="estado-pill"
-                        className="absolute inset-0 rounded-full lg-glass"
-                        transition={{ type: "spring", stiffness: 360, damping: 30 }}
-                      />
-                    )}
-                    <span className="relative z-10 inline-flex items-center gap-1.5">
-                      {e === "abierto" ? <LockOpen size={15} /> : <Lock size={15} />}
-                      {e}
-                    </span>
-                  </button>
-                ))}
-              </div>
+              <Tabs value={estado} onValueChange={(v) => setEstado(v as typeof estado)}>
+                <TabsList className="w-full">
+                  <TabsTrigger value="abierto">
+                    <LockOpen />
+                    Abierto
+                  </TabsTrigger>
+                  <TabsTrigger value="cerrado">
+                    <Lock />
+                    Cerrado
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
 
               <Button onClick={() => onGuardar()} disabled={pending} className="w-full">
                 <FloppyDisk size={18} weight="fill" />
@@ -595,15 +583,11 @@ export function CuadreEditor({
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -6 }}
-                className={cn(
-                  "flex items-center gap-2 rounded-card px-3.5 py-2.5 text-[0.82rem]",
-                  toast.ok
-                    ? "border border-success/30 bg-success-soft text-success"
-                    : "border border-danger/30 bg-danger-soft text-danger",
-                )}
               >
-                {toast.ok ? <CheckCircle size={16} weight="fill" /> : <Warning size={16} weight="fill" />}
-                {toast.msg}
+                <Alert variant={toast.ok ? "success" : "destructive"}>
+                  {toast.ok ? <CheckCircle weight="fill" /> : <Warning weight="fill" />}
+                  <AlertTitle className="line-clamp-none font-normal">{toast.msg}</AlertTitle>
+                </Alert>
               </motion.div>
             )}
           </AnimatePresence>
@@ -656,7 +640,7 @@ function SaldoHero({
       <div className="relative">
         <div className="flex items-center justify-between">
           <p className="text-[0.78rem] font-medium uppercase tracking-wide text-faint">Saldo final</p>
-          <Badge tone={sinEmpezar ? "neutral" : descuadre ? "danger" : "success"}>
+          <Badge variant={sinEmpezar ? "secondary" : descuadre ? "danger" : "success"}>
             {sinEmpezar ? (
               <Receipt size={12} weight="fill" />
             ) : descuadre ? (

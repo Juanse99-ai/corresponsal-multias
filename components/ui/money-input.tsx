@@ -3,6 +3,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { maskMiles, parseMontoInput } from "@/lib/format";
+import { Input } from "@/components/ui/input";
 
 interface MoneyInputProps {
   value: number;
@@ -14,11 +15,13 @@ interface MoneyInputProps {
   disabled?: boolean;
   className?: string;
   size?: "md" | "lg";
-  /** Se dispara al presionar Enter. Útil para enviar el formulario. */
   onEnter?: () => void;
 }
 
-/** Input de pesos con mascara de miles en vivo y prefijo $. Alinea a la derecha. */
+/**
+ * Campo de pesos (COP, enteros) sobre el <Input> de shadcn: escribe con puntos
+ * de miles mientras se teclea y entrega el número limpio en onValueChange.
+ */
 export const MoneyInput = React.forwardRef<HTMLInputElement, MoneyInputProps>(function MoneyInput(
   { value, onValueChange, id, name, placeholder = "0", autoFocus, disabled, className, size = "md", onEnter },
   ref,
@@ -34,7 +37,7 @@ export const MoneyInput = React.forwardRef<HTMLInputElement, MoneyInputProps>(fu
       >
         $
       </span>
-      <input
+      <Input
         ref={ref}
         id={id}
         name={name}
@@ -52,12 +55,7 @@ export const MoneyInput = React.forwardRef<HTMLInputElement, MoneyInputProps>(fu
           }
         }}
         className={cn(
-          "tnum w-full rounded-2xl border border-line-strong bg-surface-2/80 pr-3.5 pl-8 text-right text-text",
-          "placeholder:text-faint shadow-[inset_0_1px_0_oklch(1_0_0/0.6)]",
-          "transition-[color,background-color,border-color,box-shadow] duration-200",
-          "focus:outline-none focus:border-accent/60 focus:bg-surface",
-          "focus:shadow-[0_0_0_3px_oklch(0.515_0.172_258/0.12),inset_0_1px_0_oklch(1_0_0/0.7)]",
-          "disabled:opacity-50 disabled:pointer-events-none",
+          "tnum pr-3.5 pl-8 text-right",
           size === "lg" ? "h-14 text-2xl font-semibold" : "h-11 text-base",
           className,
         )}

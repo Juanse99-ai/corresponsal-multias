@@ -86,11 +86,11 @@ export function PanelView({ data }: { data: PanelData }) {
                     <span className="text-[0.82rem] font-medium">Cuadre de hoy</span>
                   </div>
                   {!data.cuadreHoy ? (
-                    <Badge tone="neutral">Sin abrir</Badge>
+                    <Badge variant="secondary">Sin abrir</Badge>
                   ) : sinTirilla ? (
-                    <Badge tone="neutral">Sin tirilla</Badge>
+                    <Badge variant="secondary">Sin tirilla</Badge>
                   ) : (
-                    <Badge tone={descuadreHoy ? "danger" : "success"}>
+                    <Badge variant={descuadreHoy ? "danger" : "success"}>
                       {descuadreHoy ? <Warning size={11} weight="fill" /> : <CheckCircle size={11} weight="fill" />}
                       {descuadreHoy ? "Descuadre" : "Cuadrado"}
                     </Badge>

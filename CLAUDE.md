@@ -36,7 +36,30 @@
 - Server Components + Server Actions. Lecturas en `lib/queries.ts`, acciones en
   `app/(app)/*/actions.ts`. Clientes Supabase en `lib/supabase/{client,server,middleware}.ts`.
 - Auth/roles en `lib/auth.ts`; protección de rutas en `proxy.ts` (antes middleware).
-- UI: primitivos en `components/ui`, módulos por carpeta. Montos enteros (COP) y
+- UI: **shadcn/ui obligatorio** para todo componente de interfaz (botón, campo,
+  tarjeta, diálogo, pestañas, casilla, selector, aviso, popover, gráfico...).
+  Viven en `components/ui` (config en `components.json`, estilo new-york, íconos
+  Phosphor). No armes `<button>`, `<input>`, `<select>` ni `<textarea>` a mano en
+  las pantallas: usa el componente de shadcn, y si no existe, agrégalo.
+  - Agregar uno: `npx shadcn@latest add <nombre>`. Si la red bloquea
+    `ui.shadcn.com`, se copia de `github.com/shadcn-ui/ui`
+    (`apps/v4/registry/new-york-v4/ui/<nombre>.tsx`).
+  - Al agregar uno, cambia en su código: `bg-muted` → `bg-surface-2`,
+    `text-muted-foreground` → `text-muted`, `bg-accent`/`text-accent-foreground`
+    (hover suave) → `bg-surface-2`/`text-text`, `text-white` → `text-nav-text`,
+    íconos de lucide → Phosphor. En esta app `muted` es texto gris y `accent` es
+    el azul de marca; el resto de tokens de shadcn (`primary`, `background`,
+    `input`, `ring`...) ya apuntan a la paleta en `globals.css`.
+  - Ajustes propios ya hechos: botones en píldora con alto de 44 px y
+    `type="button"` por defecto; campos de 44 px con texto de 16 px (iOS no hace
+    zoom); `Card` sin relleno propio (cada pantalla pone `p-5 sm:p-6` o usa
+    `CardHeader`/`CardContent`); variantes extra `success`/`info`/`danger` en
+    `Badge` y `success`/`muted` en `Alert`.
+  - Composiciones de la app hechas con shadcn: `ConfirmDialog` (AlertDialog),
+    `ErrorNotice` (Alert), `MoneyInput` (Input), `ChoiceChip` (Toggle),
+    `ThemeToggle` (Switch), `AreaTendencia` (Chart). Enter en un `Input`:
+    `onKeyDown={(e) => esEnter(e) && fn()}` (`lib/utils.ts`).
+- Módulos por carpeta. Montos enteros (COP) y
   `lib/format.ts` para formato. Números con clase `.tnum` (misma fuente con
   `tabular-nums` para alinear columnas).
 

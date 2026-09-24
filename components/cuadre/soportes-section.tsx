@@ -10,7 +10,7 @@ import {
   Receipt,
   UploadSimple,ArrowSquareOut } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
-import { baseInteractiva } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -140,7 +140,7 @@ export function SoportesSection({
           <Paperclip size={17} className="text-accent" weight="fill" />
           <h3 className="text-[0.95rem] font-semibold tracking-tight text-text">{titulo}</h3>
         </div>
-        {soportes.length > 0 && <Badge tone="neutral">{soportes.length}</Badge>}
+        {soportes.length > 0 && <Badge variant="secondary">{soportes.length}</Badge>}
       </div>
 
       <label
@@ -241,18 +241,16 @@ export function SoportesSection({
                   {/* En táctil no existe hover: el botón debe verse siempre (pointer-coarse). */}
                   {/* Va sobre la foto: el vidrio claro se perdería, así que lleva fondo
                       oscuro propio, con la misma forma y respuesta que los demás. */}
-                  <button
-                    type="button"
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
                     onClick={() => setPorBorrar(s.id)}
                     title="Eliminar"
                     aria-label="Eliminar soporte"
-                    className={cn(
-                      baseInteractiva,
-                      "absolute right-1.5 top-1.5 h-9 w-9 bg-[oklch(0.22_0.03_258/0.62)] text-[oklch(0.97_0.01_260/0.9)] opacity-0 backdrop-blur-sm transition-[opacity,transform,color] hover:text-[oklch(0.8_0.14_25)] group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100",
-                    )}
+                    className="absolute right-1.5 top-1.5 bg-[oklch(0.22_0.03_258/0.62)] text-[oklch(0.97_0.01_260/0.9)] opacity-0 backdrop-blur-sm hover:bg-[oklch(0.22_0.03_258/0.75)] hover:text-[oklch(0.8_0.14_25)] group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100"
                   >
                     <Trash size={16} />
-                  </button>
+                  </Button>
                 </motion.div>
               );
             })}

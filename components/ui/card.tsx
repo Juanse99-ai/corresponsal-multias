@@ -1,35 +1,91 @@
-import * as React from "react";
-import { cn } from "@/lib/utils";
+import * as React from "react"
+import { cn } from "@/lib/utils"
 
-export function Card({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+function Card({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
+      data-slot="card"
       className={cn(
-        "rounded-[1.25rem] border border-line bg-surface",
-        "shadow-[0_1px_2px_-1px_oklch(0.4_0.05_258/0.08),0_12px_26px_-16px_oklch(0.4_0.07_258/0.22)]",
-        className,
+        "rounded-[1.25rem] border bg-card text-card-foreground shadow-[0_1px_2px_-1px_oklch(0.4_0.05_258/0.08),0_12px_26px_-16px_oklch(0.4_0.07_258/0.22)]",
+        className
       )}
       {...props}
     />
-  );
+  )
 }
 
-export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("flex flex-col gap-1 p-5 sm:p-6", className)} {...props} />;
+function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-header"
+      className={cn(
+        "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-5 pt-5 pb-3 sm:px-6 sm:pt-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6",
+        className
+      )}
+      {...props}
+    />
+  )
 }
 
-export function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
-  return <h3 className={cn("text-[0.95rem] font-semibold tracking-tight text-text", className)} {...props} />;
+function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-title"
+      className={cn("text-[0.95rem] leading-tight font-semibold tracking-tight", className)}
+      {...props}
+    />
+  )
 }
 
-export function CardDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
-  return <p className={cn("text-sm text-muted", className)} {...props} />;
+function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-description"
+      className={cn("text-sm text-muted", className)}
+      {...props}
+    />
+  )
 }
 
-export function CardContent({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("p-5 pt-0 sm:p-6 sm:pt-0", className)} {...props} />;
+function CardAction({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-action"
+      className={cn(
+        "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
+        className
+      )}
+      {...props}
+    />
+  )
 }
 
-export function CardFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("flex items-center gap-3 p-5 pt-0 sm:p-6 sm:pt-0", className)} {...props} />;
+function CardContent({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-content"
+      className={cn("px-5 pb-5 sm:px-6 sm:pb-6", className)}
+      {...props}
+    />
+  )
+}
+
+function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-footer"
+      className={cn("flex items-center gap-3 px-5 pb-5 sm:px-6 sm:pb-6 [.border-t]:pt-5", className)}
+      {...props}
+    />
+  )
+}
+
+export {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardAction,
+  CardDescription,
+  CardContent,
 }

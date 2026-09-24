@@ -4,14 +4,17 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { ArrowRight, Info } from "@phosphor-icons/react/dist/ssr";
 import { signInAction, type LoginState } from "@/app/login/actions";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 import { ErrorNotice } from "@/components/ui/error-notice";
 import { cn } from "@/lib/utils";
 
 const initial: LoginState = { error: null };
 
 // text-base (16px): con menos, iOS hace zoom al enfocar el campo.
+// Input de shadcn sin caja propia: el recuadro lo pone el grupo de afuera.
 const campo =
-  "h-full w-0 min-w-0 flex-1 bg-transparent text-base text-text outline-none placeholder:text-faint";
+  "h-full w-0 min-w-0 flex-1 rounded-none border-0 bg-transparent px-0 shadow-none focus-visible:bg-transparent focus-visible:ring-0 dark:bg-transparent";
 const fila = "flex h-[3.375rem] items-center gap-2.5 px-4";
 const etiqueta = "w-[5.75rem] shrink-0 text-[0.95rem] font-medium text-text";
 
@@ -36,7 +39,7 @@ export function LoginForm() {
       <div className="overflow-hidden rounded-[1.1rem] border border-line-strong bg-surface shadow-[0_1px_2px_oklch(0.4_0.05_258/0.06)] transition-[border-color,box-shadow] duration-200 focus-within:border-accent/60 focus-within:shadow-[0_0_0_3px_oklch(0.515_0.172_258/0.12)]">
         <div className={fila}>
           <label htmlFor="email" className={etiqueta}>Usuario</label>
-          <input
+          <Input
             ref={usuarioRef}
             id="email"
             name="email"
@@ -52,7 +55,7 @@ export function LoginForm() {
         </div>
         <div className={cn(fila, "border-t border-line", state.error && "bg-danger/5")}>
           <label htmlFor="password" className={etiqueta}>Contraseña</label>
-          <input
+          <Input
             id="password"
             name="password"
             type="password"
@@ -61,14 +64,14 @@ export function LoginForm() {
             required
             className={campo}
           />
-          <button
-            type="button"
+          <Button
+            variant="link"
             onMouseDown={sinSoltarFoco}
             onClick={() => setOlvido(true)}
-            className="-mr-2 h-11 shrink-0 rounded-full px-2 text-[0.9rem] font-medium text-accent transition-colors hover:text-accent-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/45"
+            className="-mr-2 h-11 shrink-0 px-2 text-[0.9rem] hover:no-underline hover:text-accent-strong"
           >
             ¿Olvidaste?
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -86,7 +89,7 @@ export function LoginForm() {
       <Button type="submit" size="lg" disabled={pending} onMouseDown={sinSoltarFoco} className="mt-5 h-[3.375rem] w-full text-base">
         {pending ? (
           <>
-            <span aria-hidden className="h-[18px] w-[18px] animate-spin rounded-full border-[2.5px] border-current border-t-transparent opacity-70" />
+            <Spinner className="size-[18px]" aria-hidden />
             Entrando…
           </>
         ) : (

@@ -12,11 +12,11 @@ import {
   ArrowUp,ArrowSquareOut } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { IconButton } from "@/components/ui/icon-button";
-import { Label } from "@/components/ui/field";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { MoneyInput } from "@/components/ui/money-input";
-import { cn } from "@/lib/utils";
+import { cn, esEnter } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatCOP, formatFecha, hoyISO } from "@/lib/format";
@@ -87,32 +87,18 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
       </div>
 
       <div className="mt-5 flex flex-col gap-4">
-        <div className="flex rounded-full border border-line bg-surface-2 p-1">
-          {(["compensacion", "retiro"] as const).map((t) => (
-            <button
-              key={t}
-              type="button"
-              aria-pressed={tipo === t}
-              onClick={() => setTipo(t)}
-              className={cn(
-                "relative flex h-10 flex-1 items-center justify-center rounded-full text-[0.84rem] font-medium capitalize transition-[color,transform] duration-200 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/45",
-                tipo === t ? "text-glass-ink" : "text-muted hover:text-text",
-              )}
-            >
-              {tipo === t && (
-                <motion.span
-                  layoutId="mov-pill"
-                  className="absolute inset-0 rounded-full lg-glass"
-                  transition={{ type: "spring", stiffness: 360, damping: 30 }}
-                />
-              )}
-              <span className="relative z-10 inline-flex items-center gap-1.5">
-                {t === "compensacion" ? <ArrowsLeftRight size={15} /> : <ArrowUp size={15} />}
-                {t === "compensacion" ? "Compensación" : "Retiro"}
-              </span>
-            </button>
-          ))}
-        </div>
+        <Tabs value={tipo} onValueChange={(v) => setTipo(v as typeof tipo)}>
+          <TabsList className="w-full">
+            <TabsTrigger value="compensacion">
+              <ArrowsLeftRight />
+              Compensación
+            </TabsTrigger>
+            <TabsTrigger value="retiro">
+              <ArrowUp />
+              Retiro
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
 
         <div className="grid gap-4 sm:grid-cols-[1fr_150px]">
           <div className="flex flex-col gap-2">
@@ -127,11 +113,12 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="mov-nota">Nota (opcional)</Label>
-          <Input id="mov-nota" value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Referencia…" onEnter={() => !pending && registrar()} />
+          <Input id="mov-nota" value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Referencia…" onKeyDown={(e) => esEnter(e) && !pending && registrar()} />
         </div>
 
-        <label className="flex max-w-full cursor-pointer items-center gap-2 self-start rounded-card border border-line-strong bg-surface-2 px-3.5 py-2 text-[0.82rem] text-muted transition-colors hover:text-text">
-          <Paperclip size={15} className="shrink-0" />
+        <Button asChild variant="secondary" size="sm" className="max-w-full self-start">
+        <label>
+          <Paperclip className="shrink-0" />
           <span className="min-w-0 truncate">{file ? file.name : "Adjuntar anexo (foto o PDF)"}</span>
           <input
             ref={inputRef}
@@ -141,6 +128,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
           />
         </label>
+        </Button>
 
         <ErrorNotice message={error} />
 
@@ -191,9 +179,9 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
                       <ArrowSquareOut size={15} />
                     </a>
                   )}
-                  <IconButton label="Eliminar" tone="danger" onClick={() => setPorBorrar({ id: m.id, monto: m.monto })} disabled={pending}>
+                  <Button variant="ghost" size="icon" aria-label="Eliminar" title="Eliminar" onClick={() => setPorBorrar({ id: m.id, monto: m.monto })} disabled={pending} className="text-muted hover:text-destructive">
                     <Trash size={17} />
-                  </IconButton>
+                  </Button>
                 </div>
               </motion.li>
             ))}

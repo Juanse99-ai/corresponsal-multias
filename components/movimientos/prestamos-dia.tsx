@@ -6,15 +6,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { HandCoins, Plus, Trash, PencilSimple, Check, Clock, CheckCircle, Lock, ArrowCounterClockwise, X } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { IconButton } from "@/components/ui/icon-button";
+import { Alert, AlertTitle } from "@/components/ui/alert";
 import { ChoiceChip } from "@/components/ui/choice-chip";
 import { MedioPicker, ICONO_MEDIO, NOMBRE_MEDIO, type Medio } from "@/components/prestamos/medio-picker";
 import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/field";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { MoneyInput } from "@/components/ui/money-input";
 import { AnimatedMoney } from "@/components/ui/animated-number";
-import { cn } from "@/lib/utils";
+import { cn, esEnter } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatCOP, formatHoraISO } from "@/lib/format";
@@ -181,10 +181,10 @@ export function PrestamosDia({
           </div>
 
           {bloqueado && (
-            <div className="mt-4 flex items-center gap-2 rounded-card border border-line-strong bg-surface-2 px-3.5 py-2.5 text-[0.82rem] text-muted">
-              <Lock size={15} weight="fill" className="text-accent" />
-              Día cerrado. Solo Juan puede reabrirlo.
-            </div>
+            <Alert variant="muted" className="mt-4">
+              <Lock weight="fill" />
+              <AlertTitle className="line-clamp-none font-normal">Día cerrado. Solo Juan puede reabrirlo.</AlertTitle>
+            </Alert>
           )}
 
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -203,7 +203,7 @@ export function PrestamosDia({
                   onChange={(e) => setOtro(e.target.value)}
                   placeholder="Nombre de la persona"
                   className="mt-1"
-                  onEnter={() => !pending && !bloqueado && registrar()}
+                  onKeyDown={(e) => esEnter(e) && !pending && !bloqueado && registrar()}
                 />
               )}
             </div>
@@ -214,7 +214,7 @@ export function PrestamosDia({
                 value={concepto}
                 onChange={(e) => setConcepto(e.target.value)}
                 placeholder="Préstamo personal, adelanto…"
-                onEnter={() => !pending && !bloqueado && registrar()}
+                onKeyDown={(e) => esEnter(e) && !pending && !bloqueado && registrar()}
               />
             </div>
             <div className="flex flex-col gap-2">
@@ -295,9 +295,9 @@ export function PrestamosDia({
                               <Check size={16} weight="bold" />
                               Guardar
                             </Button>
-                            <IconButton label="Cancelar" onClick={() => setEditId(null)} disabled={pending}>
+                            <Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setEditId(null)} disabled={pending} className="text-muted hover:text-foreground">
                               <X size={17} />
-                            </IconButton>
+                            </Button>
                           </div>
                         </div>
                       ) : (
@@ -327,27 +327,34 @@ export function PrestamosDia({
                               const m = (d.medio in ICONO_MEDIO ? d.medio : "efectivo") as Medio;
                               const Icono = ICONO_MEDIO[m];
                               return (
-                                <IconButton
-                                  label={`${NOMBRE_MEDIO[m]} · tocar para cambiar`}
-                                  tone={m === "transferencia" ? "accent" : "plain"}
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  aria-label={`${NOMBRE_MEDIO[m]} · tocar para cambiar`}
+                                  title={`${NOMBRE_MEDIO[m]} · tocar para cambiar`}
                                   onClick={() => cambiarMedio(d)}
                                   disabled={pending || bloqueado}
+                                  className={m === "transferencia" ? "text-accent-strong" : "text-muted hover:text-foreground"}
                                 >
                                   <Icono size={17} />
-                                </IconButton>
+                                </Button>
                               );
                             })()}
                             {saldado ? (
                               <>
-                                <Badge tone="success">Devuelto</Badge>
+                                <Badge variant="success">Devuelto</Badge>
                                 {!bloqueado && (
-                                  <IconButton
-                                    label="Deshacer pago"
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    aria-label="Deshacer pago"
+                                    title="Deshacer pago"
                                     onClick={() => setConfirmar({ tipo: "reabrir", d })}
                                     disabled={pending}
+                                    className="text-muted hover:text-foreground"
                                   >
                                     <ArrowCounterClockwise size={17} />
-                                  </IconButton>
+                                  </Button>
                                 )}
                               </>
                             ) : (
@@ -371,19 +378,22 @@ export function PrestamosDia({
                               </>
                             )}
                             {!bloqueado && (
-                              <IconButton label="Editar" onClick={() => abrirEdicion(d)} disabled={pending}>
+                              <Button variant="ghost" size="icon" aria-label="Editar" title="Editar" onClick={() => abrirEdicion(d)} disabled={pending} className="text-muted hover:text-foreground">
                                 <PencilSimple size={17} />
-                              </IconButton>
+                              </Button>
                             )}
                             {isAdmin && (
-                              <IconButton
-                                label="Eliminar"
-                                tone="danger"
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label="Eliminar"
+                                title="Eliminar"
                                 onClick={() => setConfirmar({ tipo: "borrar", d })}
                                 disabled={pending || bloqueado}
+                                className="text-muted hover:text-destructive"
                               >
                                 <Trash size={17} />
-                              </IconButton>
+                              </Button>
                             )}
                           </div>
                         </div>

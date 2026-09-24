@@ -22,13 +22,13 @@ import {
 import type { Icon } from "@phosphor-icons/react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { IconButton } from "@/components/ui/icon-button";
+import { Alert, AlertTitle } from "@/components/ui/alert";
 import { ChoiceChip } from "@/components/ui/choice-chip";
-import { Label } from "@/components/ui/field";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { MoneyInput } from "@/components/ui/money-input";
 import { AnimatedMoney } from "@/components/ui/animated-number";
-import { cn } from "@/lib/utils";
+import { cn, esEnter } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatCOP, formatHora } from "@/lib/format";
@@ -148,10 +148,10 @@ export function MovimientosManager({
           <h2 className="text-[0.95rem] font-semibold tracking-tight text-text">Registrar movimiento</h2>
 
           {bloqueado && (
-            <div className="mt-4 flex items-center gap-2 rounded-card border border-line-strong bg-surface-2 px-3.5 py-2.5 text-[0.82rem] text-muted">
-              <Lock size={15} weight="fill" className="text-accent" />
-              Día cerrado. Solo Juan puede reabrirlo para editar.
-            </div>
+            <Alert variant="muted" className="mt-4">
+              <Lock weight="fill" />
+              <AlertTitle className="line-clamp-none font-normal">Día cerrado. Solo Juan puede reabrirlo para editar.</AlertTitle>
+            </Alert>
           )}
 
           <div className={cn("mt-4 flex flex-wrap gap-2", bloqueado && "pointer-events-none opacity-50")}>
@@ -173,12 +173,12 @@ export function MovimientosManager({
             {tipo === "recaudo" && (
               <div className="flex flex-col gap-2">
                 <Label htmlFor="mov-convenio">Código de convenio</Label>
-                <Input id="mov-convenio" value={convenio} onChange={(e) => setConvenio(e.target.value)} placeholder="Ej. 12345" inputMode="numeric" onEnter={() => !pending && !bloqueado && registrar()} />
+                <Input id="mov-convenio" value={convenio} onChange={(e) => setConvenio(e.target.value)} placeholder="Ej. 12345" inputMode="numeric" onKeyDown={(e) => esEnter(e) && !pending && !bloqueado && registrar()} />
               </div>
             )}
             <div className="flex flex-col gap-2">
               <Label htmlFor="mov-cliente">{tipo === "recaudo" ? "Referencia o cliente" : "Cliente (opcional)"}</Label>
-              <Input id="mov-cliente" value={cliente} onChange={(e) => setCliente(e.target.value)} placeholder="Nombre o referencia" onEnter={() => !pending && !bloqueado && registrar()} />
+              <Input id="mov-cliente" value={cliente} onChange={(e) => setCliente(e.target.value)} placeholder="Nombre o referencia" onKeyDown={(e) => esEnter(e) && !pending && !bloqueado && registrar()} />
             </div>
           </div>
 
@@ -250,9 +250,9 @@ export function MovimientosManager({
                               <Check size={16} weight="bold" />
                               Guardar
                             </Button>
-                            <IconButton label="Cancelar" onClick={() => setEditId(null)} disabled={pending}>
+                            <Button variant="ghost" size="icon" aria-label="Cancelar" title="Cancelar" onClick={() => setEditId(null)} disabled={pending} className="text-muted hover:text-foreground">
                               <X size={17} />
-                            </IconButton>
+                            </Button>
                           </div>
                         </div>
                       ) : (
@@ -283,19 +283,22 @@ export function MovimientosManager({
                           </div>
                           <div className="flex shrink-0 items-center gap-1">
                             {!bloqueado && (
-                              <IconButton label="Editar" onClick={() => abrirEdicion(m)} disabled={pending}>
+                              <Button variant="ghost" size="icon" aria-label="Editar" title="Editar" onClick={() => abrirEdicion(m)} disabled={pending} className="text-muted hover:text-foreground">
                                 <PencilSimple size={17} />
-                              </IconButton>
+                              </Button>
                             )}
                             {isAdmin && (
-                              <IconButton
-                                label="Eliminar"
-                                tone="danger"
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label="Eliminar"
+                                title="Eliminar"
                                 onClick={() => setPorBorrar({ id: m.id, monto: m.monto })}
                                 disabled={pending || bloqueado}
+                                className="text-muted hover:text-destructive"
                               >
                                 <Trash size={17} />
-                              </IconButton>
+                              </Button>
                             )}
                           </div>
                         </div>
