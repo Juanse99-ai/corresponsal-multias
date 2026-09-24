@@ -52,6 +52,25 @@
   /* Fuente única tipo iOS: SF Pro vía la pila del sistema de Apple. */
   --font-ios: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
 
+  /* Nombres crudos de shadcn/ui, para los componentes que leen var(--primary)
+     y compañía directo en su CSS (sonner, bubble). Apuntan a la paleta de
+     arriba, así que siguen solos al modo oscuro (.dark está en el mismo <html>).
+     "muted" y "accent" NO se definen: en esta app significan otra cosa. */
+  --background: var(--bg);
+  --foreground: var(--text);
+  --card: var(--surface);
+  --card-foreground: var(--text);
+  --popover: var(--surface);
+  --popover-foreground: var(--text);
+  --primary: var(--accent);
+  --primary-foreground: var(--accent-ink);
+  --secondary: var(--surface-2);
+  --secondary-foreground: var(--text);
+  --destructive: var(--danger);
+  --border: var(--line);
+  --input: var(--line-strong);
+  --ring: var(--accent);
+
   color-scheme: light;
 }
 
