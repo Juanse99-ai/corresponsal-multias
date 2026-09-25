@@ -221,6 +221,16 @@ body {
 
 @layer base {
   input, button, textarea, select { font: inherit; }
+
+  /* iOS: con la apariencia nativa, Safari les pone a los campos de fecha y hora
+     su propio relleno, un ancho mínimo y box-sizing: content-box, así que crecen
+     por fuera de su columna (la hora se montaba sobre la nota). Sin apariencia
+     nativa respetan el ancho y el alto como los demás campos, y el selector de
+     iOS sigue saliendo al tocarlos. */
+  input:is([type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"]) {
+    -webkit-appearance: none;
+    appearance: none;
+  }
 }
 
 input[type="number"]::-webkit-outer-spin-button,
@@ -248,6 +258,8 @@ input[type="number"] { -moz-appearance: textfield; }
   --duration-fast: 250ms;
   --duration-slow: 400ms;
   --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Entrada al abrir la app: cuánto se queda el logo antes de dar paso. */
+  --entrada-pausa: 650ms;
   /* Error shake (receta 12) */
   --shake-distance: 6px;
   --shake-overshoot: 4px;
@@ -281,7 +293,27 @@ input[type="number"] { -moz-appearance: textfield; }
   to   { background-color: transparent; }
 }
 
-
+/* Entrada al abrir la app (components/fx/entrada.tsx): el logo aparece sobre el
+   fondo, se queda un momento y se abre paso a la pantalla. Termina oculta, así
+   que no se queda tapando toques. html.entrada-vista la apaga el resto de la sesión. */
+.entrada {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  animation: entrada-sale var(--duration-slow) var(--ease-smooth-out) var(--entrada-pausa) forwards;
+}
+.entrada-vista .entrada { display: none; }
+.entrada-logo {
+  animation:
+    entrada-logo var(--duration-slow) var(--ease-smooth-out) both,
+    entrada-logo-sale var(--duration-fast) var(--ease-smooth-out) var(--entrada-pausa) forwards;
+}
+@keyframes entrada-sale { to { opacity: 0; visibility: hidden; } }
+@keyframes entrada-logo { from { opacity: 0; transform: scale(0.92); } }
+@keyframes entrada-logo-sale { to { opacity: 0; transform: scale(1.1); } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -290,4 +322,7 @@ input[type="number"] { -moz-appearance: textfield; }
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+  /* La entrada sin zoom: el logo quieto y el fondo se desvanece. */
+  .entrada-logo { animation: none; }
+  .entrada { animation-duration: var(--duration-fast) !important; }
 }

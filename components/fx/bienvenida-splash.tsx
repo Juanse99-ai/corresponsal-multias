@@ -7,6 +7,7 @@ import { Logo } from "@/components/brand";
 import { formatFechaLarga } from "@/lib/format";
 import { saludoHora, mensajePersonal } from "@/lib/saludos";
 import { useMontado } from "@/lib/use-montado";
+import { entradaEnPantalla, finDeEntrada } from "@/lib/entrada";
 
 /** ¿Toca mostrarla? Y si cuenta como una de las 2 del día, qué anotar. Solo lee:
  *  la vista se anota en un efecto cuando se muestra. */
@@ -41,8 +42,22 @@ export function BienvenidaSplash({ nombre }: { nombre: string }) {
 function Splash({ nombre }: { nombre: string }) {
   const [inicio] = useState(decidirBienvenida);
   const [show, setShow] = useState(inicio.mostrar);
+  // Si la entrada de la app sigue en pantalla, la bienvenida sale cuando termine.
+  const [entradaLista, setEntradaLista] = useState(() => !entradaEnPantalla());
+  const visible = show && entradaLista;
   const root = useRef<HTMLDivElement>(null);
   const reducir = useReducedMotion();
+
+  useEffect(() => {
+    if (entradaLista) return;
+    let vigente = true;
+    void finDeEntrada().then(() => {
+      if (vigente) setEntradaLista(true);
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [entradaLista]);
 
   // Anota la vista del día (la forzada con ?bienvenida=1 no cuenta).
   useEffect(() => {
@@ -56,8 +71,8 @@ function Splash({ nombre }: { nombre: string }) {
 
   // Con el foco en el aviso, Escape o Enter también lo cierran.
   useEffect(() => {
-    if (show) root.current?.focus({ preventScroll: true });
-  }, [show]);
+    if (visible) root.current?.focus({ preventScroll: true });
+  }, [visible]);
 
   const primer = nombre.split(/\s+/)[0];
   const ahora = new Date();
@@ -75,7 +90,7 @@ function Splash({ nombre }: { nombre: string }) {
 
   return createPortal(
     <AnimatePresence>
-      {show && (
+      {visible && (
         <motion.div
           ref={root}
           role="dialog"

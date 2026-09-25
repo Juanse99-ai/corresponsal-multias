@@ -101,3 +101,9 @@
 - Animación con Framer Motion y solo con motivo: retroalimentación o cambio de
   estado (montos que cambian, check al cerrar el día). Sin GSAP, sin entradas
   escalonadas de tarjetas ni efectos por letra.
+- Única excepción: la entrada al abrir la app (`components/fx/entrada.tsx`, logo
+  que da paso a la pantalla) va en CSS (`globals.css`) porque corre antes de que
+  cargue el JavaScript. Sale una vez por sesión, y la bienvenida de 2 veces al
+  día espera a que termine (`lib/entrada.ts`).
+- Campos de fecha y hora nativos sin apariencia nativa (`globals.css`): con ella,
+  iOS les suma relleno y un ancho mínimo, y se salen de su columna.
