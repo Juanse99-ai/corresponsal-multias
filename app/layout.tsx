@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
 import { PwaRegister } from "@/components/pwa-register";
+import { Entrada } from "@/components/fx/entrada";
 
 export const metadata: Metadata = {
   title: "Barrio Centro Sabanalarga 18 · Multidiagnósticos AS",
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="es" suppressHydrationWarning>
       <body className="min-h-[100dvh] antialiased">
         <Providers>
+        <Entrada />
         {children}
         <PwaRegister />
         </Providers>

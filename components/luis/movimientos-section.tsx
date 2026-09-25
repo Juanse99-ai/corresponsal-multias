@@ -334,9 +334,9 @@ export function MovimientosSection({
           </p>
         )}
       </div>
-      {/* flex-wrap y no grid: en iOS el input de hora tiene un ancho nativo propio
-          (12h con "a. m.") que no respeta la columna y se montaba sobre la nota.
-          Si los dos no caben, la nota baja a su propia línea. */}
+      {/* Hora con ancho fijo y la nota con el resto; si no caben, la nota baja a su
+          propia línea. Que el campo de hora de iOS no se salga de su ancho lo
+          arregla globals.css (sin apariencia nativa). */}
       <div className="mt-3 flex flex-wrap gap-3">
         <div className="flex w-[9.5rem] shrink-0 flex-col gap-1.5">
           <Label htmlFor={`hora-${tono}`}>Hora</Label>
