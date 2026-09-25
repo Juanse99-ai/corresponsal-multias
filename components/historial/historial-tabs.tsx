@@ -85,7 +85,7 @@ export function HistorialTabs({ cuadres, luis }: { cuadres: CuadreRow[]; luis: L
       ) : (
         <>
           <TendenciaCard
-            titulo="Cuenta de Sr. Luis"
+            titulo="Cuenta del Sr. Luis"
             subtitulo="Saldo acumulado a su favor, día a día"
             datos={datosLuis}
             nombre="a favor de Luis"

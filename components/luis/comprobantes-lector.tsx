@@ -4,7 +4,7 @@ import { Fragment, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { Sparkle, Warning, Check, X } from "@phosphor-icons/react/dist/ssr";
+import { Scan, Warning, Check, X } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardHeader, CardTitle, CardAction, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
@@ -27,7 +27,7 @@ import type { ComprobanteLeido } from "@/app/(app)/luis/actions";
 /** Lo que se guarda como nota del movimiento: qué fue y para quién. */
 function notaDe(c: ComprobanteLeido): string | null {
   const partes = [c.transaccion, c.titular].filter(Boolean);
-  return partes.length > 0 ? partes.join(" · ").slice(0, 200) : null;
+  return partes.length > 0 ? partes.join(", ").slice(0, 200) : null;
 }
 
 export function ComprobantesLector({
@@ -130,8 +130,8 @@ export function ComprobantesLector({
         {!items && (
           <CardAction>
             <Button onClick={leer} disabled={pending} className="shrink-0">
-              <Sparkle size={16} weight="fill" />
-              {pending ? "Leyendo…" : `Leer ${cantidadFotos}`}
+              <Scan size={16} weight="bold" />
+              {pending ? "Leyendo…" : `Leer ${cantidadFotos} ${cantidadFotos === 1 ? "foto" : "fotos"}`}
             </Button>
           </CardAction>
         )}
@@ -226,9 +226,9 @@ export function ComprobantesLector({
 
               {dudosos > 0 && (
                 <p className="mt-2 text-[0.74rem] text-muted">
-                  {dudosos === 1 ? "1 quedó dudosa" : `${dudosos} quedaron dudosas`} y{" "}
-                  {dudosos === 1 ? "no viene marcada" : "no vienen marcadas"}: compárala con la foto
-                  antes de incluirla.
+                  {dudosos === 1
+                    ? "1 quedó dudosa y no viene marcada: compárala con la foto antes de incluirla."
+                    : `${dudosos} quedaron dudosas y no vienen marcadas: compáralas con la foto antes de incluirlas.`}
                 </p>
               )}
               {fallidos > 0 && (

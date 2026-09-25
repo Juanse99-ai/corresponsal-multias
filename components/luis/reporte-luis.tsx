@@ -84,7 +84,7 @@ export function ReporteLuisButton({
         showCloseButton={false}
         className="max-h-[calc(100dvh-2rem)] max-w-[460px] gap-0 overflow-y-auto rounded-none border-0 bg-transparent p-0 shadow-none sm:max-w-[460px]"
       >
-        <DialogTitle className="sr-only">Reporte para Sr. Luis {fechaDMY(fecha)}</DialogTitle>
+        <DialogTitle className="sr-only">Reporte para el Sr. Luis {fechaDMY(fecha)}</DialogTitle>
         <DialogDescription className="sr-only">Descargar o compartir la imagen del reporte.</DialogDescription>
             <div
               ref={ref}
@@ -140,7 +140,7 @@ export function ReporteLuisButton({
     <>
       <Button onClick={() => setOpen(true)}>
         <Export size={17} weight="bold" />
-        Reporte para Luis
+        Reporte para el Sr. Luis
       </Button>
       {modal}
     </>
@@ -168,7 +168,7 @@ function ColumnaReporte({
       </div>
       <div className="min-h-[80px] divide-y divide-zinc-100">
         {vacio ? (
-          <p className="px-3 py-6 text-center text-sm text-zinc-300">—</p>
+          <p className="px-3 py-6 text-center text-sm text-zinc-400">Sin movimientos</p>
         ) : (
           <>
             {leading && (

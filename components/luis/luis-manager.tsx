@@ -46,7 +46,7 @@ export function LuisManager({
           <div>
             <div className="flex items-center gap-2 text-faint">
               <Wallet size={15} weight="fill" className="text-accent" />
-              <span className="text-[0.72rem] uppercase tracking-wide">Saldo acumulado de Sr. Luis</span>
+              <span className="text-[0.78rem]">Saldo acumulado del Sr. Luis</span>
             </div>
             <p className="mt-1.5 text-4xl font-semibold tracking-tight text-text">
               <AnimatedMoney value={acumulado} />
@@ -74,7 +74,7 @@ export function LuisManager({
         {/* Resumen del día */}
         <Separator className="mt-6" />
         <div className="relative grid grid-cols-1 divide-y divide-line pt-4 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-          <DiaStat label="Cupo de hoy" value={totalComp} />
+          <DiaStat label="Cupo del día" value={totalComp} />
           <DiaStat label="Consignaciones" value={totalConsig} />
           <DiaStat label="Del día" value={saldoDia} />
         </div>
@@ -86,7 +86,7 @@ export function LuisManager({
           fecha={fecha}
           items={compensaciones}
           titulo="Cupo que dio"
-          subtitulo="Lo que Sr. Luis presta en el día"
+          subtitulo="Lo que el Sr. Luis presta en el día"
           emptyText="Sin cupo registrado aún."
           tono="comp"
           agregar={agregarCompensacion}
@@ -114,7 +114,7 @@ export function LuisManager({
 function DiaStat({ label, value }: { label: string; value: number; signed?: boolean }) {
   return (
     <div className="px-0 py-2 sm:px-4 sm:py-0 sm:first:pl-0">
-      <p className="text-[0.7rem] uppercase tracking-wide text-faint">{label}</p>
+      <p className="text-[0.78rem] text-muted">{label}</p>
       {/* Neutro con su signo: el color se reserva para estado (cuadrado / descuadre). */}
       <p className="tnum mt-1 text-base font-semibold tracking-tight text-text sm:text-lg">
         {formatCOP(value)}

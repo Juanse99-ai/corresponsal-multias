@@ -12,7 +12,7 @@ export default async function BitacoraPage() {
 
   return (
     <div>
-      <PageHeader title="Bitácora" subtitle="Quién cambió qué, y cuándo." />
+      <PageHeader title="Bitácora" subtitle="Quién cambió qué y cuándo" />
       <BitacoraView entries={entries} />
     </div>
   );

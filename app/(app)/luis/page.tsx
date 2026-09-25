@@ -8,7 +8,7 @@ import { leerComprobantesDelDia, agregarConsignacionesLote } from "@/app/(app)/l
 import { PageHeader } from "@/components/shell/page-header";
 import { DateNav } from "@/components/shell/date-nav";
 
-export const metadata: Metadata = { title: "Cuenta de Sr. Luis · Corresponsal" };
+export const metadata: Metadata = { title: "Cuenta del Sr. Luis · Corresponsal" };
 
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -29,7 +29,7 @@ export default async function LuisPage({
 
   return (
     <div>
-      <PageHeader title="Cuenta de Sr. Luis" subtitle={formatFechaLarga(fecha)}>
+      <PageHeader title="Cuenta del Sr. Luis" subtitle={formatFechaLarga(fecha)}>
         <DateNav fecha={fecha} base="/luis" />
       </PageHeader>
       <LuisManager

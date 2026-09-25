@@ -34,8 +34,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="es" suppressHydrationWarning>
       <body className="min-h-[100dvh] antialiased">
         <Providers>
-        <div className="ambient" aria-hidden />
-        <div className="grain" aria-hidden />
         {children}
         <PwaRegister />
         </Providers>

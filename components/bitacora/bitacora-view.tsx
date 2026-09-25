@@ -115,13 +115,29 @@ function montoDe(e: AuditEntry): number | null {
   return n != null && !Number.isNaN(n) ? n : null;
 }
 
+// Valores que la base guarda con nombre de programa: se muestran como se dicen.
+const VALOR: Record<string, string> = {
+  consignacion_nequi: "Consignación a Nequi",
+  consignacion_bancolombia: "Consignación a Bancolombia",
+  retiro: "Retiro",
+  recaudo: "Recaudo",
+  compensacion: "Compensación",
+  efectivo: "Efectivo",
+  transferencia: "Transferencia",
+  registro: "Solo registro",
+  abierto: "Abierto",
+  cerrado: "Cerrado",
+};
+const CAMPOS_CON_VALOR = new Set(["tipo", "medio", "estado", "origen"]);
+
 function fmtVal(campo: string, v: unknown): string {
-  if (v == null || v === "") return "—";
+  if (v == null || v === "") return "vacío";
   if (MONEY.has(campo)) {
     const n = Number(v);
     return Number.isNaN(n) ? String(v) : formatCOP(n);
   }
   if (campo === "fecha") return formatFecha(String(v));
+  if (CAMPOS_CON_VALOR.has(campo)) return VALOR[String(v)] ?? String(v);
   return String(v);
 }
 
@@ -309,7 +325,7 @@ export function BitacoraView({ entries }: { entries: AuditEntry[] }) {
         </div>
 
         <div className="flex flex-wrap items-center gap-x-2 gap-y-2">
-          <span className="text-[0.72rem] font-medium uppercase tracking-wide text-faint">Acción</span>
+          <span className="text-[0.78rem] font-medium text-muted">Acción</span>
           <AccionChip tipo="todas" active={accion === "todas"} onClick={() => setAccion("todas")}>
             Todas
           </AccionChip>
@@ -320,7 +336,7 @@ export function BitacoraView({ entries }: { entries: AuditEntry[] }) {
           ))}
           {actores.length > 1 && (
             <>
-              <span className="ml-2 text-[0.72rem] font-medium uppercase tracking-wide text-faint">Quién</span>
+              <span className="ml-2 text-[0.78rem] font-medium text-muted">Quién</span>
               <Chip active={actor === "todos"} onClick={() => setActor("todos")}>
                 Todos
               </Chip>

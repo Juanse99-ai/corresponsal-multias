@@ -197,7 +197,7 @@ export function SoportesSection({
         <p className="text-[0.74rem] text-faint">
           {progreso
             ? "No cierres esta pantalla."
-            : "Toca para escoger, o arrastra las fotos aquí · varias a la vez"}
+            : "Toca para escoger o arrastra las fotos aquí. Puedes subir varias a la vez."}
         </p>
         {progreso && (
           <Progress
@@ -252,7 +252,7 @@ export function SoportesSection({
                   {/* Va sobre la foto: el vidrio claro se perdería, así que lleva fondo
                       oscuro propio, con la misma forma y respuesta que los demás. */}
                   <IconButton
-                    label="Eliminar soporte"
+                    label="Borrar soporte"
                     size="icon-sm"
                     onClick={() => setPorBorrar(s.id)}
                     className="absolute right-1.5 top-1.5 bg-[oklch(0.22_0.03_258/0.62)] text-[oklch(0.97_0.01_260/0.9)] opacity-0 backdrop-blur-sm hover:bg-[oklch(0.22_0.03_258/0.75)] hover:text-[oklch(0.8_0.14_25)] group-hover/item:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100"

@@ -13,7 +13,7 @@ export default async function PrestamosPage() {
 
   return (
     <div>
-      <PageHeader title="Préstamos / Deudas" subtitle="Saldos del fondo del corresponsal" />
+      <PageHeader title="Préstamos" subtitle="Saldos del fondo del corresponsal" />
       <PrestamosManager grupos={grupos} isAdmin={profile?.rol === "admin"} />
     </div>
   );

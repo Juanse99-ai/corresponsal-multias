@@ -11,6 +11,7 @@ import {
   comprobanteSchema,
   type Comprobante,
 } from "@/lib/leer-comprobante";
+import { formatFecha } from "@/lib/format";
 
 const CERRADO = "El día está cerrado. Solo Juan puede reabrirlo para editar.";
 
@@ -153,7 +154,7 @@ async function agregarLote(
   // Un día cerrado bloquea todo el lote: es más claro que guardar a medias.
   for (const f of fechas) {
     if (await diaBloqueado(session.rol, f)) {
-      return { ok: false, error: `${CERRADO} (${f})` };
+      return { ok: false, error: `${CERRADO} (${formatFecha(f)})` };
     }
   }
 
@@ -242,7 +243,7 @@ export async function leerComprobantesDelDia(
   await requireSession();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return { ok: false, error: "Fecha inválida." };
   if (!lecturaDisponible()) {
-    return { ok: false, error: "Falta configurar la llave de lectura (ANTHROPIC_API_KEY)." };
+    return { ok: false, error: "La lectura de fotos no está activada." };
   }
 
   const sb = await createClient();
@@ -294,6 +295,10 @@ export async function leerComprobantesDelDia(
         await sb.from("corr_soportes").update({ datos: leido }).eq("id", s.id);
         salida[i] = deDatos(s.id, s.nombre, leido);
       } catch (e) {
+        // Los errores propios vienen en español; los del servicio de lectura (en
+        // inglés) no se muestran tal cual: quedan en el log del servidor.
+        const propio = e instanceof Error && /^(No se |Formato no admitido)/.test(e.message);
+        if (!propio) console.error("Lectura de comprobante:", e);
         salida[i] = {
           soporteId: s.id,
           nombre: s.nombre,
@@ -306,7 +311,7 @@ export async function leerComprobantesDelDia(
           recibo: null,
           seguro: false,
           esComprobante: false,
-          error: e instanceof Error ? e.message : "No se pudo leer.",
+          error: propio ? (e as Error).message : "No se pudo leer la foto.",
         };
       }
     }

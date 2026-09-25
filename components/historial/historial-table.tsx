@@ -82,9 +82,9 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
     <div className="flex flex-col gap-5">
       <ConfirmDialog
         open={!!porBorrar}
-        titulo="¿Eliminar este cierre?"
+        titulo="¿Borrar este cierre?"
         detalle="No se puede deshacer."
-        confirmar="Sí, eliminar"
+        confirmar="Sí, borrar"
         onConfirmar={confirmarBorrado}
         onCancelar={() => setPorBorrar(null)}
       />
@@ -161,7 +161,7 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
                     </Badge>
                   </CardDescription>
                   <CardAction className="text-right">
-                    <p className="text-[0.66rem] uppercase tracking-wide text-faint">Saldo final</p>
+                    <p className="text-[0.78rem] text-muted">Saldo final</p>
                     <p className={cn("tnum text-[1.35rem] font-semibold", descuadre ? "text-danger" : "text-text")}>
                       {formatCOP(c.saldo_final)}
                     </p>
@@ -184,7 +184,7 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
                     </div>
                     {isAdmin && (
                       <div className="flex justify-end">
-                        <IconButton label="Eliminar cierre" onClick={(e) => borrar(c.id, e)} disabled={pending} className="text-muted hover:text-destructive">
+                        <IconButton label="Borrar cierre" onClick={(e) => borrar(c.id, e)} disabled={pending} className="text-muted hover:text-destructive">
                           <Trash size={17} />
                         </IconButton>
                       </div>
@@ -199,7 +199,7 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
         <Card className="hidden overflow-hidden p-0 md:block">
           <Table>
             <TableHeader>
-              <TableRow className="border-line text-[0.72rem] uppercase tracking-wide hover:bg-transparent">
+              <TableRow className="border-line text-[0.78rem] hover:bg-transparent">
                 <TableHead className="h-auto px-5 py-3 text-faint">Fecha</TableHead>
                 <TableHead className="h-auto px-3 py-3 text-right text-faint">Tirilla</TableHead>
                 <TableHead className="h-auto px-3 py-3 text-right text-faint">Sr. Luis</TableHead>
@@ -236,7 +236,7 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
                     </TableCell>
                     {isAdmin && (
                       <TableCell className="py-0 pr-3 pl-0">
-                        <IconButton label="Eliminar cierre" size="icon-sm" onClick={(e) => borrar(c.id, e)} disabled={pending} className="text-muted hover:text-destructive">
+                        <IconButton label="Borrar cierre" size="icon-sm" onClick={(e) => borrar(c.id, e)} disabled={pending} className="text-muted hover:text-destructive">
                           <Trash size={16} />
                         </IconButton>
                       </TableCell>

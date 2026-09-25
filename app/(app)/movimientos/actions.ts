@@ -49,7 +49,7 @@ export async function agregarMovimiento(raw: unknown): Promise<{ ok: boolean; er
 export async function eliminarMovimiento(id: string): Promise<{ ok: boolean; error?: string }> {
   const session = await requireSession();
   if (session.rol !== "admin") {
-    return { ok: false, error: "Solo Juan (admin) puede borrar movimientos." };
+    return { ok: false, error: "Solo Juan puede borrar movimientos." };
   }
   const sb = await createClient();
   const { error } = await sb.from("corr_movimientos").delete().eq("id", id);

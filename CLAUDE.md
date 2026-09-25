@@ -81,7 +81,23 @@
   `-apple-system`). Sin Geist ni webfonts.
 - Tema claro y oscuro (toggle `next-themes`, clase en `<html>`). Paleta dark por
   tokens en `.dark` (globals.css). Acento único azul (`--accent`). Los tokens
-  `nav-*` (menú overlay + hero login) son iguales en ambos temas.
-- Verde/rojo solo para estado (cuadrado/descuadre). Sin morados/neón, sin emojis.
-  Sin glows decorativos en tarjetas. Iconos: `@phosphor-icons/react/dist/ssr`.
-- GSAP solo aislado (login). Framer Motion para el resto. No mezclarlos en el mismo árbol.
+  `nav-*` (menú overlay + banda de marca del login) son iguales en ambos temas.
+- Verde/rojo solo para estado (cuadrado/descuadre), también en gráficos. Sin
+  morados/neón, sin emojis. Sin glows decorativos en tarjetas. Iconos:
+  `@phosphor-icons/react/dist/ssr`.
+- Que no parezca hecha con IA (se limpió a propósito, no reintroducir):
+  - Fondo plano (`--bg`): nada de degradados "aurora" ni halos de luz.
+  - Barra superior de lado a lado con `.barra-material` y línea fina abajo; nada
+    de píldoras flotantes de vidrio.
+  - Etiquetas en oración normal, sin mayúsculas espaciadas (`uppercase tracking-*`).
+    Las imágenes que se exportan (cuadre y reporte del Sr. Luis) sí conservan su
+    formato de hoja de cálculo.
+  - Máximo un punto medio (`·`) por línea y nunca dentro de una etiqueta; datos
+    encadenados van con comas. Sin raya larga (`—`) como valor vacío.
+  - Listas de cosas del mismo tipo en una sola tarjeta con separadores (como los
+    ajustes de iOS), no una tarjeta por fila.
+  - Textos concretos y en "tú": sin frases motivacionales, eslóganes ni datos de
+    relleno; "del Sr. Luis" con artículo.
+- Animación con Framer Motion y solo con motivo: retroalimentación o cambio de
+  estado (montos que cambian, check al cerrar el día). Sin GSAP, sin entradas
+  escalonadas de tarjetas ni efectos por letra.

@@ -9,6 +9,8 @@
  * Son funciones puras: reciben datos y devuelven hallazgos. No tocan nada.
  */
 
+import { formatFecha } from "@/lib/format";
+
 /** Tope del datáfono por consignación. Por encima, el monto va partido. */
 export const TOPE_CONSIGNACION = 3_000_000;
 /** Tope por transferencia que manda Sr. Luis. */
@@ -98,7 +100,7 @@ export function buscarDuplicados(movs: MovAuditable[]): Hallazgo[] {
       tipo: "duplicado-dias",
       fecha: m.fecha,
       titulo: "Misma consignación en dos días seguidos",
-      detalle: `El mismo monto a la misma hora (${hhmm(m.hora)}) aparece el ${m.fecha} y el ${diaSiguiente(m.fecha)}. Suele ser la misma, apuntada primero con la fecha equivocada.`,
+      detalle: `El mismo monto a la misma hora (${hhmm(m.hora)}) aparece el ${formatFecha(m.fecha)} y el ${formatFecha(diaSiguiente(m.fecha))}. Suele ser la misma, apuntada primero con la fecha equivocada.`,
       monto: m.monto,
       gravedad: "alta",
     });
@@ -117,7 +119,7 @@ export function buscarDiasSinCuadre(conMovimientos: string[], conCuadre: string[
       tipo: "sin-cuadre" as const,
       fecha,
       titulo: "Día sin cuadre",
-      detalle: "Hubo movimientos de Sr. Luis pero el cuadre diario nunca se hizo.",
+      detalle: "Hubo movimientos del Sr. Luis pero el cuadre del día nunca se hizo.",
       monto: null,
       gravedad: "media" as const,
     }));
