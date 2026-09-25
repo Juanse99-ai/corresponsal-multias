@@ -71,8 +71,9 @@ export default async function GeneralPage({
           fecha={fecha}
           soportes={soportes}
           contexto="general"
-          titulo="Anexos del día"
+          titulo="Soportes del día"
           texto="Sube un soporte (foto o PDF)"
+          detalleBorrado="No se puede deshacer."
         />
         <MovPropios movimientos={movimientos} />
         <GeneralTable entries={entries} />

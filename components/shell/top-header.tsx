@@ -88,7 +88,7 @@ export function buildAvisos(resumen: HeaderResumen): Aviso[] {
       id: "prestamos",
       tone: "info",
       title: `${resumen.prestamosCount} préstamo${resumen.prestamosCount === 1 ? "" : "s"} pendiente${resumen.prestamosCount === 1 ? "" : "s"}`,
-      detail: `${formatCOP(resumen.prestamosTotal)} por cobrar al fondo.`,
+      detail: `Le deben ${formatCOP(resumen.prestamosTotal)} al fondo.`,
       href: "/prestamos",
     });
   }
@@ -146,12 +146,12 @@ export function TopHeader({
 }) {
   const avisos = useMemo(() => buildAvisos(resumen), [resumen]);
   return (
-    // Barra flotante de vidrio: el contenido pasa por debajo al hacer scroll.
-    <header className="sticky top-0 z-20 px-2 pt-2 sm:px-4 lg:px-6" style={{ paddingTop: "max(0.5rem, env(safe-area-inset-top))" }}>
-      <div className="lg-panel relative mx-auto flex max-w-[1240px] items-center justify-between gap-3 rounded-[1.6rem] px-2 py-1.5 sm:px-3">
-      <div className="flex items-center gap-2.5 sm:gap-3.5">
-        <Button variant="secondary" size="sm" onClick={onOpenMenu} aria-label="Abrir menú" className="w-10 px-0 sm:w-auto sm:px-4">
-          <List size={18} weight="bold" />
+    // Barra de lado a lado, como en iOS: el contenido pasa por debajo al hacer scroll.
+    <header className="barra-material sticky top-0 z-20 border-b border-line/80" style={{ paddingTop: "env(safe-area-inset-top)" }}>
+      <div className="relative mx-auto flex h-14 max-w-[1240px] items-center justify-between gap-3 px-1.5 sm:px-4 lg:px-6">
+      <div className="flex items-center gap-1.5 sm:gap-3">
+        <Button variant="ghost" onClick={onOpenMenu} aria-label="Abrir menú" className="w-11 px-0 sm:w-auto sm:px-3">
+          <List size={20} />
           <span className="hidden sm:inline">Menú</span>
         </Button>
         <Link href="/panel" className="flex items-center gap-2">
@@ -160,7 +160,7 @@ export function TopHeader({
         </Link>
         <span className="ml-1 hidden text-[0.82rem] text-muted lg:block">{formatFechaLarga(hoyISO())}</span>
       </div>
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-1">
         <HeaderSearch personas={isAdmin ? resumen.personas : []} />
         <HeaderAvisos avisos={avisos} urgentes={avisosUrgentes(avisos)} />
       </div>
@@ -216,7 +216,6 @@ function HeaderSearch({ personas }: { personas: string[] }) {
     <>
       {/* Celular: lupa de 44x44. El buscador completo se abre encima del encabezado. */}
       <IconButton
-        variant="secondary"
         label="Buscar día o persona"
         onClick={() => {
           setMovil(true);
@@ -236,7 +235,8 @@ function HeaderSearch({ personas }: { personas: string[] }) {
     >
       <Popover open={open && !!q.trim()}>
       <PopoverAnchor asChild>
-      <InputGroup className="rounded-full sm:h-10 sm:w-[240px]">
+      {/* Abierto en el celular va encima de la barra: fondo sólido para que no se transparente la campana. */}
+      <InputGroup className={cn("rounded-full sm:h-10 sm:w-[240px]", movil && "bg-surface dark:bg-surface sm:bg-surface-2/60 sm:dark:bg-input/30")}>
         <InputGroupAddon>
           <MagnifyingGlass className="text-faint" />
         </InputGroupAddon>
@@ -332,7 +332,7 @@ export function HeaderAvisos({ avisos, urgentes }: { avisos: Aviso[]; urgentes: 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-      <IconButton variant="secondary" label={avisos.length ? `Avisos (${avisos.length})` : "Avisos"}>
+      <IconButton label={avisos.length ? `Avisos (${avisos.length})` : "Avisos"}>
         <span className="relative inline-flex">
           <Bell size={18} weight={avisos.length ? "fill" : "regular"} />
           {avisos.length > 0 && (
@@ -360,7 +360,7 @@ export function HeaderAvisos({ avisos, urgentes }: { avisos: Aviso[]; urgentes: 
                   <EmptyMedia className="mb-0">
                     <CheckCircle size={22} weight="fill" className="text-success" />
                   </EmptyMedia>
-                  <EmptyDescription className="text-[0.84rem] text-muted">Todo al día. Sin pendientes.</EmptyDescription>
+                  <EmptyDescription className="text-[0.84rem] text-muted">No hay avisos.</EmptyDescription>
                 </EmptyHeader>
               </Empty>
             ) : (

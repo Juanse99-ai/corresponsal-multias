@@ -26,7 +26,7 @@ export default async function AuditoriaPage() {
     <div>
       <PageHeader
         title="Auditoría"
-        subtitle={`Revisiones de la cuenta de Sr. Luis · últimos ${DIAS_ATRAS} días`}
+        subtitle={`Revisiones de la cuenta del Sr. Luis en los últimos ${DIAS_ATRAS} días`}
       />
       <div className="flex flex-col gap-5">
         <ListaHallazgos hallazgos={hallazgos} />

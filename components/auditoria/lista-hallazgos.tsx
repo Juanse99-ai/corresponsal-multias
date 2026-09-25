@@ -54,8 +54,8 @@ export function ListaHallazgos({ hallazgos }: { hallazgos: Hallazgo[] }) {
         .filter((g) => g.items.length > 0)
         .map((grupo) => (
           <div key={grupo.titulo}>
-            <p className="mb-2 text-[0.78rem] font-medium uppercase tracking-wide text-faint">
-              {grupo.titulo} · {grupo.items.length}
+            <p className="mb-2 text-[0.78rem] font-medium text-muted">
+              {grupo.titulo} ({grupo.items.length})
             </p>
             <Card className="overflow-hidden p-0">
               <ItemGroup>

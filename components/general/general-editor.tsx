@@ -74,7 +74,7 @@ export function GeneralEditor({
   }
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[1fr_380px] lg:items-start">
+    <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
       <Card>
         <CardHeader>
           <CardTitle className="text-text">
@@ -98,7 +98,7 @@ export function GeneralEditor({
                     Usar <span className="tnum">{formatCOP(saldoLuisSugerido)}</span>
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Usar el saldo del módulo de Luis</TooltipContent>
+                <TooltipContent>Usar el saldo de la cuenta del Sr. Luis</TooltipContent>
               </Tooltip>
             )}
           </Campo>
@@ -137,7 +137,7 @@ export function GeneralEditor({
 
       <div className="flex flex-col gap-4 lg:sticky lg:top-8">
         <Card className="relative overflow-hidden border-accent/30 p-6">
-          <p className="text-[0.78rem] font-medium uppercase tracking-wide text-faint">Saldo total</p>
+          <p className="text-[0.78rem] font-medium text-muted">Saldo total</p>
           <p className={cn("mt-2 text-4xl font-semibold tracking-tight", total < 0 ? "text-danger" : "text-text")}>
             <AnimatedMoney value={total} />
           </p>

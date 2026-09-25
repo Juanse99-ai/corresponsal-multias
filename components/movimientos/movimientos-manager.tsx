@@ -42,8 +42,8 @@ import { reduced } from "@/components/fx/reduced";
 type Tipo = "consignacion_nequi" | "consignacion_bancolombia" | "recaudo" | "retiro";
 
 const TIPOS: Record<Tipo, { label: string; corto: string; icon: Icon; salida: boolean }> = {
-  consignacion_nequi: { label: "Consignación a Nequi", corto: "a Nequi", icon: DeviceMobile, salida: false },
-  consignacion_bancolombia: { label: "Consignación a Bancolombia", corto: "a Bancolombia", icon: Bank, salida: false },
+  consignacion_nequi: { label: "Consignación a Nequi", corto: "Nequi", icon: DeviceMobile, salida: false },
+  consignacion_bancolombia: { label: "Consignación a Bancolombia", corto: "Bancolombia", icon: Bank, salida: false },
   recaudo: { label: "Recaudo", corto: "Recaudo", icon: Receipt, salida: false },
   retiro: { label: "Retiro", corto: "Retiro", icon: ArrowUp, salida: true } };
 
@@ -144,7 +144,7 @@ export function MovimientosManager({
   }
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[1fr_400px] lg:items-start">
+    <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start">
       {/* Registro + lista */}
       <div className="flex flex-col gap-5">
         <Card>
@@ -194,7 +194,7 @@ export function MovimientosManager({
 
           <Button onClick={registrar} disabled={pending || bloqueado} className="mt-5 w-full sm:w-auto">
             <Plus size={18} weight="bold" />
-            {pending ? "Registrando…" : `Registrar ${TIPOS[tipo].corto.toLowerCase()}`}
+            {pending ? "Registrando…" : `Registrar ${tipo === "retiro" ? "retiro" : tipo === "recaudo" ? "recaudo" : "consignación"}`}
           </Button>
           </CardContent>
         </Card>
@@ -202,7 +202,7 @@ export function MovimientosManager({
         <Card>
           <CardHeader className="items-center pb-3">
             <CardTitle className="text-text">
-              <h3>Movimientos de hoy</h3>
+              <h3>Registrados</h3>
             </CardTitle>
             <CardAction className="row-span-1 self-center text-[0.72rem] text-faint">{movimientos.length}</CardAction>
           </CardHeader>
@@ -283,17 +283,20 @@ export function MovimientosManager({
                               <Ti.icon size={15} weight="bold" />
                             </ItemMedia>
                             <ItemContent className="min-w-0 gap-0 leading-tight">
-                              <ItemTitle className="tnum text-[0.92rem] leading-tight text-text">{formatCOP(m.monto)}</ItemTitle>
-                              <ItemDescription className="flex items-center gap-1.5 text-[0.7rem] leading-tight text-faint">
-                                <span className="truncate">{Ti.corto}</span>
+                              <ItemTitle className="w-full min-w-0 gap-1.5 text-[0.92rem] leading-tight text-text">
+                                <span className="tnum">{formatCOP(m.monto)}</span>
+                                <span className="truncate text-[0.78rem] font-normal text-muted">{Ti.corto}</span>
+                              </ItemTitle>
+                              <ItemDescription className="flex items-center gap-1.5 text-[0.74rem] leading-tight text-faint">
                                 {m.hora && (
                                   <span className="inline-flex shrink-0 items-center gap-1">
                                     <Clock size={10} />
                                     {formatHora(m.hora)}
                                   </span>
                                 )}
-                                {m.convenio && <span className="truncate">· conv. {m.convenio}</span>}
-                                {m.cliente && <span className="truncate">· {m.cliente}</span>}
+                                {(m.convenio || m.cliente) && (
+                                  <span className="truncate">{[m.convenio, m.cliente].filter(Boolean).join(", ")}</span>
+                                )}
                               </ItemDescription>
                             </ItemContent>
                           <ItemActions className="shrink-0 gap-1">
@@ -304,7 +307,7 @@ export function MovimientosManager({
                             )}
                             {isAdmin && (
                               <IconButton
-                                label="Eliminar"
+                                label="Borrar"
                                 onClick={() => setPorBorrar({ id: m.id, monto: m.monto })}
                                 disabled={pending || bloqueado}
                                 className="text-muted hover:text-destructive"
@@ -329,7 +332,7 @@ export function MovimientosManager({
       <div className="flex flex-col gap-4 lg:sticky lg:top-8">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-[0.78rem] font-medium uppercase tracking-wide text-faint">Totales del día</CardTitle>
+            <CardTitle className="text-[0.78rem] font-medium text-muted">Totales del día</CardTitle>
           </CardHeader>
           <CardContent>
           <ItemGroup className="divide-y divide-line">

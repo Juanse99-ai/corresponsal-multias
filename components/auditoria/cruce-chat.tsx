@@ -89,7 +89,7 @@ export function CruceChat({
       setTexto(await f.text());
       setRegistrados(null);
     } catch {
-      setError("No pude leer ese archivo. Exporta el chat sin archivos (queda un .txt).");
+      setError("No se pudo leer ese archivo. Exporta el chat sin archivos (queda un .txt).");
     }
   }
 
@@ -158,14 +158,14 @@ export function CruceChat({
                 <ChatsCircle size={28} />
               </EmptyMedia>
               <EmptyDescription className="max-w-[18rem] text-[0.84rem]">
-                Pega o sube el chat del grupo para ver los pedidos de Sr. Luis.
+                Pega o sube el chat del grupo para ver los pedidos del Sr. Luis.
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : (
           <>
             <div className="sticky top-0 z-10 mb-3 flex justify-center">
-              <Badge variant="outline" className="lg-panel px-3 py-1 text-[0.72rem] text-muted">
+              <Badge variant="outline" className="bg-surface px-3 py-1 text-[0.72rem] text-muted">
                 {formatFechaCorta(fecha)}
                 {nombreLuis ? ` · ${nombreLuis}` : ""}
               </Badge>
@@ -223,15 +223,15 @@ export function CruceChat({
                  <Card className="rounded-[1.4rem] p-4 shadow-none">
                   <div className="grid grid-cols-3 gap-3 text-center">
                     <div>
-                      <p className="text-[0.68rem] uppercase tracking-wide text-faint">Pidió</p>
+                      <p className="text-[0.78rem] text-muted">Pidió</p>
                       <p className="tnum text-[0.95rem] font-semibold text-text">{formatCOP(cruce.totalChat)}</p>
                     </div>
                     <div>
-                      <p className="text-[0.68rem] uppercase tracking-wide text-faint">Registrado</p>
+                      <p className="text-[0.78rem] text-muted">Registrado</p>
                       <p className="tnum text-[0.95rem] font-semibold text-text">{formatCOP(cruce.totalApp)}</p>
                     </div>
                     <div>
-                      <p className="text-[0.68rem] uppercase tracking-wide text-faint">Diferencia</p>
+                      <p className="text-[0.78rem] text-muted">Diferencia</p>
                       <p className={cn("tnum text-[0.95rem] font-semibold", diferencia === 0 ? "text-success" : "text-danger")}>
                         {diferencia === 0 ? "$0" : formatCOP(diferencia)}
                       </p>
@@ -254,7 +254,7 @@ export function CruceChat({
                       {cruce.sobrantes.length > 0 && (
                         <p className="text-text">
                           Registrado sin pedido en el grupo:{" "}
-                          <span className="tnum">{cruce.sobrantes.map((v) => formatCOP(v)).join(" · ")}</span>
+                          <span className="tnum">{cruce.sobrantes.map((v) => formatCOP(v)).join(", ")}</span>
                         </p>
                       )}
                     </div>
@@ -277,10 +277,10 @@ export function CruceChat({
        </div>
       </ScrollArea>
 
-      {/* Compositor flotante de vidrio, como la barra de escribir de un chat. */}
+      {/* Compositor fijo abajo, como la barra de escribir de un chat. */}
       <div className="relative -mt-24 px-2 pb-2 sm:px-3 sm:pb-3">
         <ErrorNotice message={error} className="mb-2" />
-        <div className="lg-panel flex items-end gap-1.5 rounded-[1.6rem] p-1.5">
+        <div className="flex items-end gap-1.5 rounded-[1.4rem] border border-line-strong bg-surface p-1.5">
           <IconButton label="Pegar el chat" onClick={pegar} className="text-muted hover:text-foreground">
             <ClipboardText size={19} />
           </IconButton>

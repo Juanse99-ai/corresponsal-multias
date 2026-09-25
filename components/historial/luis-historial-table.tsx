@@ -57,7 +57,7 @@ export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
             <Wallet size={20} weight="fill" />
           </ItemMedia>
           <ItemContent className="gap-0.5 leading-tight">
-            <ItemDescription className="text-[0.74rem] font-medium uppercase tracking-wide text-faint">
+            <ItemDescription className="text-[0.78rem] font-medium text-muted">
               Saldo acumulado a favor de Luis
             </ItemDescription>
             <ItemTitle className="tnum text-2xl font-semibold tracking-tight text-text">
@@ -121,7 +121,7 @@ export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
               <CardHeader className="px-4 pt-4 pb-3 sm:px-4 sm:pt-4">
                 <CardTitle className="text-text">{formatFecha(d.fecha)}</CardTitle>
                 <CardAction className="text-right">
-                  <p className="text-[0.66rem] uppercase tracking-wide text-faint">Acumulado a favor</p>
+                  <p className="text-[0.78rem] text-muted">Acumulado a favor</p>
                   <p className="tnum text-[1.35rem] font-semibold text-text">{formatCOP(d.acumulado)}</p>
                 </CardAction>
               </CardHeader>
@@ -149,7 +149,7 @@ export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
         <Card className="hidden overflow-hidden p-0 md:block">
           <Table>
             <TableHeader>
-              <TableRow className="border-line text-[0.72rem] uppercase tracking-wide hover:bg-transparent">
+              <TableRow className="border-line text-[0.78rem] hover:bg-transparent">
                 <TableHead className="h-auto px-5 py-3 text-faint">Fecha</TableHead>
                 <TableHead className="h-auto px-3 py-3 text-right text-faint">Consignaciones</TableHead>
                 <TableHead className="h-auto px-3 py-3 text-right text-faint">Compensaciones</TableHead>

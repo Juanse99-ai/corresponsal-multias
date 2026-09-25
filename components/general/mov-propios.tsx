@@ -176,7 +176,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
                   <ItemContent className="min-w-0 gap-0 leading-tight">
                     <ItemTitle className="tnum text-[0.9rem] leading-tight text-text">{formatCOP(m.monto)}</ItemTitle>
                     <ItemDescription className="flex min-w-0 items-center gap-1.5 text-[0.7rem] leading-tight text-faint">
-                      <span className="shrink-0"><span className="capitalize">{m.tipo}</span> · {formatFecha(m.fecha)}</span>
+                      <span className="shrink-0">{m.tipo === "compensacion" ? "Compensación" : "Retiro"}, {formatFecha(m.fecha)}</span>
                       {m.nota && <span className="min-w-0 truncate">· {m.nota}</span>}
                     </ItemDescription>
                   </ItemContent>
@@ -194,7 +194,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
                       </IconButton>
                     )}
                     <IconButton
-                      label="Eliminar"
+                      label="Borrar"
                       onClick={() => setPorBorrar({ id: m.id, monto: m.monto })}
                       disabled={pending}
                       className="text-muted hover:text-destructive"
@@ -213,7 +213,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
         open={!!porBorrar}
         titulo="¿Borrar este movimiento propio?"
         monto={porBorrar?.monto ?? null}
-        detalle="Cambia el saldo total del control general."
+        detalle="Queda registrado en la bitácora."
         onConfirmar={() => porBorrar && borrar(porBorrar.id)}
         onCancelar={() => setPorBorrar(null)}
       />

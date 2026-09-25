@@ -9,7 +9,7 @@ import {
   Wallet,
   Warning,
   CheckCircle,
-  ArrowUpRight,
+  CaretRight,
   Lock,
   LockOpen,
   ArrowClockwise,
@@ -35,7 +35,6 @@ import {
 } from "@/components/ui/item";
 import { SaldoVivo } from "@/components/fx/saldo-vivo";
 import { CelebracionCierre } from "@/components/fx/celebracion-cierre";
-import { ripple } from "@/components/fx/ripple";
 import { cn } from "@/lib/utils";
 import { formatCOP } from "@/lib/format";
 import { useMontado } from "@/lib/use-montado";
@@ -73,7 +72,6 @@ interface Props {
   existente: boolean;
   inicial: Inicial;
   isAdmin: boolean;
-  nombre: string;
   soportesCount: number;
   movCount: number;
   prestamosCount: number;
@@ -101,7 +99,6 @@ export function CuadreEditor({
   existente,
   inicial,
   isAdmin,
-  nombre,
   soportesCount,
   movCount,
   prestamosCount,
@@ -275,7 +272,7 @@ export function CuadreEditor({
   }
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[1fr_400px] lg:items-start">
+    <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start">
       {/* ====== Columna de captura ====== */}
       <Card className="p-5 sm:p-6">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
@@ -321,7 +318,6 @@ export function CuadreEditor({
         <div className="rounded-[1rem] border border-accent/25 bg-accent-soft/40 p-4">
           <div className="flex items-center justify-between">
             <Label htmlFor="total_tirilla">Total tirilla</Label>
-            <span className="text-[0.7rem] text-faint">Reporte Bancolombia del día</span>
           </div>
           <div className="mt-2">
             <MoneyInput id="total_tirilla" size="lg" value={vals.total_tirilla} onValueChange={set("total_tirilla")} />
@@ -335,18 +331,18 @@ export function CuadreEditor({
           className="mt-4 flex-nowrap gap-3 rounded-[1rem] border-line bg-surface-2 hover:border-line-strong"
         >
           <Link href="/luis">
-            <ItemMedia className="h-10 w-10 rounded-full bg-accent-soft text-accent-strong group-has-[[data-slot=item-description]]/item:translate-y-0 group-has-[[data-slot=item-description]]/item:self-center">
-              <Wallet size={18} weight="fill" />
+            <ItemMedia className="h-9 w-9 rounded-full bg-accent-soft text-accent-strong group-has-[[data-slot=item-description]]/item:translate-y-0 group-has-[[data-slot=item-description]]/item:self-center">
+              <Wallet size={17} weight="fill" />
             </ItemMedia>
             <ItemContent className="min-w-0 gap-0 leading-tight">
               <ItemTitle className="text-[0.82rem] leading-tight text-text">Sr. Luis</ItemTitle>
-              <ItemDescription className="truncate text-[0.72rem] leading-tight text-faint">
-                {consignacionesCount} {consignacionesCount === 1 ? "consignación" : "consignaciones"} · toca para registrar
+              <ItemDescription className="truncate text-nowrap text-[0.74rem] leading-tight text-muted">
+                {consignacionesCount} {consignacionesCount === 1 ? "consignación" : "consignaciones"}
               </ItemDescription>
             </ItemContent>
-            <ItemActions className="shrink-0 pl-2">
-              <span className="tnum text-base font-semibold text-text">{formatCOP(srLuis)}</span>
-              <ArrowUpRight size={16} className="text-faint transition-transform group-hover/item:translate-x-0.5 group-hover/item:-translate-y-0.5" />
+            <ItemActions className="shrink-0 gap-1.5">
+              <span className="tnum text-[0.95rem] font-semibold text-text">{formatCOP(srLuis)}</span>
+              <CaretRight size={14} weight="bold" className="text-faint transition-transform group-hover/item:translate-x-0.5" />
             </ItemActions>
           </Link>
         </Item>
@@ -356,10 +352,7 @@ export function CuadreEditor({
             <TooltipTrigger asChild>
               <Button
                 variant="secondary"
-                onClick={(e) => {
-                  ripple(e);
-                  traerDeMovimientos();
-                }}
+                onClick={traerDeMovimientos}
                 className="mt-4 w-full"
               >
                 <ArrowClockwise size={16} weight="bold" />
@@ -439,67 +432,58 @@ export function CuadreEditor({
             </div>
           </div>
 
-          {/* Diferencia destacada: que se note de una si la caja cuadra o no. */}
+          {/* Diferencia destacada: que se note de una si la caja cuadra o no. El monto
+              va debajo del título para que el texto tenga todo el ancho en el celular. */}
           <div
             className={cn(
-              "mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-[1rem] border px-4 py-3.5 transition-colors",
+              "mt-3 flex items-start gap-2.5 rounded-[1rem] border px-4 py-3.5 transition-colors",
               cajaCuadra ? "border-success/35 bg-success-soft" : "border-danger/50 bg-danger-soft",
             )}
           >
-            <div className="flex min-w-0 flex-1 items-center gap-2.5">
-              <span
-                className={cn(
-                  "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
-                  cajaCuadra ? "bg-success/15 text-success" : "bg-danger/15 text-danger",
-                )}
-              >
-                {cajaCuadra ? (
-                  <CheckCircle size={20} weight="fill" />
-                ) : (
-                  <Warning size={20} weight="fill" />
-                )}
-              </span>
-              <div className="min-w-0 leading-tight">
-                <p
-                  className={cn(
-                    "text-[0.92rem] font-semibold",
-                    cajaCuadra ? "text-success" : "text-danger",
-                  )}
-                >
-                  {cajaCuadra
-                    ? "Caja cuadrada"
-                    : diferenciaCaja > 0
-                      ? "Sobra efectivo en caja"
-                      : "Falta efectivo en caja"}
-                </p>
-                <p className="text-[0.72rem] text-muted">
-                  {cajaCuadra
-                    ? "Lo contado coincide con lo esperado."
-                    : "Revisa el efectivo contado o los movimientos."}
-                </p>
-              </div>
-            </div>
             <span
               className={cn(
-                "tnum shrink-0 text-lg font-bold tracking-tight sm:text-xl",
-                cajaCuadra ? "text-success" : "text-danger",
+                "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
+                cajaCuadra ? "bg-success/15 text-success" : "bg-danger/15 text-danger",
               )}
             >
-              {diferenciaCaja > 0 ? "+" : ""}
-              {formatCOP(diferenciaCaja)}
+              {cajaCuadra ? <CheckCircle size={20} weight="fill" /> : <Warning size={20} weight="fill" />}
             </span>
+            <div className="min-w-0 flex-1 leading-tight">
+              <p className={cn("text-[0.92rem] font-semibold", cajaCuadra ? "text-success" : "text-danger")}>
+                {cajaCuadra
+                  ? "Caja cuadrada"
+                  : diferenciaCaja > 0
+                    ? "Sobra efectivo en caja"
+                    : "Falta efectivo en caja"}
+              </p>
+              {!cajaCuadra && (
+                <p className="tnum mt-1 text-lg font-bold tracking-tight text-danger sm:text-xl">
+                  {diferenciaCaja > 0 ? "+" : ""}
+                  {formatCOP(diferenciaCaja)}
+                </p>
+              )}
+              <p className="mt-1 text-[0.78rem] text-muted">
+                {cajaCuadra
+                  ? "Lo contado coincide con lo esperado."
+                  : "Revisa el efectivo contado o los movimientos."}
+              </p>
+            </div>
           </div>
         </div>
 
         <div className="mt-4 flex flex-col gap-2">
-          <Label htmlFor="nota">Nota (opcional)</Label>
+          <Label htmlFor="nota">Nota</Label>
           <Textarea
             id="nota"
             value={nota}
             onChange={(e) => setNota(e.target.value)}
             rows={2}
             placeholder="Observación del día…"
+            aria-describedby="nota-ayuda"
           />
+          <p id="nota-ayuda" className="text-[0.78rem] text-muted">
+            Si el día no cuadra, explica aquí por qué antes de cerrarlo.
+          </p>
         </div>
         </fieldset>
       </Card>
@@ -509,7 +493,7 @@ export function CuadreEditor({
         <SaldoHero saldo={saldo} descuadre={descuadre} estado={estado} sinEmpezar={sinEmpezar} />
 
         <Card className="p-5">
-          <p className="mb-3 text-[0.78rem] font-medium uppercase tracking-wide text-faint">Cómo cuadra</p>
+          <p className="mb-3 text-[0.78rem] font-medium text-muted">Cómo cuadra</p>
           <div className="flex flex-col divide-y divide-line">
             {lineas.map((l) => (
               <div key={l.label} className="flex items-center justify-between py-2 text-sm">
@@ -545,7 +529,7 @@ export function CuadreEditor({
                 sinEmpezar ? "text-faint" : descuadre ? "text-danger" : "text-success",
               )}
             >
-              {sinEmpezar ? "—" : formatCOP(saldo)}
+              {sinEmpezar ? "Sin tirilla" : formatCOP(saldo)}
             </span>
           </div>
         </Card>
@@ -597,13 +581,13 @@ export function CuadreEditor({
       <ConfirmDialog
         open={confirmarCierre}
         titulo="El día no cuadra. ¿Cerrarlo así?"
-        detalle={`Hoy ${motivoDescuadre}. Después solo Juan podrá reabrirlo. Tu nota queda guardada como explicación.`}
+        detalle={`${motivoDescuadre.charAt(0).toUpperCase()}${motivoDescuadre.slice(1)}. Tu nota queda guardada como explicación.${isAdmin ? "" : " Después solo Juan podrá reabrirlo."}`}
         confirmar="Sí, cerrar así"
         onConfirmar={() => guardar("cerrado")}
         onCancelar={() => setConfirmarCierre(false)}
       />
 
-      <CelebracionCierre play={celebrar} nombre={nombre} cuadrado={!descuadre} />
+      <CelebracionCierre play={celebrar} fecha={fecha} cuadrado={!descuadre} />
     </div>
   );
 }
@@ -639,7 +623,7 @@ function SaldoHero({
     >
       <div className="relative">
         <div className="flex items-center justify-between">
-          <p className="text-[0.78rem] font-medium uppercase tracking-wide text-faint">Saldo final</p>
+          <p className="text-[0.78rem] font-medium text-muted">Saldo final</p>
           <Badge variant={sinEmpezar ? "secondary" : descuadre ? "danger" : "success"}>
             {sinEmpezar ? (
               <Receipt size={12} weight="fill" />
@@ -651,13 +635,11 @@ function SaldoHero({
             {sinEmpezar ? "Sin tirilla" : descuadre ? "Descuadre" : "Cuadrado"}
           </Badge>
         </div>
-        <div className="mt-3">
-          {sinEmpezar ? (
-            <p className="tnum text-4xl font-semibold tracking-tight text-faint">—</p>
-          ) : (
+        {!sinEmpezar && (
+          <div className="mt-3">
             <SaldoVivo saldo={saldo} descuadre={descuadre} />
-          )}
-        </div>
+          </div>
+        )}
         <p className="mt-2 text-[0.82rem] leading-relaxed text-muted">
           {sinEmpezar
             ? "Escribe el total de la tirilla para ver si el día cuadra."
@@ -666,7 +648,7 @@ function SaldoHero({
                 ? `Faltan ${formatCOP(saldo)} por registrar para que la tirilla cuadre.`
                 : `Sobran ${formatCOP(Math.abs(saldo))} sin justificar. Revisa los movimientos del día.`
               : estado === "cerrado"
-                ? "El día cerró perfecto. Nada pendiente."
+                ? "Día cerrado y cuadrado."
                 : "Todo cuadra. Puedes cerrar el día."}
         </p>
       </div>

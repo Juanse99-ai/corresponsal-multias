@@ -47,7 +47,7 @@ export async function GET(req: Request) {
       : "El día sigue abierto. Cuando tengas la tirilla, cuádralo y ciérralo.";
   } else if (descuadre) {
     title = "Descuadre del día";
-    body = `El cuadre quedó con ${cuadre!.saldo_final < 0 ? "sobrante" : "faltante"} de ${fmtCOP(
+    body = `El cuadre quedó con un ${cuadre!.saldo_final < 0 ? "sobrante" : "faltante"} de ${fmtCOP(
       cuadre!.saldo_final,
     )} sin justificar.`;
   } else {

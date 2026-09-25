@@ -22,7 +22,7 @@ export async function signInAction(_prev: LoginState, formData: FormData): Promi
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    return { error: "Correo o contraseña incorrectos." };
+    return { error: "Usuario o contraseña incorrectos." };
   }
 
   redirect("/panel");

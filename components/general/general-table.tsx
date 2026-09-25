@@ -79,7 +79,7 @@ export function GeneralTable({ entries }: { entries: GeneralRow[] }) {
     <Card className="overflow-hidden p-0">
       <CardHeader className="items-center border-b border-line px-5 py-3 sm:px-5 sm:pt-3 [.border-b]:pb-3">
         <CardTitle className="self-center text-[0.9rem] text-text">
-          <h3>Histórico</h3>
+          <h3>Historial</h3>
         </CardTitle>
         <CardAction className="self-center">
           <Button variant="secondary" size="sm" onClick={exportar}>
@@ -109,7 +109,7 @@ export function GeneralTable({ entries }: { entries: GeneralRow[] }) {
               <div className="flex items-start justify-between gap-3">
                 <p className="text-[0.95rem] font-semibold text-text">{formatFecha(e.fecha)}</p>
                 <div className="shrink-0 text-right">
-                  <p className="text-[0.66rem] uppercase tracking-wide text-faint">Saldo total</p>
+                  <p className="text-[0.78rem] text-muted">Saldo total</p>
                   <p className={cn("tnum text-[1.35rem] font-semibold", total < 0 ? "text-danger" : "text-text")}>
                     {formatCOP(total)}
                   </p>
@@ -142,7 +142,7 @@ export function GeneralTable({ entries }: { entries: GeneralRow[] }) {
       <div className="hidden md:block">
         <Table>
           <TableHeader>
-            <TableRow className="border-line text-left text-[0.7rem] uppercase tracking-wide text-faint hover:bg-transparent">
+            <TableRow className="border-line text-left text-[0.78rem] text-muted hover:bg-transparent">
               <TableHead className="h-auto px-5 py-3 font-medium text-faint">Fecha</TableHead>
               <TableHead className="h-auto px-3 py-3 text-right font-medium text-faint">Saldo Luis</TableHead>
               <TableHead className="h-auto px-3 py-3 text-right font-medium text-faint">Cristian</TableHead>
@@ -178,7 +178,7 @@ export function GeneralTable({ entries }: { entries: GeneralRow[] }) {
                   <TableCell className={cn("tnum px-3 py-2.5 text-right font-semibold", total < 0 ? "text-danger" : "text-text")}>{formatCOP(total)}</TableCell>
                   <TableCell className="py-0 pl-0 pr-3">
                     <IconButton
-                      label="Eliminar registro"
+                      label="Borrar registro"
                       size="icon-sm"
                       onClick={(ev) => {
                         ev.stopPropagation();
@@ -198,7 +198,7 @@ export function GeneralTable({ entries }: { entries: GeneralRow[] }) {
       </div>
       <ConfirmDialog
         open={!!porBorrar}
-        titulo="¿Eliminar este día del control general?"
+        titulo="¿Borrar este día del control general?"
         onConfirmar={() => porBorrar && borrar(porBorrar)}
         onCancelar={() => setPorBorrar(null)}
       />

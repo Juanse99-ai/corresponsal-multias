@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
-import { ArrowRight, Info } from "@phosphor-icons/react/dist/ssr";
+import { Info } from "@phosphor-icons/react/dist/ssr";
 import { signInAction, type LoginState } from "@/app/login/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -97,10 +97,7 @@ export function LoginForm() {
             Entrando…
           </>
         ) : (
-          <>
-            Entrar
-            <ArrowRight size={18} weight="bold" />
-          </>
+          "Entrar"
         )}
       </Button>
     </form>

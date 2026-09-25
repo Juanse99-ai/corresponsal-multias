@@ -86,13 +86,13 @@ export function PrestamosManager({
   );
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[1fr_400px] lg:items-start">
+    <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start">
       <div className="min-w-0">
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 px-1">
           <h3 className="text-[0.95rem] font-semibold tracking-tight text-text">Quién debe</h3>
           {deben.length > 0 && (
             <p className="tnum text-[0.78rem] text-faint">
-              {deben.length} persona{deben.length === 1 ? "" : "s"} · {formatCOP(totalPendiente)}
+              {deben.length === 1 ? "1 persona debe" : `${deben.length} personas deben`} {formatCOP(totalPendiente)}
             </p>
           )}
         </div>
@@ -105,12 +105,12 @@ export function PrestamosManager({
                   <HandCoins size={20} />
                 </EmptyMedia>
                 <EmptyTitle className="text-sm font-normal text-muted">Nadie tiene préstamos pendientes.</EmptyTitle>
-                <EmptyDescription className="text-[0.78rem] text-faint">Registra uno en el panel de la derecha.</EmptyDescription>
+                <EmptyDescription className="text-[0.78rem] text-faint">Regístralo en Nuevo préstamo.</EmptyDescription>
               </EmptyHeader>
             </Empty>
           </Card>
         ) : (
-          <div className="flex flex-col gap-3">
+          <Card className="overflow-hidden">
             <AnimatePresence initial={false}>
               {deben.map((g, i) => (
                 <PersonaCard
@@ -122,7 +122,7 @@ export function PrestamosManager({
                 />
               ))}
             </AnimatePresence>
-          </div>
+          </Card>
         )}
 
         {alDia.length > 0 && (
@@ -133,10 +133,12 @@ export function PrestamosManager({
                 {alDia.length} persona{alDia.length === 1 ? "" : "s"} al día
               </Button>
             </CollapsibleTrigger>
-            <CollapsibleContent className="mt-3 flex flex-col gap-3">
-              {alDia.map((g) => (
-                <PersonaCard key={g.key} grupo={g} isAdmin={isAdmin} origenes={origenes} defaultOpen={false} />
-              ))}
+            <CollapsibleContent className="mt-3">
+              <Card className="overflow-hidden">
+                {alDia.map((g) => (
+                  <PersonaCard key={g.key} grupo={g} isAdmin={isAdmin} origenes={origenes} defaultOpen={false} />
+                ))}
+              </Card>
             </CollapsibleContent>
           </Collapsible>
         )}
@@ -145,7 +147,7 @@ export function PrestamosManager({
       <div className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-8">
         {isAdmin && (
           <Card className="relative overflow-hidden border-accent/30 p-6">
-            <p className="text-[0.78rem] font-medium uppercase tracking-wide text-faint">Total pendiente</p>
+            <p className="text-[0.78rem] font-medium text-muted">Total pendiente</p>
             <p className="mt-2 text-4xl font-semibold tracking-tight text-text">
               <AnimatedMoney value={totalPendiente} />
             </p>
@@ -200,7 +202,7 @@ function AddDeudaForm() {
         toast.success("Préstamo registrado.");
         router.refresh();
       } else {
-        setMsg(res.error ?? "Error.");
+        setMsg(res.error ?? "No se pudo registrar el préstamo.");
       }
     });
   }
@@ -262,7 +264,7 @@ function AddDeudaForm() {
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto]">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="deuda-desc">Motivo · ¿para qué fue?</Label>
+            <Label htmlFor="deuda-desc">Motivo</Label>
             <Input id="deuda-desc" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Para qué fue el préstamo" onKeyDown={(e) => esEnter(e) && !pending && registrar()} />
           </div>
           <div className="flex flex-col gap-2">
@@ -282,7 +284,7 @@ function AddDeudaForm() {
   );
 }
 
-/** Una persona = una tarjeta. El encabezado resume su deuda; al abrir salen sus préstamos. */
+/** Una persona = una fila de la lista. El encabezado resume su deuda; al abrir salen sus préstamos. */
 function PersonaCard({
   grupo,
   isAdmin,
@@ -299,9 +301,15 @@ function PersonaCard({
   const pct = grupo.total > 0 ? Math.min(100, (grupo.abonado / grupo.total) * 100) : 0;
 
   return (
-    <motion.div layout initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: -6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
+      className="border-b border-line last:border-b-0"
+    >
       <Collapsible asChild open={open} onOpenChange={setOpen}>
-      <Card className="overflow-hidden">
+      <div className="overflow-hidden">
         <CollapsibleTrigger className="flex w-full items-center gap-3 p-4 text-left transition-colors hover:bg-surface-2 active:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/45 sm:p-5"
         >
           <Avatar size="lg" aria-hidden="true">
@@ -324,7 +332,7 @@ function PersonaCard({
               {alDia ? (
                 <>
                   {grupo.deudas.length} préstamo{grupo.deudas.length === 1 ? "" : "s"}
-                  <span className="hidden sm:inline"> · todo pagado</span>
+                  <span className="hidden sm:inline">, todo pagado</span>
                 </>
               ) : (
                 <>
@@ -332,7 +340,7 @@ function PersonaCard({
                   {/* El detalle del abono solo si cabe: en celular estorbaba y se cortaba. */}
                   <span className="hidden sm:inline">
                     {" "}
-                    · abonado {formatCOP(grupo.abonado)} de {formatCOP(grupo.total)}
+                    , abonado {formatCOP(grupo.abonado)} de {formatCOP(grupo.total)}
                   </span>
                 </>
               )}
@@ -374,7 +382,7 @@ function PersonaCard({
             ))}
           </ItemGroup>
         </CollapsibleContent>
-      </Card>
+      </div>
       </Collapsible>
     </motion.div>
   );
@@ -616,7 +624,7 @@ function DeudaRow({
             {porOrigen.map((o, i) => (
               // El separador va por fuera: así la línea puede partir entre orígenes.
               <Fragment key={o.origen ?? "sin-origen"}>
-                {i > 0 && " · "}
+                {i > 0 && ", "}
                 <span className="tnum whitespace-nowrap">
                   <span className={o.origen ? "font-medium text-muted" : undefined}>
                     {o.origen ?? "sin origen"}
@@ -659,7 +667,7 @@ function DeudaRow({
             </Tooltip>
           )}
           {isAdmin && (
-            <IconButton label="Eliminar préstamo" onClick={() => setConfirmando("borrar")} disabled={pending} className="ml-auto text-muted hover:text-destructive">
+            <IconButton label="Borrar préstamo" onClick={() => setConfirmando("borrar")} disabled={pending} className="ml-auto text-muted hover:text-destructive">
               <Trash size={17} />
             </IconButton>
           )}

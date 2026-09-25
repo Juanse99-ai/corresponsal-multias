@@ -235,7 +235,7 @@ export function MovimientosSection({
     try {
       cambiarTexto(await f.text());
     } catch {
-      setError("No pude leer ese archivo. Exporta el chat sin archivos (queda un .txt).");
+      setError("No se pudo leer ese archivo. Exporta el chat sin archivos (queda un .txt).");
     }
   }
 
@@ -330,7 +330,7 @@ export function MovimientosSection({
             <Warning size={13} weight="fill" className="mt-0.5 shrink-0" />
             {tono === "consig"
               ? "El datáfono no pasa de $3.000.000 por consignación: si fue un monto grande, va partido en varias."
-              : "Las transferencias de Sr. Luis topan en $9.999.999: si mandó más, van en varias."}
+              : "Las transferencias del Sr. Luis topan en $9.999.999: si mandó más, van en varias."}
           </p>
         )}
       </div>
@@ -441,7 +441,7 @@ export function MovimientosSection({
               {loteTexto.trim() && (
                 <div className="mt-3">
                   {lote.movimientos.length === 0 ? (
-                    <p className="text-[0.82rem] text-danger">No encontré montos en ese texto.</p>
+                    <p className="text-[0.82rem] text-danger">No hay montos en ese texto.</p>
                   ) : (
                     <>
                       {/* El chat es un grupo: apagar a quien no manda movimientos
@@ -480,7 +480,7 @@ export function MovimientosSection({
                               <p className="sticky top-0 flex items-baseline justify-between gap-2 border-b border-line bg-surface-2 px-3 py-1.5 text-[0.72rem] font-medium text-muted">
                                 <span className={cn(d.fecha === fecha && "text-accent-strong")}>
                                   {formatFechaCorta(d.fecha)}
-                                  {d.fecha === fecha && " · día abierto"}
+                                  {d.fecha === fecha && ", día abierto"}
                                 </span>
                                 <span className="tnum shrink-0">{formatCOP(d.total)}</span>
                               </p>
@@ -519,9 +519,9 @@ export function MovimientosSection({
                                           </ItemTitle>
                                           {(m.nota || repetidos.has(i) || lote.remitentes.length > 1) && (
                                             <ItemDescription className="line-clamp-none truncate text-[0.74rem] leading-tight">
-                                              {repetidos.has(i) && <span className="font-medium text-text">Ya está · </span>}
+                                              {repetidos.has(i) && <span className="font-medium text-text">Ya está registrada. </span>}
                                               {lote.remitentes.length > 1 && m.de && (
-                                                <span className="text-faint">{m.de.split(" ")[0]} · </span>
+                                                <span className="text-faint">{m.de.split(" ")[0]}{m.nota ? ": " : ""}</span>
                                               )}
                                               {m.nota ?? ""}
                                             </ItemDescription>
@@ -554,7 +554,7 @@ export function MovimientosSection({
                           className="group/ign h-auto min-h-0 whitespace-normal p-0 text-left text-[0.72rem] font-normal text-faint"
                         >
                           <CaretDown className="size-3 transition-transform group-data-[state=closed]/ign:-rotate-90" />
-                          No tomé en cuenta {lote.ignoradas.length} {lote.ignoradas.length === 1 ? "línea" : "líneas"} (fotos,
+                          {lote.ignoradas.length === 1 ? "Se ignoró 1 línea" : `Se ignoraron ${lote.ignoradas.length} líneas`} (fotos,
                           números de cuenta, texto sin monto)
                         </Button>
                       </CollapsibleTrigger>
@@ -671,7 +671,7 @@ export function MovimientosSection({
                       <IconButton label="Editar" onClick={() => abrirEdicion(c)} disabled={pending} className="text-muted hover:text-foreground">
                         <PencilSimple size={17} />
                       </IconButton>
-                      <IconButton label="Eliminar" onClick={() => setPorBorrar(c)} disabled={pending} className="text-muted hover:text-destructive">
+                      <IconButton label="Borrar" onClick={() => setPorBorrar(c)} disabled={pending} className="text-muted hover:text-destructive">
                         <Trash size={17} />
                       </IconButton>
                     </ItemActions>
@@ -688,7 +688,7 @@ export function MovimientosSection({
         open={!!porBorrar}
         titulo="¿Borrar este movimiento?"
         monto={porBorrar?.monto ?? null}
-        detalle="Cambia el saldo de Sr. Luis y el cuadre del día."
+        detalle="Cambia el saldo del Sr. Luis y el cuadre del día."
         onConfirmar={confirmarBorrado}
         onCancelar={() => setPorBorrar(null)}
       />

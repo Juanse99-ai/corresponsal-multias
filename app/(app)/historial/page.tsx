@@ -16,7 +16,7 @@ export default async function HistorialPage() {
 
   return (
     <div>
-      <PageHeader title="Historial y reportes" subtitle="Cierres del corresponsal y cuenta de Sr. Luis" />
+      <PageHeader title="Historial y reportes" subtitle="Cierres del corresponsal y cuenta del Sr. Luis" />
       <HistorialTabs cuadres={cuadres} luis={luis} />
     </div>
   );

@@ -172,7 +172,7 @@ export function PrestamosDia({
   }
 
   return (
-    <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_400px] lg:items-start">
+    <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start">
       {/* Registro + lista */}
       <div className="flex flex-col gap-5">
         <Card>
@@ -181,7 +181,7 @@ export function PrestamosDia({
               <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-soft text-accent-strong">
                 <HandCoins size={15} weight="bold" />
               </span>
-              <h2>Préstamos del día</h2>
+              <h2>Registrar préstamo</h2>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -214,7 +214,7 @@ export function PrestamosDia({
               )}
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="pr-concepto">Motivo · ¿para qué fue?</Label>
+              <Label htmlFor="pr-concepto">Motivo</Label>
               <Input
                 id="pr-concepto"
                 value={concepto}
@@ -257,7 +257,7 @@ export function PrestamosDia({
         <Card>
           <CardHeader className="items-center pb-3">
             <CardTitle className="text-text">
-              <h3>Préstamos de hoy</h3>
+              <h3>Préstamos del día</h3>
             </CardTitle>
             <CardAction className="row-span-1 self-center text-[0.72rem] text-faint">{prestamos.length}</CardAction>
           </CardHeader>
@@ -343,7 +343,7 @@ export function PrestamosDia({
                               const Icono = ICONO_MEDIO[m];
                               return (
                                 <IconButton
-                                  label={`${NOMBRE_MEDIO[m]} · tocar para cambiar`}
+                                  label={`Cambiar medio (${NOMBRE_MEDIO[m]})`}
                                   onClick={() => cambiarMedio(d)}
                                   disabled={pending || bloqueado}
                                   className={m === "transferencia" ? "text-accent-strong" : "text-muted hover:text-foreground"}
@@ -393,7 +393,7 @@ export function PrestamosDia({
                             )}
                             {isAdmin && (
                               <IconButton
-                                label="Eliminar"
+                                label="Borrar"
                                 onClick={() => setConfirmar({ tipo: "borrar", d })}
                                 disabled={pending || bloqueado}
                                 className="text-muted hover:text-destructive"
@@ -417,7 +417,7 @@ export function PrestamosDia({
       {/* Total pendiente */}
       <div className="flex flex-col gap-4 lg:sticky lg:top-8">
         <Card className="p-5 sm:p-6">
-          <p className="text-[0.78rem] font-medium uppercase tracking-wide text-faint">Pendiente del día</p>
+          <p className="text-[0.78rem] font-medium text-muted">Pendiente del día</p>
           <p className="tnum mt-1 text-[1.9rem] font-semibold tracking-tight text-text">
             <AnimatedMoney value={pendiente} />
           </p>
@@ -427,7 +427,7 @@ export function PrestamosDia({
               <span className="tnum font-medium text-text">{formatCOP(prestado)}</span>
             </Item>
             <Item role="listitem" className="justify-between rounded-none p-0 py-2 text-[0.82rem]">
-              <span className="text-muted">Devuelto hoy</span>
+              <span className="text-muted">Devuelto</span>
               <span className="tnum font-medium text-success">{formatCOP(devuelto)}</span>
             </Item>
           </ItemGroup>

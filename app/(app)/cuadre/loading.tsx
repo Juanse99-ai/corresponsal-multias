@@ -4,7 +4,7 @@ export default function Loading() {
   return (
     <div>
       <SkeletonHeader />
-      <div className="grid gap-5 lg:grid-cols-[1fr_380px] lg:items-start">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
         <div className="flex flex-col gap-5">
           <SkeletonCard />
           <SkeletonList rows={3} />
