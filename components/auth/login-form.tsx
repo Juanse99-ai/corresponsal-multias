@@ -51,7 +51,6 @@ export function LoginForm() {
             autoCapitalize="none"
             autoCorrect="off"
             spellCheck={false}
-            placeholder="ivana o correo"
             required
             className={campo}
           />
@@ -64,7 +63,6 @@ export function LoginForm() {
             name="password"
             type="password"
             autoComplete="current-password"
-            placeholder="Requerida"
             required
             className={campo}
           />
