@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { createPortal } from "react-dom";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -9,6 +9,7 @@ import { SplitText } from "gsap/SplitText";
 import { MoonStars } from "@phosphor-icons/react/dist/ssr";
 import { reduced } from "@/components/fx/reduced";
 import { despedidaDelDia } from "@/lib/saludos";
+import { useMontado } from "@/lib/use-montado";
 
 gsap.registerPlugin(DrawSVGPlugin, SplitText);
 
@@ -18,12 +19,11 @@ const COLORES = ["oklch(0.515 0.172 258)", "oklch(0.64 0.15 255)", "oklch(0.585 
 /** Despedida al cerrar el día: confeti + check si quedó cuadrado, mensaje cálido.
  *  Se queda hasta que la persona toca/presiona (no se cierra sola). */
 export function CelebracionCierre({ play, nombre, cuadrado }: { play: number; nombre: string; cuadrado: boolean }) {
-  const [mounted, setMounted] = useState(false);
+  // El portal va a document.body, que no existe en el servidor.
+  const mounted = useMontado();
   const root = useRef<HTMLDivElement>(null);
   const confettiRef = useRef<HTMLDivElement>(null);
   const tl = useRef<gsap.core.Timeline | null>(null);
-
-  useEffect(() => setMounted(true), []);
 
   useGSAP(
     () => {

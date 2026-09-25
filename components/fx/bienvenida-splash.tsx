@@ -7,6 +7,7 @@ import { useGSAP } from "@gsap/react";
 import { MorphSVGPlugin } from "gsap/MorphSVGPlugin";
 import { reduced } from "@/components/fx/reduced";
 import { saludoHora, mensajePersonal, esFemenino } from "@/lib/saludos";
+import { useMontado } from "@/lib/use-montado";
 
 gsap.registerPlugin(MorphSVGPlugin);
 
@@ -57,36 +58,51 @@ const PLACES: { c: string; x: number; y: number; w: number; s: number }[] = [
   { c: NEUTRO, x: 6, y: 40, w: 9, s: 0 },
 ];
 
+/** ¿Toca mostrarla? Y si cuenta como una de las 2 del día, qué anotar. Solo lee:
+ *  la vista se anota en un efecto cuando se muestra. */
+function decidirBienvenida(): { mostrar: boolean; anotar?: { key: string; veces: number } } {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("bienvenida") === "1") return { mostrar: true };
+    const hoy = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Bogota",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+    const key = `corr-bienvenida:v2:${hoy}`;
+    const veces = Number(localStorage.getItem(key) || "0");
+    if (veces >= 2) return { mostrar: false };
+    return { mostrar: true, anotar: { key, veces } };
+  } catch {
+    return { mostrar: true }; // sin localStorage: la mostramos igual
+  }
+}
+
 /** Bienvenida a pantalla completa: app borrosa detrás, formas (flor/carro/corazón/estrella)
  *  que flotan y se MORPHEAN entre sí, secuencia de textos y el logo. Primeras 2 veces del día
  *  (o forzada con ?bienvenida=1). Solo se cierra al tocar. Respeta prefers-reduced-motion. */
 export function BienvenidaSplash({ nombre }: { nombre: string }) {
-  const [show, setShow] = useState(false);
+  // Decidir requiere la URL y localStorage, que solo existen en el navegador.
+  const montado = useMontado();
+  return montado ? <Splash nombre={nombre} /> : null;
+}
+
+function Splash({ nombre }: { nombre: string }) {
+  const [inicio] = useState(decidirBienvenida);
+  const [show, setShow] = useState(inicio.mostrar);
   const root = useRef<HTMLDivElement>(null);
   const tl = useRef<gsap.core.Timeline | null>(null);
 
+  // Anota la vista del día (la forzada con ?bienvenida=1 no cuenta).
   useEffect(() => {
+    if (!inicio.anotar) return;
     try {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get("bienvenida") === "1") {
-        setShow(true);
-        return;
-      }
-      const hoy = new Intl.DateTimeFormat("en-CA", {
-        timeZone: "America/Bogota",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      }).format(new Date());
-      const key = `corr-bienvenida:v2:${hoy}`;
-      const veces = Number(localStorage.getItem(key) || "0");
-      if (veces >= 2) return;
-      localStorage.setItem(key, String(veces + 1));
+      localStorage.setItem(inicio.anotar.key, String(inicio.anotar.veces + 1));
     } catch {
-      /* sin localStorage: la mostramos igual */
+      /* sin localStorage no se anota */
     }
-    setShow(true);
-  }, []);
+  }, [inicio]);
 
   useGSAP(
     () => {
