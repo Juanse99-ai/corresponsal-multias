@@ -3,16 +3,10 @@
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import {
-  FloppyDisk,
-  Plus,
-  Minus,
-  ArrowClockwise,
-} from "@phosphor-icons/react/dist/ssr";
+import { FloppyDisk, ArrowClockwise } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Label } from "@/components/ui/label";
 import { MoneyInput } from "@/components/ui/money-input";
 import { Textarea } from "@/components/ui/textarea";
@@ -103,7 +97,9 @@ export function GeneralEditor({
             )}
           </Campo>
 
-          <CampoSigned label="Saldo Cristian" id="saldo_cristian" value={vals.saldo_cristian} onChange={set("saldo_cristian")} />
+          <Campo label="Saldo Cristian" id="saldo_cristian">
+            <MoneyInput id="saldo_cristian" value={vals.saldo_cristian} onValueChange={set("saldo_cristian")} />
+          </Campo>
 
           <Campo label="Cupo disponible" id="cupo_disponible">
             <MoneyInput id="cupo_disponible" value={vals.cupo_disponible} onValueChange={set("cupo_disponible")} />
@@ -163,56 +159,3 @@ function Campo({ label, id, children }: { label: string; id: string; children: R
   );
 }
 
-function CampoSigned({
-  label,
-  id,
-  value,
-  onChange,
-}: {
-  label: string;
-  id: string;
-  value: number;
-  onChange: (n: number) => void;
-}) {
-  const negativo = value < 0;
-  const magnitud = Math.abs(value);
-  return (
-    <div className="flex flex-col gap-2">
-      <Label htmlFor={id}>{label}</Label>
-      <div className="flex gap-2">
-        <ToggleGroup
-          type="single"
-          value={negativo ? "menos" : "mas"}
-          onValueChange={(v) => v && onChange(v === "menos" ? -magnitud : magnitud)}
-          aria-label={`Signo de ${label}`}
-          variant="outline"
-          className="h-11 shrink-0"
-        >
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <ToggleGroupItem value="mas" aria-label="A favor" className="size-11">
-                <Plus weight="bold" />
-              </ToggleGroupItem>
-            </TooltipTrigger>
-            <TooltipContent>A favor</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <ToggleGroupItem
-                value="menos"
-                aria-label="En contra"
-                className="size-11 data-[state=on]:border-destructive/30 data-[state=on]:bg-danger-soft data-[state=on]:text-destructive"
-              >
-                <Minus weight="bold" />
-              </ToggleGroupItem>
-            </TooltipTrigger>
-            <TooltipContent>En contra</TooltipContent>
-          </Tooltip>
-        </ToggleGroup>
-        <div className="flex-1">
-          <MoneyInput id={id} value={magnitud} onValueChange={(n) => onChange(negativo ? -n : n)} />
-        </div>
-      </div>
-    </div>
-  );
-}
