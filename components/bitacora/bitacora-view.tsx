@@ -38,7 +38,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/in
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChoiceChip } from "@/components/ui/choice-chip";
 import { cn } from "@/lib/utils";
-import { formatCOP, formatFecha, formatHoraISO } from "@/lib/format";
+import { addDiasISO, formatCOP, formatFecha, formatHoraISO } from "@/lib/format";
 import type { AuditEntry } from "@/lib/queries";
 
 type AccionTipo = "INSERT" | "UPDATE" | "DELETE";
@@ -205,7 +205,7 @@ export function BitacoraView({ entries }: { entries: AuditEntry[] }) {
   }, [filtrados]);
 
   const hoy = diaBogota(new Date().toISOString());
-  const ayer = diaBogota(new Date(Date.now() - 86400000).toISOString());
+  const ayer = addDiasISO(hoy, -1);
   const labelDia = (d: string) => (d === hoy ? "Hoy" : d === ayer ? "Ayer" : formatFecha(d));
 
   const hayFiltro = modulo !== "todos" || accion !== "todas" || actor !== "todos" || !!desde || !!hasta || !!q;

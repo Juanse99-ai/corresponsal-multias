@@ -38,6 +38,7 @@ import { CelebracionCierre } from "@/components/fx/celebracion-cierre";
 import { ripple } from "@/components/fx/ripple";
 import { cn } from "@/lib/utils";
 import { formatCOP } from "@/lib/format";
+import { useMontado } from "@/lib/use-montado";
 import {
   computeSaldoFinal,
   sumaComponentes,
@@ -79,6 +80,18 @@ interface Props {
   prestamosTransferDia: number;
   prestamosEfectivoDia: number;
   movTotales: { consignacion_nequi: number; consignacion_bancolombia: number; retiro: number; recaudo: number };
+}
+
+type Borrador = Partial<Pick<Inicial, "total_tirilla" | "compensado" | "fondo_caja" | "efectivo_contado" | "nota">>;
+
+/** Borrador local del día, o null si no hay o no se puede leer. */
+function leerBorrador(key: string): Borrador | null {
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw ? (JSON.parse(raw) as Borrador) : null;
+  } catch {
+    return null; // localStorage no disponible: seguimos sin borrador
+  }
 }
 
 export function CuadreEditor({
@@ -131,8 +144,8 @@ export function CuadreEditor({
   }
 
   const valores = { ...vals, sr_luis: srLuis };
-  const saldo = useMemo(() => computeSaldoFinal(valores), [valores]);
-  const suma = useMemo(() => sumaComponentes(valores), [valores]);
+  const saldo = computeSaldoFinal(valores);
+  const suma = sumaComponentes(valores);
   const descuadre = isDescuadre(saldo);
   // Día recién abierto y sin tirilla: no se habla de sobra ni de falta todavía.
   const sinEmpezar = vals.total_tirilla === 0 && !existente;
@@ -161,37 +174,25 @@ export function CuadreEditor({
   // (Nequis, Bancolombia, etc.) NO se guardan aqui: siempre se traen frescos.
   // Un dia cerrado en el servidor siempre manda: no se restaura un borrador encima.
   const draftKey = `corr-cuadre-draft:${fecha}`;
+  // Se aplica una sola vez, en el primer render del navegador: justo al hidratar, o de
+  // entrada si se llega navegando. Va en el render y no en un efecto para que, al llegar
+  // navegando, no se pinte primero lo del servidor y un instante después el borrador.
+  const montado = useMontado();
   const [hydrated, setHydrated] = useState(false);
-  useEffect(() => {
-    if (inicial.estado === "cerrado") {
-      setHydrated(true);
-      return;
-    }
-    try {
-      const raw = window.localStorage.getItem(draftKey);
-      if (raw) {
-        const d = JSON.parse(raw) as Partial<{
-          total_tirilla: number;
-          compensado: number;
-          fondo_caja: number;
-          efectivo_contado: number;
-          nota: string;
-        }>;
-        setVals((s) => ({
-          ...s,
-          total_tirilla: typeof d.total_tirilla === "number" ? d.total_tirilla : s.total_tirilla,
-          compensado: typeof d.compensado === "number" ? d.compensado : s.compensado,
-          fondo_caja: typeof d.fondo_caja === "number" ? d.fondo_caja : s.fondo_caja,
-          efectivo_contado: typeof d.efectivo_contado === "number" ? d.efectivo_contado : s.efectivo_contado,
-        }));
-        if (typeof d.nota === "string") setNota(d.nota);
-      }
-    } catch {
-      /* localStorage no disponible: seguimos sin borrador */
-    }
+  if (montado && !hydrated) {
     setHydrated(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const d = inicial.estado === "cerrado" ? null : leerBorrador(draftKey);
+    if (d) {
+      setVals((s) => ({
+        ...s,
+        total_tirilla: typeof d.total_tirilla === "number" ? d.total_tirilla : s.total_tirilla,
+        compensado: typeof d.compensado === "number" ? d.compensado : s.compensado,
+        fondo_caja: typeof d.fondo_caja === "number" ? d.fondo_caja : s.fondo_caja,
+        efectivo_contado: typeof d.efectivo_contado === "number" ? d.efectivo_contado : s.efectivo_contado,
+      }));
+      if (typeof d.nota === "string") setNota(d.nota);
+    }
+  }
   useEffect(() => {
     if (!hydrated || locked) return;
     try {

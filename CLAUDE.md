@@ -72,6 +72,9 @@
 - Módulos por carpeta. Montos enteros (COP) y
   `lib/format.ts` para formato. Números con clase `.tnum` (misma fuente con
   `tabular-nums` para alinear columnas).
+- Lo que solo existe en el navegador (`document.body`, `localStorage`, la URL):
+  `useMontado()` de `lib/use-montado.ts`. No uses `useEffect(() => setX(...), [])`
+  para eso: el lint de React Hooks lo marca como error (`set-state-in-effect`).
 
 ## Convenciones de diseño
 - Fuente única tipo iOS: SF Pro vía la pila del sistema de Apple (`--font-ios`,

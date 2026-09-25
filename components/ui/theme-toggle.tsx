@@ -1,17 +1,15 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import { Sun, Moon } from "@phosphor-icons/react/dist/ssr";
 import { Switch } from "@/components/ui/switch";
-
-const sinSuscripcion = () => () => {};
+import { useMontado } from "@/lib/use-montado";
 
 /** Interruptor claro/oscuro: <Switch> de shadcn con sol y luna a los lados. */
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
   // En el servidor no se sabe el tema: se pinta apagado hasta hidratar.
-  const montado = useSyncExternalStore(sinSuscripcion, () => true, () => false);
+  const montado = useMontado();
   const oscuro = montado && resolvedTheme === "dark";
 
   return (

@@ -18,22 +18,34 @@ function urlBase64ToUint8Array(base64String: string) {
   return arr;
 }
 
+/** Cómo están los avisos en este navegador. Es asíncrono porque la suscripción se
+ *  le pide al service worker; el botón muestra "…" mientras tanto. */
+async function estadoInicial(): Promise<State> {
+  const supported =
+    "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+  if (!supported) return "unsupported";
+  if (Notification.permission === "denied") return "denied";
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    return sub ? "on" : "off";
+  } catch {
+    return "off";
+  }
+}
+
 /** Botón para activar/desactivar las notificaciones push (recordatorios). */
 export function ActivarAvisos() {
   const [state, setState] = useState<State>("loading");
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const supported =
-      "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
-    if (!supported) return setState("unsupported");
-    if (Notification.permission === "denied") return setState("denied");
-    navigator.serviceWorker.ready
-      .then(async (reg) => {
-        const sub = await reg.pushManager.getSubscription();
-        setState(sub ? "on" : "off");
-      })
-      .catch(() => setState("off"));
+    let vigente = true;
+    estadoInicial().then((s) => {
+      if (vigente) setState(s);
+    });
+    return () => {
+      vigente = false;
+    };
   }, []);
 
   async function activar() {
