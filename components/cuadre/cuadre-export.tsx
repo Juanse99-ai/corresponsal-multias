@@ -106,7 +106,7 @@ export function CuadreExport({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
         showCloseButton={false}
-        className="max-h-[calc(100dvh-2rem)] max-w-[420px] gap-0 overflow-y-auto rounded-none border-0 bg-transparent p-0 shadow-none sm:max-w-[420px]"
+        className="max-h-[calc(100dvh-2rem)] max-w-[420px] gap-0 overflow-y-auto rounded-none border-0 bg-transparent p-0 shadow-none max-sm:before:hidden sm:max-w-[420px]"
       >
         <DialogTitle className="sr-only">Cuadre {fechaDMY(fecha)}</DialogTitle>
         <DialogDescription className="sr-only">Descargar o compartir la imagen del cuadre.</DialogDescription>
