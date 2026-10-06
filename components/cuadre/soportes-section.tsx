@@ -3,19 +3,14 @@
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Paperclip,
-  Trash,
-  FilePdf,
-  Receipt,
-  ArrowSquareOut } from "@phosphor-icons/react/dist/ssr";
+import { Trash, FilePdf, Receipt, ArrowSquareOut } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { IconButton } from "@/components/ui/icon-button";
 import { Progress } from "@/components/ui/progress";
 import { Spinner } from "@/components/ui/spinner";
 import { Item, ItemFooter, ItemGroup, ItemMedia } from "@/components/ui/item";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { Badge } from "@/components/ui/badge";
+import { Contador } from "@/components/ui/contador";
 import { cn } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
 import { createClient } from "@/lib/supabase/client";
@@ -139,18 +134,17 @@ export function SoportesSection({
   return (
     <Card className="mt-5">
       <CardHeader className="items-center">
-        <CardTitle className="flex items-center gap-2 self-center text-text">
-          <Paperclip size={17} className="text-accent" weight="fill" />
+        <CardTitle className="self-center text-text">
           <h3>{titulo}</h3>
         </CardTitle>
         {soportes.length > 0 && (
           <CardAction className="self-center">
-            <Badge variant="secondary">{soportes.length}</Badge>
+            <Contador n={soportes.length} />
           </CardAction>
         )}
       </CardHeader>
 
-      <CardContent className="pt-1">
+      <CardContent>
 
       <label
         onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
@@ -160,9 +154,13 @@ export function SoportesSection({
           setDrag(false);
           if (e.dataTransfer.files) subir(e.dataTransfer.files);
         }}
+        // Zona de soltar como un campo relleno grande, sin borde punteado en
+        // reposo; al arrastrar fotos encima se marca con el borde y el tinte azul.
         className={cn(
-          "flex cursor-pointer flex-col items-center gap-2 rounded-[1rem] border border-dashed px-4 py-8 text-center transition-colors",
-          drag ? "border-accent/60 bg-accent-soft/40" : "border-line-strong hover:border-line-strong hover:bg-surface-2",
+          "flex cursor-pointer flex-col items-center gap-1.5 rounded-2xl border-2 border-transparent px-4 py-6 text-center transition-colors duration-[var(--dur-1)] has-focus-visible:border-accent",
+          drag
+            ? "border-dashed border-accent bg-[color-mix(in_srgb,var(--accent)_9%,transparent)]"
+            : "bg-campo hover:bg-campo-hover",
         )}
       >
         <input
@@ -175,7 +173,8 @@ export function SoportesSection({
           accept="image/*,.jpg,.jpeg,.png,.heic,.heif,.webp,application/pdf,.pdf"
           multiple
           disabled={subiendo}
-          className="hidden"
+          // Oculto a la vista pero no al teclado: con Tab se llega a la zona.
+          className="sr-only"
           onChange={(e) => {
             // Copiar antes de limpiar: al vaciar el input, su FileList (que es
             // viva) se queda sin archivos y no subiría nada.
@@ -184,17 +183,17 @@ export function SoportesSection({
             if (elegidos.length > 0) subir(elegidos);
           }}
         />
-        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-surface-2 text-accent">
+        <div className="mb-1 flex size-11 items-center justify-center rounded-full bg-blanco text-muted shadow-chica">
           {subiendo ? (
             <Spinner size={19} weight="bold" className="size-[19px]" />
           ) : (
             <Receipt size={19} weight="fill" />
           )}
         </div>
-        <p className="text-[0.86rem] font-medium text-text">
+        <p className="text-body font-medium text-text">
           {progreso ? `Subiendo ${progreso.hechos} de ${progreso.total}…` : texto}
         </p>
-        <p className="text-[0.74rem] text-faint">
+        <p className="text-meta text-faint">
           {progreso
             ? "No cierres esta pantalla."
             : "Toca para escoger o arrastra las fotos aquí. Puedes subir varias a la vez."}
@@ -203,7 +202,7 @@ export function SoportesSection({
           <Progress
             value={Math.round((progreso.hechos / progreso.total) * 100)}
             aria-label="Avance de la subida"
-            className="mt-1 h-1 w-40 bg-surface-2"
+            className="mt-1.5 w-40"
           />
         )}
       </label>
@@ -227,7 +226,7 @@ export function SoportesSection({
                 >
                 <Item
                   variant="outline"
-                  className="relative block aspect-[3/4] overflow-hidden rounded-[0.9rem] border-line bg-surface-2 p-0"
+                  className="relative block aspect-[3/4] overflow-hidden rounded-xl border-fila-borde bg-surface-2 p-0"
                 >
                   <ItemMedia variant="image" className="size-full rounded-none group-has-[[data-slot=item-description]]/item:translate-y-0">
                   <a href={s.url ?? "#"} target="_blank" rel="noopener noreferrer" className="block h-full w-full">
@@ -236,16 +235,16 @@ export function SoportesSection({
                       <img src={s.url} alt={s.nombre ?? "soporte"} className="h-full w-full object-cover transition-transform duration-500 group-hover/item:scale-105" />
                     ) : (
                       <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-3 text-center">
-                        <FilePdf size={28} className="text-danger" weight="fill" />
-                        <span className="line-clamp-2 text-[0.68rem] text-muted">{s.nombre ?? "Documento"}</span>
+                        <FilePdf size={28} className="text-muted" weight="fill" />
+                        <span className="line-clamp-2 text-label text-muted">{s.nombre ?? "Documento"}</span>
                       </div>
                     )}
                   </a>
                   </ItemMedia>
 
                   <ItemFooter className="pointer-events-none absolute inset-x-0 bottom-0 gap-1 bg-gradient-to-t from-[oklch(0.22_0.03_258/0.7)] to-transparent px-2 py-1.5">
-                    <span className="truncate text-[0.62rem] text-[oklch(0.97_0.01_260/0.8)]">{pesoArchivo(s.tamano)}</span>
-                    <ArrowSquareOut size={12} className="text-[oklch(0.97_0.01_260/0.7)]" />
+                    <span className="truncate text-label text-white/80">{pesoArchivo(s.tamano)}</span>
+                    <ArrowSquareOut size={12} className="text-white/70" />
                   </ItemFooter>
 
                   {/* En táctil no existe hover: el botón debe verse siempre (pointer-coarse). */}
