@@ -330,6 +330,59 @@ input[type="number"] { -moz-appearance: textfield; }
 .panel-entra { animation: panel-entra 320ms var(--ease-smooth-out) both; }
 @keyframes panel-entra { from { opacity: 0; transform: translateX(-6px); } }
 
+/* ===== Pantallas (estilo del taller) ====================================== */
+/* Miga de pan sobre el título de la pantalla, solo en el computador. El texto
+   lo pone el AppShell en --miga ("Principal › Cuadre diario"). */
+@media (min-width: 1024px) {
+  [data-titulo]::before {
+    content: var(--miga, none);
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--faint);
+  }
+}
+
+/* Cada pantalla entra por bloques: la cabecera y luego cada tarjeta, uno tras
+   otro con 45 ms de diferencia (app/(app)/template.tsx). "backwards": al
+   terminar no queda transform, que volvería al bloque la caja de lo fijo. El
+   esqueleto de carga no entra: la que entra es la pantalla. */
+@keyframes bloque-entra { from { opacity: 0; transform: translateY(10px); } }
+.entra-bloques > * > * {
+  animation: bloque-entra 420ms var(--ease-smooth-out) backwards;
+  animation-delay: calc(var(--bq, 0) * 45ms);
+}
+.entra-bloques > * > :nth-child(2) { --bq: 1; }
+.entra-bloques > * > :nth-child(3) { --bq: 2; }
+.entra-bloques > * > :nth-child(4) { --bq: 3; }
+.entra-bloques > * > :nth-child(5) { --bq: 4; }
+.entra-bloques > * > :nth-child(n + 6) { --bq: 5; }
+.entra-bloques > :has([data-slot="skeleton"]) > * { animation: none; }
+
+/* Tablas dentro de una tarjeta, en el computador: cada fila es una cajita
+   (blanca en Azul) separada 6 px de la siguiente, sin filete corrido. */
+@media (min-width: 1024px) {
+  [data-slot="card"] > [data-slot="table-container"] { padding: 0 12px 12px; }
+  [data-slot="card"] [data-slot="table"] { border-collapse: separate; border-spacing: 0 6px; }
+  [data-slot="card"] [data-slot="table-body"] > tr > td {
+    background: var(--fila);
+    border-top: 1px solid var(--fila-borde);
+    border-bottom: 1px solid var(--fila-borde);
+    transition: background-color var(--duration-quick);
+  }
+  [data-slot="card"] [data-slot="table-body"] > tr > td:first-child {
+    border-left: 1px solid var(--fila-borde);
+    border-radius: 12px 0 0 12px;
+  }
+  [data-slot="card"] [data-slot="table-body"] > tr > td:last-child {
+    border-right: 1px solid var(--fila-borde);
+    border-radius: 0 12px 12px 0;
+  }
+  [data-slot="card"] [data-slot="table-body"] > tr:hover { background: transparent; }
+  [data-slot="card"] [data-slot="table-body"] > tr:hover > td { background: var(--fila-hover); }
+}
+
 /* Aviso de versión nueva (components/shell/nueva-version.tsx): pastilla
    oscura flotante arriba al centro, como en el taller, en los dos temas.
    El selector largo le gana al estilo que sonner inyecta. */

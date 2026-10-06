@@ -8,6 +8,7 @@ import type { HeaderResumen } from "@/lib/queries";
 import { TopHeader } from "@/components/shell/top-header";
 import { NavOverlay } from "@/components/shell/nav-overlay";
 import { RielPanel } from "@/components/shell/riel-panel";
+import { seccionDe } from "@/components/shell/nav-items";
 import { NuevaVersion } from "@/components/shell/nueva-version";
 import { BienvenidaSplash } from "@/components/fx/bienvenida-splash";
 
@@ -23,6 +24,11 @@ export function AppShell({
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const isAdmin = profile.rol === "admin";
+  // Miga de pan sobre el título ("Principal › Cuadre diario"), en el computador.
+  const seccion = seccionDe(pathname);
+  const miga = seccion
+    ? ({ "--miga": JSON.stringify(`${seccion.grupo} › ${seccion.label}`) } as React.CSSProperties)
+    : undefined;
 
   return (
     <MotionConfig reducedMotion="user">
@@ -45,7 +51,7 @@ export function AppShell({
           resumen={resumen}
         />
 
-        <div className="mx-auto w-full max-w-[1200px] px-4 pb-16 pt-6 sm:px-6 lg:px-2 lg:pt-2 lg:pb-3">
+        <div className="mx-auto w-full max-w-[1200px] px-4 pb-16 pt-6 sm:px-6 lg:px-2 lg:pt-2 lg:pb-3" style={miga}>
           {children}
         </div>
         </div>

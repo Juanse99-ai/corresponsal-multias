@@ -68,8 +68,8 @@ export function PanelView({ data }: { data: PanelData }) {
 
   return (
     <div className="flex flex-col gap-5">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight text-text sm:text-[1.7rem]">
+      <header data-titulo>
+        <h1 className="text-[1.5rem] font-medium tracking-[-0.6px] text-text sm:text-[1.625rem]">
           {data.saludo}, {primer}
         </h1>
         <p className="mt-1 text-sm text-muted">{data.mensaje}</p>
