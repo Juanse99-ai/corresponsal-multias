@@ -26,7 +26,7 @@ const ROL: Record<Rol, string> = { admin: "Administrador", operador: "Operador" 
 const rielBtn = "size-10 rounded-full text-muted hover:bg-[var(--menu-hover)] hover:text-text";
 const rielOn = "bg-primary text-primary-foreground shadow-[var(--primario-sombra)] hover:bg-primary hover:text-primary-foreground";
 
-function iniciales(nombre: string) {
+export function iniciales(nombre: string) {
   const partes = nombre.trim().split(/\s+/).filter(Boolean);
   return ((partes[0]?.[0] ?? "") + (partes[1]?.[0] ?? "")).toUpperCase() || "?";
 }

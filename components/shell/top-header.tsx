@@ -11,7 +11,6 @@ import {
   CalendarBlank,
   HandCoins,
   ArrowRight,
-  List,
   X,
 } from "@phosphor-icons/react/dist/ssr";
 import { Logo } from "@/components/brand";
@@ -138,11 +137,9 @@ function parseFechaISO(raw: string): string | null {
 export function TopHeader({
   resumen,
   isAdmin,
-  onOpenMenu,
 }: {
   resumen: HeaderResumen;
   isAdmin: boolean;
-  onOpenMenu: () => void;
 }) {
   const avisos = useMemo(() => buildAvisos(resumen), [resumen]);
   return (
@@ -153,12 +150,9 @@ export function TopHeader({
     <header className="barra-material barra-arriba sticky top-0 z-20 border-b border-line/80 lg:static lg:border-b-0" style={{ paddingTop: "env(safe-area-inset-top)" }}>
       <div className="relative mx-auto flex h-14 max-w-[1240px] items-center justify-between gap-3 px-1.5 sm:px-4 lg:h-12 lg:max-w-none lg:px-2">
       <div className="flex items-center gap-1.5 sm:gap-3">
-        <Button variant="ghost" onClick={onOpenMenu} aria-label="Abrir menú" className="w-11 px-0 sm:w-auto sm:px-3 lg:hidden">
-          <List size={20} />
-          <span className="hidden sm:inline">Menú</span>
-        </Button>
-        <Link href="/panel" className="flex items-center gap-2 lg:hidden">
-          <Logo size={30} />
+        {/* Sin botón de menú: abajo está la barra. El logo lleva al Panel. */}
+        <Link href="/panel" aria-label="Inicio" className="ml-2 flex items-center gap-2 rounded-xl shadow-[0_1px_2px_rgba(20,16,50,0.08),0_4px_10px_-6px_rgba(20,16,50,0.3)] sm:ml-0 lg:hidden">
+          <Logo size={40} className="rounded-xl" />
           <span className="hidden text-sm font-semibold tracking-tight text-text sm:block">Barrio Centro Sabanalarga 18</span>
         </Link>
         <span className="ml-1 hidden text-[0.82rem] text-muted lg:block">{formatFechaLarga(hoyISO())}</span>

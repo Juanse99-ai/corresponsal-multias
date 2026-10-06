@@ -35,7 +35,7 @@ function SheetOverlay({
     <SheetPrimitive.Overlay
       data-slot="sheet-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-text/30 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0",
+        "velo fixed inset-0 z-50",
         className
       )}
       {...props}
@@ -50,9 +50,29 @@ function SheetContent({
   showCloseButton = true,
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
-  side?: "top" | "right" | "bottom" | "left"
+  side?: "top" | "right" | "bottom" | "left" | "barra"
   showCloseButton?: boolean
 }) {
+  // La hoja de un grupo de la barra de abajo: sube sobre la barra, con las
+  // cuatro esquinas redondas (globals.css, .hoja-barra).
+  if (side === "barra") {
+    return (
+      <SheetPortal>
+        <SheetOverlay />
+        <SheetPrimitive.Content
+          data-slot="sheet-content"
+          className={cn(
+            "hoja-barra fixed inset-x-2.5 bottom-[var(--gbar-sitio)] z-50 mx-auto flex max-h-[calc(100dvh-var(--gbar-sitio)-40px)] max-w-[560px] flex-col overflow-y-auto overscroll-contain rounded-3xl bg-blanco px-2.5 pt-1 pb-3 text-text shadow-ventana outline-none",
+            className
+          )}
+          {...props}
+        >
+          {children}
+        </SheetPrimitive.Content>
+      </SheetPortal>
+    )
+  }
+
   return (
     <SheetPortal>
       <SheetOverlay />

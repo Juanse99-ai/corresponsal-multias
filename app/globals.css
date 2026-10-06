@@ -732,6 +732,209 @@ input[type="number"] { -moz-appearance: textfield; }
   background: #2563eb;
 }
 
+/* ===== Barra de abajo del celular (components/shell/barra-abajo.tsx) ======
+   Cápsula de vidrio como la barra de WhatsApp en iOS 26: ícono de 26 con su
+   nombre debajo, la pantalla abierta sobre una pastilla que viaja, globo rojo
+   con los pendientes y "Tú" al final con las iniciales. Solo en el celular y
+   la tableta; en el computador manda el riel. */
+.gbar { display: none; }
+@media (max-width: 1023px) {
+  .gbar {
+    position: fixed;
+    left: var(--gbar-lado);
+    right: var(--gbar-lado);
+    bottom: var(--gbar-abajo);
+    z-index: 45;
+    display: grid;
+    grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr));
+    align-items: center;
+    height: var(--gbar-h);
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 0 7px;
+    border-radius: 999px;
+    background: var(--gbar-fondo);
+    -webkit-backdrop-filter: blur(22px) saturate(1.8);
+    backdrop-filter: blur(22px) saturate(1.8);
+    box-shadow: var(--gbar-sombra);
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    transition: transform 380ms var(--ease-ios), opacity var(--dur-2);
+  }
+  /* Con la hoja de un grupo arriba, la barra queda sobre el velo y se puede
+     tocar (Radix deja el resto de la página sin toques). */
+  .gbar.gbar--arriba { z-index: 60; pointer-events: auto; }
+  /* Al bajar por la pantalla se encoge desde su centro (Instagram en iOS 26:
+     397 × 59 pasa a 332 × 49); al subir vuelve. Con el dedo encima crece un
+     poco, con rebote. */
+  .gbar.gbar--chica { transform: scale(var(--gbar-chica)); }
+  .gbar.gbar--toca {
+    transform: scale(var(--gbar-toca));
+    transition: transform 260ms var(--ease-rebote), opacity var(--dur-2);
+  }
+  /* Mientras se escribe baja: sobre el teclado taparía el campo. */
+  .gbar.gbar--abajo { transform: translateY(calc(100% + 30px)); opacity: 0; pointer-events: none; }
+  .gbar__pil {
+    position: absolute;
+    top: 4.5px;
+    bottom: 4.5px;
+    width: min(calc((100% - 14px) / var(--n, 5) - 4px), 86px);
+    transform: translateX(-50%);
+    border-radius: 999px;
+    background: var(--gbar-pastilla);
+    pointer-events: none;
+    transition: left 380ms var(--ease-rebote-suave), opacity 160ms;
+  }
+  .gbar__pil--bajo { opacity: 0; }
+  .gbar__b {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    height: 52px;
+    min-width: 0;
+    width: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    box-shadow: none;
+    color: var(--gbar-tinta);
+    transition: color var(--dur-1);
+  }
+  .gbar__b { -webkit-user-drag: none; }
+  .gbar__b:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
+  .gbar__b[data-sobre] { color: var(--gbar-tinta-on); }
+  .gbar__ic { position: relative; display: grid; place-items: center; height: 27px; }
+  .gbar__ic > svg { width: 26px; height: 26px; }
+  /* La letra del sistema, como la barra de WhatsApp. El nombre puede pasar
+     unos px de su columna ("Movimientos" a 390 px): los vecinos son cortos. */
+  .gbar__t {
+    max-width: calc(100% + 10px);
+    overflow: hidden;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.1;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .gbar__av {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--accent-fill);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9);
+  }
+  .gbar__globo {
+    position: absolute;
+    top: -5px;
+    left: calc(50% + 4px);
+    display: grid;
+    place-items: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--gbar-globo);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    box-shadow: 0 0 0 2px var(--gbar-globo-filo);
+  }
+  /* La lupa de vidrio al apoyar el dedo: más alta que la barra, borde con
+     reflejo de color y brillo arriba; dentro, la fila agrandada 1,22. Entra
+     creciendo, se estira con la velocidad del dedo (--sx/--sy) y al soltar
+     se encoge con rebote hasta volverse la pastilla. */
+  .gbar__lente {
+    position: absolute;
+    z-index: 3;
+    left: 0;
+    top: -9px;
+    bottom: -9px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--lupa-fondo);
+    -webkit-backdrop-filter: blur(14px) saturate(1.6) brightness(1.06);
+    backdrop-filter: blur(14px) saturate(1.6) brightness(1.06);
+    box-shadow: var(--lupa-sombra);
+    pointer-events: none;
+    transform: scale(var(--sx, 1), var(--sy, 1));
+    transition: transform 140ms ease-out;
+    will-change: translate, transform;
+  }
+  .gbar__lente::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    padding: 1.5px;
+    border-radius: inherit;
+    background: conic-gradient(from 200deg, rgba(255, 90, 170, 0.6), rgba(90, 200, 255, 0.6), rgba(255, 236, 120, 0.5),
+      rgba(255, 255, 255, 0.75), rgba(140, 120, 255, 0.55), rgba(255, 90, 170, 0.6));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    opacity: 0.75;
+    pointer-events: none;
+  }
+  .gbar__lente::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: inherit;
+    background: radial-gradient(120% 70% at 28% 0%, rgba(255, 255, 255, 0.4), transparent 55%),
+      radial-gradient(90% 60% at 80% 110%, rgba(255, 255, 255, 0.18), transparent 60%);
+    pointer-events: none;
+  }
+  .gbar__lente--entra { animation: lente-entra 300ms var(--ease-rebote) both; }
+  .gbar__lente--sale {
+    transform: scale(0.8, 0.72);
+    opacity: 0;
+    transition: translate 300ms var(--ease-rebote-suave), width 300ms, transform 280ms cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 200ms 90ms;
+  }
+  @keyframes lente-entra { from { opacity: 0.2; transform: scale(0.72, 0.66); } }
+  .gbar__lupa {
+    position: absolute;
+    z-index: 1;
+    left: 0;
+    top: 9px;
+    display: grid;
+    grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr));
+    align-items: center;
+    height: var(--gbar-h);
+    padding: 0 7px;
+    transform: scale(1.22);
+  }
+  /* La página deja sitio a la barra; lo que se trae a la vista queda encima. */
+  .contenido-app { padding-bottom: calc(var(--gbar-sitio) + 18px); }
+  html { scroll-padding-bottom: calc(var(--gbar-sitio) + 8px); }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .gbar { background: var(--blanco); }
+}
+
+/* La hoja de un grupo de la barra (components/ui/sheet.tsx, side="barra"):
+   sube sobre la barra con las cuatro esquinas redondas. */
+.hoja-barra[data-state="open"] { animation: hoja-barra-entra 340ms var(--ease-ios); }
+.hoja-barra[data-state="closed"] { animation: hoja-barra-sale 200ms cubic-bezier(0.4, 0, 1, 1) forwards; }
+@keyframes hoja-barra-entra { from { opacity: 0; transform: translateY(24px) scale(0.98); } }
+@keyframes hoja-barra-sale { to { opacity: 0; transform: translateY(24px) scale(0.98); } }
+
 /* ===== Movimiento (estilo del taller) ===================================== */
 /* Tokens compartidos: toda animación nueva debe leer de aquí, no hardcodear.
    Una sola curva, la del cajón de iOS (arranca decidida y frena pareja), y
