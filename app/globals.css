@@ -579,6 +579,21 @@ input[type="number"] { -moz-appearance: textfield; }
   [data-slot="card"] [data-slot="table-body"] > tr:hover > td { background: var(--fila-hover); }
 }
 
+/* Listas de Item en cajitas (ItemGroup variant="cajitas"): en el computador
+   cada fila es una cajita separada 6 px, como las filas de una tabla; en el
+   celular quedan los renglones a sangre con su línea. */
+@media (min-width: 1024px) {
+  [data-slot="item-group"][data-variant="cajitas"] { gap: 6px; }
+  [data-slot="item-group"][data-variant="cajitas"] [data-slot="item-separator"] { display: none; }
+  [data-slot="item-group"][data-variant="cajitas"] [data-slot="item"] {
+    padding: 10px 12px;
+    border: 1px solid var(--fila-borde);
+    border-radius: 12px;
+    background: var(--fila);
+  }
+  [data-slot="item-group"][data-variant="cajitas"] [data-slot="item"]:hover { background: var(--fila-hover); }
+}
+
 /* ===== Segmentados (opción A, components/ui/tabs.tsx y toggle-group.tsx) ===
    La pastilla de la elegida la pinta el riel en su ::before y viaja de una
    opción a otra (lib/use-pastilla.ts). Mientras no se mide, la opción elegida

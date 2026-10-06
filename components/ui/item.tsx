@@ -5,11 +5,22 @@ import { Slot } from "radix-ui"
 
 import { Separator } from "@/components/ui/separator"
 
-function ItemGroup({ className, ...props }: React.ComponentProps<"div">) {
+/**
+ * Lista de filas. `variant="cajitas"`: en el computador cada fila es una
+ * cajita (blanca en Azul) separada 6 px; en el celular, renglones a sangre
+ * separados por una línea (globals.css). Una lista por tarjeta, no una
+ * tarjeta por fila.
+ */
+function ItemGroup({
+  className,
+  variant = "default",
+  ...props
+}: React.ComponentProps<"div"> & { variant?: "default" | "cajitas" }) {
   return (
     <div
       role="list"
       data-slot="item-group"
+      data-variant={variant}
       className={cn("group/item-group flex flex-col", className)}
       {...props}
     />
@@ -24,20 +35,20 @@ function ItemSeparator({
     <Separator
       data-slot="item-separator"
       orientation="horizontal"
-      className={cn("my-0", className)}
+      className={cn("my-0 bg-linea-fila", className)}
       {...props}
     />
   )
 }
 
 const itemVariants = cva(
-  "group/item flex flex-wrap items-center rounded-md border border-transparent text-sm transition-colors duration-100 outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 [a]:transition-colors [a]:hover:bg-surface-2/50",
+  "group/item flex flex-wrap items-center rounded-xl border border-transparent text-body transition-colors duration-[var(--dur-1)] outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent focus-visible:outline-solid [a]:transition-colors [a]:hover:bg-bg-soft",
   {
     variants: {
       variant: {
         default: "bg-transparent",
-        outline: "border-border",
-        muted: "bg-surface-2/50",
+        outline: "border-line",
+        muted: "bg-bg-soft",
       },
       size: {
         default: "gap-4 p-4",
@@ -77,7 +88,8 @@ const itemMediaVariants = cva(
     variants: {
       variant: {
         default: "bg-transparent",
-        icon: "size-8 rounded-sm border bg-surface-2 [&_svg:not([class*='size-'])]:size-4",
+        // Círculo gris de 36 con el ícono del tipo de la fila.
+        icon: "size-9 rounded-full bg-surface-2 text-muted [&_svg:not([class*='size-'])]:size-4",
         image:
           "size-10 overflow-hidden rounded-sm [&_img]:size-full [&_img]:object-cover",
       },
@@ -121,7 +133,7 @@ function ItemTitle({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="item-title"
       className={cn(
-        "flex w-fit items-center gap-2 text-sm leading-snug font-medium",
+        "flex w-fit items-center gap-2 text-title leading-snug font-semibold",
         className
       )}
       {...props}
@@ -134,7 +146,7 @@ function ItemDescription({ className, ...props }: React.ComponentProps<"p">) {
     <p
       data-slot="item-description"
       className={cn(
-        "line-clamp-2 text-sm leading-normal font-normal text-balance text-muted",
+        "line-clamp-2 text-meta leading-snug font-normal text-balance text-muted",
         "[&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-accent",
         className
       )}
