@@ -128,8 +128,8 @@ export function ComprobantesLector({
       <CardHeader className="gap-3 pb-0">
         <CardTitle className="min-w-0 self-center text-text">Llenar consignaciones desde las fotos</CardTitle>
         {!items && (
-          <CardAction>
-            <Button onClick={leer} disabled={pending} className="shrink-0">
+          <CardAction className="self-center">
+            <Button variant="outline" size="sm" onClick={leer} disabled={pending} className="shrink-0">
               <Scan size={16} weight="bold" />
               {pending ? "Leyendo…" : `Leer ${cantidadFotos} ${cantidadFotos === 1 ? "foto" : "fotos"}`}
             </Button>
@@ -150,17 +150,18 @@ export function ComprobantesLector({
           >
             <div className="mt-4">
               <div className="flex items-baseline justify-between gap-3">
-                <p className="text-[0.82rem] font-medium text-text">
+                <p className="text-body font-medium text-text">
                   {seleccion.length} de {items.length}{" "}
                   {items.length === 1 ? "comprobante" : "comprobantes"}
                 </p>
-                <p className="tnum shrink-0 text-[0.95rem] font-semibold text-text">
+                <p className="tnum shrink-0 text-title font-semibold text-text">
                   {formatCOP(total)}
                 </p>
               </div>
 
-              <ScrollArea className="mt-2 overflow-hidden rounded-[0.8rem] border border-line bg-surface [&>[data-slot=scroll-area-viewport]]:max-h-80">
-                <ItemGroup>
+              {/* Lista para escoger en cajitas, sin recuadro con borde. */}
+              <ScrollArea className="mt-2 overflow-hidden [&>[data-slot=scroll-area-viewport]]:max-h-80">
+                <ItemGroup variant="cajitas">
                   {items.map((c, i) => {
                     const utilizable = sirve(c);
                     const activo = marcado(i, c);
@@ -172,7 +173,7 @@ export function ComprobantesLector({
                           size="sm"
                           role="listitem"
                           className={cn(
-                            "flex-nowrap gap-2.5 rounded-none px-3 py-2 text-[0.84rem] transition-opacity",
+                            "flex-nowrap gap-3 px-0 py-2.5 transition-opacity",
                             utilizable ? "cursor-pointer" : "cursor-default",
                             !activo && "opacity-45",
                           )}
@@ -189,16 +190,16 @@ export function ComprobantesLector({
                             </ItemMedia>
                             <ItemContent className="min-w-0 gap-0 leading-tight">
                               <ItemTitle className="w-full items-baseline justify-between gap-2 leading-tight">
-                                <span className="tnum font-medium text-text">
+                                <span className="tnum font-semibold text-text">
                                   {utilizable ? formatCOP(c.monto as number) : "Sin monto"}
                                 </span>
-                                <span className="tnum shrink-0 text-[0.74rem] font-normal text-faint">
+                                <span className="tnum shrink-0 text-meta font-normal text-faint">
                                   {c.hora ? formatHora(c.hora) : "sin hora"}
                                 </span>
                               </ItemTitle>
-                              <ItemDescription className="line-clamp-none truncate text-[0.74rem] leading-tight">
+                              <ItemDescription className="line-clamp-none truncate leading-tight">
                                 {!utilizable && (
-                                  <span className="text-danger">
+                                  <span className="text-bad-fg">
                                     {c.error ?? "No es una tirilla legible"} ·{" "}
                                   </span>
                                 )}
@@ -206,7 +207,7 @@ export function ComprobantesLector({
                                   <>
                                     {/* El separador va fuera del inline-flex: adentro se
                                         come el espacio final y queda "Revísala ·Depósito". */}
-                                    <span className="inline-flex items-center gap-1 font-medium text-text">
+                                    <span className="inline-flex items-center gap-1 font-semibold text-warn-fg">
                                       <Warning size={11} weight="fill" />
                                       Revísala
                                     </span>
@@ -225,14 +226,14 @@ export function ComprobantesLector({
               </ScrollArea>
 
               {dudosos > 0 && (
-                <p className="mt-2 text-[0.74rem] text-muted">
+                <p className="mt-2 text-meta text-muted">
                   {dudosos === 1
                     ? "1 quedó dudosa y no viene marcada: compárala con la foto antes de incluirla."
                     : `${dudosos} quedaron dudosas y no vienen marcadas: compáralas con la foto antes de incluirlas.`}
                 </p>
               )}
               {fallidos > 0 && (
-                <p className="mt-1 text-[0.74rem] text-muted">
+                <p className="mt-1 text-meta text-muted">
                   {fallidos === 1 ? "1 foto no se pudo leer" : `${fallidos} fotos no se pudieron leer`}.
                   Esas tocan a mano.
                 </p>
@@ -251,7 +252,7 @@ export function ComprobantesLector({
                       ? "Guardar"
                       : `Guardar ${seleccion.length} ${seleccion.length === 1 ? "consignación" : "consignaciones"}`}
                 </Button>
-                <IconButton label="Cancelar" onClick={() => setItems(null)} disabled={pending} className="text-muted hover:text-foreground">
+                <IconButton label="Cancelar" onClick={() => setItems(null)} disabled={pending}>
                   <X size={17} />
                 </IconButton>
               </div>

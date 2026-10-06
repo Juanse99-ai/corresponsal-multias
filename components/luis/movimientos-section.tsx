@@ -4,14 +4,15 @@ import { Fragment, useMemo, useRef, useState, useTransition, type ChangeEvent } 
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { Plus, Trash, PencilSimple, Clock, ArrowDown, Receipt, WhatsappLogo, ClipboardText, FileArrowUp, Warning, Check, X, CaretDown } from "@phosphor-icons/react/dist/ssr";
+import { Plus, Trash, PencilSimple, ArrowDown, Receipt, WhatsappLogo, ClipboardText, FileArrowUp, Warning, Check, X, CaretDown } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
-import { Empty, EmptyHeader, EmptyMedia, EmptyDescription } from "@/components/ui/empty";
+import { Empty, EmptyTitle } from "@/components/ui/empty";
+import { Contador } from "@/components/ui/contador";
 import {
   ItemGroup,
   Item,
@@ -311,11 +312,12 @@ export function MovimientosSection({
       <CardHeader className="pb-0">
         <CardTitle className="text-text">{titulo}</CardTitle>
         <CardDescription>{subtitulo}</CardDescription>
-        <CardAction className="text-right">
-          <p className="tnum text-lg font-semibold text-text">
-            <AnimatedMoney value={total} />
-          </p>
-          <p className="text-[0.68rem] text-faint">{items.length} {items.length === 1 ? "movimiento" : "movimientos"}</p>
+        <CardAction className="flex flex-col items-end gap-1">
+          <AnimatedMoney value={total} className="text-title font-semibold text-text" />
+          <Contador
+            n={items.length}
+            aria-label={`${items.length} ${items.length === 1 ? "movimiento" : "movimientos"}`}
+          />
         </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col">
@@ -326,8 +328,8 @@ export function MovimientosSection({
         <Label htmlFor={`monto-${tono}`}>Monto</Label>
         <MoneyInput id={`monto-${tono}`} size="lg" value={monto} onValueChange={setMonto} onEnter={() => !pending && registrar()} />
         {monto > tope && (
-          <p className="flex items-start gap-1.5 text-[0.76rem] text-danger">
-            <Warning size={13} weight="fill" className="mt-0.5 shrink-0" />
+          <p className="flex items-start gap-1.5 text-meta font-semibold text-warn-fg">
+            <Warning size={14} weight="fill" className="mt-px shrink-0" />
             {tono === "consig"
               ? "El datáfono no pasa de $3.000.000 por consignación: si fue un monto grande, va partido en varias."
               : "Las transferencias del Sr. Luis topan en $9.999.999: si mandó más, van en varias."}
@@ -358,13 +360,13 @@ export function MovimientosSection({
       <ErrorNotice message={error} className="mt-3" />
 
       <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
-        <Button onClick={registrar} disabled={pending} className="w-full sm:w-auto">
+        <Button variant="secondary" onClick={registrar} disabled={pending} className="w-full sm:w-auto">
           <Plus size={16} weight="bold" />
           {pending ? "Guardando…" : "Agregar"}
         </Button>
         {!loteAbierto && (
           <Button
-            variant="secondary"
+            variant="outline"
             onClick={() => setLoteAbierto(true)}
             disabled={pending}
             className="w-full sm:w-auto"
@@ -383,8 +385,8 @@ export function MovimientosSection({
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <div className="mt-4 rounded-[1rem] border border-accent/25 bg-accent-soft/30 p-4">
-              <p className="text-[0.88rem] font-semibold text-text">Chat de WhatsApp</p>
+            <div className="mt-4 border-t border-linea-fila pt-4">
+              <p className="text-title font-semibold text-text">Chat de WhatsApp</p>
               <div className="mt-2.5 flex gap-2">
                 <Button size="sm" variant="secondary" onClick={pegarDelPortapapeles}>
                   <ClipboardText size={16} />
@@ -429,7 +431,7 @@ export function MovimientosSection({
               />
 
               {soltoFotos && (
-                <Alert role="status" className="mt-2 block text-[0.78rem] text-muted">
+                <Alert role="status" className="mt-2 block text-meta text-muted">
                   Aquí va el texto del chat, no las fotos. Las fotos de los comprobantes van en{" "}
                   <a href="#comprobantes" onClick={() => setSoltoFotos(false)} className="font-medium text-accent-strong underline underline-offset-2">
                     Comprobantes del día
@@ -441,7 +443,7 @@ export function MovimientosSection({
               {loteTexto.trim() && (
                 <div className="mt-3">
                   {lote.movimientos.length === 0 ? (
-                    <p className="text-[0.82rem] text-danger">No hay montos en ese texto.</p>
+                    <p className="text-meta font-medium text-bad-fg">No hay montos en ese texto.</p>
                   ) : (
                     <>
                       {/* El chat es un grupo: apagar a quien no manda movimientos
@@ -461,23 +463,23 @@ export function MovimientosSection({
                       )}
 
                       <div className="flex items-baseline justify-between gap-3">
-                        <p className="min-w-0 text-[0.82rem] font-medium text-text">
+                        <p className="min-w-0 text-body font-medium text-text">
                           {seleccionados.length}
                           {seleccionados.length !== lote.movimientos.length && ` de ${lote.movimientos.length}`}{" "}
                           {seleccionados.length === 1 && seleccionados.length === lote.movimientos.length
                             ? "movimiento"
                             : "movimientos"}
                         </p>
-                        <p className="tnum shrink-0 text-[0.95rem] font-semibold text-text">{formatCOP(totalSeleccion)}</p>
+                        <p className="tnum shrink-0 text-title font-semibold text-text">{formatCOP(totalSeleccion)}</p>
                       </div>
 
                       {/* Cada fila se puede desmarcar: en el grupo también escriben
                           otros y a veces Luis corrige un monto. */}
-                      <ScrollArea className="mt-2 overflow-hidden rounded-[0.8rem] border border-line bg-surface [&>[data-slot=scroll-area-viewport]]:max-h-72">
+                      <ScrollArea className="mt-2 overflow-hidden [&>[data-slot=scroll-area-viewport]]:max-h-72">
                         {lote.dias.map((d) => (
                           <div key={d.fecha}>
                             {variosDias && (
-                              <p className="sticky top-0 flex items-baseline justify-between gap-2 border-b border-line bg-surface-2 px-3 py-1.5 text-[0.72rem] font-medium text-muted">
+                              <p className="sticky top-0 z-10 flex items-baseline justify-between gap-2 bg-card py-1.5 text-meta font-semibold text-faint">
                                 <span className={cn(d.fecha === fecha && "text-accent-strong")}>
                                   {formatFechaCorta(d.fecha)}
                                   {d.fecha === fecha && ", día abierto"}
@@ -485,7 +487,7 @@ export function MovimientosSection({
                                 <span className="tnum shrink-0">{formatCOP(d.total)}</span>
                               </p>
                             )}
-                            <ItemGroup>
+                            <ItemGroup variant="cajitas" className="pb-1.5">
                               {d.movimientos.map((m, k) => {
                                 const i = indiceDe.get(m) ?? -1;
                                 const activo = estaMarcado(i);
@@ -497,7 +499,7 @@ export function MovimientosSection({
                                       size="sm"
                                       role="listitem"
                                       className={cn(
-                                        "cursor-pointer flex-nowrap gap-2.5 rounded-none px-3 py-2 text-[0.84rem] transition-opacity",
+                                        "cursor-pointer flex-nowrap gap-3 px-0 py-2.5 transition-opacity",
                                         !activo && "opacity-45",
                                       )}
                                     >
@@ -512,13 +514,13 @@ export function MovimientosSection({
                                         </ItemMedia>
                                         <ItemContent className="min-w-0 gap-0 leading-tight">
                                           <ItemTitle className="w-full items-baseline justify-between gap-2 leading-tight">
-                                            <span className="tnum font-medium text-text">{formatCOP(m.monto)}</span>
-                                            <span className="tnum shrink-0 text-[0.74rem] font-normal text-faint">
+                                            <span className="tnum font-semibold text-text">{formatCOP(m.monto)}</span>
+                                            <span className="tnum shrink-0 text-meta font-normal text-faint">
                                               {m.hora ? formatHora(m.hora) : "sin hora"}
                                             </span>
                                           </ItemTitle>
                                           {(m.nota || repetidos.has(i) || lote.remitentes.length > 1) && (
-                                            <ItemDescription className="line-clamp-none truncate text-[0.74rem] leading-tight">
+                                            <ItemDescription className="line-clamp-none truncate leading-tight">
                                               {repetidos.has(i) && <span className="font-medium text-text">Ya está registrada. </span>}
                                               {lote.remitentes.length > 1 && m.de && (
                                                 <span className="text-faint">{m.de.split(" ")[0]}{m.nota ? ": " : ""}</span>
@@ -539,19 +541,19 @@ export function MovimientosSection({
                     </>
                   )}
                   {repetidos.size > 0 && (
-                    <p className="mt-2 text-[0.74rem] text-muted">
+                    <p className="mt-2 text-meta text-muted">
                       {repetidos.size === 1
                         ? "1 ya estaba registrado en este día y quedó sin marcar."
                         : `${repetidos.size} ya estaban registrados en este día y quedaron sin marcar.`}
                     </p>
                   )}
                   {lote.ignoradas.length > 0 && (
-                    <Collapsible className="mt-2 text-[0.72rem] text-faint">
+                    <Collapsible className="mt-2 text-meta text-faint">
                       <CollapsibleTrigger asChild>
                         <Button
                           variant="link"
                           size="sm"
-                          className="group/ign h-auto min-h-0 whitespace-normal p-0 text-left text-[0.72rem] font-normal text-faint"
+                          className="group/ign h-auto min-h-0 whitespace-normal p-0 text-left text-meta font-normal text-faint"
                         >
                           <CaretDown className="size-3 transition-transform group-data-[state=closed]/ign:-rotate-90" />
                           {lote.ignoradas.length === 1 ? "Se ignoró 1 línea" : `Se ignoraron ${lote.ignoradas.length} líneas`} (fotos,
@@ -593,7 +595,6 @@ export function MovimientosSection({
                     cambiarTexto("");
                   }}
                   disabled={pending}
-                  className="text-muted hover:text-foreground"
                 >
                   <X size={17} />
                 </IconButton>
@@ -604,18 +605,13 @@ export function MovimientosSection({
       </AnimatePresence>
 
       {items.length === 0 ? (
-        <Empty className="mt-5 gap-1 rounded-[1rem] border border-dashed border-line-strong py-9 md:py-9">
-          <EmptyHeader className="gap-1">
-            <EmptyMedia className="mb-0 text-faint">
-              <Icon size={18} />
-            </EmptyMedia>
-            <EmptyDescription className="text-[0.82rem]">{emptyText}</EmptyDescription>
-          </EmptyHeader>
+        <Empty fila className="mt-3">
+          <EmptyTitle>{emptyText}</EmptyTitle>
         </Empty>
       ) : (
-        <ItemGroup className="mt-4">
+        <ItemGroup variant="cajitas" className="mt-4 max-lg:divide-y max-lg:divide-linea-fila">
           <AnimatePresence initial={false}>
-            {items.map((c, idx) => {
+            {items.map((c) => {
               const nuevo = !yaEstaban.has(c.id) && !reduced();
               return (
               <motion.div
@@ -627,51 +623,45 @@ export function MovimientosSection({
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ type: "spring", stiffness: 320, damping: 30 }}
               >
-                {idx > 0 && <ItemSeparator />}
                 {editId === c.id ? (
-                  <div className="flex flex-col gap-2.5 py-2.5">
-                    <div className="grid gap-2 sm:grid-cols-[1fr_120px]">
-                      <MoneyInput value={eMonto} onValueChange={setEMonto} autoFocus />
-                      <Input type="time" value={eHora} onChange={(e) => setEHora(e.target.value)} />
+                  // Edición en línea dentro de la misma cajita.
+                  <Item className="flex-col items-stretch gap-2.5 px-0 py-3">
+                    <div className="grid gap-2 sm:grid-cols-[1fr_140px]">
+                      <MoneyInput value={eMonto} onValueChange={setEMonto} autoFocus aria-label="Monto" />
+                      <Input type="time" value={eHora} onChange={(e) => setEHora(e.target.value)} aria-label="Hora" />
                     </div>
-                    <Input value={eNota} onChange={(e) => setENota(e.target.value)} placeholder="Nota (opcional)" />
+                    <Input value={eNota} onChange={(e) => setENota(e.target.value)} placeholder="Nota (opcional)" aria-label="Nota" />
                     <div className="flex items-center gap-2">
                       <Button size="sm" onClick={guardarEdicion} disabled={pending}>
                         <Check size={16} weight="bold" />
                         Guardar
                       </Button>
-                      <IconButton label="Cancelar" onClick={() => setEditId(null)} disabled={pending} className="text-muted hover:text-foreground">
+                      <IconButton label="Cancelar" size="icon-sm" onClick={() => setEditId(null)} disabled={pending}>
                         <X size={17} />
                       </IconButton>
                     </div>
-                  </div>
+                  </Item>
                 ) : (
                   <Item
                     role="presentation"
-                    className={cn("flex-nowrap gap-3 rounded-lg px-0 py-2.5", nuevo && "t-flash-ok")}
+                    className={cn("flex-nowrap gap-3 px-0 py-2.5", nuevo && "t-flash-ok")}
                   >
-                    <ItemMedia className="size-8 self-center rounded-full bg-accent-soft text-accent-strong group-has-[[data-slot=item-description]]/item:translate-y-0 group-has-[[data-slot=item-description]]/item:self-center">
-                      <Icon size={13} weight="bold" />
+                    <ItemMedia variant="icon" className="group-has-[[data-slot=item-description]]/item:translate-y-0 group-has-[[data-slot=item-description]]/item:self-center">
+                      <Icon size={16} weight="bold" />
                     </ItemMedia>
-                    <ItemContent className="min-w-0 gap-0 leading-tight">
-                      <ItemTitle className="tnum text-[0.88rem] leading-tight text-text">{formatCOP(c.monto)}</ItemTitle>
+                    <ItemContent className="min-w-0 gap-0.5">
+                      <ItemTitle className="tnum">{formatCOP(c.monto)}</ItemTitle>
                       {(c.hora || c.nota) && (
-                        <ItemDescription className="line-clamp-none flex min-w-0 items-center gap-1 text-[0.7rem] leading-tight text-faint">
-                          {c.hora && (
-                            <span className="flex shrink-0 items-center gap-1">
-                              <Clock size={10} />
-                              {formatHora(c.hora)}
-                            </span>
-                          )}
-                          {c.nota && <span className="truncate">· {c.nota}</span>}
+                        <ItemDescription className="line-clamp-none truncate text-faint">
+                          {[c.hora ? formatHora(c.hora) : null, c.nota].filter(Boolean).join(" · ")}
                         </ItemDescription>
                       )}
                     </ItemContent>
-                    <ItemActions className="shrink-0 gap-1">
-                      <IconButton label="Editar" onClick={() => abrirEdicion(c)} disabled={pending} className="text-muted hover:text-foreground">
+                    <ItemActions className="shrink-0 gap-1.5">
+                      <IconButton label="Editar" onClick={() => abrirEdicion(c)} disabled={pending} className="lg:size-[38px]">
                         <PencilSimple size={17} />
                       </IconButton>
-                      <IconButton label="Borrar" onClick={() => setPorBorrar(c)} disabled={pending} peligro>
+                      <IconButton label="Borrar" onClick={() => setPorBorrar(c)} disabled={pending} peligro className="lg:size-[38px]">
                         <Trash size={17} />
                       </IconButton>
                     </ItemActions>
