@@ -113,31 +113,46 @@ export function formatHora(time: string | null | undefined): string {
   return time.slice(0, 5);
 }
 
-/** ISO timestamp -> "03:45 p. m." (solo la hora) en hora de Colombia. */
-export function formatHoraISO(iso: string | null | undefined): string {
-  if (!iso) return "";
-  try {
-    return new Intl.DateTimeFormat("es-CO", {
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZone: "America/Bogota",
-    }).format(new Date(iso));
-  } catch {
-    return "";
-  }
+/** Hora (0 a 23) y minutos de un instante en Colombia, en números. */
+function horaMinutoBogota(d: Date): { h: number; m: number } {
+  const partes = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "America/Bogota",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(d);
+  const valor = (tipo: string) => Number(partes.find((p) => p.type === tipo)?.value ?? 0);
+  return { h: valor("hour"), m: valor("minute") };
 }
 
-/** ISO timestamp -> "17 jun, 03:45" en hora de Colombia. */
+/**
+ * ISO timestamp -> "03:45 p. m." (solo la hora) en hora de Colombia.
+ *
+ * Se arma a mano en vez de pedírselo a Intl en "es-CO": el ICU de Node escribe
+ * "p. m." con un espacio normal y el del navegador con uno de no separación, y
+ * esa diferencia invisible rompía la hidratación (React #418) en Movimientos y
+ * en la Bitácora. Va como lo pinta el navegador: espacio normal antes de
+ * "p. m." (la hora puede partir línea ahí) y de no separación adentro.
+ */
+export function formatHoraISO(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const { h, m } = horaMinutoBogota(d);
+  const h12 = h % 12 || 12;
+  return `${String(h12).padStart(2, "0")}:${String(m).padStart(2, "0")} ${h < 12 ? "a.\u00a0m." : "p.\u00a0m."}`;
+}
+
+/** ISO timestamp -> "17 jun, 03:45 p. m." en hora de Colombia (a mano, como formatHoraISO). */
 export function formatFechaHora(iso: string): string {
-  try {
-    return new Intl.DateTimeFormat("es-CO", {
-      day: "2-digit",
-      month: "short",
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZone: "America/Bogota",
-    }).format(new Date(iso));
-  } catch {
-    return iso.slice(0, 16).replace("T", " ");
-  }
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso.slice(0, 16).replace("T", " ");
+  const dia = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Bogota",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+  const [, mes, dd] = dia.split("-").map(Number);
+  return `${dd} ${MESES[mes - 1]}, ${formatHoraISO(iso)}`;
 }
