@@ -647,6 +647,13 @@ input[type="number"] { -moz-appearance: textfield; }
   }
 }
 
+/* Plegable (components/ui/plegable.tsx): el cuerpo crece de alto al abrir y se
+   recoge al cerrar, en 220 ms con la curva de iOS. */
+.plegable-cuerpo[data-state="open"] { animation: plegable-abre var(--dur-2) var(--ease-ios); }
+.plegable-cuerpo[data-state="closed"] { animation: plegable-cierra var(--dur-2) var(--ease-ios); }
+@keyframes plegable-abre { from { height: 0; opacity: 0; } to { height: var(--radix-collapsible-content-height); opacity: 1; } }
+@keyframes plegable-cierra { from { height: var(--radix-collapsible-content-height); } to { height: 0; opacity: 0; } }
+
 /* Globo de las gráficas (components/ui/chart.tsx, area-chart.tsx): oscuro en
    los dos temas, entra subiendo 4 px y creciendo de 0,96. */
 .globo-grafica {
