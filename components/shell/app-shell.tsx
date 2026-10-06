@@ -9,6 +9,7 @@ import { BarraAbajo } from "@/components/shell/barra-abajo";
 import { RielPanel } from "@/components/shell/riel-panel";
 import { seccionDe } from "@/components/shell/nav-items";
 import { NuevaVersion } from "@/components/shell/nueva-version";
+import { JalarParaActualizar } from "@/components/shell/jalar-para-actualizar";
 import { BienvenidaSplash } from "@/components/fx/bienvenida-splash";
 import { TRANSICION } from "@/lib/movimiento";
 import { useAtrasCierraVentanas } from "@/lib/use-atras-cierra-ventanas";
@@ -54,6 +55,7 @@ export function AppShell({
         <BarraAbajo profile={profile} isAdmin={isAdmin} pathname={pathname} resumen={resumen} />
 
         <NuevaVersion />
+        <JalarParaActualizar />
       </div>
     </MotionConfig>
   );
