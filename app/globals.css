@@ -664,6 +664,19 @@ input[type="number"] { -moz-appearance: textfield; }
 .dark .globo-grafica { background: #26262d; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 10px 26px -10px rgba(0, 0, 0, 0.7); }
 @keyframes globo-entra { from { opacity: 0; translate: 0 4px; scale: 0.96; } }
 
+/* Barras de las gráficas (panel-view.tsx, guía 8.23): cada una crece desde
+   abajo al entrar, escalonadas 40 ms tras 260 ms de espera, en 560 ms con la
+   curva de iOS. "backwards": al terminar no queda transform. Al pasar el mouse
+   las demás bajan a .45. */
+.barra-crece {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: barra-crece 560ms var(--ease-ios) backwards;
+  animation-delay: calc(260ms + var(--m, 0) * 40ms);
+  transition: opacity var(--dur-2) var(--ease-ios);
+}
+@keyframes barra-crece { from { transform: scaleY(0); } }
+
 /* Brillo que cruza el esqueleto de carga (components/ui/skeleton.tsx). Con
    reducir movimiento queda el gris quieto. */
 .brillo::after {
@@ -1044,6 +1057,10 @@ input[type="number"] { -moz-appearance: textfield; }
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+  /* Lo que entra con espera (bloques, barras) ya está en su sitio: si no, el
+     retraso lo dejaría invisible un momento antes de aparecer de golpe. */
+  .entra-bloques > * > *,
+  .barra-crece { animation: none; }
   /* La entrada sin zoom: el logo quieto y el fondo se desvanece. */
   .entrada-logo { animation: none; }
   .entrada { animation-duration: var(--duration-fast) !important; }

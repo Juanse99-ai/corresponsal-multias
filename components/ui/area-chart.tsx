@@ -1,6 +1,7 @@
 "use client";
 
 import { useId } from "react";
+import { useReducedMotion } from "framer-motion";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { ChartContainer, ChartTooltip, type ChartConfig } from "@/components/ui/chart";
 import { formatCOP, formatCompactCOP } from "@/lib/format";
@@ -54,6 +55,8 @@ export function AreaTendencia({
   height?: number;
 }) {
   const gradId = useId().replace(/:/g, "");
+  // La línea se dibuja al entrar (600 ms); con reducir movimiento sale entera.
+  const reducir = useReducedMotion();
   if (datos.length < 2) return null;
 
   const config = { valor: { label: nombre, color: "var(--accent)" } } satisfies ChartConfig;
@@ -89,8 +92,9 @@ export function AreaTendencia({
           fill={`url(#${gradId})`}
           dot={false}
           activeDot={{ r: 3.5, fill: "var(--color-valor)", stroke: "var(--surface)", strokeWidth: 2 }}
-          isAnimationActive
+          isAnimationActive={!reducir}
           animationDuration={600}
+          animationEasing="ease-out"
         />
       </AreaChart>
     </ChartContainer>

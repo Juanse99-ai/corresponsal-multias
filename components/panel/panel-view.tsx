@@ -1,9 +1,10 @@
 "use client";
 
+import { useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useReducedMotion } from "framer-motion";
-import { Bar, BarChart, Cell, Pie, PieChart, XAxis } from "recharts";
+import { Bar, BarChart, Cell, Pie, PieChart, Rectangle, XAxis, type BarShapeProps } from "recharts";
 import { CaretRight, CheckCircle, Warning, Plus, ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
@@ -323,24 +324,56 @@ function TooltipCierre({ active, payload }: { active?: boolean; payload?: { payl
   );
 }
 
+/** Guía punteada del globo: 1 px al 40 % del texto, por el centro de la barra
+ *  (la barra la tapa de su techo para abajo). */
+function GuiaPunteada({ x = 0, y = 0, width = 0, height = 0 }: { x?: number; y?: number; width?: number; height?: number }) {
+  const cx = Math.round(x + width / 2) + 0.5;
+  return (
+    <line
+      x1={cx}
+      x2={cx}
+      y1={y}
+      y2={y + height}
+      stroke="color-mix(in oklch, var(--text) 40%, transparent)"
+      strokeWidth={1}
+      strokeDasharray="3 3"
+      pointerEvents="none"
+    />
+  );
+}
+
 function RecientesChart({ recientes }: { recientes: Reciente[] }) {
   const router = useRouter();
-  const reduce = useReducedMotion();
   const orden = [...recientes].reverse(); // antiguo -> reciente
+  // La barra bajo el mouse: las demás bajan a .45 para leerla sola.
+  const [activa, setActiva] = useState<number | null>(null);
 
   return (
     <div>
       <ChartContainer config={chartConfig} className="aspect-auto h-36 w-full lg:h-44">
-        <BarChart data={orden} margin={{ top: 0, right: 0, bottom: 0, left: 0 }} barCategoryGap={4}>
+        <BarChart
+          data={orden}
+          margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+          barCategoryGap={4}
+          onMouseMove={(e) => setActiva(e.isTooltipActive && e.activeTooltipIndex != null ? Number(e.activeTooltipIndex) : null)}
+          onMouseLeave={() => setActiva(null)}
+        >
           <XAxis dataKey="fecha" hide />
-          <ChartTooltip content={<TooltipCierre />} cursor={false} />
+          <ChartTooltip content={<TooltipCierre />} cursor={<GuiaPunteada />} />
           <Bar
             dataKey="total_tirilla"
             radius={[4, 4, 0, 0]}
             // Alto mínimo visible aunque la tirilla sea pequeña.
             minPointSize={9}
-            isAnimationActive={!reduce}
-            animationDuration={600}
+            // Crecen con CSS (.barra-crece), escalonadas: recharts no lo hace.
+            isAnimationActive={false}
+            shape={(p: BarShapeProps) => (
+              <Rectangle
+                {...p}
+                className="barra-crece"
+                style={{ "--m": p.index, opacity: activa !== null && p.index !== activa ? 0.45 : 1 } as CSSProperties}
+              />
+            )}
             className="cursor-pointer"
             onClick={(d: { payload?: Reciente }) => {
               if (d.payload) router.push(`/cuadre?fecha=${d.payload.fecha}`);
