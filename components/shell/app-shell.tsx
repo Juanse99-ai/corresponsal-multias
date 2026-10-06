@@ -11,6 +11,7 @@ import { seccionDe } from "@/components/shell/nav-items";
 import { NuevaVersion } from "@/components/shell/nueva-version";
 import { BienvenidaSplash } from "@/components/fx/bienvenida-splash";
 import { TRANSICION } from "@/lib/movimiento";
+import { useAtrasCierraVentanas } from "@/lib/use-atras-cierra-ventanas";
 
 export function AppShell({
   profile,
@@ -23,6 +24,8 @@ export function AppShell({
 }) {
   const pathname = usePathname();
   const isAdmin = profile.rol === "admin";
+  // Atrás cierra la ventana u hoja de arriba antes de salirse de la pantalla.
+  useAtrasCierraVentanas();
   // Miga de pan sobre el título ("Principal › Cuadre diario"), en el computador.
   const seccion = seccionDe(pathname);
   const miga = seccion
