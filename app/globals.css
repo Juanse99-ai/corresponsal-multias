@@ -31,7 +31,11 @@
   --campo: #eef2f7;
   --campo-hover: #e6ebf2;
   --velo: rgba(15, 30, 70, 0.26);
+  /* El velo de las ventanas desenfoca el fondo, como una hoja de iOS. */
+  --velo-blur: blur(14px) saturate(1.15);
   --menu-hover: rgba(255, 255, 255, 0.55);
+  /* El ítem elegido de un menú: pastilla blanca. */
+  --menu-activo: #ffffff;
 
   /* Superficies */
   --bg: #e7ecf4;
@@ -41,10 +45,22 @@
   --elevated: #e3e8f0;
   --line: #e0e6ee;
   --line-strong: #d3dbe6;
+  /* Entre renglones de una lista sin cajitas y bajo la cabecera de una tabla. */
+  --linea-fila: #e5eaf2;
+  --linea-cabecera: #dbe2ec;
+  /* Contorno de un botón y de un campo de filtro (3:1 sobre la mesa). */
+  --borde-boton: #78859a;
+  --borde-campo: #d3dae3;
 
+  /* Tinta en cinco pesos: dato, secundario, rótulo, metadato y lo que no se
+     pulsa. --faint baja a #57677d: #6b7a90 daba 3,68:1 sobre la mesa y no
+     pasaba AA. --inerte nunca es texto. */
   --text: #0f172a;
+  --text-2: #334155;
   --muted: #475569;
-  --faint: #6b7a90;
+  --faint: #57677d;
+  --inerte: #94a3b8;
+  --vacio: #b0bac6;
 
   /* Azul del logo: --accent para texto y aros, --accent-fill para rellenos. */
   --accent: #1d4ed8;
@@ -52,6 +68,8 @@
   --accent-fill: #1d4ed8;
   --accent-ink: #ffffff;
   --accent-soft: #e6edfc;
+  /* Círculo del ícono de las ventanas. */
+  --accent-soft-2: #dbeafe;
 
   /* Verde semantico (cuadrado) */
   --success: oklch(0.585 0.13 155);
@@ -60,6 +78,61 @@
   /* Rojo del logo (descuadre / negativos) */
   --danger: oklch(0.545 0.2 25);
   --danger-soft: oklch(0.945 0.06 25);
+
+  /* Estados de plata en pares fondo/letra. La LETRA de un estado sobre su
+     fondo suave va con el par (text-ok-fg sobre bg-ok-bg); --success y
+     --danger quedan para rellenos, puntos y gráficas (text-success sobre
+     bg-success-soft da 3,3:1 y no pasa AA). */
+  --ok-bg: #dcfce7;
+  --ok-fg: #166534;
+  --bad-bg: #fee2e2;
+  --bad-fg: #b91c1c;
+  --warn-bg: #fef3c7;
+  --warn-fg: #92400e;
+  --info-bg: #dbeafe;
+  --info-fg: #1e40af;
+  --ok-fill: #15803d;
+  --danger-fill: #dc2626;
+
+  /* Navy: la única cifra por pantalla sobre la que se aprieta un botón. */
+  --navy: #0d1b35;
+  --navy-filo: 0 0 0 0 transparent;
+
+  /* Rellenos grises de iOS: Cancelar, botón apagado, agarradera. */
+  --fill: rgba(120, 120, 128, 0.12);
+  --fill-2: rgba(120, 120, 128, 0.16);
+
+  /* Segmentados y pestañas en riel (opción A, la eligió el dueño): el riel
+     hundido y más oscuro que la página, la elegida en pastilla blanca. */
+  --riel: #dde3ee;
+  --riel-sombra: inset 0 1px 2px rgba(20, 16, 50, 0.09), inset 0 0 0 1px rgba(20, 16, 50, 0.04);
+  --riel-on: #ffffff;
+  --riel-on-sombra: 0 1px 3px rgba(20, 16, 50, 0.16), 0 0 0 0.5px rgba(20, 16, 50, 0.1);
+  --riel-on-tinta: var(--text);
+  --riel-tinta: var(--text-2);
+
+  /* Sombras: solo para lo que flota, se abre o tapa. */
+  --sombra-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 1px rgba(15, 23, 42, 0.03);
+  --sombra: 0 2px 6px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --sombra-md: 0 6px 18px rgba(15, 23, 42, 0.1), 0 2px 6px rgba(15, 23, 42, 0.05);
+  --sombra-lg: 0 18px 40px rgba(15, 23, 42, 0.16), 0 4px 12px rgba(15, 23, 42, 0.06);
+  --sombra-ventana: 0 30px 80px -20px rgba(15, 35, 80, 0.35);
+
+  /* Barra de abajo del celular (vidrio claro) y su lupa. */
+  --gbar-fondo: rgba(255, 255, 255, 0.8);
+  --gbar-sombra: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 0 0 0.5px rgba(255, 255, 255, 0.7),
+    0 0 0 0.5px rgba(15, 35, 80, 0.1), 0 12px 32px -12px rgba(15, 35, 80, 0.4);
+  --gbar-pastilla: rgba(15, 23, 42, 0.08);
+  --gbar-tinta: var(--text-2);
+  --gbar-tinta-on: var(--accent);
+  --gbar-globo-filo: rgba(255, 255, 255, 0.95);
+  --lupa-fondo: rgba(255, 255, 255, 0.55);
+  --lupa-sombra: inset 0 1.5px 1px rgba(255, 255, 255, 0.95), inset 0 -1px 1px rgba(255, 255, 255, 0.5),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.8), 0 10px 26px -6px rgba(15, 35, 80, 0.35), 0 0 0 0.5px rgba(15, 35, 80, 0.12);
+
+  /* Avisos en pastilla: oscura en los dos temas. */
+  --aviso-fondo: #16181d;
+  --aviso-sombra: 0 14px 34px -12px rgba(10, 14, 30, 0.55), 0 2px 6px rgba(10, 14, 30, 0.16);
 
   /* Azul marino del menú del celular y de la banda del login */
   --nav-bg: oklch(0.268 0.058 260);
@@ -118,6 +191,7 @@
   --campo-hover: #202026;
   --velo: rgba(0, 0, 0, 0.6);
   --menu-hover: rgba(255, 255, 255, 0.05);
+  --menu-activo: #1c1c22;
 
   --bg: #000000;
   --bg-soft: #0b0b0e;
@@ -126,22 +200,76 @@
   --elevated: #232329;
   --line: #232329;
   --line-strong: #2e2e36;
+  --linea-fila: #1e1e24;
+  --linea-cabecera: #2a2a31;
+  --borde-boton: #5a5a63;
+  --borde-campo: #2e2e36;
 
   --text: #f2f2f5;
+  --text-2: #c9c9d1;
   --muted: #a2a2ad;
   --faint: #8e8e99;
+  --inerte: #6f6f78;
+  --vacio: #5a5a62;
 
   --accent: #5b8cff;
   --accent-strong: #7aa2ff;
   --accent-fill: #2563eb;
   --accent-ink: #ffffff;
   --accent-soft: rgba(59, 110, 246, 0.16);
+  --accent-soft-2: rgba(59, 110, 246, 0.26);
 
   --success: oklch(0.74 0.135 155);
   --success-soft: oklch(0.34 0.06 160);
 
   --danger: oklch(0.7 0.165 25);
   --danger-soft: oklch(0.36 0.085 25);
+
+  /* Pares en Noche: fondo translúcido y letra clara (el par claro/claro de
+     Azul es ilegible sobre negro). */
+  --ok-bg: rgba(74, 222, 128, 0.16);
+  --ok-fg: #4ade80;
+  --bad-bg: rgba(252, 165, 165, 0.16);
+  --bad-fg: #fca5a5;
+  --warn-bg: rgba(251, 191, 36, 0.16);
+  --warn-fg: #fbbf24;
+  --info-bg: rgba(96, 165, 250, 0.16);
+  --info-fg: #93c5fd;
+
+  /* El navy se perdía contra el negro: sube un tono y lleva filo azul. */
+  --navy: #0f1a33;
+  --navy-filo: inset 0 0 0 1px rgba(76, 141, 255, 0.3);
+
+  --fill: rgba(120, 120, 128, 0.24);
+  --fill-2: rgba(120, 120, 128, 0.32);
+
+  /* Opción A en Noche: la elegida SUBE a gris claro con letra blanca (antes
+     quedaba más oscura que el riel y no se veía). */
+  --riel: #1a1a1f;
+  --riel-sombra: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+  --riel-on: #3a3a43;
+  --riel-on-sombra: 0 1px 3px rgba(0, 0, 0, 0.6), inset 0 0.5px 0 rgba(255, 255, 255, 0.12);
+  --riel-on-tinta: #ffffff;
+
+  --sombra-sm: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --sombra: 0 2px 8px rgba(0, 0, 0, 0.5);
+  --sombra-md: 0 8px 24px rgba(0, 0, 0, 0.55);
+  --sombra-lg: 0 24px 60px rgba(0, 0, 0, 0.65);
+  --sombra-ventana: 0 30px 80px -20px rgba(0, 0, 0, 0.7);
+
+  --gbar-fondo: rgba(40, 40, 44, 0.8);
+  --gbar-sombra: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 0 0 0.5px rgba(255, 255, 255, 0.1),
+    0 14px 36px -10px rgba(0, 0, 0, 0.85);
+  --gbar-pastilla: rgba(0, 0, 0, 0.45);
+  --gbar-tinta: rgba(255, 255, 255, 0.86);
+  --gbar-tinta-on: #ffffff;
+  --gbar-globo-filo: #2c2c30;
+  --lupa-fondo: rgba(70, 70, 78, 0.42);
+  --lupa-sombra: inset 0 1.5px 1px rgba(255, 255, 255, 0.55), inset 0 -1px 1px rgba(255, 255, 255, 0.18),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.3), 0 10px 26px -6px rgba(0, 0, 0, 0.7);
+
+  --aviso-fondo: #202026;
+  --aviso-sombra: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 14px 34px -12px rgba(0, 0, 0, 0.7);
 
   /* Los tokens nav-* (menú del celular + banda del login) NO se redefinen
      aquí: el menú usa el mismo azul marino en los dos temas. */
@@ -159,13 +287,17 @@
   --color-line-strong: var(--line-strong);
 
   --color-text: var(--text);
+  --color-text-2: var(--text-2);
   --color-muted: var(--muted);
   --color-faint: var(--faint);
+  --color-inerte: var(--inerte);
+  --color-vacio: var(--vacio);
 
   --color-accent: var(--accent);
   --color-accent-strong: var(--accent-strong);
   --color-accent-ink: var(--accent-ink);
   --color-accent-soft: var(--accent-soft);
+  --color-accent-soft-2: var(--accent-soft-2);
   --color-accent-fill: var(--accent-fill);
 
   /* Capas del estilo del taller */
@@ -177,11 +309,72 @@
   --color-campo: var(--campo);
   --color-campo-hover: var(--campo-hover);
   --color-velo: var(--velo);
+  --color-menu-activo: var(--menu-activo);
+  --color-navy: var(--navy);
+  --color-riel: var(--riel);
+  --color-riel-on: var(--riel-on);
+  --color-riel-tinta: var(--riel-tinta);
+  --color-riel-on-tinta: var(--riel-on-tinta);
+  --color-fill: var(--fill);
+  --color-fill-2: var(--fill-2);
+  --color-linea-fila: var(--linea-fila);
+  --color-linea-cabecera: var(--linea-cabecera);
+  --color-borde-boton: var(--borde-boton);
+  --color-borde-campo: var(--borde-campo);
 
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
+
+  /* Pares de estado: bg-ok-bg text-ok-fg, bg-bad-bg text-bad-fg... */
+  --color-ok-bg: var(--ok-bg);
+  --color-ok-fg: var(--ok-fg);
+  --color-bad-bg: var(--bad-bg);
+  --color-bad-fg: var(--bad-fg);
+  --color-warn-bg: var(--warn-bg);
+  --color-warn-fg: var(--warn-fg);
+  --color-info-bg: var(--info-bg);
+  --color-info-fg: var(--info-fg);
+  --color-ok-fill: var(--ok-fill);
+  --color-danger-fill: var(--danger-fill);
+
+  /* Escala de letra del taller: ocho tamaños y ninguno más.
+     label 11, meta 12,5, body 13,5, title 15, lead 17, h1 22, kpi 26,
+     display 32. Excepción: 16 px (text-base) en los campos del celular,
+     para que iOS no acerque la pantalla al tocarlos. */
+  --text-label: 11px;
+  --text-label--line-height: 1.2;
+  --text-meta: 12.5px;
+  --text-meta--line-height: 1.4;
+  --text-body: 13.5px;
+  --text-body--line-height: 1.5;
+  --text-title: 15px;
+  --text-title--line-height: 1.3;
+  --text-lead: 17px;
+  --text-lead--line-height: 1.25;
+  --text-h1: 22px;
+  --text-h1--line-height: 1.15;
+  --text-kpi: 26px;
+  --text-kpi--line-height: 1.05;
+  --text-display: 32px;
+  --text-display--line-height: 1.05;
+
+  /* Radios: 4 sm, 8 lg, 12 xl, 16 2xl, 24 3xl y pastilla; faltaban 20 (panel)
+     y 30 (marco del computador). */
+  --radius-panel: 20px;
+  --radius-marco: 30px;
+
+  /* Sombras con nombre (shadow-pastilla, shadow-flota...) */
+  --shadow-pastilla: var(--pastilla-sombra);
+  --shadow-riel-on: var(--riel-on-sombra);
+  --shadow-primario: var(--primario-sombra);
+  --shadow-chica: var(--sombra-sm);
+  --shadow-flota: var(--sombra-md);
+  --shadow-ventana: var(--sombra-ventana);
+
+  /* Curva de iOS para Tailwind (ease-ios). */
+  --ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
 
   --color-nav-bg: var(--nav-bg);
   --color-nav-bg-2: var(--nav-bg-2);
@@ -416,13 +609,37 @@ input[type="number"] { -moz-appearance: textfield; }
   font-weight: 600;
 }
 
-/* ===== Movimiento (transitions.dev) ===================================== */
-/* Tokens compartidos: toda animación nueva debe leer de aquí, no hardcodear. */
+/* ===== Movimiento (estilo del taller) ===================================== */
+/* Tokens compartidos: toda animación nueva debe leer de aquí, no hardcodear.
+   Una sola curva, la del cajón de iOS (arranca decidida y frena pareja), y
+   tres duraciones: 120 ms hover y color, 220 ms entrar o salir, 420 ms hojas
+   y entrada por bloques. Los nombres viejos apuntan a la escala nueva. */
 :root {
-  --duration-quick: 150ms;
-  --duration-fast: 250ms;
-  --duration-slow: 400ms;
-  --ease-smooth-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-1: 120ms;
+  --dur-2: 220ms;
+  --dur-3: 420ms;
+  --duration-quick: var(--dur-1);
+  --duration-fast: var(--dur-2);
+  --duration-slow: var(--dur-3);
+  --ease-smooth-out: var(--ease-ios);
+  /* Rebote corto: SOLO la lupa y la pastilla de la barra de abajo, y la barra
+     al crecer con el dedo (como iOS). En el resto, sin rebote. */
+  --ease-rebote: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-rebote-suave: cubic-bezier(0.34, 1.4, 0.64, 1);
+
+  /* Barra de abajo del celular: 61 de alto, 21 a cada lado, metida en la
+     zona de la rayita del iPhone. --gbar-sitio es lo que la página deja libre. */
+  --gbar-h: 61px;
+  --gbar-lado: 21px;
+  --gbar-abajo: max(14px, calc(env(safe-area-inset-bottom, 0px) - 12px));
+  --gbar-sitio: calc(var(--gbar-h) + var(--gbar-abajo) + 12px);
+  --gbar-chica: 0.835;
+  --gbar-toca: 1.035;
+  --gbar-globo: #ff3b30;
+
+  /* Toque mínimo. */
+  --tap: 44px;
   /* Entrada al abrir la app: cuánto se queda el logo antes de dar paso. */
   --entrada-pausa: 650ms;
   /* Error shake (receta 12) */
