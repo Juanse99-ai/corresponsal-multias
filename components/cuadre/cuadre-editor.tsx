@@ -583,6 +583,7 @@ export function CuadreEditor({
         titulo="El día no cuadra. ¿Cerrarlo así?"
         detalle={`${motivoDescuadre.charAt(0).toUpperCase()}${motivoDescuadre.slice(1)}. Tu nota queda guardada como explicación.${isAdmin ? "" : " Después solo Juan podrá reabrirlo."}`}
         confirmar="Sí, cerrar así"
+        tono="warn"
         onConfirmar={() => guardar("cerrado")}
         onCancelar={() => setConfirmarCierre(false)}
       />

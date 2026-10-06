@@ -632,6 +632,31 @@ input[type="number"] { -moz-appearance: textfield; }
   }
 }
 
+/* ===== Ventanas y hojas (components/ui/dialog.tsx, alert-dialog.tsx) =====
+   El velo desenfoca el fondo como una hoja de iOS. La ventana entra creciendo
+   desde 0,95 sin subir; en el celular es una hoja que sube desde abajo. Al
+   cerrar, el velo se desvanece y la ventana se va (la hoja baja). Solo se
+   anima transform: la posición (translate) la ponen las clases. */
+.velo {
+  background: var(--velo);
+  -webkit-backdrop-filter: var(--velo-blur);
+  backdrop-filter: var(--velo-blur);
+}
+.velo[data-state="open"] { animation: velo-entra var(--dur-2) var(--ease-ios); }
+.velo[data-state="closed"] { animation: velo-sale 260ms ease-in forwards; }
+.ventana[data-state="open"] { animation: ventana-entra 280ms var(--ease-ios); }
+.ventana[data-state="closed"] { animation: ventana-sale 180ms cubic-bezier(0.4, 0, 1, 1) forwards; }
+@media (max-width: 639px) {
+  .ventana[data-state="open"] { animation: hoja-entra var(--dur-3) var(--ease-ios); }
+  .ventana[data-state="closed"] { animation: hoja-sale 280ms var(--ease-ios) forwards; }
+}
+@keyframes velo-entra { from { opacity: 0; } }
+@keyframes velo-sale { to { opacity: 0; } }
+@keyframes ventana-entra { from { opacity: 0; transform: scale(0.95); } }
+@keyframes ventana-sale { to { opacity: 0; transform: translateY(6px) scale(0.98); } }
+@keyframes hoja-entra { from { transform: translateY(100%); } }
+@keyframes hoja-sale { to { transform: translateY(100%); } }
+
 /* Aviso de versión nueva (components/shell/nueva-version.tsx): pastilla
    oscura flotante arriba al centro, como en el taller, en los dos temas.
    El selector largo le gana al estilo que sonner inyecta. */

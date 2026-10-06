@@ -21,6 +21,10 @@ export interface ConfirmDialogProps {
   monto?: number | null;
   detalle?: string;
   confirmar?: string;
+  /** "bad" (por defecto) borra: círculo y botón rojos. "warn" no borra nada
+   *  pero conviene mirar (cerrar un día descuadrado): círculo ámbar y la
+   *  acción en azul. */
+  tono?: "bad" | "warn";
   onConfirmar: () => void;
   onCancelar: () => void;
 }
@@ -36,6 +40,7 @@ export function ConfirmDialog({
   monto,
   detalle,
   confirmar = "Sí, borrar",
+  tono = "bad",
   onConfirmar,
   onCancelar,
 }: ConfirmDialogProps) {
@@ -49,7 +54,7 @@ export function ConfirmDialog({
         }}
       >
         <AlertDialogHeader>
-          <AlertDialogMedia className="bg-danger-soft text-destructive">
+          <AlertDialogMedia className={tono === "bad" ? "bg-bad-bg text-bad-fg" : "bg-warn-bg text-warn-fg"}>
             <Warning weight="fill" />
           </AlertDialogMedia>
           <AlertDialogTitle>{titulo}</AlertDialogTitle>
@@ -57,7 +62,7 @@ export function ConfirmDialog({
         </AlertDialogHeader>
 
         {typeof monto === "number" && (
-          <p className="tnum text-center text-3xl font-semibold tracking-tight text-foreground sm:text-left">
+          <p className="tnum text-kpi font-semibold tracking-[-0.6px] text-text">
             {formatCOP(monto)}
           </p>
         )}
@@ -65,7 +70,7 @@ export function ConfirmDialog({
         <AlertDialogFooter>
           <AlertDialogCancel onClick={onCancelar}>Cancelar</AlertDialogCancel>
           <AlertDialogAction
-            variant="destructive"
+            variant={tono === "bad" ? "destructive" : "default"}
             onClick={(e) => {
               // Sin esto Radix cierra solo y dispara también onCancelar.
               e.preventDefault();
