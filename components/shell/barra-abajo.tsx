@@ -115,23 +115,27 @@ export function BarraAbajo({
     };
   }, []);
 
-  // Mientras se escribe, baja. Al pasar de un campo a otro llega focusout y
-  // luego focusin: se mira después de ese salto para que no suba y baje.
+  // Mientras se escribe, baja: sobre el teclado taparía el campo. Escribir es
+  // un campo con foco Y el teclado arriba (el viewport visible se encoge, en
+  // iOS y en Chrome de Android): un campo con autoFocus no saca el teclado en
+  // el iPhone y no debe esconder la barra. Al pasar de un campo a otro llega
+  // focusout y luego focusin: se mira en el siguiente tic para no parpadear.
   useEffect(() => {
+    const vv = window.visualViewport;
+    const teclado = () => !vv || window.innerHeight - vv.height > 150;
     let reloj = 0;
-    const entra = (e: FocusEvent) => {
-      if (esCampo(e.target)) setEscribiendo(true);
-    };
-    const sale = () => {
+    const mirar = () => {
       clearTimeout(reloj);
-      reloj = window.setTimeout(() => setEscribiendo(esCampo(document.activeElement)), 0);
+      reloj = window.setTimeout(() => setEscribiendo(esCampo(document.activeElement) && teclado()), 0);
     };
-    document.addEventListener("focusin", entra);
-    document.addEventListener("focusout", sale);
+    document.addEventListener("focusin", mirar);
+    document.addEventListener("focusout", mirar);
+    vv?.addEventListener("resize", mirar);
     return () => {
       clearTimeout(reloj);
-      document.removeEventListener("focusin", entra);
-      document.removeEventListener("focusout", sale);
+      document.removeEventListener("focusin", mirar);
+      document.removeEventListener("focusout", mirar);
+      vv?.removeEventListener("resize", mirar);
     };
   }, []);
 
