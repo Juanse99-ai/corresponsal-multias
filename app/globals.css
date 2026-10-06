@@ -935,6 +935,20 @@ input[type="number"] { -moz-appearance: textfield; }
 @keyframes hoja-barra-entra { from { opacity: 0; transform: translateY(24px) scale(0.98); } }
 @keyframes hoja-barra-sale { to { opacity: 0; transform: translateY(24px) scale(0.98); } }
 
+/* ===== Tarjeta navy (la cifra con botón) ==================================
+   Lo de adentro va con los colores de Noche (los pares de estado, el riel y
+   los botones): la tarjeta pone la clase "dark" en su contenido. El riel
+   sobre el navy se aclara para no verse como un hueco gris. */
+.sobre-navy {
+  --riel: rgba(0, 0, 0, 0.28);
+  --riel-sombra: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --riel-on: rgba(255, 255, 255, 0.16);
+  --riel-on-sombra: 0 1px 3px rgba(0, 0, 0, 0.35), inset 0 0.5px 0 rgba(255, 255, 255, 0.16);
+  --riel-on-tinta: #ffffff;
+  --riel-tinta: rgba(255, 255, 255, 0.72);
+  color: #ffffff;
+}
+
 /* ===== Movimiento (estilo del taller) ===================================== */
 /* Tokens compartidos: toda animación nueva debe leer de aquí, no hardcodear.
    Una sola curva, la del cajón de iOS (arranca decidida y frena pareja), y
