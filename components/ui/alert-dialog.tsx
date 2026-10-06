@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useArrastrarHoja } from "@/lib/use-arrastrar-hoja"
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui"
 
 import { Button } from "@/components/ui/button"
@@ -44,10 +45,14 @@ function AlertDialogOverlay({
 function AlertDialogContent({
   className,
   size = "default",
+  onTouchStart,
+  onPointerDown,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Content> & {
   size?: "default" | "sm"
 }) {
+  // En el celular la hoja se arrastra hacia abajo; Escape pasa por Cancelar.
+  const arrastre = useArrastrarHoja()
   return (
     <AlertDialogPortal>
       <AlertDialogOverlay />
@@ -62,6 +67,14 @@ function AlertDialogContent({
           "max-sm:before:absolute max-sm:before:top-2 max-sm:before:left-1/2 max-sm:before:h-[5px] max-sm:before:w-[38px] max-sm:before:-translate-x-1/2 max-sm:before:rounded max-sm:before:bg-fill-2",
           className
         )}
+        onTouchStart={(e) => {
+          onTouchStart?.(e)
+          arrastre.onTouchStart(e)
+        }}
+        onPointerDown={(e) => {
+          onPointerDown?.(e)
+          arrastre.onPointerDown(e)
+        }}
         {...props}
       />
     </AlertDialogPortal>

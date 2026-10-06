@@ -954,6 +954,10 @@ input[type="number"] { -moz-appearance: textfield; }
    sube sobre la barra con las cuatro esquinas redondas. */
 .hoja-barra[data-state="open"] { animation: hoja-barra-entra 340ms var(--ease-ios); }
 .hoja-barra[data-state="closed"] { animation: hoja-barra-sale 200ms cubic-bezier(0.4, 0, 1, 1) forwards; }
+/* Cerrada arrastrándola (lib/use-arrastrar-hoja.ts): sigue hacia abajo desde
+   donde la soltó el dedo, no vuelve a subir para irse. */
+.hoja-barra[data-arrastrada][data-state="closed"] { animation: hoja-barra-baja 260ms var(--ease-ios) forwards; }
+@keyframes hoja-barra-baja { to { opacity: 0; transform: translateY(100%); } }
 @keyframes hoja-barra-entra { from { opacity: 0; transform: translateY(24px) scale(0.98); } }
 @keyframes hoja-barra-sale { to { opacity: 0; transform: translateY(24px) scale(0.98); } }
 

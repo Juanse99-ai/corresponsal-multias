@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useArrastrarHoja } from "@/lib/use-arrastrar-hoja"
 import { X } from "@phosphor-icons/react/dist/ssr"
 import { Dialog as DialogPrimitive } from "radix-ui"
 
@@ -48,10 +49,14 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  onTouchStart,
+  onPointerDown,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
 }) {
+  // En el celular la hoja se arrastra hacia abajo para cerrarla.
+  const arrastre = useArrastrarHoja()
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
@@ -67,6 +72,14 @@ function DialogContent({
           "max-sm:before:absolute max-sm:before:top-2 max-sm:before:left-1/2 max-sm:before:h-[5px] max-sm:before:w-[38px] max-sm:before:-translate-x-1/2 max-sm:before:rounded max-sm:before:bg-fill-2",
           className
         )}
+        onTouchStart={(e) => {
+          onTouchStart?.(e)
+          arrastre.onTouchStart(e)
+        }}
+        onPointerDown={(e) => {
+          onPointerDown?.(e)
+          arrastre.onPointerDown(e)
+        }}
         {...props}
       >
         {children}
