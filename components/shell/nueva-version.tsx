@@ -41,8 +41,10 @@ export function NuevaVersion() {
         avisado.current = true;
         toast("Hay una versión nueva de la app.", {
           id: "nueva-version",
-          // Pastilla oscura flotante arriba al centro (globals.css), como en el taller.
+          // Pastilla oscura flotante arriba al centro (globals.css), como en el
+          // taller: este aviso no va donde los demás.
           className: "version-nueva",
+          position: "top-center",
           icon: <ArrowsClockwise size={18} weight="bold" />,
           duration: Infinity,
           // Como antes: no se puede descartar, solo actualizar.

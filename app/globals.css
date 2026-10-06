@@ -657,37 +657,35 @@ input[type="number"] { -moz-appearance: textfield; }
 @keyframes hoja-entra { from { transform: translateY(100%); } }
 @keyframes hoja-sale { to { transform: translateY(100%); } }
 
-/* Aviso de versión nueva (components/shell/nueva-version.tsx): pastilla
-   oscura flotante arriba al centro, como en el taller, en los dos temas.
-   El selector largo le gana al estilo que sonner inyecta. */
-[data-sonner-toaster] [data-sonner-toast].version-nueva[data-styled="true"] {
-  align-items: center;
-  gap: 12px;
-  padding: 8px 8px 8px 14px;
-  border: 0;
-  border-radius: 20px;
-  background: #111114;
-  color: #f4f4f6;
-  box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.06);
-  font-size: 13.5px;
+/* ===== Avisos en pastilla (components/ui/sonner.tsx) =====================
+   Pastilla oscura en los dos temas; el punto de color lo pone el ícono. El
+   error lleva además su filo rojo. Sube 10 px y crece un poco al aparecer
+   (también arriba a la derecha, donde sonner la bajaba). Centrados, en la
+   tableta y en el aviso de versión nueva, miden lo que su texto. */
+[data-sonner-toast].aviso {
+  background: var(--aviso-fondo);
+  box-shadow: var(--aviso-sombra);
+  animation: aviso-sube 320ms var(--ease-ios);
 }
-.dark [data-sonner-toaster] [data-sonner-toast].version-nueva[data-styled="true"] {
-  background: #1c1c22;
-  box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1);
+[data-sonner-toast].aviso[data-type="error"] {
+  box-shadow: inset 0 0 0 1.5px rgba(240, 82, 82, 0.7), 0 14px 34px -12px rgba(120, 10, 10, 0.5), 0 2px 6px rgba(10, 14, 30, 0.16);
 }
-[data-sonner-toaster] [data-sonner-toast].version-nueva [data-icon] {
-  color: #f4f4f6;
-  margin: 0;
-}
-[data-sonner-toaster] [data-sonner-toast].version-nueva [data-button] {
+[data-sonner-toast][data-y-position="top"][data-mounted="false"] { --y: translateY(14px); }
+[data-sonner-toaster][data-x-position="center"] [data-sonner-toast] { left: 0; right: 0; margin-inline: auto; }
+@keyframes aviso-sube { from { translate: 0 10px; scale: 0.96; } }
+/* Con una ventana abierta Radix deja la página sin toques: el aviso los
+   recupera para que su botón se pueda pulsar. */
+[data-sonner-toast] { pointer-events: auto; }
+
+/* Aviso de versión nueva (components/shell/nueva-version.tsx): la misma
+   pastilla, arriba al centro, con Actualizar en azul. */
+[data-sonner-toast].version-nueva { padding: 8px 8px 8px 14px; gap: 12px; font-size: 13.5px; }
+[data-sonner-toast].version-nueva [data-button] {
   height: 32px;
   margin-left: auto;
   padding: 0 14px;
-  border-radius: 999px;
+  border: 0;
   background: #2563eb;
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: 600;
 }
 
 /* ===== Movimiento (estilo del taller) ===================================== */
