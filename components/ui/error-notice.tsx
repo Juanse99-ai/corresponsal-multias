@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Warning } from "@phosphor-icons/react/dist/ssr";
-import { Alert, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertPunto, AlertTitle } from "@/components/ui/alert";
 
 /**
- * Aviso de error estándar: <Alert variant="destructive"> de shadcn con una
- * sacudida (transitions.dev, receta 12) cada vez que llega un mensaje nuevo.
+ * Aviso de error estándar: aviso en fila (<Alert variant="destructive">) con el
+ * punto rojo y el texto en el rojo de letra, y una sacudida (transitions.dev,
+ * receta 12) cada vez que llega un mensaje nuevo.
  * Render nulo si no hay mensaje, así el caller lo deja siempre montado.
  */
 export function ErrorNotice({ message, className }: { message: string | null; className?: string }) {
@@ -25,8 +25,8 @@ export function ErrorNotice({ message, className }: { message: string | null; cl
 
   return (
     <Alert ref={ref} variant="destructive" className={className}>
-      <Warning weight="fill" />
-      <AlertTitle className="line-clamp-none font-normal">{message}</AlertTitle>
+      <AlertPunto />
+      <AlertTitle className="line-clamp-none">{message}</AlertTitle>
     </Alert>
   );
 }
