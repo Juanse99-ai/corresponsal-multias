@@ -39,7 +39,7 @@ function DialogOverlay({
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-text/30 backdrop-blur-[2px] data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0",
+        "fixed inset-0 z-50 bg-velo backdrop-blur-[2px] data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0",
         className
       )}
       {...props}
@@ -61,7 +61,9 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-[1.5rem] border bg-card p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg",
+          // Ventana del estilo del taller: sin filetes, fondo blanco (en Noche,
+          // apenas más claro que el negro) y entra creciendo desde 0,95.
+          "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-[1.5rem] border-0 bg-blanco p-[22px] shadow-[0_24px_60px_-20px_rgba(15,35,80,0.35)] duration-[280ms] outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg",
           className
         )}
         {...props}
@@ -81,13 +83,68 @@ function DialogContent({
   )
 }
 
-function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
+/** Color del círculo del ícono: lo que pasa (azul), bien, cuidado o mal. */
+const TONO_ICONO = {
+  info: "bg-accent-soft text-accent",
+  ok: "bg-success-soft text-success",
+  warn: "bg-danger-soft/60 text-danger",
+  bad: "bg-danger-soft text-danger",
+} as const
+
+/** Círculo de 44 px (40 en el celular) con el ícono de la ventana. */
+function DialogIcon({
+  className,
+  tono = "info",
+  ...props
+}: React.ComponentProps<"div"> & { tono?: keyof typeof TONO_ICONO }) {
+  return (
+    <div
+      data-slot="dialog-icon"
+      aria-hidden
+      className={cn(
+        "grid size-10 shrink-0 place-items-center rounded-full sm:size-11 [&_svg:not([class*='size-'])]:size-5",
+        TONO_ICONO[tono],
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+/**
+ * Cabecera de la ventana. Con `icono`, el círculo de color va a la izquierda
+ * del título y la descripción (estilo del taller).
+ */
+function DialogHeader({
+  className,
+  icono,
+  tono,
+  children,
+  ...props
+}: React.ComponentProps<"div"> & {
+  icono?: React.ReactNode
+  tono?: keyof typeof TONO_ICONO
+}) {
+  if (icono) {
+    return (
+      <div
+        data-slot="dialog-header"
+        className={cn("flex items-start gap-3.5 text-left", className)}
+        {...props}
+      >
+        <DialogIcon tono={tono}>{icono}</DialogIcon>
+        <div className="flex min-w-0 flex-1 flex-col gap-1 pt-px">{children}</div>
+      </div>
+    )
+  }
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
+      className={cn("flex flex-col gap-1 text-center sm:text-left", className)}
       {...props}
-    />
+    >
+      {children}
+    </div>
   )
 }
 
@@ -111,7 +168,7 @@ function DialogFooter({
       {children}
       {showCloseButton && (
         <DialogPrimitive.Close asChild>
-          <Button variant="outline">Close</Button>
+          <Button variant="secondary">Cerrar</Button>
         </DialogPrimitive.Close>
       )}
     </div>
@@ -125,7 +182,7 @@ function DialogTitle({
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-lg leading-none font-semibold", className)}
+      className={cn("text-[17px] leading-tight font-semibold tracking-[-0.2px] sm:text-[22px] sm:tracking-[-0.4px]", className)}
       {...props}
     />
   )
@@ -138,7 +195,7 @@ function DialogDescription({
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn("text-sm text-muted", className)}
+      className={cn("text-[13.5px] text-muted", className)}
       {...props}
     />
   )
@@ -151,6 +208,7 @@ export {
   DialogDescription,
   DialogFooter,
   DialogHeader,
+  DialogIcon,
   DialogOverlay,
   DialogPortal,
   DialogTitle,

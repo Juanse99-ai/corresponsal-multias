@@ -16,7 +16,7 @@ const badgeVariants = cva(
         outline:
           "border-border text-foreground [a&]:hover:bg-surface-2 [a&]:hover:text-text",
         ghost: "[a&]:hover:bg-surface-2 [a&]:hover:text-text",
-        link: "text-primary underline-offset-4 [a&]:hover:underline",
+        link: "text-accent underline-offset-4 [a&]:hover:underline",
         // Propias de la app: estado suave, sin relleno fuerte.
         success: "border-success/30 bg-success-soft text-success",
         info: "border-primary/30 bg-accent-soft text-accent-strong",

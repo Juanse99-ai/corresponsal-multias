@@ -35,7 +35,10 @@ async function estadoInicial(): Promise<State> {
 }
 
 /** Botón para activar/desactivar las notificaciones push (recordatorios). */
-export function ActivarAvisos() {
+/** `sobre="claro"`: fuera del menú azul marino (ajustes del riel en el computador). */
+export function ActivarAvisos({ sobre = "menu" }: { sobre?: "menu" | "claro" }) {
+  const claro = sobre === "claro";
+  const tenue = claro ? "text-faint" : "text-nav-faint";
   const [state, setState] = useState<State>("loading");
 
   useEffect(() => {
@@ -89,11 +92,11 @@ export function ActivarAvisos() {
   }
 
   if (state === "loading")
-    return <span className="text-[0.72rem] text-nav-faint">…</span>;
+    return <span className={cn("text-[0.72rem]", tenue)}>…</span>;
   if (state === "unsupported")
-    return <span className="text-[0.72rem] text-nav-faint">Instala la app para activarlos</span>;
+    return <span className={cn("text-[0.72rem]", tenue)}>Instala la app para activarlos</span>;
   if (state === "denied")
-    return <span className="text-[0.72rem] text-nav-faint">Bloqueados en ajustes</span>;
+    return <span className={cn("text-[0.72rem]", tenue)}>Bloqueados en ajustes</span>;
 
   const on = state === "on";
   const working = state === "working";
@@ -105,10 +108,14 @@ export function ActivarAvisos() {
       disabled={working}
       aria-pressed={on}
       className={cn(
-        "border text-[0.84rem] focus-visible:ring-nav-accent/50",
-        on
-          ? "border-transparent bg-nav-accent/20 text-nav-accent hover:bg-nav-accent/25 hover:text-nav-accent"
-          : "border-nav-line text-nav-muted hover:bg-nav-active hover:text-nav-text",
+        "border text-[0.84rem]",
+        claro
+          ? on
+            ? "border-transparent bg-accent-soft text-accent-strong hover:bg-accent-soft hover:text-accent-strong"
+            : "border-line text-muted hover:bg-surface-2 hover:text-text"
+          : on
+            ? "border-transparent bg-nav-accent/20 text-nav-accent hover:bg-nav-accent/25 hover:text-nav-accent focus-visible:ring-nav-accent/50"
+            : "border-nav-line text-nav-muted hover:bg-nav-active hover:text-nav-text focus-visible:ring-nav-accent/50",
       )}
     >
       {working ? (

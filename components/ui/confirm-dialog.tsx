@@ -49,8 +49,8 @@ export function ConfirmDialog({
         }}
       >
         <AlertDialogHeader>
-          <AlertDialogMedia className="size-12 rounded-full bg-danger-soft text-destructive">
-            <Warning weight="fill" className="size-6" />
+          <AlertDialogMedia className="bg-danger-soft text-destructive">
+            <Warning weight="fill" />
           </AlertDialogMedia>
           <AlertDialogTitle>{titulo}</AlertDialogTitle>
           {detalle && <AlertDialogDescription>{detalle}</AlertDialogDescription>}

@@ -146,22 +146,27 @@ export function TopHeader({
 }) {
   const avisos = useMemo(() => buildAvisos(resumen), [resumen]);
   return (
-    // Barra de lado a lado, como en iOS: el contenido pasa por debajo al hacer scroll.
-    <header className="barra-material sticky top-0 z-20 border-b border-line/80" style={{ paddingTop: "env(safe-area-inset-top)" }}>
-      <div className="relative mx-auto flex h-14 max-w-[1240px] items-center justify-between gap-3 px-1.5 sm:px-4 lg:px-6">
+    // Celular y tableta: barra de lado a lado, como en iOS; el contenido pasa
+    // por debajo al hacer scroll. Computador: dentro del marco, transparente y
+    // sin línea (globals.css); el menú, la marca y el buscador están en el riel
+    // y el panel de la izquierda.
+    <header className="barra-material barra-arriba sticky top-0 z-20 border-b border-line/80 lg:static lg:border-b-0" style={{ paddingTop: "env(safe-area-inset-top)" }}>
+      <div className="relative mx-auto flex h-14 max-w-[1240px] items-center justify-between gap-3 px-1.5 sm:px-4 lg:h-12 lg:max-w-none lg:px-2">
       <div className="flex items-center gap-1.5 sm:gap-3">
-        <Button variant="ghost" onClick={onOpenMenu} aria-label="Abrir menú" className="w-11 px-0 sm:w-auto sm:px-3">
+        <Button variant="ghost" onClick={onOpenMenu} aria-label="Abrir menú" className="w-11 px-0 sm:w-auto sm:px-3 lg:hidden">
           <List size={20} />
           <span className="hidden sm:inline">Menú</span>
         </Button>
-        <Link href="/panel" className="flex items-center gap-2">
+        <Link href="/panel" className="flex items-center gap-2 lg:hidden">
           <Logo size={30} />
           <span className="hidden text-sm font-semibold tracking-tight text-text sm:block">Barrio Centro Sabanalarga 18</span>
         </Link>
         <span className="ml-1 hidden text-[0.82rem] text-muted lg:block">{formatFechaLarga(hoyISO())}</span>
       </div>
       <div className="flex items-center gap-1">
-        <HeaderSearch personas={isAdmin ? resumen.personas : []} />
+        <div className="contents lg:hidden">
+          <HeaderSearch personas={isAdmin ? resumen.personas : []} />
+        </div>
         <HeaderAvisos avisos={avisos} urgentes={avisosUrgentes(avisos)} />
       </div>
       </div>
@@ -169,7 +174,8 @@ export function TopHeader({
   );
 }
 
-function HeaderSearch({ personas }: { personas: string[] }) {
+/** Buscador de día o persona. `enPanel`: el del panel del computador, siempre abierto. */
+export function HeaderSearch({ personas, enPanel = false }: { personas: string[]; enPanel?: boolean }) {
   const router = useRouter();
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -215,6 +221,7 @@ function HeaderSearch({ personas }: { personas: string[] }) {
   return (
     <>
       {/* Celular: lupa de 44x44. El buscador completo se abre encima del encabezado. */}
+      {!enPanel && (
       <IconButton
         label="Buscar día o persona"
         onClick={() => {
@@ -225,18 +232,26 @@ function HeaderSearch({ personas }: { personas: string[] }) {
       >
         <MagnifyingGlass size={18} />
       </IconButton>
+      )}
 
     <form
       onSubmit={onSubmit}
       className={cn(
         "relative",
-        movil ? "absolute inset-x-1.5 top-1.5 z-30 sm:static sm:inset-auto" : "hidden sm:block",
+        enPanel ? "mb-2.5" : movil ? "absolute inset-x-1.5 top-1.5 z-30 sm:static sm:inset-auto" : "hidden sm:block",
       )}
     >
       <Popover open={open && !!q.trim()}>
       <PopoverAnchor asChild>
       {/* Abierto en el celular va encima de la barra: fondo sólido para que no se transparente la campana. */}
-      <InputGroup className={cn("rounded-full sm:h-10 sm:w-[240px]", movil && "bg-surface dark:bg-surface sm:bg-surface-2/60 sm:dark:bg-input/30")}>
+      <InputGroup
+        className={cn(
+          enPanel
+            ? "h-10 rounded-full bg-blanco shadow-[0_1px_2px_rgba(20,16,50,0.06)] hover:bg-blanco"
+            : "rounded-full sm:h-10 sm:w-[240px]",
+          movil && "bg-blanco hover:bg-blanco sm:bg-campo sm:hover:bg-campo-hover",
+        )}
+      >
         <InputGroupAddon>
           <MagnifyingGlass className="text-faint" />
         </InputGroupAddon>
@@ -251,7 +266,7 @@ function HeaderSearch({ personas }: { personas: string[] }) {
           placeholder="Buscar día, persona…"
           aria-label="Buscar día o persona"
           /* text-base en celular: con menos de 16px iOS hace zoom al enfocar. */
-          className="text-base placeholder:text-faint sm:text-[0.82rem]"
+          className={cn("text-base placeholder:text-faint sm:text-[0.82rem]", enPanel && "text-[0.84rem]")}
         />
         {movil && (
           <InputGroupAddon align="inline-end" className="sm:hidden">
@@ -264,7 +279,7 @@ function HeaderSearch({ personas }: { personas: string[] }) {
       </PopoverAnchor>
 
       <PopoverContent
-        align="end"
+        align={enPanel ? "start" : "end"}
         sideOffset={8}
         // El foco se queda en el campo: se sigue escribiendo mientras sale la lista.
         onOpenAutoFocus={(e) => e.preventDefault()}
