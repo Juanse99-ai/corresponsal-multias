@@ -1,8 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
+import { usePastilla } from "@/lib/use-pastilla"
 import { Tabs as TabsPrimitive } from "radix-ui"
 
 function Tabs({
@@ -24,32 +24,36 @@ function Tabs({
   )
 }
 
-const tabsListVariants = cva(
-  "group/tabs-list inline-flex w-fit items-center justify-center rounded-full p-1 text-muted group-data-[orientation=horizontal]/tabs:h-11 group-data-[orientation=vertical]/tabs:h-fit group-data-[orientation=vertical]/tabs:flex-col data-[variant=line]:rounded-none",
-  {
-    variants: {
-      variant: {
-        default: "bg-surface-2",
-        line: "gap-1 bg-transparent",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  }
-)
+/** Clases del riel de un segmentado (opción A): Tabs y ToggleGroup. */
+const rielSegmentado =
+  "segmentado relative isolate inline-flex w-fit max-w-full items-center gap-[3px] rounded-full bg-riel p-[3px] shadow-[var(--riel-sombra)]"
 
+/** Clases de una opción del riel; `on` es el atributo de la elegida. */
+function opcionSegmentado(on: "active" | "on") {
+  return cn(
+    "relative inline-flex h-[38px] shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-full px-4 text-body font-medium whitespace-nowrap text-riel-tinta transition-[color,transform] duration-[var(--dur-1)] outline-none select-none hover:text-text active:scale-[0.96] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent focus-visible:outline-solid disabled:pointer-events-none disabled:text-faint lg:h-[34px] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+    on === "active"
+      ? "data-[state=active]:bg-riel-on data-[state=active]:font-semibold data-[state=active]:text-riel-on-tinta data-[state=active]:shadow-riel-on"
+      : "data-[state=on]:bg-riel-on data-[state=on]:font-semibold data-[state=on]:text-riel-on-tinta data-[state=on]:shadow-riel-on"
+  )
+}
+
+/**
+ * Riel de pestañas: segmentado opción A (el riel hundido y más oscuro que la
+ * página, la elegida en pastilla blanca que viaja). Si no caben, el riel se
+ * desliza de lado en el celular.
+ */
 function TabsList({
   className,
-  variant = "default",
   ...props
-}: React.ComponentProps<typeof TabsPrimitive.List> &
-  VariantProps<typeof tabsListVariants>) {
+}: Omit<React.ComponentProps<typeof TabsPrimitive.List>, "ref">) {
+  const rielRef = React.useRef<HTMLDivElement>(null)
+  usePastilla(rielRef)
   return (
     <TabsPrimitive.List
+      ref={rielRef}
       data-slot="tabs-list"
-      data-variant={variant}
-      className={cn(tabsListVariants({ variant }), className)}
+      className={cn(rielSegmentado, className)}
       {...props}
     />
   )
@@ -62,13 +66,7 @@ function TabsTrigger({
   return (
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
-      className={cn(
-        "relative inline-flex h-full flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-full border border-transparent px-4 py-1 text-sm font-medium whitespace-nowrap text-foreground/60 transition-all group-data-[orientation=vertical]/tabs:w-full group-data-[orientation=vertical]/tabs:justify-start hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:opacity-50 group-data-[variant=default]/tabs-list:data-[state=active]:shadow-[var(--pastilla-sombra)] group-data-[variant=line]/tabs-list:data-[state=active]:shadow-none dark:text-muted dark:hover:text-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
-        "group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent dark:group-data-[variant=line]/tabs-list:data-[state=active]:border-transparent dark:group-data-[variant=line]/tabs-list:data-[state=active]:bg-transparent",
-        "data-[state=active]:bg-blanco data-[state=active]:text-foreground",
-        "after:absolute after:bg-foreground after:opacity-0 after:transition-opacity group-data-[orientation=horizontal]/tabs:after:inset-x-0 group-data-[orientation=horizontal]/tabs:after:bottom-[-5px] group-data-[orientation=horizontal]/tabs:after:h-0.5 group-data-[orientation=vertical]/tabs:after:inset-y-0 group-data-[orientation=vertical]/tabs:after:-right-1 group-data-[orientation=vertical]/tabs:after:w-0.5 group-data-[variant=line]/tabs-list:data-[state=active]:after:opacity-100",
-        className
-      )}
+      className={cn(opcionSegmentado("active"), className)}
       {...props}
     />
   )
@@ -87,4 +85,4 @@ function TabsContent({
   )
 }
 
-export { Tabs, TabsList, TabsTrigger, TabsContent, tabsListVariants }
+export { Tabs, TabsList, TabsTrigger, TabsContent, rielSegmentado, opcionSegmentado }

@@ -579,6 +579,59 @@ input[type="number"] { -moz-appearance: textfield; }
   [data-slot="card"] [data-slot="table-body"] > tr:hover > td { background: var(--fila-hover); }
 }
 
+/* ===== Segmentados (opción A, components/ui/tabs.tsx y toggle-group.tsx) ===
+   La pastilla de la elegida la pinta el riel en su ::before y viaja de una
+   opción a otra (lib/use-pastilla.ts). Mientras no se mide, la opción elegida
+   se pinta sola. Un riel a lo ancho reparte el ancho, pero ninguna opción baja
+   de su texto. */
+.segmentado[data-pastilla]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: -1;
+  width: var(--pastilla-w);
+  height: var(--pastilla-h);
+  transform: translate(var(--pastilla-x), var(--pastilla-y));
+  border-radius: 999px;
+  background: var(--riel-on);
+  box-shadow: var(--riel-on-sombra);
+  pointer-events: none;
+}
+.segmentado[data-pastilla-anima]::before {
+  transition:
+    transform var(--dur-2) var(--ease-ios),
+    width var(--dur-2) var(--ease-ios),
+    height var(--dur-2) var(--ease-ios);
+}
+.segmentado[data-pastilla] > :is([data-state="active"], [data-state="on"]) {
+  background: transparent;
+  box-shadow: none;
+}
+.segmentado.w-full > * { flex: 1 1 0; min-width: max-content; }
+/* En el celular cada opción mide lo que su texto y, si no caben, el riel se
+   desliza de lado; el borde del lado donde quedan opciones se desvanece. */
+@media (max-width: 1023px) {
+  .segmentado {
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .segmentado::-webkit-scrollbar { display: none; }
+  .segmentado > * { flex: 1 0 auto; padding-inline: 12px; }
+}
+@supports (animation-timeline: scroll()) {
+  @media (max-width: 1023px) {
+    .segmentado { animation: segmentado-bordes linear both; animation-timeline: scroll(self inline); }
+  }
+  @keyframes segmentado-bordes {
+    0% { mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent); }
+    6%, 94% { mask-image: linear-gradient(to right, transparent, #000 36px, #000 calc(100% - 36px), transparent); }
+    100% { mask-image: linear-gradient(to right, transparent, #000 36px); }
+  }
+}
+
 /* Aviso de versión nueva (components/shell/nueva-version.tsx): pastilla
    oscura flotante arriba al centro, como en el taller, en los dos temas.
    El selector largo le gana al estilo que sonner inyecta. */
