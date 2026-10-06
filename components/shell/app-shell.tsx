@@ -7,6 +7,7 @@ import type { Rol } from "@/lib/cuadre";
 import type { HeaderResumen } from "@/lib/queries";
 import { TopHeader } from "@/components/shell/top-header";
 import { NavOverlay } from "@/components/shell/nav-overlay";
+import { RielPanel } from "@/components/shell/riel-panel";
 import { NuevaVersion } from "@/components/shell/nueva-version";
 import { BienvenidaSplash } from "@/components/fx/bienvenida-splash";
 
@@ -25,9 +26,14 @@ export function AppShell({
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-[100dvh]">
+      {/* Computador: la app es una ventana redonda (el marco) sobre el lienzo,
+          con el riel y el panel a la izquierda. Celular: lo de siempre. */}
+      <div className="marco min-h-[100dvh]">
         <BienvenidaSplash nombre={profile.nombre} />
 
+        <RielPanel profile={profile} isAdmin={isAdmin} pathname={pathname} resumen={resumen} />
+
+        <div className="min-w-0 flex-1">
         <TopHeader resumen={resumen} isAdmin={isAdmin} onOpenMenu={() => setMenuOpen(true)} />
 
         <NavOverlay
@@ -39,8 +45,9 @@ export function AppShell({
           resumen={resumen}
         />
 
-        <div className="mx-auto w-full max-w-[1200px] px-4 pb-16 pt-6 sm:px-6 lg:px-8 lg:pt-7">
+        <div className="mx-auto w-full max-w-[1200px] px-4 pb-16 pt-6 sm:px-6 lg:px-2 lg:pt-2 lg:pb-3">
           {children}
+        </div>
         </div>
 
         <NuevaVersion />

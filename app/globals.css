@@ -31,6 +31,7 @@
   --campo: #eef2f7;
   --campo-hover: #e6ebf2;
   --velo: rgba(15, 30, 70, 0.26);
+  --menu-hover: rgba(255, 255, 255, 0.55);
 
   /* Superficies */
   --bg: #e7ecf4;
@@ -116,6 +117,7 @@
   --campo: #1a1a1f;
   --campo-hover: #202026;
   --velo: rgba(0, 0, 0, 0.6);
+  --menu-hover: rgba(255, 255, 255, 0.05);
 
   --bg: #000000;
   --bg-soft: #0b0b0e;
@@ -302,6 +304,31 @@ input[type="number"] { -moz-appearance: textfield; }
   .barra-material { background: var(--surface); }
 }
 
+
+/* ===== Marco del computador (components/shell/app-shell.tsx) ==========
+   La app entera es una ventana de 30 px de esquina sobre el lienzo, con el
+   riel y el panel a la izquierda. La barra de arriba queda dentro del marco,
+   transparente y sin línea. En celular y tableta no hay marco. */
+@media (min-width: 1024px) {
+  .marco {
+    display: flex;
+    gap: 12px;
+    margin: 14px;
+    min-height: calc(100dvh - 28px);
+    padding: 10px;
+    border-radius: 30px;
+    background: var(--marco);
+    box-shadow: var(--marco-sombra);
+  }
+  .marco .barra-arriba {
+    background: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+/* El panel del grupo entra corriéndose un poco desde el riel. */
+.panel-entra { animation: panel-entra 320ms var(--ease-smooth-out) both; }
+@keyframes panel-entra { from { opacity: 0; transform: translateX(-6px); } }
 
 /* Aviso de versión nueva (components/shell/nueva-version.tsx): pastilla
    oscura flotante arriba al centro, como en el taller, en los dos temas.

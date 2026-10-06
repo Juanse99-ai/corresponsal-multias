@@ -5,8 +5,13 @@ import { Sun, Moon } from "@phosphor-icons/react/dist/ssr";
 import { Switch } from "@/components/ui/switch";
 import { useMontado } from "@/lib/use-montado";
 
-/** Interruptor claro/oscuro: <Switch> de shadcn con sol y luna a los lados. */
-export function ThemeToggle() {
+/**
+ * Interruptor de tema: Azul (de día, sol) o Noche (negro, luna). <Switch> de
+ * shadcn con sol y luna a los lados. `sobre="claro"` para usarlo fuera del
+ * menú azul marino.
+ */
+export function ThemeToggle({ sobre = "menu" }: { sobre?: "menu" | "claro" }) {
+  const icono = sobre === "menu" ? "size-5 text-nav-muted" : "size-5 text-muted";
   const { resolvedTheme, setTheme } = useTheme();
   // En el servidor no se sabe el tema: se pinta apagado hasta hidratar.
   const montado = useMontado();
@@ -14,14 +19,14 @@ export function ThemeToggle() {
 
   return (
     <div className="flex items-center gap-2.5">
-      <Sun weight="fill" className="size-5 text-nav-muted" aria-hidden />
+      <Sun weight="fill" className={icono} aria-hidden />
       <Switch
         checked={oscuro}
         onCheckedChange={(v) => setTheme(v ? "dark" : "light")}
-        aria-label="Modo oscuro"
+        aria-label="Tema Noche"
         className="scale-125"
       />
-      <Moon weight="fill" className="size-5 text-nav-muted" aria-hidden />
+      <Moon weight="fill" className={icono} aria-hidden />
     </div>
   );
 }
