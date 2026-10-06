@@ -4,17 +4,20 @@ import { cn } from "@/lib/utils"
 /**
  * Cifras en celdas (guía 8.5): las cifras que se comparan van en una caja
  * partida por filetes, columnas iguales, sin fondo. En el celular, dos
- * columnas con filete entre filas.
+ * columnas con filete entre filas. `dos`: dos columnas en todos los anchos
+ * (los totales del día van 2 × 2).
  */
-function Celdas({ className, ...props }: React.ComponentProps<"div">) {
+function Celdas({ className, dos = false, ...props }: React.ComponentProps<"div"> & { dos?: boolean }) {
   return (
     <div
       data-slot="celdas"
       className={cn(
-        "grid grid-cols-2 overflow-hidden rounded-2xl border border-line lg:auto-cols-fr lg:grid-flow-col lg:grid-cols-none",
-        // Filetes: a la izquierda de cada celda que no abre fila, y arriba de la
-        // segunda fila en el celular.
-        "*:border-line max-lg:*:even:border-l max-lg:*:nth-[n+3]:border-t lg:*:not-first:border-l",
+        "grid grid-cols-2 overflow-hidden rounded-2xl border border-line *:border-line",
+        // Filetes: a la izquierda de cada celda que no abre fila, y arriba de
+        // la segunda fila cuando van dos por fila.
+        dos
+          ? "*:even:border-l *:nth-[n+3]:border-t"
+          : "max-lg:*:even:border-l max-lg:*:nth-[n+3]:border-t lg:auto-cols-fr lg:grid-flow-col lg:grid-cols-none lg:*:not-first:border-l",
         className
       )}
       {...props}
@@ -28,6 +31,7 @@ function Celda({
   children,
   detalle,
   grande = false,
+  tono,
   className,
 }: {
   rotulo: React.ReactNode
@@ -36,6 +40,8 @@ function Celda({
   detalle?: React.ReactNode
   /** Resumen de la pantalla: 22 (17 en el celular) en vez de 15. */
   grande?: boolean
+  /** La cifra en el color de su estado ("Devuelto" en verde). */
+  tono?: "ok" | "bad"
   className?: string
 }) {
   return (
@@ -43,8 +49,9 @@ function Celda({
       <span className="truncate text-meta text-faint">{rotulo}</span>
       <span
         className={cn(
-          "tnum truncate font-semibold text-text",
+          "tnum truncate font-semibold",
           grande ? "text-lead tracking-[-0.3px] lg:text-h1" : "text-title",
+          tono === "ok" ? "text-ok-fg" : tono === "bad" ? "text-bad-fg" : "text-text",
         )}
       >
         {children}

@@ -3,11 +3,27 @@
 import { useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { HandCoins, Plus, Trash, PencilSimple, Check, Clock, CheckCircle, Lock, ArrowCounterClockwise, X } from "@phosphor-icons/react/dist/ssr";
+import {
+  HandCoins,
+  Plus,
+  Trash,
+  PencilSimple,
+  Check,
+  Clock,
+  CheckCircle,
+  Lock,
+  ArrowCounterClockwise,
+  X,
+  DotsThree,
+} from "@phosphor-icons/react/dist/ssr";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { Empty, EmptyTitle } from "@/components/ui/empty";
+import { Contador } from "@/components/ui/contador";
+import { Celdas, Celda } from "@/components/ui/celdas";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { ChoiceChip } from "@/components/ui/choice-chip";
@@ -176,25 +192,22 @@ export function PrestamosDia({
       {/* Registro + lista */}
       <div className="flex flex-col gap-5">
         <Card>
-          <CardHeader className="pb-0">
-            <CardTitle className="flex items-center gap-2 text-text">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-soft text-accent-strong">
-                <HandCoins size={15} weight="bold" />
-              </span>
+          <CardHeader>
+            <CardTitle className="text-text">
               <h2>Registrar préstamo</h2>
             </CardTitle>
           </CardHeader>
           <CardContent>
 
           {bloqueado && (
-            <Alert variant="muted" className="mt-4">
+            <Alert variant="muted" className="mb-4">
               <Lock weight="fill" />
               <AlertTitle className="line-clamp-none font-normal">Día cerrado. Solo Juan puede reabrirlo.</AlertTitle>
             </Alert>
           )}
 
-          <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-2 sm:col-span-2">
+          <div className="grid gap-x-4 gap-y-3.5 sm:grid-cols-2">
+            <div className="flex flex-col gap-1.5 sm:col-span-2">
               <Label id="grp-persona-dia">A quién</Label>
               <div role="group" aria-labelledby="grp-persona-dia" className="flex flex-wrap gap-2">
                 {[...PERSONAS_PRESET, "Otro"].map((p) => (
@@ -208,12 +221,13 @@ export function PrestamosDia({
                   value={otro}
                   onChange={(e) => setOtro(e.target.value)}
                   placeholder="Nombre de la persona"
+                  aria-label="Nombre de la persona"
                   className="mt-1"
                   onKeyDown={(e) => esEnter(e) && !pending && !bloqueado && registrar()}
                 />
               )}
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1.5">
               <Label htmlFor="pr-concepto">Motivo</Label>
               <Input
                 id="pr-concepto"
@@ -223,31 +237,39 @@ export function PrestamosDia({
                 onKeyDown={(e) => esEnter(e) && !pending && !bloqueado && registrar()}
               />
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1.5">
               <Label htmlFor="pr-monto">Monto</Label>
               <MoneyInput id="pr-monto" size="lg" value={monto} onValueChange={setMonto} onEnter={() => !pending && !bloqueado && registrar()} />
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1.5 sm:col-span-2">
               <Label id="grp-devuelto">¿Ya lo devolvió?</Label>
-              <div role="group" aria-labelledby="grp-devuelto" className="grid grid-cols-2 gap-2">
-                <ChoiceChip selected={!pagado} onClick={() => setPagado(false)} icon={<Clock size={15} />} className="w-full">
+              <ToggleGroup
+                type="single"
+                variant="segmentado"
+                value={pagado ? "devuelto" : "pendiente"}
+                onValueChange={(v) => v && setPagado(v === "devuelto")}
+                aria-labelledby="grp-devuelto"
+              >
+                <ToggleGroupItem value="pendiente">
+                  <Clock />
                   Pendiente
-                </ChoiceChip>
-                <ChoiceChip selected={pagado} onClick={() => setPagado(true)} icon={<CheckCircle size={15} />} className="w-full">
+                </ToggleGroupItem>
+                <ToggleGroupItem value="devuelto">
+                  <CheckCircle />
                   Devuelto
-                </ChoiceChip>
-              </div>
+                </ToggleGroupItem>
+              </ToggleGroup>
             </div>
           </div>
 
-          <div className="mt-4 flex flex-col gap-2">
+          <div className="mt-3.5 flex flex-col gap-1.5">
             <Label id="grp-medio-dia">¿Cómo se lo diste?</Label>
             <MedioPicker medio={medio} onChange={setMedio} labelledBy="grp-medio-dia" efectivoPrimero />
           </div>
 
           <ErrorNotice message={error} className="mt-4" />
 
-          <Button onClick={registrar} disabled={pending || bloqueado} className="mt-5 w-full sm:w-auto">
+          <Button variant="secondary" onClick={registrar} disabled={pending || bloqueado} className="mt-5 w-full sm:w-auto">
             <Plus size={18} weight="bold" />
             {pending ? "Registrando…" : "Registrar préstamo"}
           </Button>
@@ -255,29 +277,30 @@ export function PrestamosDia({
         </Card>
 
         <Card>
-          <CardHeader className="items-center pb-3">
+          <CardHeader className="items-center">
             <CardTitle className="text-text">
               <h3>Préstamos del día</h3>
             </CardTitle>
-            <CardAction className="row-span-1 self-center text-[0.72rem] text-faint">{prestamos.length}</CardAction>
+            <CardAction className="self-center">
+              <Contador n={prestamos.length} />
+            </CardAction>
           </CardHeader>
           <CardContent>
 
           {prestamos.length === 0 ? (
-            <Empty className="gap-2 rounded-[1rem] border border-dashed border-line-strong py-12 md:py-12">
-              <EmptyHeader>
-                <EmptyMedia className="mb-0 text-faint">
-                  <HandCoins size={20} />
-                </EmptyMedia>
-                <EmptyTitle className="text-sm font-normal tracking-normal text-muted">Aún no hay préstamos registrados.</EmptyTitle>
-              </EmptyHeader>
+            <Empty fila>
+              <EmptyTitle>Aún no hay préstamos registrados</EmptyTitle>
             </Empty>
           ) : (
-            <ItemGroup className="divide-y divide-line">
+            <ItemGroup variant="cajitas" className="max-lg:divide-y max-lg:divide-linea-fila">
               <AnimatePresence initial={false}>
                 {prestamos.map((d) => {
                   const saldado = d.saldo === 0;
                   const nuevo = !yaEstaban.has(d.id) && !reduced();
+                  // Mismo ícono que en el formulario: así se reconoce sin leer.
+                  const m = (d.medio in ICONO_MEDIO ? d.medio : "efectivo") as Medio;
+                  const IconoMedio = ICONO_MEDIO[m];
+                  const conMenu = !bloqueado || isAdmin;
                   return (
                     <motion.div
                       key={d.id}
@@ -287,11 +310,12 @@ export function PrestamosDia({
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, height: 0 }}
                       transition={{ type: "spring", stiffness: 320, damping: 30 }}
-                      className={cn("rounded-lg", nuevo && "t-flash-ok")}
+                      className={cn("rounded-xl", nuevo && "t-flash-ok")}
                     >
                       {editId === d.id ? (
-                        <div className="flex flex-col gap-2.5 py-2.5">
-                          <div className="flex flex-wrap gap-1.5">
+                        // Edición en línea dentro de la misma cajita.
+                        <Item className="flex-col items-stretch gap-2.5 px-0 py-3">
+                          <div role="group" aria-label="A quién" className="flex flex-wrap gap-1.5">
                             {[...PERSONAS_PRESET, "Otro"].map((p) => (
                               <ChoiceChip key={p} selected={ePersona === p} onClick={() => setEPersona(p)}>
                                 {p}
@@ -299,107 +323,94 @@ export function PrestamosDia({
                             ))}
                           </div>
                           {ePersona === "Otro" && (
-                            <Input value={eOtro} onChange={(e) => setEOtro(e.target.value)} placeholder="Nombre de la persona" />
+                            <Input value={eOtro} onChange={(e) => setEOtro(e.target.value)} placeholder="Nombre de la persona" aria-label="Nombre de la persona" />
                           )}
                           <div className="grid gap-2 sm:grid-cols-2">
-                            <Input value={eConcepto} onChange={(e) => setEConcepto(e.target.value)} placeholder="Concepto" />
-                            <MoneyInput value={eMonto} onValueChange={setEMonto} />
+                            <Input value={eConcepto} onChange={(e) => setEConcepto(e.target.value)} placeholder="Concepto" aria-label="Concepto" />
+                            <MoneyInput value={eMonto} onValueChange={setEMonto} aria-label="Monto" />
                           </div>
                           <div className="flex items-center gap-2">
                             <Button size="sm" onClick={guardarEdicion} disabled={pending}>
                               <Check size={16} weight="bold" />
                               Guardar
                             </Button>
-                            <IconButton label="Cancelar" onClick={() => setEditId(null)} disabled={pending} className="text-muted hover:text-foreground">
+                            <IconButton label="Cancelar" size="icon-sm" onClick={() => setEditId(null)} disabled={pending}>
                               <X size={17} />
                             </IconButton>
                           </div>
-                        </div>
+                        </Item>
                       ) : (
-                        <Item className="justify-between gap-x-3 gap-y-2 rounded-none px-0 py-2.5">
-                          <div className="flex min-w-0 flex-1 items-center gap-3">
-                            <ItemMedia
-                              className={cn(
-                                "size-9 rounded-full",
-                                saldado ? "bg-success-soft text-success" : "bg-accent-soft text-accent-strong",
-                              )}
+                        <Item className="flex-nowrap gap-3 px-0 py-2.5">
+                          <ItemMedia variant="icon" className={cn(saldado && "bg-ok-bg text-ok-fg")}>
+                            {saldado ? <CheckCircle size={16} weight="bold" /> : <HandCoins size={16} weight="bold" />}
+                          </ItemMedia>
+                          <ItemContent className="min-w-0 gap-0.5">
+                            <ItemTitle className="w-full min-w-0 gap-2">
+                              <span className="tnum">{formatCOP(d.monto)}</span>
+                              {saldado && <Badge variant="success">Devuelto</Badge>}
+                            </ItemTitle>
+                            <ItemDescription className="truncate text-nowrap text-faint">
+                              {[d.persona, d.concepto].filter(Boolean).join(", ")} · {formatHoraISO(d.created_at)}
+                              {!saldado && d.abonado > 0 && <span className="tnum">, queda {formatCOP(d.saldo)}</span>}
+                            </ItemDescription>
+                          </ItemContent>
+                          {/* Solo íconos, máximo tres: medio, devuelto (o deshacer) y más. */}
+                          <ItemActions className="shrink-0 gap-1.5">
+                            <IconButton
+                              label={`Cambiar medio (${NOMBRE_MEDIO[m]})`}
+                              onClick={() => cambiarMedio(d)}
+                              disabled={pending || bloqueado}
+                              className="lg:size-[38px]"
                             >
-                              {saldado ? <CheckCircle size={16} weight="bold" /> : <HandCoins size={15} weight="bold" />}
-                            </ItemMedia>
-                            <ItemContent className="min-w-0 gap-0 leading-tight">
-                              <ItemTitle className="tnum text-[0.92rem] leading-tight text-text">{formatCOP(d.monto)}</ItemTitle>
-                              <ItemDescription className="flex items-center gap-1.5 truncate text-[0.7rem] leading-tight text-faint">
-                                <span className="truncate text-muted">{d.persona}</span>
-                                {d.concepto && <span className="truncate">· {d.concepto}</span>}
-                                <Clock size={10} />
-                                {formatHoraISO(d.created_at)}
-                              </ItemDescription>
-                            </ItemContent>
-                          </div>
-                          <ItemActions className="w-full shrink-0 flex-wrap justify-end gap-1.5 sm:w-auto">
-                            {(() => {
-                              // Mismo ícono que en el formulario: así se reconoce sin leer.
-                              const m = (d.medio in ICONO_MEDIO ? d.medio : "efectivo") as Medio;
-                              const Icono = ICONO_MEDIO[m];
-                              return (
-                                <IconButton
-                                  label={`Cambiar medio (${NOMBRE_MEDIO[m]})`}
-                                  onClick={() => cambiarMedio(d)}
-                                  disabled={pending || bloqueado}
-                                  className={m === "transferencia" ? "text-accent-strong" : "text-muted hover:text-foreground"}
-                                >
-                                  <Icono size={17} />
-                                </IconButton>
-                              );
-                            })()}
+                              <IconoMedio size={17} />
+                            </IconButton>
                             {saldado ? (
-                              <>
-                                <Badge variant="success">Devuelto</Badge>
-                                {!bloqueado && (
-                                  <IconButton
-                                    label="Deshacer pago"
-                                    onClick={() => setConfirmar({ tipo: "reabrir", d })}
-                                    disabled={pending}
-                                    className="text-muted hover:text-foreground"
-                                  >
-                                    <ArrowCounterClockwise size={17} />
-                                  </IconButton>
-                                )}
-                              </>
-                            ) : (
-                              <>
-                                {d.abonado > 0 && (
-                                  <span className="tnum hidden text-[0.7rem] text-faint sm:inline">
-                                    queda {formatCOP(d.saldo)}
-                                  </span>
-                                )}
-                                {/* En celular va de último y a lo ancho: así los íconos no se parten en dos filas. */}
-                                <Button
-                                  size="sm"
-                                  variant="secondary"
-                                  onClick={() => pagar(d)}
-                                  disabled={pending || bloqueado}
-                                  className="order-last w-full sm:order-none sm:w-auto"
+                              !bloqueado && (
+                                <IconButton
+                                  label="Deshacer pago"
+                                  onClick={() => setConfirmar({ tipo: "reabrir", d })}
+                                  disabled={pending}
+                                  className="lg:size-[38px]"
                                 >
-                                  <CheckCircle size={16} weight="bold" className="text-success" />
-                                  Marcar devuelto
-                                </Button>
-                              </>
-                            )}
-                            {!bloqueado && (
-                              <IconButton label="Editar" onClick={() => abrirEdicion(d)} disabled={pending} className="text-muted hover:text-foreground">
-                                <PencilSimple size={17} />
-                              </IconButton>
-                            )}
-                            {isAdmin && (
+                                  <ArrowCounterClockwise size={17} />
+                                </IconButton>
+                              )
+                            ) : (
                               <IconButton
-                                label="Borrar"
-                                onClick={() => setConfirmar({ tipo: "borrar", d })}
+                                label="Marcar devuelto"
+                                onClick={() => pagar(d)}
                                 disabled={pending || bloqueado}
-                                peligro
+                                className="lg:size-[38px]"
                               >
-                                <Trash size={17} />
+                                <CheckCircle size={18} />
                               </IconButton>
+                            )}
+                            {conMenu && (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <IconButton label="Más" disabled={pending} className="lg:size-[38px]">
+                                    <DotsThree size={20} weight="bold" />
+                                  </IconButton>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  {!bloqueado && (
+                                    <DropdownMenuItem onSelect={() => abrirEdicion(d)}>
+                                      <PencilSimple />
+                                      Editar
+                                    </DropdownMenuItem>
+                                  )}
+                                  {isAdmin && (
+                                    <DropdownMenuItem
+                                      variant="destructive"
+                                      disabled={bloqueado}
+                                      onSelect={() => setConfirmar({ tipo: "borrar", d })}
+                                    >
+                                      <Trash />
+                                      Borrar
+                                    </DropdownMenuItem>
+                                  )}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             )}
                           </ItemActions>
                         </Item>
@@ -417,20 +428,17 @@ export function PrestamosDia({
       {/* Total pendiente */}
       <div className="flex flex-col gap-4 lg:sticky lg:top-8">
         <Card className="p-5">
-          <p className="text-[0.78rem] font-medium text-muted">Pendiente del día</p>
-          <p className="tnum mt-1 text-[1.9rem] font-semibold tracking-tight text-text">
-            <AnimatedMoney value={pendiente} />
-          </p>
-          <ItemGroup className="mt-4 divide-y divide-line text-[0.82rem]">
-            <Item role="listitem" className="justify-between rounded-none p-0 py-2 text-[0.82rem]">
-              <span className="text-muted">Prestado</span>
-              <span className="tnum font-medium text-text">{formatCOP(prestado)}</span>
-            </Item>
-            <Item role="listitem" className="justify-between rounded-none p-0 py-2 text-[0.82rem]">
-              <span className="text-muted">Devuelto</span>
-              <span className="tnum font-medium text-success">{formatCOP(devuelto)}</span>
-            </Item>
-          </ItemGroup>
+          <p className="text-meta font-medium text-faint">Pendiente del día</p>
+          <AnimatedMoney
+            value={pendiente}
+            className="mt-1 block text-kpi leading-none font-semibold tracking-[-0.6px] text-text"
+          />
+          <Celdas dos className="mt-4">
+            <Celda rotulo="Prestado">{formatCOP(prestado)}</Celda>
+            <Celda rotulo="Devuelto" tono="ok">
+              {formatCOP(devuelto)}
+            </Celda>
+          </Celdas>
         </Card>
       </div>
       <ConfirmDialog
