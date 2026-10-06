@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useReducedMotion } from "framer-motion";
+import { useInView, useReducedMotion } from "framer-motion";
 import { Bar, BarChart, Cell, Pie, PieChart, Rectangle, XAxis, type BarShapeProps } from "recharts";
 import { CaretRight, CheckCircle, Warning, Plus, ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -347,9 +347,12 @@ function RecientesChart({ recientes }: { recientes: Reciente[] }) {
   const orden = [...recientes].reverse(); // antiguo -> reciente
   // La barra bajo el mouse: las demás bajan a .45 para leerla sola.
   const [activa, setActiva] = useState<number | null>(null);
+  // Crecen al entrar la tarjeta en pantalla (en el celular está muy abajo).
+  const caja = useRef<HTMLDivElement>(null);
+  const vista = useInView(caja, { once: true, amount: 0.4 });
 
   return (
-    <div>
+    <div ref={caja}>
       <ChartContainer config={chartConfig} className="aspect-auto h-36 w-full lg:h-44">
         <BarChart
           data={orden}
@@ -370,7 +373,7 @@ function RecientesChart({ recientes }: { recientes: Reciente[] }) {
             shape={(p: BarShapeProps) => (
               <Rectangle
                 {...p}
-                className="barra-crece"
+                className={vista ? "barra-crece" : "barra-espera"}
                 style={{ "--m": p.index, opacity: activa !== null && p.index !== activa ? 0.45 : 1 } as CSSProperties}
               />
             )}

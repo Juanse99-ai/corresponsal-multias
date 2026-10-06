@@ -688,6 +688,8 @@ input[type="number"] { -moz-appearance: textfield; }
   transition: opacity var(--dur-2) var(--ease-ios);
 }
 @keyframes barra-crece { from { transform: scaleY(0); } }
+/* Antes de que la gráfica entre en pantalla, las barras esperan abajo. */
+.barra-espera { transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(0); }
 
 /* Brillo que cruza el esqueleto de carga (components/ui/skeleton.tsx). Con
    reducir movimiento queda el gris quieto. */
@@ -1077,6 +1079,7 @@ input[type="number"] { -moz-appearance: textfield; }
      retraso lo dejaría invisible un momento antes de aparecer de golpe. */
   .entra-bloques > * > *,
   .barra-crece { animation: none; }
+  .barra-espera { transform: none; }
   /* La entrada sin zoom: el logo quieto y el fondo se desvanece. */
   .entrada-logo { animation: none; }
   .entrada { animation-duration: var(--duration-fast) !important; }
