@@ -632,6 +632,18 @@ input[type="number"] { -moz-appearance: textfield; }
   }
 }
 
+/* Brillo que cruza el esqueleto de carga (components/ui/skeleton.tsx). Con
+   reducir movimiento queda el gris quieto. */
+.brillo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.18), transparent);
+  animation: brillo 1.3s ease-in-out infinite;
+}
+@keyframes brillo { to { transform: translateX(100%); } }
+
 /* ===== Ventanas y hojas (components/ui/dialog.tsx, alert-dialog.tsx) =====
    El velo desenfoca el fondo como una hoja de iOS. La ventana entra creciendo
    desde 0,95 sin subir; en el celular es una hoja que sube desde abajo. Al
