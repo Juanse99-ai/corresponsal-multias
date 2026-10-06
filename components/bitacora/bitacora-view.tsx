@@ -1,13 +1,12 @@
 "use client";
 
-import { Fragment, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Plus,
   PencilSimple,
   Trash,
-  ShieldCheck,
   MagnifyingGlass,
-  CaretDown,
+  CaretRight,
   ArrowRight,
   DownloadSimple,
   Calculator,
@@ -21,19 +20,12 @@ import {
 import type { Icon } from "@phosphor-icons/react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { IconButton } from "@/components/ui/icon-button";
 import { DatePicker } from "@/components/ui/date-picker";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia } from "@/components/ui/empty";
-import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemGroup,
-  ItemMedia,
-  ItemSeparator,
-  ItemTitle,
-} from "@/components/ui/item";
+import { Celdas, Celda } from "@/components/ui/celdas";
+import { Contador } from "@/components/ui/contador";
+import { Empty, EmptyTitle } from "@/components/ui/empty";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChoiceChip } from "@/components/ui/choice-chip";
@@ -43,10 +35,11 @@ import type { AuditEntry } from "@/lib/queries";
 
 type AccionTipo = "INSERT" | "UPDATE" | "DELETE";
 
-const ACCION: Record<string, { verbo: string; color: string; bg: string; icon: Icon }> = {
-  INSERT: { verbo: "registró", color: "text-success", bg: "bg-success-soft", icon: Plus },
-  UPDATE: { verbo: "editó", color: "text-accent-strong", bg: "bg-accent-soft", icon: PencilSimple },
-  DELETE: { verbo: "borró", color: "text-danger", bg: "bg-danger-soft", icon: Trash },
+// El color va solo en el círculo de la línea de tiempo, en el par de su estado.
+const ACCION: Record<string, { verbo: string; par: string; icon: Icon }> = {
+  INSERT: { verbo: "registró", par: "bg-ok-bg text-ok-fg", icon: Plus },
+  UPDATE: { verbo: "editó", par: "bg-info-bg text-info-fg", icon: PencilSimple },
+  DELETE: { verbo: "borró", par: "bg-bad-bg text-bad-fg", icon: Trash },
 };
 
 const TABLA_TEXTO: Record<string, string> = {
@@ -262,13 +255,8 @@ export function BitacoraView({ entries }: { entries: AuditEntry[] }) {
   if (entries.length === 0) {
     return (
       <Card>
-        <Empty className="py-14 md:py-14">
-          <EmptyHeader>
-            <EmptyMedia variant="icon" className="rounded-full text-faint">
-              <ShieldCheck size={20} />
-            </EmptyMedia>
-            <EmptyDescription>Aún no hay movimientos registrados.</EmptyDescription>
-          </EmptyHeader>
+        <Empty>
+          <EmptyTitle>Aún no hay movimientos registrados</EmptyTitle>
         </Empty>
       </Card>
     );
@@ -276,234 +264,212 @@ export function BitacoraView({ entries }: { entries: AuditEntry[] }) {
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Resumen */}
-      <Card className="grid grid-cols-2 gap-y-4 p-4 sm:grid-cols-4 sm:divide-x sm:divide-line sm:p-5">
-        <Stat label="Movimientos" value={stats.total} />
-        <Stat label="Registros" value={stats.INSERT} tone="success" />
-        <Stat label="Ediciones" value={stats.UPDATE} tone="accent" />
-        <Stat label="Borrados" value={stats.DELETE} tone="danger" />
+      {/* Resumen en celdas: las cifras en negro, el color va en la lista. */}
+      <Card className="p-5">
+        <Celdas>
+          <Celda rotulo="Movimientos">{stats.total}</Celda>
+          <Celda rotulo="Registros">{stats.INSERT}</Celda>
+          <Celda rotulo="Ediciones">{stats.UPDATE}</Celda>
+          <Celda rotulo="Borrados">{stats.DELETE}</Celda>
+        </Celdas>
       </Card>
 
-      {/* Filtros */}
-      <Card className="flex flex-col gap-4 p-4 sm:p-5">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <InputGroup className="h-10 flex-1">
-            <InputGroupAddon>
-              <MagnifyingGlass className="text-faint" />
-            </InputGroupAddon>
-            <InputGroupInput
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Buscar por nombre, persona, monto…"
-              aria-label="Buscar en la bitácora"
-            />
-          </InputGroup>
-          <div className="flex flex-wrap items-end gap-2">
-            <Campo label="Desde" htmlFor="bit-desde">
-              <DatePicker id="bit-desde" value={desde} onChange={setDesde} placeholder="Desde" className="h-10 w-full min-w-0 sm:w-[8.8rem]" />
-            </Campo>
-            <Campo label="Hasta" htmlFor="bit-hasta">
-              <DatePicker id="bit-hasta" value={hasta} onChange={setHasta} placeholder="Hasta" className="h-10 w-full min-w-0 sm:w-[8.8rem]" />
-            </Campo>
-            <Button variant="secondary" size="sm" onClick={exportar} disabled={filtrados.length === 0} className="shrink-0">
-              <DownloadSimple size={16} weight="bold" />
-              Excel
-            </Button>
+      <Card>
+        {/* Barra de filtros dentro de la tarjeta de la lista. */}
+        <div className="flex flex-col gap-3 px-5 pt-5">
+          <div className="flex flex-wrap items-center gap-2">
+            <InputGroup className="h-9 min-w-[12rem] flex-1 rounded-full">
+              <InputGroupAddon>
+                <MagnifyingGlass className="text-faint" />
+              </InputGroupAddon>
+              <InputGroupInput
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Buscar por nombre, persona, monto…"
+                aria-label="Buscar en la bitácora"
+              />
+            </InputGroup>
+            <DatePicker id="bit-desde" variante="filtro" value={desde} onChange={setDesde} placeholder="Desde" aria-label="Desde" className="w-[8.75rem]" />
+            <DatePicker id="bit-hasta" variante="filtro" value={hasta} onChange={setHasta} placeholder="Hasta" aria-label="Hasta" className="w-[8.75rem]" />
+            <IconButton label="Descargar Excel" size="icon-sm" onClick={exportar} disabled={filtrados.length === 0}>
+              <DownloadSimple size={18} weight="bold" />
+            </IconButton>
           </div>
-        </div>
 
-        <Separator />
-        <div className="-mt-1 flex flex-wrap gap-2">
-          <Chip active={modulo === "todos"} onClick={() => setModulo("todos")}>
-            Todos
-          </Chip>
-          {MODULOS.map((m) => (
-            <Chip key={m.id} active={modulo === m.id} onClick={() => setModulo(m.id)} icon={m.icon}>
-              {m.label}
+          <ToggleGroup
+            type="single"
+            variant="segmentado"
+            value={accion}
+            onValueChange={(v) => v && setAccion(v as "todas" | AccionTipo)}
+            aria-label="Acción"
+          >
+            <ToggleGroupItem value="todas">Todas</ToggleGroupItem>
+            <ToggleGroupItem value="INSERT">Registró</ToggleGroupItem>
+            <ToggleGroupItem value="UPDATE">Editó</ToggleGroupItem>
+            <ToggleGroupItem value="DELETE">Borró</ToggleGroupItem>
+          </ToggleGroup>
+
+          <div role="group" aria-label="Módulo" className="flex flex-wrap gap-2">
+            <Chip active={modulo === "todos"} onClick={() => setModulo("todos")}>
+              Todos
             </Chip>
-          ))}
-        </div>
-
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-2">
-          <span className="text-[0.78rem] font-medium text-muted">Acción</span>
-          <AccionChip tipo="todas" active={accion === "todas"} onClick={() => setAccion("todas")}>
-            Todas
-          </AccionChip>
-          {(["INSERT", "UPDATE", "DELETE"] as const).map((t) => (
-            <AccionChip key={t} tipo={t} active={accion === t} onClick={() => setAccion(t)}>
-              {t === "INSERT" ? "Registró" : t === "UPDATE" ? "Editó" : "Borró"}
-            </AccionChip>
-          ))}
-          {actores.length > 1 && (
-            <>
-              <span className="ml-2 text-[0.78rem] font-medium text-muted">Quién</span>
-              <Chip active={actor === "todos"} onClick={() => setActor("todos")}>
-                Todos
+            {MODULOS.map((m) => (
+              <Chip key={m.id} active={modulo === m.id} onClick={() => setModulo(m.id)} icon={m.icon}>
+                {m.label}
               </Chip>
-              {actores.map((a) => (
-                <Chip key={a} active={actor === a} onClick={() => setActor(a)}>
-                  {a.split(/\s+/)[0]}
-                </Chip>
-              ))}
-            </>
-          )}
-          {hayFiltro && (
-            <Button size="sm" variant="ghost" onClick={limpiar} className="ml-auto">
-              <X size={16} />
-              Limpiar
-            </Button>
+            ))}
+          </div>
+
+          {(actores.length > 1 || hayFiltro) && (
+            <div className="flex flex-wrap items-center gap-2">
+              {actores.length > 1 && (
+                <div role="group" aria-label="Quién" className="flex flex-wrap gap-2">
+                  <Chip active={actor === "todos"} onClick={() => setActor("todos")}>
+                    Todos
+                  </Chip>
+                  {actores.map((a) => (
+                    <Chip key={a} active={actor === a} onClick={() => setActor(a)}>
+                      {a.split(/\s+/)[0]}
+                    </Chip>
+                  ))}
+                </div>
+              )}
+              {hayFiltro && (
+                <Button size="sm" variant="ghost" onClick={limpiar} className="ml-auto">
+                  <X size={16} />
+                  Limpiar
+                </Button>
+              )}
+            </div>
           )}
         </div>
-      </Card>
 
-      {/* Lista agrupada por día */}
-      {filtrados.length === 0 ? (
-        <Card>
-          <Empty className="py-12 md:py-12">
-            <EmptyHeader>
-              <EmptyMedia variant="icon" className="rounded-full text-faint">
-                <MagnifyingGlass size={20} />
-              </EmptyMedia>
-              <EmptyDescription>Ningún registro con estos filtros.</EmptyDescription>
-            </EmptyHeader>
+        {/* Lista por día como línea de tiempo, del más nuevo al más viejo. */}
+        {filtrados.length === 0 ? (
+          <Empty fila className="px-5 pt-4 pb-5">
+            <EmptyTitle>Ningún registro con estos filtros</EmptyTitle>
           </Empty>
-        </Card>
-      ) : (
-        grupos.map(([dia, items]) => (
-          <div key={dia} className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between px-1">
-              <h3 className="text-[0.8rem] font-semibold text-muted">{labelDia(dia)}</h3>
-              <span className="text-[0.72rem] text-faint">{items.length} {items.length === 1 ? "movimiento" : "movimientos"}</span>
-            </div>
-            <Card className="p-1.5 sm:p-2">
-              <ItemGroup>
-                {items.map((e, i) => (
-                  <Fragment key={e.id}>
-                    {i > 0 && <ItemSeparator />}
-                    <Fila e={e} abierto={abiertos.has(e.id)} onToggle={() => toggle(e.id)} />
-                  </Fragment>
-                ))}
-              </ItemGroup>
-            </Card>
+        ) : (
+          <div className="flex flex-col gap-4 px-5 pt-5 pb-4">
+            {grupos.map(([dia, items]) => (
+              <section key={dia} aria-label={labelDia(dia)}>
+                <div className="mb-1.5 flex items-center gap-2">
+                  <h3 className="text-meta font-semibold text-faint">{labelDia(dia)}</h3>
+                  <Contador n={items.length} />
+                </div>
+                <div role="list">
+                  {items.map((e, i) => (
+                    <Fila
+                      key={e.id}
+                      e={e}
+                      primera={i === 0}
+                      ultima={i === items.length - 1}
+                      abierto={abiertos.has(e.id)}
+                      onToggle={() => toggle(e.id)}
+                    />
+                  ))}
+                </div>
+              </section>
+            ))}
           </div>
-        ))
-      )}
+        )}
+      </Card>
     </div>
   );
 }
 
-function Fila({ e, abierto, onToggle }: { e: AuditEntry; abierto: boolean; onToggle: () => void }) {
-  const acc = ACCION[e.accion] ?? { verbo: e.accion, color: "text-muted", bg: "bg-surface-2", icon: PencilSimple };
+/**
+ * Un evento de la línea de tiempo (guía 8.27): hora a la izquierda, círculo de
+ * 32 en el par de la acción unido a los demás por una línea, y la frase. Al
+ * tocarla se abre el detalle con los cambios.
+ */
+function Fila({
+  e,
+  primera,
+  ultima,
+  abierto,
+  onToggle,
+}: {
+  e: AuditEntry;
+  primera: boolean;
+  ultima: boolean;
+  abierto: boolean;
+  onToggle: () => void;
+}) {
+  const acc = ACCION[e.accion] ?? { verbo: e.accion, par: "bg-surface-2 text-muted", icon: PencilSimple };
   const tabla = TABLA_TEXTO[e.tabla] ?? e.tabla;
   const monto = montoDe(e);
   const Icono = acc.icon;
   const cambios = cambiosDe(e);
+  const detalle = [e.fecha_dato ? `del ${formatFecha(e.fecha_dato)}` : null, monto != null ? formatCOP(monto) : null]
+    .filter(Boolean)
+    .join(", ");
 
   return (
     <Collapsible asChild open={abierto} onOpenChange={onToggle}>
-    <Item
-      role="listitem"
-      className={cn("flex-col items-stretch gap-0 rounded-lg p-0", e.accion === "DELETE" && "bg-danger-soft/25")}
-    >
-      <CollapsibleTrigger className="flex w-full items-center gap-3 rounded-lg px-2 py-2.5 text-left transition-colors hover:bg-surface-2 active:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/45 sm:px-2.5"
-      >
-        <ItemMedia className={cn("h-9 w-9 rounded-full", acc.bg, acc.color)}>
-          <Icono size={16} weight="bold" />
-        </ItemMedia>
-        <ItemContent className="min-w-0">
-          <ItemTitle className="block w-auto text-[0.88rem] font-normal text-text">
-            <span className="font-semibold">{e.actorNombre}</span> <span className={acc.color}>{acc.verbo}</span> {tabla}
-            {e.fecha_dato && <span className="text-muted"> del {formatFecha(e.fecha_dato)}</span>}
-            {monto != null && <span className="tnum text-muted"> · {formatCOP(monto)}</span>}
-          </ItemTitle>
-        </ItemContent>
-        <ItemActions className="shrink-0 gap-3">
-          <span className="whitespace-nowrap text-[0.72rem] text-faint">{formatHoraISO(e.created_at)}</span>
-          <CaretDown
-            size={14}
-            className={cn("shrink-0 text-faint transition-transform", abierto && "rotate-180")}
+      <div role="listitem" className="relative grid grid-cols-[52px_32px_minmax(0,1fr)] gap-x-3">
+        {/* La línea que une los círculos: de un centro al siguiente. */}
+        {!(primera && ultima) && (
+          <span
+            aria-hidden
+            className={cn(
+              "absolute left-[79px] w-0.5 bg-line",
+              primera ? "top-5" : "top-0",
+              ultima ? "h-5" : "bottom-0",
+            )}
           />
-        </ItemActions>
-      </CollapsibleTrigger>
+        )}
+        <span className="tnum pt-[11px] text-meta text-faint">{formatHoraISO(e.created_at)}</span>
+        <span className={cn("relative z-[1] mt-1 grid size-8 place-items-center rounded-full", acc.par)}>
+          <Icono size={15} weight="bold" />
+        </span>
+        <CollapsibleTrigger className="group/evento flex min-w-0 items-start gap-2 rounded-lg py-1.5 text-left outline-none focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-solid">
+          <span className="min-w-0 flex-1">
+            <span className="block text-body text-text">
+              <span className="font-semibold">{e.actorNombre}</span> {acc.verbo} {tabla}
+            </span>
+            {detalle && <span className="tnum block text-meta text-muted">{detalle}</span>}
+          </span>
+          <CaretRight
+            aria-hidden
+            weight="bold"
+            className="mt-1 size-3.5 shrink-0 text-inerte transition-transform duration-[var(--dur-2)] ease-ios group-data-[state=open]/evento:rotate-90"
+          />
+        </CollapsibleTrigger>
 
-      <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-            <div className="mb-2 ml-10 mr-2 rounded-card border border-line bg-surface-2/50 p-3 sm:ml-[3rem]">
-              {cambios.length === 0 ? (
-                <p className="text-[0.78rem] text-faint">Sin detalle adicional.</p>
-              ) : (
-                <div className="flex flex-col">
-                  {cambios.map((c, i) => (
-                    <Fragment key={c.campo}>
-                    {i > 0 && <Separator className="bg-line/70" />}
-                    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-1.5 text-[0.78rem]">
-                      <span className="shrink-0 text-muted">{CAMPO[c.campo] ?? c.campo}</span>
-                      {c.valor != null ? (
-                        <span className="tnum min-w-0 break-words text-right text-text">{c.valor}</span>
-                      ) : (
-                        <span className="flex min-w-0 flex-wrap items-center justify-end gap-1.5">
-                          <span className="tnum text-faint line-through">{c.antes}</span>
-                          <ArrowRight size={11} className="text-faint" />
-                          <span className="tnum font-medium text-text">{c.despues}</span>
-                        </span>
-                      )}
-                    </div>
-                    </Fragment>
-                  ))}
-                </div>
-              )}
-            </div>
-      </CollapsibleContent>
-    </Item>
+        <CollapsibleContent className="plegable-cuerpo col-start-3 overflow-hidden">
+          <div className="pb-2">
+            {cambios.length === 0 ? (
+              <p className="text-meta text-faint">Sin detalle adicional</p>
+            ) : (
+              <div className="flex flex-col">
+                {cambios.map((c) => (
+                  <div
+                    key={c.campo}
+                    className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-linea-fila py-1.5 text-meta last:border-b-0"
+                  >
+                    <span className="shrink-0 text-muted">{CAMPO[c.campo] ?? c.campo}</span>
+                    {c.valor != null ? (
+                      <span className="tnum min-w-0 break-words text-right font-medium text-text">{c.valor}</span>
+                    ) : (
+                      <span className="flex min-w-0 flex-wrap items-center justify-end gap-1.5">
+                        <span className="tnum text-faint line-through">{c.antes}</span>
+                        <ArrowRight size={11} className="text-faint" />
+                        <span className="tnum font-medium text-text">{c.despues}</span>
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </CollapsibleContent>
+      </div>
     </Collapsible>
   );
 }
 
-function Stat({ label, value, tone }: { label: string; value: number; tone?: "success" | "accent" | "danger" }) {
-  return (
-    <div className="px-4 first:pl-0">
-      <p className="text-[0.72rem] text-faint">{label}</p>
-      <p
-        className={cn(
-          "tnum mt-0.5 text-xl font-semibold",
-          tone === "success" ? "text-success" : tone === "accent" ? "text-accent-strong" : tone === "danger" ? "text-danger" : "text-text",
-        )}
-      >
-        {value}
-      </p>
-    </div>
-  );
-}
-
-function Campo({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) {
-  return (
-    <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-none">
-      <Label htmlFor={htmlFor} className="text-[0.72rem] font-normal text-faint">{label}</Label>
-      {children}
-    </div>
-  );
-}
-
 function Chip({ active, onClick, icon: Icono, children }: { active: boolean; onClick: () => void; icon?: Icon; children: React.ReactNode }) {
-  return (
-    <ChoiceChip selected={active} onClick={onClick} icon={Icono && <Icono size={15} weight="bold" />}>
-      {children}
-    </ChoiceChip>
-  );
-}
-
-function AccionChip({
-  tipo,
-  active,
-  onClick,
-  children,
-}: {
-  tipo: "todas" | AccionTipo;
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  const a = tipo === "todas" ? null : ACCION[tipo];
-  const Icono = a?.icon;
   return (
     <ChoiceChip selected={active} onClick={onClick} icon={Icono && <Icono size={15} weight="bold" />}>
       {children}
