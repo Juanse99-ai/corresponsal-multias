@@ -4,6 +4,7 @@ import { useTheme } from "next-themes";
 import { Sun, Moon } from "@phosphor-icons/react/dist/ssr";
 import { Switch } from "@/components/ui/switch";
 import { useMontado } from "@/lib/use-montado";
+import { useCambiarTema } from "@/lib/tema";
 
 /**
  * Interruptor de tema: Azul (de día, sol) o Noche (negro, luna). <Switch> de
@@ -12,7 +13,8 @@ import { useMontado } from "@/lib/use-montado";
  */
 export function ThemeToggle({ sobre = "menu" }: { sobre?: "menu" | "claro" }) {
   const icono = sobre === "menu" ? "size-5 text-nav-muted" : "size-5 text-muted";
-  const { resolvedTheme, setTheme } = useTheme();
+  const { resolvedTheme } = useTheme();
+  const cambiarTema = useCambiarTema();
   // En el servidor no se sabe el tema: se pinta apagado hasta hidratar.
   const montado = useMontado();
   const oscuro = montado && resolvedTheme === "dark";
@@ -22,7 +24,7 @@ export function ThemeToggle({ sobre = "menu" }: { sobre?: "menu" | "claro" }) {
       <Sun weight="fill" className={icono} aria-hidden />
       <Switch
         checked={oscuro}
-        onCheckedChange={(v) => setTheme(v ? "dark" : "light")}
+        onCheckedChange={(v) => cambiarTema(v ? "dark" : "light")}
         aria-label="Tema Noche"
       />
       <Moon weight="fill" className={icono} aria-hidden />

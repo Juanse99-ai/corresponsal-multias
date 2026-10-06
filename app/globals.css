@@ -664,6 +664,15 @@ input[type="number"] { -moz-appearance: textfield; }
 .dark .globo-grafica { background: #26262d; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 10px 26px -10px rgba(0, 0, 0, 0.7); }
 @keyframes globo-entra { from { opacity: 0; translate: 0 4px; scale: 0.96; } }
 
+/* Cambio de tema (lib/tema.ts, guía 8.28): la página entera se funde en
+   350 ms. Mientras dura, next-themes apaga las transiciones de color
+   (disableTransitionOnChange) para que nada se tiña por partes encima. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 350ms;
+  animation-timing-function: ease-in-out;
+}
+
 /* Barras de las gráficas (panel-view.tsx, guía 8.23): cada una crece desde
    abajo al entrar, escalonadas 40 ms tras 260 ms de espera, en 560 ms con la
    curva de iOS. "backwards": al terminar no queda transform. Al pasar el mouse

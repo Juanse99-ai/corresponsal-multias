@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
+import { useCambiarTema } from "@/lib/tema";
 import { Moon, SidebarSimple, SignOut, Sun } from "@phosphor-icons/react/dist/ssr";
 import { Logo } from "@/components/brand";
 import { IconButton } from "@/components/ui/icon-button";
@@ -50,7 +51,8 @@ export function RielPanel({
   resumen: HeaderResumen;
 }) {
   const router = useRouter();
-  const { resolvedTheme, setTheme } = useTheme();
+  const { resolvedTheme } = useTheme();
+  const cambiarTema = useCambiarTema();
   const montado = useMontado();
   const noche = montado && resolvedTheme === "dark";
   // El grupo que se ve en el panel (null: el de la sección abierta).
@@ -112,7 +114,7 @@ export function RielPanel({
             label={noche ? "Tema Azul" : "Tema Noche"}
             tooltipSide="right"
             className={rielBtn}
-            onClick={() => setTheme(noche ? "light" : "dark")}
+            onClick={() => cambiarTema(noche ? "light" : "dark")}
           >
             {noche ? <Sun size={19} /> : <Moon size={19} />}
           </IconButton>
