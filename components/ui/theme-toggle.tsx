@@ -24,7 +24,6 @@ export function ThemeToggle({ sobre = "menu" }: { sobre?: "menu" | "claro" }) {
         checked={oscuro}
         onCheckedChange={(v) => setTheme(v ? "dark" : "light")}
         aria-label="Tema Noche"
-        className="scale-125"
       />
       <Moon weight="fill" className={icono} aria-hidden />
     </div>
