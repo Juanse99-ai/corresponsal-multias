@@ -48,11 +48,15 @@
     `text-muted-foreground` → `text-muted`, `bg-accent`/`text-accent-foreground`
     (hover suave) → `bg-surface-2`/`text-text`, `text-white` → `text-nav-text`,
     íconos de lucide → Phosphor. En esta app `muted` es texto gris y `accent` es
-    el azul de marca; el resto de tokens de shadcn (`primary`, `background`,
-    `input`, `ring`...) ya apuntan a la paleta en `globals.css`.
+    el azul de marca para texto y aros; el relleno azul es `primary`
+    (`--accent-fill`). El resto de tokens de shadcn (`background`, `input`,
+    `ring`...) ya apuntan a la paleta en `globals.css`. Capas del estilo del
+    taller: `bg-campo` (campos), `bg-blanco` (lo elegido, ventanas, menús),
+    `bg-panel`, `bg-fila`/`border-fila-borde`, `bg-velo` (fondo de ventanas).
   - Ajustes propios ya hechos: botones en píldora con alto de 44 px y
-    `type="button"` por defecto; campos de 44 px con texto de 16 px (iOS no hace
-    zoom); `Card` sin relleno propio (cada pantalla pone `p-5 sm:p-6` o usa
+    `type="button"` por defecto; campos rellenos (gris sin borde, blancos con aro
+    azul al escribir) de 44 px con texto de 16 px (iOS no hace zoom); ventanas
+    sin filetes con `DialogHeader icono tono`; `Card` sin relleno propio (cada pantalla pone `p-5 sm:p-6` o usa
     `CardHeader`/`CardContent`); variantes extra `success`/`info`/`danger` en
     `Badge` y `success`/`muted` en `Alert`.
   - Composiciones de la app hechas con shadcn: `ConfirmDialog` (AlertDialog),
@@ -79,28 +83,40 @@
 ## Convenciones de diseño
 - Fuente única tipo iOS: SF Pro vía la pila del sistema de Apple (`--font-ios`,
   `-apple-system`). Sin Geist ni webfonts.
-- Tema claro y oscuro (toggle `next-themes`, clase en `<html>`). Paleta dark por
-  tokens en `.dark` (globals.css). Acento único azul (`--accent`). Los tokens
-  `nav-*` (menú overlay + banda de marca del login) son iguales en ambos temas.
+- Estilo del taller (6 oct 2026, lo pidió el dueño: "mudar este diseño"). Dos
+  temas con `next-themes` (clase en `<html>`): **Azul** (claro) y **Noche**
+  (oscuro, negro total `#000`, tarjetas `#0e0e11`, sin sombras). Acento único
+  azul. En el computador la app va en un marco redondo (`.marco`) sobre el
+  lienzo, con riel de íconos por grupo y panel de secciones
+  (`components/shell/riel-panel.tsx`); el celular conserva su barra y su menú.
+  Lo elegido (pestaña, ítem del menú) es pastilla blanca con sombra. Detalle en
+  DESIGN.md. Los tokens `nav-*` (menú del celular + banda de marca del login)
+  son iguales en ambos temas.
 - Verde/rojo solo para estado (cuadrado/descuadre), también en gráficos. Sin
   morados/neón, sin emojis. Sin glows decorativos en tarjetas. Iconos:
   `@phosphor-icons/react/dist/ssr`.
 - Que no parezca hecha con IA (se limpió a propósito, no reintroducir):
-  - Fondo plano (`--bg`): nada de degradados "aurora" ni halos de luz.
-  - Barra superior de lado a lado con `.barra-material` y línea fina abajo; nada
-    de píldoras flotantes de vidrio.
+  - Nada de degradados "aurora" ni halos de luz. Única excepción: el lienzo del
+    estilo del taller (`--lienzo`, degradado suave en Azul y un velo azul arriba
+    en Noche), detrás del marco.
+  - Celular: barra superior de lado a lado con `.barra-material` y línea fina
+    abajo. Computador: la barra va dentro del marco, transparente. Nada de
+    píldoras flotantes de vidrio.
   - Etiquetas en oración normal, sin mayúsculas espaciadas (`uppercase tracking-*`).
     Las imágenes que se exportan (cuadre y reporte del Sr. Luis) sí conservan su
     formato de hoja de cálculo.
   - Máximo un punto medio (`·`) por línea y nunca dentro de una etiqueta; datos
     encadenados van con comas. Sin raya larga (`—`) como valor vacío.
   - Listas de cosas del mismo tipo en una sola tarjeta con separadores (como los
-    ajustes de iOS), no una tarjeta por fila.
+    ajustes de iOS), no una tarjeta por fila. En el computador, las filas de una
+    `Table` dentro de una tarjeta se ven como cajitas separadas 6 px (CSS).
   - Textos concretos y en "tú": sin frases motivacionales, eslóganes ni datos de
     relleno; "del Sr. Luis" con artículo.
 - Animación con Framer Motion y solo con motivo: retroalimentación o cambio de
-  estado (montos que cambian, check al cerrar el día). Sin GSAP, sin entradas
-  escalonadas de tarjetas ni efectos por letra.
+  estado (montos que cambian, check al cerrar el día). Sin GSAP ni efectos por
+  letra. La única entrada escalonada es la de cada pantalla por bloques (estilo
+  del taller): `app/(app)/template.tsx` + `.entra-bloques` en CSS, 45 ms entre
+  bloques; no agregues otras.
 - Única excepción: la entrada al abrir la app (`components/fx/entrada.tsx`, logo
   que da paso a la pantalla) va en CSS (`globals.css`) porque corre antes de que
   cargue el JavaScript. Sale una vez por sesión, y la bienvenida de 2 veces al
