@@ -135,7 +135,7 @@ export function GeneralEditor({
         <Card className="relative overflow-hidden border-accent/30 p-6">
           <p className="text-[0.78rem] font-medium text-muted">Saldo total</p>
           <p className={cn("mt-2 text-4xl font-semibold tracking-tight", total < 0 ? "text-danger" : "text-text")}>
-            <AnimatedMoney value={total} />
+            <AnimatedMoney value={total} desdeCero={false} />
           </p>
         </Card>
 
