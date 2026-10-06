@@ -32,10 +32,12 @@ function TooltipCOP({
   if (!active || !payload?.length) return null;
   const v = Number(payload[0]?.value ?? 0);
   return (
-    <div className="rounded-xl border bg-popover px-3 py-2 text-popover-foreground shadow-md">
-      <p className="text-[0.7rem] text-faint">{label ? etiquetaDia(label) : ""}</p>
-      <p className="tnum mt-0.5 text-[0.85rem] font-semibold">
-        {formatCOP(v)} <span className="font-normal text-faint">{nombre}</span>
+    // Globo oscuro del taller: fecha y la cifra con su nombre.
+    <div className="globo-grafica min-w-[132px] rounded-lg px-[11px] py-2 text-meta text-white">
+      <p className="text-white/82">{label ? etiquetaDia(label) : ""}</p>
+      <p className="tnum mt-0.5 flex items-center gap-1.5 font-semibold">
+        <span aria-hidden className="size-2 shrink-0 rounded-full bg-accent" />
+        {formatCOP(v)} <span className="font-normal text-white/82">{nombre}</span>
       </p>
     </div>
   );
@@ -61,11 +63,11 @@ export function AreaTendencia({
       <AreaChart data={datos} margin={{ top: 8, right: 8, bottom: 0, left: 8 }}>
         <defs>
           <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="var(--color-valor)" stopOpacity={0.35} />
-            <stop offset="95%" stopColor="var(--color-valor)" stopOpacity={0.03} />
+            <stop offset="5%" stopColor="var(--color-valor)" stopOpacity={0.18} />
+            <stop offset="95%" stopColor="var(--color-valor)" stopOpacity={0.02} />
           </linearGradient>
         </defs>
-        <CartesianGrid vertical={false} stroke="var(--line)" />
+        <CartesianGrid vertical={false} stroke="var(--linea-fila)" />
         <XAxis
           dataKey="fecha"
           tickLine={false}
@@ -75,7 +77,10 @@ export function AreaTendencia({
           tickFormatter={etiquetaDia}
         />
         <YAxis width={58} tickLine={false} axisLine={false} tickFormatter={formatCompactCOP} />
-        <ChartTooltip content={<TooltipCOP nombre={nombre} />} cursor={{ stroke: "var(--line-strong)" }} />
+        <ChartTooltip
+          content={<TooltipCOP nombre={nombre} />}
+          cursor={{ stroke: "color-mix(in oklch, var(--text) 40%, transparent)", strokeDasharray: "3 3" }}
+        />
         <Area
           type="monotone"
           dataKey="valor"
