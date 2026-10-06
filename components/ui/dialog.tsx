@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useArrastrarHoja } from "@/lib/use-arrastrar-hoja"
 import { X } from "@phosphor-icons/react/dist/ssr"
 import { Dialog as DialogPrimitive } from "radix-ui"
 
@@ -38,10 +39,7 @@ function DialogOverlay({
   return (
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
-      className={cn(
-        "fixed inset-0 z-50 bg-velo backdrop-blur-[2px] data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0",
-        className
-      )}
+      className={cn("velo fixed inset-0 z-50", className)}
       {...props}
     />
   )
@@ -51,10 +49,14 @@ function DialogContent({
   className,
   children,
   showCloseButton = true,
+  onTouchStart,
+  onPointerDown,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
 }) {
+  // En el celular la hoja se arrastra hacia abajo para cerrarla.
+  const arrastre = useArrastrarHoja()
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
@@ -62,17 +64,29 @@ function DialogContent({
         data-slot="dialog-content"
         className={cn(
           // Ventana del estilo del taller: sin filetes, fondo blanco (en Noche,
-          // apenas más claro que el negro) y entra creciendo desde 0,95.
-          "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-[1.5rem] border-0 bg-blanco p-[22px] shadow-[0_24px_60px_-20px_rgba(15,35,80,0.35)] duration-[280ms] outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:max-w-lg",
+          // apenas más claro que el negro); entra creciendo desde 0,95. En el
+          // celular es una hoja que sube desde abajo con su agarradera. Las
+          // animaciones están en globals.css (.ventana).
+          "ventana fixed top-[50%] left-[50%] z-50 grid max-h-[90vh] w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 overflow-y-auto overscroll-contain rounded-3xl border-0 bg-blanco p-[22px] shadow-ventana outline-none sm:max-w-lg",
+          "max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:max-h-[92vh] max-sm:max-w-none max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-b-none max-sm:px-[18px] max-sm:pt-[26px] max-sm:pb-[calc(18px+env(safe-area-inset-bottom,0px))]",
+          "max-sm:before:absolute max-sm:before:top-2 max-sm:before:left-1/2 max-sm:before:h-[5px] max-sm:before:w-[38px] max-sm:before:-translate-x-1/2 max-sm:before:rounded max-sm:before:bg-fill-2",
           className
         )}
+        onTouchStart={(e) => {
+          onTouchStart?.(e)
+          arrastre.onTouchStart(e)
+        }}
+        onPointerDown={(e) => {
+          onPointerDown?.(e)
+          arrastre.onPointerDown(e)
+        }}
         {...props}
       >
         {children}
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            className="absolute top-4 right-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none data-[state=open]:bg-surface-2 data-[state=open]:text-muted [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+            className="absolute top-[18px] right-[18px] grid size-9 place-items-center rounded-full text-muted transition-colors duration-[var(--dur-1)] outline-none after:absolute after:-inset-1 hover:bg-surface-2 hover:text-text focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-solid disabled:pointer-events-none max-sm:top-[18px] max-sm:right-3 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-[18px]"
           >
             <X />
             <span className="sr-only">Cerrar</span>
@@ -85,10 +99,10 @@ function DialogContent({
 
 /** Color del círculo del ícono: lo que pasa (azul), bien, cuidado o mal. */
 const TONO_ICONO = {
-  info: "bg-accent-soft text-accent",
-  ok: "bg-success-soft text-success",
-  warn: "bg-danger-soft/60 text-danger",
-  bad: "bg-danger-soft text-danger",
+  info: "bg-accent-soft-2 text-accent",
+  ok: "bg-ok-bg text-ok-fg",
+  warn: "bg-warn-bg text-warn-fg",
+  bad: "bg-bad-bg text-bad-fg",
 } as const
 
 /** Círculo de 44 px (40 en el celular) con el ícono de la ventana. */
@@ -102,7 +116,7 @@ function DialogIcon({
       data-slot="dialog-icon"
       aria-hidden
       className={cn(
-        "grid size-10 shrink-0 place-items-center rounded-full sm:size-11 [&_svg:not([class*='size-'])]:size-5",
+        "grid size-10 shrink-0 place-items-center rounded-full sm:size-11 [&_svg:not([class*='size-'])]:size-[21px]",
         TONO_ICONO[tono],
         className
       )}
@@ -129,7 +143,7 @@ function DialogHeader({
     return (
       <div
         data-slot="dialog-header"
-        className={cn("flex items-start gap-3.5 text-left", className)}
+        className={cn("flex items-start gap-3.5 pr-8 text-left", className)}
         {...props}
       >
         <DialogIcon tono={tono}>{icono}</DialogIcon>
@@ -140,7 +154,7 @@ function DialogHeader({
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-1 text-center sm:text-left", className)}
+      className={cn("flex flex-col gap-1 pr-8 text-left", className)}
       {...props}
     >
       {children}
@@ -160,7 +174,8 @@ function DialogFooter({
     <div
       data-slot="dialog-footer"
       className={cn(
-        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
+        // Botones a la derecha; en el celular, en fila y a lo ancho.
+        "flex flex-row justify-end gap-2.5 pt-1.5 max-sm:*:flex-1",
         className
       )}
       {...props}
@@ -182,7 +197,7 @@ function DialogTitle({
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-[17px] leading-tight font-semibold tracking-[-0.2px] sm:text-[22px] sm:tracking-[-0.4px]", className)}
+      className={cn("text-lead font-semibold tracking-[-0.2px] sm:text-h1 sm:tracking-[-0.4px]", className)}
       {...props}
     />
   )
@@ -195,7 +210,7 @@ function DialogDescription({
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn("text-[13.5px] text-muted", className)}
+      className={cn("text-body text-muted", className)}
       {...props}
     />
   )

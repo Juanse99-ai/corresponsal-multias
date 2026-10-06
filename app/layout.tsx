@@ -3,6 +3,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { PwaRegister } from "@/components/pwa-register";
 import { Entrada } from "@/components/fx/entrada";
+import { COLOR_BARRA_SISTEMA } from "@/lib/colores-tema";
 
 export const metadata: Metadata = {
   title: "Barrio Centro Sabanalarga 18 · Multidiagnósticos AS",
@@ -21,9 +22,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
+  // Al cargar, el del teléfono; ya hidratada, lib/tema.ts lo pone al del tema elegido.
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#e7ecf4" },
-    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+    { media: "(prefers-color-scheme: light)", color: COLOR_BARRA_SISTEMA.light },
+    { media: "(prefers-color-scheme: dark)", color: COLOR_BARRA_SISTEMA.dark },
   ],
   width: "device-width",
   initialScale: 1,

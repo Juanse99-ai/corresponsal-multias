@@ -6,25 +6,24 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
   Trash,
-  HandCoins,
-  CaretDown,
+  CaretRight,
   ArrowCounterClockwise,
   Tag,
   Check,
   X,
   Eraser,
-  ClockCounterClockwise,
+  Coins,
 } from "@phosphor-icons/react/dist/ssr";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 import { DatePicker } from "@/components/ui/date-picker";
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { Empty, EmptyDescription, EmptyTitle } from "@/components/ui/empty";
+import { Contador } from "@/components/ui/contador";
+import { Plegable } from "@/components/ui/plegable";
 import {
   Item,
   ItemActions,
@@ -42,7 +41,6 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { MoneyInput } from "@/components/ui/money-input";
-import { AnimatedMoney } from "@/components/ui/animated-number";
 import { cn, esEnter } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -88,71 +86,63 @@ export function PrestamosManager({
   return (
     <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start">
       <div className="min-w-0">
-        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 px-1">
-          <h3 className="text-[0.95rem] font-semibold tracking-tight text-text">Quién debe</h3>
-          {deben.length > 0 && (
-            <p className="tnum text-[0.78rem] text-faint">
-              {deben.length === 1 ? "1 persona debe" : `${deben.length} personas deben`} {formatCOP(totalPendiente)}
-            </p>
-          )}
-        </div>
+        <Card>
+          <CardHeader className="items-center">
+            <CardTitle className="flex items-center gap-2 text-text">
+              <h2>Quién debe</h2>
+              <Contador n={deben.length} />
+            </CardTitle>
+            {deben.length > 0 && (
+              <p className="tnum text-meta text-faint">
+                {deben.length === 1 ? "1 persona debe" : `${deben.length} personas deben`} {formatCOP(totalPendiente)}
+              </p>
+            )}
+          </CardHeader>
 
-        {deben.length === 0 ? (
-          <Card>
-            <Empty className="py-14 md:py-14">
-              <EmptyHeader>
-                <EmptyMedia variant="icon" className="rounded-full text-faint">
-                  <HandCoins size={20} />
-                </EmptyMedia>
-                <EmptyTitle className="text-sm font-normal text-muted">Nadie tiene préstamos pendientes.</EmptyTitle>
-                <EmptyDescription className="text-[0.78rem] text-faint">Regístralo en Nuevo préstamo.</EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          </Card>
-        ) : (
-          <Card className="overflow-hidden">
-            <AnimatePresence initial={false}>
-              {deben.map((g, i) => (
-                <PersonaCard
-                  key={g.key}
-                  grupo={g}
-                  isAdmin={isAdmin}
-                  origenes={origenes}
-                  defaultOpen={i === 0 && deben.length <= 3}
-                />
-              ))}
-            </AnimatePresence>
-          </Card>
-        )}
-
-        {alDia.length > 0 && (
-          <Collapsible className="group/aldia mt-5">
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" size="sm" className="rounded-full px-2 text-[0.84rem] font-normal text-muted hover:text-text">
-                <CaretDown size={14} className="transition-transform group-data-[state=open]/aldia:rotate-180" />
-                {alDia.length} persona{alDia.length === 1 ? "" : "s"} al día
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="mt-3">
-              <Card className="overflow-hidden">
-                {alDia.map((g) => (
-                  <PersonaCard key={g.key} grupo={g} isAdmin={isAdmin} origenes={origenes} defaultOpen={false} />
+          {deben.length === 0 ? (
+            <CardContent>
+              <Empty fila>
+                <EmptyTitle>Nadie tiene préstamos pendientes</EmptyTitle>
+                <EmptyDescription>Regístralo en Nuevo préstamo</EmptyDescription>
+              </Empty>
+            </CardContent>
+          ) : (
+            // En el computador cada persona es una cajita que se abre; en el
+            // celular, renglones con su línea.
+            <div className="flex flex-col px-5 pb-3 lg:gap-1.5 lg:px-3">
+              <AnimatePresence initial={false}>
+                {deben.map((g, i) => (
+                  <PersonaCard
+                    key={g.key}
+                    grupo={g}
+                    isAdmin={isAdmin}
+                    origenes={origenes}
+                    defaultOpen={i === 0 && deben.length <= 3}
+                  />
                 ))}
-              </Card>
-            </CollapsibleContent>
-          </Collapsible>
-        )}
+              </AnimatePresence>
+            </div>
+          )}
+
+          {alDia.length > 0 && (
+            <div className="border-t border-linea-fila px-5 py-1.5">
+              <Plegable
+                variante="fila"
+                titulo={`${alDia.length === 1 ? "Persona" : "Personas"} al día`}
+                contador={alDia.length}
+              >
+                <div className="flex flex-col pb-2 lg:gap-1.5">
+                  {alDia.map((g) => (
+                    <PersonaCard key={g.key} grupo={g} isAdmin={isAdmin} origenes={origenes} defaultOpen={false} />
+                  ))}
+                </div>
+              </Plegable>
+            </div>
+          )}
+        </Card>
       </div>
 
       <div className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-8">
-        {isAdmin && (
-          <Card className="relative overflow-hidden border-accent/30 p-6">
-            <p className="text-[0.78rem] font-medium text-muted">Total pendiente</p>
-            <p className="mt-2 text-4xl font-semibold tracking-tight text-text">
-              <AnimatedMoney value={totalPendiente} />
-            </p>
-          </Card>
-        )}
         <AddDeudaForm />
       </div>
     </div>
@@ -213,8 +203,8 @@ function AddDeudaForm() {
         <CardTitle className="text-text">Nuevo préstamo</CardTitle>
       </CardHeader>
 
-      <CardContent className="mt-2 flex flex-col gap-4">
-        <div className="flex flex-col gap-2">
+      <CardContent className="flex flex-col gap-3.5">
+        <div className="flex flex-col gap-1.5">
           <Label id="grp-persona">Persona</Label>
           <div role="group" aria-labelledby="grp-persona" className="flex flex-wrap gap-2">
             {[...PERSONAS_PRESET, "Otro"].map((p) => (
@@ -228,12 +218,13 @@ function AddDeudaForm() {
               value={otro}
               onChange={(e) => setOtro(e.target.value)}
               placeholder="Nombre de la persona"
+              aria-label="Nombre de la persona"
               className="mt-1"
             />
           )}
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1.5">
           <Label id="grp-concepto">Concepto</Label>
           <div role="group" aria-labelledby="grp-concepto" className="flex flex-wrap gap-2">
             {CONCEPTOS.map((c) => (
@@ -247,27 +238,28 @@ function AddDeudaForm() {
               value={conceptoOtro}
               onChange={(e) => setConceptoOtro(e.target.value)}
               placeholder="Especifica el concepto"
+              aria-label="Especifica el concepto"
               className="mt-1"
             />
           )}
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1.5">
           <Label htmlFor="deuda-monto">Monto</Label>
           <MoneyInput id="deuda-monto" size="lg" value={monto} onValueChange={setMonto} onEnter={() => !pending && registrar()} />
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1.5">
           <Label id="grp-medio">¿Cómo se lo diste?</Label>
           <MedioPicker medio={medio} onChange={setMedio} labelledBy="grp-medio" />
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto]">
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="deuda-desc">Motivo</Label>
             <Input id="deuda-desc" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Para qué fue el préstamo" onKeyDown={(e) => esEnter(e) && !pending && registrar()} />
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="deuda-fecha">Fecha</Label>
             <DatePicker id="deuda-fecha" value={fecha} onChange={setFecha} className="w-full sm:w-[9.5rem]" />
           </div>
@@ -275,7 +267,7 @@ function AddDeudaForm() {
 
         <ErrorNotice message={msg} />
 
-        <Button onClick={registrar} disabled={pending}>
+        <Button onClick={registrar} disabled={pending} className="mt-1.5">
           <Plus size={18} weight="bold" />
           {pending ? "Registrando…" : "Registrar préstamo"}
         </Button>
@@ -284,7 +276,11 @@ function AddDeudaForm() {
   );
 }
 
-/** Una persona = una fila de la lista. El encabezado resume su deuda; al abrir salen sus préstamos. */
+/**
+ * Una persona = una fila que se abre (plegable del taller): chevron a la
+ * izquierda que gira 90°, iniciales, nombre, la pista solo cerrada, el saldo a
+ * la derecha y la barra de lo abonado. Al abrir salen sus préstamos.
+ */
 function PersonaCard({
   grupo,
   isAdmin,
@@ -306,74 +302,62 @@ function PersonaCard({
       initial={{ opacity: 0, y: -6 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
-      className="border-b border-line last:border-b-0"
+      className="border-b border-linea-fila last:border-b-0 lg:rounded-xl lg:border lg:border-fila-borde lg:bg-fila lg:last:border-b"
     >
       <Collapsible asChild open={open} onOpenChange={setOpen}>
       <div className="overflow-hidden">
-        <CollapsibleTrigger className="flex w-full items-center gap-3 p-4 text-left transition-colors hover:bg-surface-2 active:bg-surface-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/45 sm:p-5"
-        >
+        <CollapsibleTrigger className="group/persona flex w-full items-center gap-3 rounded-xl py-3 text-left transition-colors duration-[var(--dur-1)] outline-none hover:bg-fila-hover focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent focus-visible:outline-solid lg:px-3">
+          <CaretRight
+            aria-hidden
+            weight="bold"
+            className="size-3.5 shrink-0 text-muted transition-transform duration-[var(--dur-2)] ease-ios group-data-[state=open]/persona:rotate-90"
+          />
           <Avatar size="lg" aria-hidden="true">
-            <AvatarFallback
-              className={cn(
-                "text-[0.78rem] font-semibold",
-                alDia ? "bg-success-soft text-success" : "bg-accent-soft text-accent-strong",
-              )}
-            >
-              {iniciales(grupo.persona)}
-            </AvatarFallback>
+            <AvatarFallback className={cn(alDia && "bg-ok-bg text-ok-fg")}>{iniciales(grupo.persona)}</AvatarFallback>
           </Avatar>
 
           <span className="min-w-0 flex-1">
             <span className="flex min-w-0 items-center gap-2">
-              <span className="truncate font-medium text-text">{grupo.persona}</span>
+              <span className="truncate text-title font-semibold text-text">{grupo.persona}</span>
               {alDia && <Badge variant="success">Al día</Badge>}
             </span>
-            <span className="mt-0.5 block truncate text-[0.72rem] text-faint">
-              {alDia ? (
-                <>
-                  {grupo.deudas.length} préstamo{grupo.deudas.length === 1 ? "" : "s"}
-                  <span className="hidden sm:inline">, todo pagado</span>
-                </>
-              ) : (
-                <>
-                  {grupo.activos} pendiente{grupo.activos === 1 ? "" : "s"}
-                  {/* El detalle del abono solo si cabe: en celular estorbaba y se cortaba. */}
-                  <span className="hidden sm:inline">
-                    {" "}
-                    , abonado {formatCOP(grupo.abonado)} de {formatCOP(grupo.total)}
-                  </span>
-                </>
-              )}
-            </span>
+            {!open && (
+              <span className="mt-0.5 block truncate text-meta text-muted">
+                {alDia ? (
+                  <>
+                    {grupo.deudas.length} préstamo{grupo.deudas.length === 1 ? "" : "s"}
+                    <span className="hidden sm:inline">, todo pagado</span>
+                  </>
+                ) : (
+                  <>
+                    {grupo.activos} pendiente{grupo.activos === 1 ? "" : "s"}
+                    {/* El detalle del abono solo si cabe: en celular estorbaba y se cortaba. */}
+                    <span className="hidden sm:inline">
+                      , abonado {formatCOP(grupo.abonado)} de {formatCOP(grupo.total)}
+                    </span>
+                  </>
+                )}
+              </span>
+            )}
           </span>
 
-          <span className="shrink-0 text-right">
-            <span className={cn("tnum block text-lg font-semibold", alDia ? "text-success" : "text-text")}>
-              {formatCOP(alDia ? 0 : grupo.saldo)}
-            </span>
+          <span className={cn("tnum shrink-0 text-lead font-semibold", alDia ? "text-ok-fg" : "text-text")}>
+            {formatCOP(alDia ? 0 : grupo.saldo)}
           </span>
-
-          <CaretDown
-            size={16}
-            className={cn("shrink-0 text-faint transition-transform", open && "rotate-180")}
-          />
         </CollapsibleTrigger>
 
         {/* Sin abonos la barra es un riel gris decorativo: no se dibuja. */}
         {(grupo.abonado > 0 || alDia) && (
           <Progress
             value={pct}
+            tono={alDia ? "ok" : "accent"}
             aria-label={`Abonado ${Math.round(pct)}%`}
-            className={cn(
-              "mx-4 mb-4 h-1.5 w-auto bg-surface-2 sm:mx-5 sm:mb-5 [&>[data-slot=progress-indicator]]:rounded-full [&>[data-slot=progress-indicator]]:duration-500",
-              alDia ? "[&>[data-slot=progress-indicator]]:bg-success" : "[&>[data-slot=progress-indicator]]:bg-accent",
-            )}
+            className="mb-3 ml-[4.25rem] w-auto lg:mr-3 lg:ml-[4.75rem]"
           />
         )}
 
-        <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-          <Separator />
-          <ItemGroup>
+        <CollapsibleContent className="plegable-cuerpo overflow-hidden">
+          <ItemGroup className="border-t border-linea-fila lg:mx-3">
             {grupo.deudas.map((d, i) => (
               <Fragment key={d.id}>
                 {i > 0 && <ItemSeparator />}
@@ -407,7 +391,7 @@ function OrigenPicker({
 }) {
   const clave = claveNombre(value);
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1.5">
       <Label htmlFor={id}>¿De dónde sale la plata?</Label>
       {sugeridos.length > 0 && (
         <div role="group" aria-label="Orígenes usados antes" className="flex flex-wrap gap-1.5">
@@ -457,7 +441,7 @@ function AbonoItem({ abono, origenes }: { abono: AbonoRow; origenes: string[] })
 
   return (
     <Item role="listitem" size="sm" className="gap-0 rounded-none px-0 py-2">
-      <div className="flex basis-full items-center gap-2 text-[0.8rem]">
+      <div className="flex basis-full items-center gap-2 text-meta">
         <span className="shrink-0 text-faint">{formatFecha(abono.fecha)}</span>
         <Button
           size="sm"
@@ -473,7 +457,7 @@ function AbonoItem({ abono, origenes }: { abono: AbonoRow; origenes: string[] })
           <Tag size={15} className="shrink-0" />
           <span className="truncate">{abono.origen ?? "Poner origen"}</span>
         </Button>
-        <span className="tnum ml-auto shrink-0 text-success">+{formatCOP(abono.monto)}</span>
+        <span className="tnum ml-auto shrink-0 text-body font-semibold text-ok-fg">+{formatCOP(abono.monto)}</span>
       </div>
 
       <AnimatePresence initial={false}>
@@ -484,7 +468,7 @@ function AbonoItem({ abono, origenes }: { abono: AbonoRow; origenes: string[] })
             exit={{ opacity: 0, height: 0 }}
             className="basis-full overflow-hidden"
           >
-            <div className="mt-2 flex flex-col gap-3 rounded-card border border-line bg-surface-2/60 p-3">
+            <div className="mt-2 flex flex-col gap-3 pb-1">
               <OrigenPicker
                 id={id}
                 value={valor}
@@ -503,7 +487,7 @@ function AbonoItem({ abono, origenes }: { abono: AbonoRow; origenes: string[] })
                     Quitar origen
                   </Button>
                 )}
-                <IconButton label="Cancelar" onClick={() => setEditando(false)} className="ml-auto text-muted hover:text-foreground">
+                <IconButton label="Cancelar" size="icon-sm" onClick={() => setEditando(false)} className="ml-auto">
                   <X size={17} />
                 </IconButton>
               </div>
@@ -588,38 +572,34 @@ function DeudaRow({
   }
 
   return (
-    <Item role="listitem" className="items-start gap-x-3 gap-y-0 rounded-none p-4 sm:px-5">
-          <ItemContent className="min-w-0 gap-0">
+    <Item role="listitem" className="items-start gap-x-3 gap-y-0 rounded-none px-0 py-3">
+          <ItemContent className="min-w-0 gap-1">
             <ItemTitle className="flex-wrap gap-1.5 font-normal">
               {deuda.concepto && <Badge variant="secondary">{deuda.concepto}</Badge>}
               {saldada && <Badge variant="success">Pagado</Badge>}
-              <span className="text-[0.72rem] text-faint">{formatFecha(deuda.fecha)}</span>
+              <span className="text-meta text-faint">{formatFecha(deuda.fecha)}</span>
             </ItemTitle>
-            <ItemDescription className="mt-1 line-clamp-1 text-[0.82rem]">
+            <ItemDescription className="line-clamp-1 text-body text-muted">
               {deuda.descripcion || "Sin motivo anotado"}
             </ItemDescription>
           </ItemContent>
           <ItemActions className="block shrink-0 text-right">
-            <p className={cn("tnum text-[0.95rem] font-semibold", saldada ? "text-success" : "text-text")}>
+            <p className={cn("tnum text-title font-semibold", saldada ? "text-ok-fg" : "text-text")}>
               {saldada ? formatCOP(0) : formatCOP(deuda.saldo)}
             </p>
             {deuda.abonado > 0 && (
-              <p className="text-[0.68rem] text-faint">de {formatCOP(deuda.monto)}</p>
+              <p className="tnum text-meta text-muted">de {formatCOP(deuda.monto)}</p>
             )}
           </ItemActions>
 
         <div className="min-w-0 basis-full">
         {deuda.abonado > 0 && !saldada && (
-          <Progress
-            value={pct}
-            aria-label={`Abonado ${Math.round(pct)}%`}
-            className="mt-2.5 h-1 bg-surface-2 [&>[data-slot=progress-indicator]]:rounded-full [&>[data-slot=progress-indicator]]:bg-success [&>[data-slot=progress-indicator]]:duration-500"
-          />
+          <Progress value={pct} tono="ok" aria-label={`Abonado ${Math.round(pct)}%`} className="mt-2.5" />
         )}
 
         {/* Solo cuando hay al menos un origen: si todo está sin etiqueta no dice nada nuevo. */}
         {hayOrigen && (
-          <p className="mt-2 text-[0.72rem] leading-relaxed text-faint">
+          <p className="mt-2 text-meta leading-relaxed text-faint">
             Pagado con{" "}
             {porOrigen.map((o, i) => (
               // El separador va por fuera: así la línea puede partir entre orígenes.
@@ -636,38 +616,26 @@ function DeudaRow({
           </p>
         )}
 
-        <ItemFooter className="mt-3 flex-wrap justify-start">
+        {/* Acciones como íconos con su nombre en el globo. */}
+        <ItemFooter className="mt-2 flex-wrap justify-start gap-1.5">
           {saldada ? (
-            <Button size="sm" variant="secondary" onClick={() => setConfirmando("reabrir")} disabled={pending}>
-              <ArrowCounterClockwise size={15} weight="bold" />
-              Reabrir
-            </Button>
+            <IconButton label="Reabrir" size="icon-sm" onClick={() => setConfirmando("reabrir")} disabled={pending}>
+              <ArrowCounterClockwise size={17} />
+            </IconButton>
           ) : (
-            <Button size="sm" variant="secondary" onClick={() => setAbonoOpen((v) => !v)} disabled={pending} aria-expanded={abonoOpen}>
-              <Plus size={16} weight="bold" />
-              Abonar
-            </Button>
-          )}
-          {deuda.abonos.length > 0 && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setHistoryOpen((v) => !v)}
-                  aria-expanded={historyOpen}
-                  aria-label={`${historyOpen ? "Ocultar" : "Ver"} ${deuda.abonos.length} abono${deuda.abonos.length === 1 ? "" : "s"}`}
-                >
-                  <ClockCounterClockwise size={16} />
-                  <span className="tnum">{deuda.abonos.length}</span>
-                  <CaretDown size={13} className={cn("transition-transform", historyOpen && "rotate-180")} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Abonos</TooltipContent>
-            </Tooltip>
+            <IconButton
+              label="Abonar"
+              size="icon-sm"
+              onClick={() => setAbonoOpen((v) => !v)}
+              disabled={pending}
+              aria-expanded={abonoOpen}
+              className={cn(abonoOpen && "bg-accent-soft text-accent hover:bg-accent-soft")}
+            >
+              <Coins size={18} />
+            </IconButton>
           )}
           {isAdmin && (
-            <IconButton label="Borrar préstamo" onClick={() => setConfirmando("borrar")} disabled={pending} className="ml-auto text-muted hover:text-destructive">
+            <IconButton label="Borrar préstamo" size="icon-sm" onClick={() => setConfirmando("borrar")} disabled={pending} peligro className="ml-auto">
               <Trash size={17} />
             </IconButton>
           )}
@@ -681,7 +649,6 @@ function DeudaRow({
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden"
             >
-              <Separator className="mt-3" />
               <div className="flex flex-col gap-3 pt-3">
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor={`ab-${deuda.id}`}>Abono</Label>
@@ -694,9 +661,9 @@ function DeudaRow({
                   sugeridos={origenes}
                   onEnter={() => !pending && abonar()}
                 />
-                <Button onClick={abonar} disabled={pending} className="w-full sm:w-auto sm:self-end">
-                  <Check size={17} weight="bold" />
-                  {pending ? "Registrando…" : "Confirmar abono"}
+                <Button size="sm" onClick={abonar} disabled={pending} className="self-start">
+                  <Check size={16} weight="bold" />
+                  {pending ? "Registrando…" : "Abonar"}
                 </Button>
               </div>
             </motion.div>
@@ -705,26 +672,25 @@ function DeudaRow({
 
         <ErrorNotice message={err} className="mt-3" />
 
-        <AnimatePresence>
-          {historyOpen && deuda.abonos.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="overflow-hidden"
-            >
-              <Separator className="mt-3" />
-              <ItemGroup className="pt-1">
-                {deuda.abonos.map((a, i) => (
-                  <Fragment key={a.id}>
-                    {i > 0 && <ItemSeparator />}
-                    <AbonoItem abono={a} origenes={origenes} />
-                  </Fragment>
-                ))}
-              </ItemGroup>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {deuda.abonos.length > 0 && (
+          <Plegable
+            variante="fila"
+            titulo="Abonos"
+            contador={deuda.abonos.length}
+            abierto={historyOpen}
+            onAbiertoChange={setHistoryOpen}
+            className="mt-1"
+          >
+            <ItemGroup>
+              {deuda.abonos.map((a, i) => (
+                <Fragment key={a.id}>
+                  {i > 0 && <ItemSeparator />}
+                  <AbonoItem abono={a} origenes={origenes} />
+                </Fragment>
+              ))}
+            </ItemGroup>
+          </Plegable>
+        )}
         </div>
 
       <ConfirmDialog

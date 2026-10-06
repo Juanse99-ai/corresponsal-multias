@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
+import { useCambiarTema } from "@/lib/tema";
 import { Moon, SidebarSimple, SignOut, Sun } from "@phosphor-icons/react/dist/ssr";
 import { Logo } from "@/components/brand";
 import { IconButton } from "@/components/ui/icon-button";
@@ -26,7 +27,7 @@ const ROL: Record<Rol, string> = { admin: "Administrador", operador: "Operador" 
 const rielBtn = "size-10 rounded-full text-muted hover:bg-[var(--menu-hover)] hover:text-text";
 const rielOn = "bg-primary text-primary-foreground shadow-[var(--primario-sombra)] hover:bg-primary hover:text-primary-foreground";
 
-function iniciales(nombre: string) {
+export function iniciales(nombre: string) {
   const partes = nombre.trim().split(/\s+/).filter(Boolean);
   return ((partes[0]?.[0] ?? "") + (partes[1]?.[0] ?? "")).toUpperCase() || "?";
 }
@@ -50,7 +51,8 @@ export function RielPanel({
   resumen: HeaderResumen;
 }) {
   const router = useRouter();
-  const { resolvedTheme, setTheme } = useTheme();
+  const { resolvedTheme } = useTheme();
+  const cambiarTema = useCambiarTema();
   const montado = useMontado();
   const noche = montado && resolvedTheme === "dark";
   // El grupo que se ve en el panel (null: el de la sección abierta).
@@ -85,6 +87,7 @@ export function RielPanel({
             const punto = !on && g.items.some((i) => urgentes.includes(i.href));
             return (
               <IconButton
+                forma="suelto"
                 key={g.id}
                 label={g.label}
                 tooltipSide="right"
@@ -107,19 +110,20 @@ export function RielPanel({
 
         <div className="mt-auto flex flex-col items-center gap-2">
           <IconButton
+            forma="suelto"
             label={noche ? "Tema Azul" : "Tema Noche"}
             tooltipSide="right"
             className={rielBtn}
-            onClick={() => setTheme(noche ? "light" : "dark")}
+            onClick={() => cambiarTema(noche ? "light" : "dark")}
           >
             {noche ? <Sun size={19} /> : <Moon size={19} />}
           </IconButton>
 
           <Popover>
             <PopoverTrigger asChild>
-              <IconButton label={`${profile.nombre}, ${ROL[profile.rol] ?? profile.rol}`} tooltipSide="right" className="size-10 rounded-full p-0 hover:bg-transparent">
+              <IconButton forma="suelto" label={`${profile.nombre}, ${ROL[profile.rol] ?? profile.rol}`} tooltipSide="right" className="size-10 rounded-full p-0 hover:bg-transparent">
                 <Avatar className="size-9">
-                  <AvatarFallback className="bg-primary text-[0.78rem] font-semibold text-primary-foreground">
+                  <AvatarFallback className="bg-primary text-meta font-semibold text-primary-foreground">
                     {iniciales(profile.nombre)}
                   </AvatarFallback>
                 </Avatar>
@@ -129,15 +133,15 @@ export function RielPanel({
               <ItemGroup>
                 <Item size="sm" className="rounded-none border-0">
                   <ItemContent className="min-w-0 gap-0.5">
-                    <ItemTitle className="w-full truncate text-[0.9rem] font-semibold text-text">{profile.nombre}</ItemTitle>
-                    <ItemDescription className="text-[0.78rem] text-faint">{ROL[profile.rol] ?? profile.rol}</ItemDescription>
+                    <ItemTitle className="w-full truncate text-title font-semibold text-text">{profile.nombre}</ItemTitle>
+                    <ItemDescription className="text-meta text-faint">{ROL[profile.rol] ?? profile.rol}</ItemDescription>
                   </ItemContent>
                 </Item>
                 <ItemSeparator className="bg-line" />
                 <Item size="sm" className="rounded-none border-0">
                   <ItemContent className="gap-0.5">
-                    <ItemTitle className="text-[0.86rem] font-normal text-text">Avisos</ItemTitle>
-                    <ItemDescription className="text-[0.74rem] text-faint">Recordatorio para cerrar el día</ItemDescription>
+                    <ItemTitle className="text-title font-medium text-text">Avisos</ItemTitle>
+                    <ItemDescription className="text-meta text-faint">Recordatorio para cerrar el día</ItemDescription>
                   </ItemContent>
                   <ItemActions>
                     <ActivarAvisos sobre="claro" />
@@ -146,12 +150,12 @@ export function RielPanel({
                 <ItemSeparator className="bg-line" />
                 <form action={signOutAction}>
                   <Item size="sm" asChild className="w-full rounded-none border-0">
-                    <Button type="submit" variant="ghost" className="h-11 justify-start rounded-none font-normal text-text">
+                    <Button type="submit" variant="ghost" className="h-11 justify-start rounded-none font-normal text-text hover:bg-fill active:scale-100">
                       <ItemMedia>
                         <SignOut size={17} />
                       </ItemMedia>
                       <ItemContent>
-                        <ItemTitle className="text-[0.86rem] font-normal">Cerrar sesión</ItemTitle>
+                        <ItemTitle className="text-title font-medium">Cerrar sesión</ItemTitle>
                       </ItemContent>
                     </Button>
                   </Item>
@@ -161,6 +165,7 @@ export function RielPanel({
           </Popover>
 
           <IconButton
+            forma="suelto"
             label={escondido ? "Mostrar el panel" : "Esconder el panel"}
             tooltipSide="right"
             className={rielBtn}
@@ -176,7 +181,7 @@ export function RielPanel({
           key={grupo.id}
           className="panel-entra flex w-[240px] flex-none flex-col rounded-[20px] border border-[var(--tarjeta-borde)] bg-panel px-2 pt-3.5 pb-2.5 shadow-[var(--tarjeta-sombra)]"
         >
-          <h2 className="px-2 pb-3 text-[17px] font-semibold tracking-[-0.3px] text-text">{grupo.label}</h2>
+          <h2 className="px-2 pb-3 text-lead font-semibold tracking-[-0.3px] text-text">{grupo.label}</h2>
           <HeaderSearch enPanel personas={isAdmin ? resumen.personas : []} />
 
           <nav aria-label={grupo.label} className="flex flex-1 flex-col gap-0.5">
@@ -189,7 +194,7 @@ export function RielPanel({
                   key={item.href}
                   asChild
                   className={cn(
-                    "h-[38px] flex-nowrap gap-2.5 rounded-xl border-0 px-2.5 py-0 text-[0.875rem] font-medium text-text [a]:hover:bg-[var(--menu-hover)]",
+                    "h-[38px] flex-nowrap gap-2.5 rounded-xl border-0 px-2.5 py-0 text-body font-medium text-text [a]:hover:bg-[var(--menu-hover)]",
                     activo && "bg-blanco font-semibold shadow-[var(--pastilla-sombra)] [a]:hover:bg-blanco",
                   )}
                 >
@@ -202,7 +207,7 @@ export function RielPanel({
                     </ItemContent>
                     {n > 0 && (
                       <ItemActions>
-                        <span className="tnum text-[0.78rem] font-medium text-faint">{n}</span>
+                        <span className="tnum text-meta font-medium text-faint">{n}</span>
                       </ItemActions>
                     )}
                   </Link>
@@ -212,8 +217,8 @@ export function RielPanel({
           </nav>
 
           <div className="border-t border-line px-2 pt-2.5">
-            <p className="truncate text-[0.84rem] font-semibold text-text">{profile.nombre}</p>
-            <p className="text-[0.78rem] text-faint">{ROL[profile.rol] ?? profile.rol}</p>
+            <p className="truncate text-body font-semibold text-text">{profile.nombre}</p>
+            <p className="text-meta text-faint">{ROL[profile.rol] ?? profile.rol}</p>
           </div>
         </div>
       )}

@@ -31,7 +31,7 @@ function TendenciaCard({
         <CardTitle className="text-text">{titulo}</CardTitle>
         <CardDescription>{subtitulo}</CardDescription>
       </CardHeader>
-      <CardContent className="pt-1">
+      <CardContent>
         <AreaTendencia datos={datos} nombre={nombre} />
       </CardContent>
     </Card>
@@ -64,7 +64,7 @@ export function HistorialTabs({ cuadres, luis }: { cuadres: CuadreRow[]; luis: L
             const Icono = t.icon;
             return (
               <TabsTrigger key={t.id} value={t.id}>
-                <Icono weight="fill" />
+                <Icono className="size-4" />
                 {t.label}
               </TabsTrigger>
             );

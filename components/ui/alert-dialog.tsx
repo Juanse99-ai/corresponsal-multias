@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useArrastrarHoja } from "@/lib/use-arrastrar-hoja"
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui"
 
 import { Button } from "@/components/ui/button"
@@ -35,10 +36,7 @@ function AlertDialogOverlay({
   return (
     <AlertDialogPrimitive.Overlay
       data-slot="alert-dialog-overlay"
-      className={cn(
-        "fixed inset-0 z-50 bg-velo backdrop-blur-[2px] data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0",
-        className
-      )}
+      className={cn("velo fixed inset-0 z-50", className)}
       {...props}
     />
   )
@@ -47,10 +45,14 @@ function AlertDialogOverlay({
 function AlertDialogContent({
   className,
   size = "default",
+  onTouchStart,
+  onPointerDown,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Content> & {
   size?: "default" | "sm"
 }) {
+  // En el celular la hoja se arrastra hacia abajo; Escape pasa por Cancelar.
+  const arrastre = useArrastrarHoja()
   return (
     <AlertDialogPortal>
       <AlertDialogOverlay />
@@ -58,9 +60,21 @@ function AlertDialogContent({
         data-slot="alert-dialog-content"
         data-size={size}
         className={cn(
-          "group/alert-dialog-content fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-[18px] rounded-[1.5rem] border-0 bg-blanco p-[22px] shadow-[0_24px_60px_-20px_rgba(15,35,80,0.35)] duration-[280ms] data-[size=sm]:max-w-xs data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[size=default]:sm:max-w-lg",
+          // Confirmación del taller: la misma ventana, más compacta (440 px);
+          // en el celular, hoja con agarradera. Tocar afuera no la cierra.
+          "ventana group/alert-dialog-content fixed top-[50%] left-[50%] z-50 grid max-h-[90vh] w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-[18px] overflow-y-auto overscroll-contain rounded-3xl border-0 bg-blanco p-6 shadow-ventana outline-none data-[size=sm]:max-w-xs data-[size=default]:sm:max-w-[440px]",
+          "max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:max-h-[92vh] max-sm:max-w-none max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-b-none max-sm:px-[18px] max-sm:pt-[26px] max-sm:pb-[calc(18px+env(safe-area-inset-bottom,0px))] max-sm:data-[size=sm]:max-w-none",
+          "max-sm:before:absolute max-sm:before:top-2 max-sm:before:left-1/2 max-sm:before:h-[5px] max-sm:before:w-[38px] max-sm:before:-translate-x-1/2 max-sm:before:rounded max-sm:before:bg-fill-2",
           className
         )}
+        onTouchStart={(e) => {
+          onTouchStart?.(e)
+          arrastre.onTouchStart(e)
+        }}
+        onPointerDown={(e) => {
+          onPointerDown?.(e)
+          arrastre.onPointerDown(e)
+        }}
         {...props}
       />
     </AlertDialogPortal>
@@ -75,7 +89,8 @@ function AlertDialogHeader({
     <div
       data-slot="alert-dialog-header"
       className={cn(
-        "grid grid-rows-[auto_1fr] place-items-center gap-1.5 text-center has-data-[slot=alert-dialog-media]:grid-rows-[auto_auto_1fr] has-data-[slot=alert-dialog-media]:gap-x-3.5 sm:group-data-[size=default]/alert-dialog-content:place-items-start sm:group-data-[size=default]/alert-dialog-content:text-left sm:group-data-[size=default]/alert-dialog-content:has-data-[slot=alert-dialog-media]:grid-rows-[auto_1fr] sm:group-data-[size=default]/alert-dialog-content:has-data-[slot=alert-dialog-media]:grid-cols-[auto_1fr]",
+        // Círculo a la izquierda; título y texto a su lado, alineados a la izquierda.
+        "grid grid-rows-[auto_1fr] place-items-start gap-x-3.5 gap-y-1 text-left has-data-[slot=alert-dialog-media]:grid-cols-[auto_1fr]",
         className
       )}
       {...props}
@@ -91,7 +106,8 @@ function AlertDialogFooter({
     <div
       data-slot="alert-dialog-footer"
       className={cn(
-        "flex flex-col-reverse gap-2 group-data-[size=sm]/alert-dialog-content:grid group-data-[size=sm]/alert-dialog-content:grid-cols-2 sm:flex-row sm:justify-end",
+        // Cancelar gris y la acción, a la derecha; en el celular a lo ancho.
+        "flex flex-row justify-end gap-2.5 max-sm:*:flex-1 group-data-[size=sm]/alert-dialog-content:grid group-data-[size=sm]/alert-dialog-content:grid-cols-2",
         className
       )}
       {...props}
@@ -107,7 +123,7 @@ function AlertDialogTitle({
     <AlertDialogPrimitive.Title
       data-slot="alert-dialog-title"
       className={cn(
-        "text-[17px] leading-tight font-semibold tracking-[-0.2px] sm:text-[22px] sm:tracking-[-0.4px] sm:group-data-[size=default]/alert-dialog-content:group-has-data-[slot=alert-dialog-media]/alert-dialog-content:col-start-2",
+        "text-lead font-semibold tracking-[-0.2px] group-has-data-[slot=alert-dialog-media]/alert-dialog-content:col-start-2 sm:text-h1 sm:tracking-[-0.4px]",
         className
       )}
       {...props}
@@ -122,7 +138,7 @@ function AlertDialogDescription({
   return (
     <AlertDialogPrimitive.Description
       data-slot="alert-dialog-description"
-      className={cn("text-[13.5px] text-muted", className)}
+      className={cn("text-body text-muted group-has-data-[slot=alert-dialog-media]/alert-dialog-content:col-start-2", className)}
       {...props}
     />
   )
@@ -136,8 +152,8 @@ function AlertDialogMedia({
     <div
       data-slot="alert-dialog-media"
       className={cn(
-        // Círculo de 44 px en el color de lo que pasa (estilo del taller).
-        "mb-1 inline-flex size-11 items-center justify-center rounded-full bg-accent-soft text-accent sm:mb-0 sm:group-data-[size=default]/alert-dialog-content:row-span-2 *:[svg:not([class*='size-'])]:size-[21px]",
+        // Círculo de 44 px (40 en el celular) en el color de lo que pasa.
+        "row-span-2 inline-flex size-10 items-center justify-center rounded-full bg-accent-soft-2 text-accent sm:size-11 *:[svg:not([class*='size-'])]:size-[21px]",
         className
       )}
       {...props}

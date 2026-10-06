@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useArrastrarHoja } from "@/lib/use-arrastrar-hoja"
 import { X } from "@phosphor-icons/react/dist/ssr"
 import { Dialog as SheetPrimitive } from "radix-ui"
 
@@ -35,7 +36,7 @@ function SheetOverlay({
     <SheetPrimitive.Overlay
       data-slot="sheet-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-text/30 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0",
+        "velo fixed inset-0 z-50",
         className
       )}
       {...props}
@@ -48,16 +49,50 @@ function SheetContent({
   children,
   side = "right",
   showCloseButton = true,
+  onTouchStart,
+  onPointerDown,
   ...props
 }: React.ComponentProps<typeof SheetPrimitive.Content> & {
-  side?: "top" | "right" | "bottom" | "left"
+  side?: "top" | "right" | "bottom" | "left" | "barra"
   showCloseButton?: boolean
 }) {
+  // La hoja de la barra se arrastra hacia abajo para cerrarla, en todo ancho.
+  const arrastre = useArrastrarHoja({ siempre: true })
+  // La hoja de un grupo de la barra de abajo: sube sobre la barra, con las
+  // cuatro esquinas redondas (globals.css, .hoja-barra).
+  if (side === "barra") {
+    return (
+      <SheetPortal>
+        <SheetOverlay />
+        <SheetPrimitive.Content
+          data-slot="sheet-content"
+          className={cn(
+            "hoja-barra fixed inset-x-2.5 bottom-[var(--gbar-sitio)] z-50 mx-auto flex max-h-[calc(100dvh-var(--gbar-sitio)-40px)] max-w-[560px] flex-col overflow-y-auto overscroll-contain rounded-3xl bg-blanco px-2.5 pt-1 pb-3 text-text shadow-ventana outline-none",
+            className
+          )}
+          onTouchStart={(e) => {
+            onTouchStart?.(e)
+            arrastre.onTouchStart(e)
+          }}
+          onPointerDown={(e) => {
+            onPointerDown?.(e)
+            arrastre.onPointerDown(e)
+          }}
+          {...props}
+        >
+          {children}
+        </SheetPrimitive.Content>
+      </SheetPortal>
+    )
+  }
+
   return (
     <SheetPortal>
       <SheetOverlay />
       <SheetPrimitive.Content
         data-slot="sheet-content"
+        onTouchStart={onTouchStart}
+        onPointerDown={onPointerDown}
         className={cn(
           "fixed z-50 flex flex-col gap-4 bg-background shadow-lg transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:animate-in data-[state=open]:duration-500",
           side === "right" &&

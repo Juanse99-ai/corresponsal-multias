@@ -13,7 +13,9 @@ function Checkbox({
     <CheckboxPrimitive.Root
       data-slot="checkbox"
       className={cn(
-        "peer size-4 shrink-0 rounded-[4px] border border-input shadow-xs transition-shadow outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground dark:bg-input/30 dark:aria-invalid:ring-destructive/40 dark:data-[state=checked]:bg-primary",
+        // Casilla del taller: 22 px, esquina 8, blanca con borde de campo; al
+        // marcarla se llena del azul de relleno. El toque llega a 44 con el ::after.
+        "peer relative size-[22px] shrink-0 rounded-lg border-[1.5px] border-borde-boton bg-blanco transition-colors duration-[var(--dur-1)] outline-none after:absolute after:-inset-[11px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent focus-visible:outline-solid disabled:cursor-not-allowed disabled:border-line disabled:bg-bg-soft aria-invalid:border-destructive data-[state=checked]:border-accent-fill data-[state=checked]:bg-accent-fill data-[state=checked]:text-white",
         className
       )}
       {...props}
@@ -22,7 +24,7 @@ function Checkbox({
         data-slot="checkbox-indicator"
         className="grid place-content-center text-current transition-none"
       >
-        <Check className="size-3.5" />
+        <Check weight="bold" className="size-3.5" />
       </CheckboxPrimitive.Indicator>
     </CheckboxPrimitive.Root>
   )

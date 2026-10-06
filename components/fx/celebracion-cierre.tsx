@@ -6,6 +6,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { LockSimple } from "@phosphor-icons/react/dist/ssr";
 import { formatFechaLarga } from "@/lib/format";
 import { useMontado } from "@/lib/use-montado";
+import { CURVA_IOS } from "@/lib/movimiento";
 
 const VERDE = "oklch(0.585 0.13 155)";
 
@@ -63,7 +64,7 @@ export function CelebracionCierre({ play, fecha, cuadrado }: { play: number; fec
             className="relative flex flex-col items-center gap-3.5 px-8 text-center"
             initial={{ opacity: 0, y: reducir ? 0 : 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: reducir ? 0 : 0.4, delay: reducir ? 0 : 0.08, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: reducir ? 0 : 0.4, delay: reducir ? 0 : 0.08, ease: CURVA_IOS }}
           >
             {cuadrado ? (
               <span className="flex h-24 w-24 items-center justify-center rounded-full bg-success-soft">

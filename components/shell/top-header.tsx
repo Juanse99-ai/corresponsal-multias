@@ -11,13 +11,13 @@ import {
   CalendarBlank,
   HandCoins,
   ArrowRight,
-  List,
   X,
 } from "@phosphor-icons/react/dist/ssr";
 import { Logo } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia } from "@/components/ui/empty";
+import { Empty, EmptyTitle } from "@/components/ui/empty";
+import { Contador } from "@/components/ui/contador";
 import {
   Item,
   ItemActions,
@@ -27,7 +27,6 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item";
-import { Separator } from "@/components/ui/separator";
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group";
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
@@ -138,11 +137,9 @@ function parseFechaISO(raw: string): string | null {
 export function TopHeader({
   resumen,
   isAdmin,
-  onOpenMenu,
 }: {
   resumen: HeaderResumen;
   isAdmin: boolean;
-  onOpenMenu: () => void;
 }) {
   const avisos = useMemo(() => buildAvisos(resumen), [resumen]);
   return (
@@ -153,15 +150,12 @@ export function TopHeader({
     <header className="barra-material barra-arriba sticky top-0 z-20 border-b border-line/80 lg:static lg:border-b-0" style={{ paddingTop: "env(safe-area-inset-top)" }}>
       <div className="relative mx-auto flex h-14 max-w-[1240px] items-center justify-between gap-3 px-1.5 sm:px-4 lg:h-12 lg:max-w-none lg:px-2">
       <div className="flex items-center gap-1.5 sm:gap-3">
-        <Button variant="ghost" onClick={onOpenMenu} aria-label="Abrir menú" className="w-11 px-0 sm:w-auto sm:px-3 lg:hidden">
-          <List size={20} />
-          <span className="hidden sm:inline">Menú</span>
-        </Button>
-        <Link href="/panel" className="flex items-center gap-2 lg:hidden">
-          <Logo size={30} />
+        {/* Sin botón de menú: abajo está la barra. El logo lleva al Panel. */}
+        <Link href="/panel" aria-label="Inicio" className="ml-2 flex items-center gap-2 rounded-xl shadow-[0_1px_2px_rgba(20,16,50,0.08),0_4px_10px_-6px_rgba(20,16,50,0.3)] sm:ml-0 lg:hidden">
+          <Logo size={40} className="rounded-xl" />
           <span className="hidden text-sm font-semibold tracking-tight text-text sm:block">Barrio Centro Sabanalarga 18</span>
         </Link>
-        <span className="ml-1 hidden text-[0.82rem] text-muted lg:block">{formatFechaLarga(hoyISO())}</span>
+        <span className="ml-1 hidden text-body text-muted lg:block">{formatFechaLarga(hoyISO())}</span>
       </div>
       <div className="flex items-center gap-1">
         <div className="contents lg:hidden">
@@ -223,6 +217,7 @@ export function HeaderSearch({ personas, enPanel = false }: { personas: string[]
       {/* Celular: lupa de 44x44. El buscador completo se abre encima del encabezado. */}
       {!enPanel && (
       <IconButton
+        forma="suelto"
         label="Buscar día o persona"
         onClick={() => {
           setMovil(true);
@@ -266,7 +261,7 @@ export function HeaderSearch({ personas, enPanel = false }: { personas: string[]
           placeholder="Buscar día, persona…"
           aria-label="Buscar día o persona"
           /* text-base en celular: con menos de 16px iOS hace zoom al enfocar. */
-          className={cn("text-base placeholder:text-faint sm:text-[0.82rem]", enPanel && "text-[0.84rem]")}
+          className={cn("text-base placeholder:text-faint sm:text-body", enPanel && "text-body")}
         />
         {movil && (
           <InputGroupAddon align="inline-end" className="sm:hidden">
@@ -287,7 +282,7 @@ export function HeaderSearch({ personas, enPanel = false }: { personas: string[]
         className="w-[min(20rem,80vw)] overflow-hidden p-0"
       >
             {!hayResultados ? (
-              <p className="px-4 py-3 text-[0.8rem] text-faint">Escribe una fecha (17/06) o el nombre de una persona.</p>
+              <p className="px-4 py-3 text-meta text-faint">Escribe una fecha (17/06) o el nombre de una persona.</p>
             ) : (
               <ItemGroup className="py-1">
                 {fechaISO && (
@@ -297,10 +292,10 @@ export function HeaderSearch({ personas, enPanel = false }: { personas: string[]
                         <CalendarBlank size={16} className="text-accent" />
                       </ItemMedia>
                       <ItemContent>
-                        <ItemTitle className="text-[0.84rem] font-normal text-text">Ver el día {formatFecha(fechaISO)}</ItemTitle>
+                        <ItemTitle className="text-body font-normal text-text">Ver el día {formatFecha(fechaISO)}</ItemTitle>
                       </ItemContent>
                       <ItemActions>
-                        <ArrowRight size={14} className="text-faint" />
+                        <ArrowRight size={14} className="text-inerte" />
                       </ItemActions>
                     </Button>
                   </Item>
@@ -312,10 +307,10 @@ export function HeaderSearch({ personas, enPanel = false }: { personas: string[]
                         <HandCoins size={16} className="text-accent" />
                       </ItemMedia>
                       <ItemContent>
-                        <ItemTitle className="text-[0.84rem] font-normal text-text">{p}</ItemTitle>
+                        <ItemTitle className="text-body font-normal text-text">{p}</ItemTitle>
                       </ItemContent>
                       <ItemActions>
-                        <span className="text-[0.7rem] text-faint">Préstamos</span>
+                        <span className="text-meta text-faint">Préstamos</span>
                       </ItemActions>
                     </Button>
                   </Item>
@@ -331,14 +326,14 @@ export function HeaderSearch({ personas, enPanel = false }: { personas: string[]
 
 // Fila de resultado del buscador: <Item> sobre un <Button> fantasma a todo el ancho.
 const filaResultado =
-  "h-auto min-h-11 w-full flex-nowrap justify-start rounded-none border-0 text-left font-normal hover:bg-surface-2/70";
+  "h-auto min-h-11 w-full flex-nowrap justify-start rounded-none border-0 text-left font-normal hover:bg-fill active:scale-100";
 
+// Círculo de 32 en el par de su estado: rojo urgente, ámbar "ojo", azul informa.
 const TONE: Record<Tone, { wrap: string; icon: typeof Warning }> = {
-  danger: { wrap: "bg-danger-soft text-danger", icon: Warning },
-  // Urgente e informativo tenían el mismo fondo y color: no se distinguían.
-  warn: { wrap: "bg-danger-soft/60 text-danger", icon: Warning },
-  info: { wrap: "bg-accent-soft text-accent-strong", icon: HandCoins },
-  ok: { wrap: "bg-success-soft text-success", icon: CheckCircle },
+  danger: { wrap: "bg-bad-bg text-bad-fg", icon: Warning },
+  warn: { wrap: "bg-warn-bg text-warn-fg", icon: Warning },
+  info: { wrap: "bg-info-bg text-info-fg", icon: HandCoins },
+  ok: { wrap: "bg-ok-bg text-ok-fg", icon: CheckCircle },
 };
 
 export function HeaderAvisos({ avisos, urgentes }: { avisos: Aviso[]; urgentes: number }) {
@@ -347,7 +342,7 @@ export function HeaderAvisos({ avisos, urgentes }: { avisos: Aviso[]; urgentes: 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-      <IconButton label={avisos.length ? `Avisos (${avisos.length})` : "Avisos"}>
+      <IconButton forma="suelto" label={avisos.length ? `Avisos (${avisos.length})` : "Avisos"}>
         <span className="relative inline-flex">
           <Bell size={18} weight={avisos.length ? "fill" : "regular"} />
           {avisos.length > 0 && (
@@ -364,36 +359,30 @@ export function HeaderAvisos({ avisos, urgentes }: { avisos: Aviso[]; urgentes: 
       </PopoverTrigger>
 
       <PopoverContent align="end" sideOffset={10} className="w-[min(22rem,84vw)] overflow-hidden p-0">
-            <div className="flex items-center justify-between px-4 py-3">
-              <p className="text-[0.84rem] font-semibold text-text">Avisos</p>
-              <span className="text-[0.72rem] text-faint">{avisos.length}</span>
+            <div className="flex items-center justify-between gap-3 px-4 pt-3.5 pb-1.5">
+              <p className="text-title font-semibold text-text">Avisos</p>
+              <Contador n={avisos.length} />
             </div>
-            <Separator className="bg-line/60" />
             {avisos.length === 0 ? (
-              <Empty className="gap-2 px-4 py-8 md:px-4 md:py-8">
-                <EmptyHeader className="gap-2">
-                  <EmptyMedia className="mb-0">
-                    <CheckCircle size={22} weight="fill" className="text-success" />
-                  </EmptyMedia>
-                  <EmptyDescription className="text-[0.84rem] text-muted">No hay avisos.</EmptyDescription>
-                </EmptyHeader>
+              <Empty compacto>
+                <EmptyTitle>No hay avisos</EmptyTitle>
               </Empty>
             ) : (
-              <ItemGroup>
+              <ItemGroup className="pb-1.5">
                 {avisos.map((a) => {
                   const T = TONE[a.tone];
                   return (
-                    <Item key={a.id} size="sm" asChild className="flex-nowrap items-start gap-3 rounded-none border-0 hover:bg-surface-2/70">
+                    <Item key={a.id} size="sm" asChild className="min-h-11 flex-nowrap items-start gap-3 rounded-none border-0 py-2.5 [a]:hover:bg-fill">
                       <Link href={a.href} onClick={() => setOpen(false)}>
                         <ItemMedia className={cn("size-8 rounded-full", T.wrap)}>
                           <T.icon size={15} weight="fill" />
                         </ItemMedia>
                         <ItemContent className="min-w-0 gap-0">
-                          <ItemTitle className="text-[0.85rem] font-medium text-text">{a.title}</ItemTitle>
-                          <ItemDescription className="text-[0.76rem] text-faint">{a.detail}</ItemDescription>
+                          <ItemTitle className="text-body font-medium text-text">{a.title}</ItemTitle>
+                          <ItemDescription className="text-meta text-faint">{a.detail}</ItemDescription>
                         </ItemContent>
                         <ItemActions className="mt-1 self-start">
-                          <ArrowRight size={14} className="shrink-0 text-faint" />
+                          <ArrowRight size={14} className="shrink-0 text-inerte" />
                         </ItemActions>
                       </Link>
                     </Item>

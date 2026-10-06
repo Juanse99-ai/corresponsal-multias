@@ -1,5 +1,5 @@
 import { ArrowsLeftRight, Money, NotePencil } from "@phosphor-icons/react/dist/ssr";
-import { ChoiceChip } from "@/components/ui/choice-chip";
+import { Baldosas, Baldosa } from "@/components/ui/baldosas";
 
 export type Medio = "efectivo" | "transferencia" | "registro";
 
@@ -17,9 +17,10 @@ export const NOMBRE_MEDIO: Record<Medio, string> = {
 };
 
 /**
- * Cómo se entregó la plata de un préstamo. Cada pantalla conserva el orden que
- * ya tenía (en Movimientos va primero Efectivo): cambiarlo provocaría toques
- * equivocados justo en un campo que decide dónde cae la plata.
+ * Cómo se entregó la plata de un préstamo, en tres baldosas. Cada pantalla
+ * conserva el orden que ya tenía (en Movimientos va primero Efectivo):
+ * cambiarlo provocaría toques equivocados justo en un campo que decide dónde
+ * cae la plata. Sin premarcar: mientras no se elige, ninguna va elegida.
  */
 export function MedioPicker({
   medio,
@@ -34,21 +35,16 @@ export function MedioPicker({
 }) {
   const pares: Medio[] = efectivoPrimero ? ["efectivo", "transferencia"] : ["transferencia", "efectivo"];
   return (
-    <div role="group" aria-labelledby={labelledBy} className="grid grid-cols-2 gap-2">
+    <Baldosas
+      value={medio ?? ""}
+      onValueChange={(v) => onChange(v as Medio)}
+      aria-labelledby={labelledBy}
+      className="grid-cols-3"
+    >
       {[...pares, "registro" as const].map((m) => {
         const Icono = ICONO_MEDIO[m];
-        return (
-          <ChoiceChip
-            key={m}
-            selected={medio === m}
-            onClick={() => onChange(m)}
-            icon={<Icono size={15} />}
-            className={m === "registro" ? "col-span-2 w-full" : "w-full"}
-          >
-            {NOMBRE_MEDIO[m]}
-          </ChoiceChip>
-        );
+        return <Baldosa key={m} value={m} icono={<Icono />} nombre={NOMBRE_MEDIO[m]} />;
       })}
-    </div>
+    </Baldosas>
   );
 }

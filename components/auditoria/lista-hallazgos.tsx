@@ -1,9 +1,8 @@
 import { Fragment } from "react";
 import Link from "next/link";
 import { CheckCircle, WarningCircle, Info, CaretRight } from "@phosphor-icons/react/dist/ssr";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Contador } from "@/components/ui/contador";
 import {
   ItemGroup,
   Item,
@@ -12,7 +11,6 @@ import {
   ItemTitle,
   ItemDescription,
   ItemActions,
-  ItemSeparator,
 } from "@/components/ui/item";
 import { cn } from "@/lib/utils";
 import { formatCOP, formatFechaCorta } from "@/lib/format";
@@ -27,78 +25,77 @@ export function ListaHallazgos({ hallazgos }: { hallazgos: Hallazgo[] }) {
   const graves = hallazgos.filter((h) => h.gravedad === "alta");
   const avisos = hallazgos.filter((h) => h.gravedad === "media");
 
+  // El único vacío que se celebra: todo revisado y en orden.
   if (hallazgos.length === 0) {
     return (
-      <Card className="p-0">
-        <Empty className="gap-2 p-8 md:p-8">
-          <EmptyHeader>
-            <EmptyMedia className="mb-0 text-success">
-              <CheckCircle size={22} weight="fill" />
-            </EmptyMedia>
-            <EmptyTitle className="text-[0.9rem] text-text">Sin hallazgos</EmptyTitle>
-            <EmptyDescription className="text-[0.8rem]">
-              Ningún registro pasa del tope, no hay duplicados y todos los días tienen su cuadre.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
+      <Card className="p-5">
+        <p className="flex items-start gap-2 rounded-lg bg-ok-bg px-3 py-2.5 text-meta text-ok-fg">
+          <CheckCircle size={15} weight="fill" className="mt-px shrink-0" />
+          <span>
+            <span className="font-semibold">Sin hallazgos.</span> Ningún registro pasa del tope, no hay duplicados y
+            todos los días tienen su cuadre.
+          </span>
+        </p>
       </Card>
     );
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <Card>
       {[
         { titulo: "Revisar", items: graves, grave: true },
         { titulo: "Vale la pena mirar", items: avisos, grave: false },
       ]
         .filter((g) => g.items.length > 0)
         .map((grupo) => (
-          <div key={grupo.titulo}>
-            <p className="mb-2 text-[0.78rem] font-medium text-muted">
-              {grupo.titulo} ({grupo.items.length})
-            </p>
-            <Card className="overflow-hidden p-0">
-              <ItemGroup>
+          <Fragment key={grupo.titulo}>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-meta font-semibold tracking-normal text-faint">
+                <h2>{grupo.titulo}</h2>
+                <Contador n={grupo.items.length} tono={grupo.grave ? "peligro" : "aviso"} />
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="not-last:pb-2">
+              <ItemGroup variant="cajitas" className="max-lg:divide-y max-lg:divide-linea-fila">
                 {grupo.items.map((h, i) => (
                   <Fragment key={`${h.tipo}-${h.fecha}-${i}`}>
-                    {i > 0 && <ItemSeparator />}
-                    <Item asChild size="sm" className="items-start gap-3 rounded-none hover:bg-surface-2">
+                    <Item asChild size="sm" className="flex-nowrap items-start gap-3 px-0 py-3">
                       <Link href={destino(h)}>
-                        <ItemMedia className="mt-0.5">
-                          {grupo.grave ? (
-                            <WarningCircle size={17} weight="fill" className="text-danger" />
-                          ) : (
-                            <Info size={17} weight="fill" className="text-faint" />
+                        <ItemMedia
+                          className={cn(
+                            "size-8 rounded-full group-has-[[data-slot=item-description]]/item:translate-y-0",
+                            grupo.grave ? "bg-bad-bg text-bad-fg" : "bg-warn-bg text-warn-fg",
                           )}
+                        >
+                          {grupo.grave ? <WarningCircle size={16} weight="fill" /> : <Info size={16} weight="fill" />}
                         </ItemMedia>
                         <ItemContent className="min-w-0 gap-0.5">
-                          <ItemTitle className="flex-wrap items-baseline gap-x-2 gap-y-0">
-                            <span className="text-[0.88rem] font-medium text-text">{h.titulo}</span>
-                            <span className="text-[0.74rem] font-normal text-faint">{formatFechaCorta(h.fecha)}</span>
+                          {/* El monto va a la derecha del título: así el detalle
+                              usa todo el ancho y no queda en una columna angosta. */}
+                          <ItemTitle className="w-full items-start justify-between gap-3">
+                            <span className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0">
+                              <span className="text-body font-medium text-text">{h.titulo}</span>
+                              <span className="text-meta font-normal text-faint">{formatFechaCorta(h.fecha)}</span>
+                            </span>
                             {h.monto !== null && (
-                              <Badge
-                                variant={grupo.grave ? "danger" : "outline"}
-                                className={cn("tnum text-[0.78rem]", !grupo.grave && "text-text")}
-                              >
-                                {formatCOP(h.monto)}
-                              </Badge>
+                              <span className="tnum shrink-0 text-title font-semibold text-text">{formatCOP(h.monto)}</span>
                             )}
                           </ItemTitle>
-                          <ItemDescription className="line-clamp-none text-[0.76rem] leading-snug text-balance">
+                          <ItemDescription className="line-clamp-none leading-snug text-balance text-muted">
                             {h.detalle}
                           </ItemDescription>
                         </ItemContent>
-                        <ItemActions className="mt-1">
-                          <CaretRight size={14} className="text-faint" />
+                        <ItemActions className="shrink-0 self-center">
+                          <CaretRight size={14} weight="bold" className="text-inerte" />
                         </ItemActions>
                       </Link>
                     </Item>
                   </Fragment>
                 ))}
               </ItemGroup>
-            </Card>
-          </div>
+            </CardContent>
+          </Fragment>
         ))}
-    </div>
+    </Card>
   );
 }

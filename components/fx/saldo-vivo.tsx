@@ -37,6 +37,7 @@ export function SaldoVivo({ saldo, descuadre }: { saldo: number; descuadre: bool
       </span>
       <AnimatedMoney
         value={saldo}
+        desdeCero={false}
         className="tnum min-w-0 flex-1 text-[1.75rem] leading-none font-semibold tracking-tight sm:text-4xl"
       />
     </div>

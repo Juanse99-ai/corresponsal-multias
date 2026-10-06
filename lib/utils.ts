@@ -1,5 +1,18 @@
 import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { extendTailwindMerge } from "tailwind-merge";
+
+// La escala propia de globals.css (@theme inline). Sin esto tailwind-merge
+// toma `text-title` por un color y, junto a `text-muted`, lo borra.
+const twMerge = extendTailwindMerge({
+  extend: {
+    theme: {
+      text: ["label", "meta", "body", "title", "lead", "h1", "kpi", "display"],
+      radius: ["panel", "marco", "card"],
+      shadow: ["pastilla", "riel-on", "primario", "chica", "flota", "ventana"],
+      ease: ["ios"],
+    },
+  },
+});
 
 /** Une clases condicionales y resuelve conflictos de Tailwind. */
 export function cn(...inputs: ClassValue[]) {

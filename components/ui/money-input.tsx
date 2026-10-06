@@ -32,7 +32,7 @@ export const MoneyInput = React.forwardRef<HTMLInputElement, MoneyInputProps>(fu
       <span
         className={cn(
           "pointer-events-none absolute left-3.5 text-faint tnum",
-          size === "lg" ? "text-lg" : "text-sm",
+          size === "lg" ? "text-lead" : "text-body",
         )}
       >
         $
@@ -56,7 +56,9 @@ export const MoneyInput = React.forwardRef<HTMLInputElement, MoneyInputProps>(fu
         }}
         className={cn(
           "tnum pr-3.5 pl-8 text-right",
-          size === "lg" ? "h-14 text-2xl font-semibold" : "h-11 text-base",
+          // El grande (56 px, 22/600) para el dato que manda: la tirilla, el
+          // monto a registrar.
+          size === "lg" ? "h-14 text-h1 font-semibold tracking-[-0.3px] lg:text-h1" : "h-11",
           className,
         )}
       />

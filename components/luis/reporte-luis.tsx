@@ -19,12 +19,15 @@ export function ReporteLuisButton({
   compensaciones,
   acumulado,
   acumuladoAyer,
+  comoIcono = false,
 }: {
   fecha: string;
   consignaciones: MovimientoItem[];
   compensaciones: MovimientoItem[];
   acumulado: number;
   acumuladoAyer: number;
+  /** En la cabecera de la pantalla: círculo blanco con el nombre en el globo. */
+  comoIcono?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -77,15 +80,19 @@ export function ReporteLuisButton({
     }
   }
 
-  // Dialog de shadcn sin caja propia: el contenido es la imagen del reporte.
+  // Dialog de shadcn: en el computador sin caja propia (el contenido es la
+  // imagen del reporte); en el celular, la imagen y los botones van en la hoja.
   const modal = (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
         showCloseButton={false}
-        className="max-h-[calc(100dvh-2rem)] max-w-[460px] gap-0 overflow-y-auto rounded-none border-0 bg-transparent p-0 shadow-none sm:max-w-[460px]"
+        className="max-w-[460px] gap-0 sm:max-h-[calc(100dvh-2rem)] sm:max-w-[460px] sm:rounded-none sm:bg-transparent sm:p-0 sm:shadow-none"
       >
         <DialogTitle className="sr-only">Reporte para el Sr. Luis {fechaDMY(fecha)}</DialogTitle>
         <DialogDescription className="sr-only">Descargar o compartir la imagen del reporte.</DialogDescription>
+            {/* El filo va afuera de la imagen (en la hoja blanca del celular no se
+                vería su borde) para que no salga en el PNG. */}
+            <div className="rounded-[1.1rem] max-sm:ring-1 max-sm:ring-line">
             <div
               ref={ref}
               style={{ fontFamily: "var(--font-ios)" }}
@@ -118,6 +125,7 @@ export function ReporteLuisButton({
                 Multidiagnósticos AS
               </div>
             </div>
+            </div>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <Button onClick={descargar} disabled={busy} className="basis-full sm:flex-1 sm:basis-0">
@@ -128,7 +136,7 @@ export function ReporteLuisButton({
                 <ShareNetwork size={17} />
                 Compartir
               </Button>
-              <IconButton label="Cerrar" variant="secondary" onClick={() => setOpen(false)}>
+              <IconButton label="Cerrar" onClick={() => setOpen(false)}>
                 <X size={18} />
               </IconButton>
             </div>
@@ -138,10 +146,16 @@ export function ReporteLuisButton({
 
   return (
     <>
-      <Button onClick={() => setOpen(true)}>
-        <Export size={17} weight="bold" />
-        Reporte para el Sr. Luis
-      </Button>
+      {comoIcono ? (
+        <IconButton forma="blanco" label="Reporte para el Sr. Luis" onClick={() => setOpen(true)}>
+          <Export size={19} weight="bold" />
+        </IconButton>
+      ) : (
+        <Button onClick={() => setOpen(true)}>
+          <Export size={17} weight="bold" />
+          Reporte para el Sr. Luis
+        </Button>
+      )}
       {modal}
     </>
   );

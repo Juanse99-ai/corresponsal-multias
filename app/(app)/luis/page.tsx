@@ -5,7 +5,10 @@ import { LuisManager } from "@/components/luis/luis-manager";
 import { SoportesSection } from "@/components/cuadre/soportes-section";
 import { ComprobantesLector } from "@/components/luis/comprobantes-lector";
 import { leerComprobantesDelDia, agregarConsignacionesLote } from "@/app/(app)/luis/actions";
-import { PageHeader } from "@/components/shell/page-header";
+import { PageHeader, CifraCabecera } from "@/components/shell/page-header";
+import { ReporteLuisButton } from "@/components/luis/reporte-luis";
+import { AnimatedMoney } from "@/components/ui/animated-number";
+import { Badge } from "@/components/ui/badge";
 import { DateNav } from "@/components/shell/date-nav";
 
 export const metadata: Metadata = { title: "Cuenta del Sr. Luis · Corresponsal" };
@@ -27,10 +30,38 @@ export default async function LuisPage({
     getSoportes(fecha, "luis"),
   ]);
 
+  // El saldo acumulado (lo que el punto le debe al Sr. Luis): la cifra de la cabecera.
+  const totalComp = compensaciones.reduce((s, c) => s + c.monto, 0);
+  const totalConsig = consignaciones.reduce((s, c) => s + c.monto, 0);
+  const acumulado = acumuladoAyer + totalComp - totalConsig;
+
   return (
     <div>
-      <PageHeader title="Cuenta del Sr. Luis" subtitle={formatFechaLarga(fecha)}>
+      <PageHeader
+        title="Cuenta del Sr. Luis"
+        subtitle={formatFechaLarga(fecha)}
+        cifras={
+          <CifraCabecera
+            rotulo="Saldo acumulado del Sr. Luis"
+            chip={
+              <Badge variant={acumulado > 0 ? "info" : acumulado === 0 ? "success" : "secondary"}>
+                {acumulado > 0 ? "A favor de Luis" : acumulado < 0 ? "A favor del punto" : "Igualado"}
+              </Badge>
+            }
+          >
+            <AnimatedMoney value={acumulado} />
+          </CifraCabecera>
+        }
+      >
         <DateNav fecha={fecha} base="/luis" />
+        <ReporteLuisButton
+          comoIcono
+          fecha={fecha}
+          consignaciones={consignaciones}
+          compensaciones={compensaciones}
+          acumulado={acumulado}
+          acumuladoAyer={acumuladoAyer}
+        />
       </PageHeader>
       <LuisManager
         fecha={fecha}

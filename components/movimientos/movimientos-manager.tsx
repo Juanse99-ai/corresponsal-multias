@@ -8,8 +8,6 @@ import {
   Plus,
   Trash,
   PencilSimple,
-  Clock,
-  ArrowDown,
   ArrowUp,
   DeviceMobile,
   Bank,
@@ -23,10 +21,13 @@ import type { Icon } from "@phosphor-icons/react";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
-import { Empty, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { Empty, EmptyTitle } from "@/components/ui/empty";
+import { Contador } from "@/components/ui/contador";
+import { Celdas, Celda } from "@/components/ui/celdas";
+import { Baldosas, Baldosa } from "@/components/ui/baldosas";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { Alert, AlertTitle } from "@/components/ui/alert";
-import { ChoiceChip } from "@/components/ui/choice-chip";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { MoneyInput } from "@/components/ui/money-input";
@@ -38,6 +39,7 @@ import { formatCOP, formatHora } from "@/lib/format";
 import type { MovimientoRow } from "@/lib/database.types";
 import { agregarMovimiento, eliminarMovimiento, editarMovimiento } from "@/app/(app)/movimientos/actions";
 import { reduced } from "@/components/fx/reduced";
+import { TRANSICION } from "@/lib/movimiento";
 
 type Tipo = "consignacion_nequi" | "consignacion_bancolombia" | "recaudo" | "retiro";
 
@@ -46,6 +48,14 @@ const TIPOS: Record<Tipo, { label: string; corto: string; icon: Icon; salida: bo
   consignacion_bancolombia: { label: "Consignación a Bancolombia", corto: "Bancolombia", icon: Bank, salida: false },
   recaudo: { label: "Recaudo", corto: "Recaudo", icon: Receipt, salida: false },
   retiro: { label: "Retiro", corto: "Retiro", icon: ArrowUp, salida: true } };
+
+/** Rótulo de cada total en las celdas del día. */
+const TOTAL: Record<Tipo, string> = {
+  consignacion_nequi: "Nequi",
+  consignacion_bancolombia: "Bancolombia",
+  recaudo: "Recaudos",
+  retiro: "Retiros",
+};
 
 function horaActual(): string {
   const d = new Date();
@@ -148,7 +158,7 @@ export function MovimientosManager({
       {/* Registro + lista */}
       <div className="flex flex-col gap-5">
         <Card>
-          <CardHeader className="pb-0">
+          <CardHeader>
             <CardTitle className="text-text">
               <h2>Registrar movimiento</h2>
             </CardTitle>
@@ -156,39 +166,54 @@ export function MovimientosManager({
           <CardContent>
 
           {bloqueado && (
-            <Alert variant="muted" className="mt-4">
+            <Alert variant="muted" className="mb-4">
               <Lock weight="fill" />
               <AlertTitle className="line-clamp-none font-normal">Día cerrado. Solo Juan puede reabrirlo para editar.</AlertTitle>
             </Alert>
           )}
 
-          <div className={cn("mt-4 flex flex-wrap gap-2", bloqueado && "pointer-events-none opacity-50")}>
+          <fieldset disabled={bloqueado} className="contents">
+          {/* El tipo en baldosas: decide dónde cae la plata. El nombre largo va
+              para el lector de pantalla. */}
+          <Baldosas
+            value={tipo}
+            onValueChange={(v) => setTipo(v as Tipo)}
+            disabled={bloqueado}
+            aria-label="Tipo de movimiento"
+            className="grid-cols-2 sm:grid-cols-4"
+          >
             {(Object.keys(TIPOS) as Tipo[]).map((t) => {
               const Ti = TIPOS[t];
               return (
-                <ChoiceChip key={t} selected={tipo === t} onClick={() => setTipo(t)} icon={<Ti.icon size={15} weight="bold" />}>
-                  {Ti.label}
-                </ChoiceChip>
+                <Baldosa
+                  key={t}
+                  value={t}
+                  aria-label={Ti.label}
+                  icono={<Ti.icon />}
+                  nombre={Ti.corto}
+                  detalle={t.startsWith("consignacion") ? "Consignación" : undefined}
+                />
               );
             })}
-          </div>
+          </Baldosas>
 
-          <div className={cn("mt-4 grid gap-4 sm:grid-cols-2", bloqueado && "pointer-events-none opacity-50")}>
-            <div className="flex flex-col gap-2">
+          <div className="mt-4 grid gap-x-4 gap-y-3.5 sm:grid-cols-2">
+            <div className="flex flex-col gap-1.5">
               <Label htmlFor="mov-monto">Monto</Label>
               <MoneyInput id="mov-monto" size="lg" value={monto} onValueChange={setMonto} autoFocus onEnter={() => !pending && !bloqueado && registrar()} />
             </div>
             {tipo === "recaudo" && (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-1.5">
                 <Label htmlFor="mov-convenio">Código de convenio</Label>
                 <Input id="mov-convenio" value={convenio} onChange={(e) => setConvenio(e.target.value)} placeholder="Ej. 12345" inputMode="numeric" onKeyDown={(e) => esEnter(e) && !pending && !bloqueado && registrar()} />
               </div>
             )}
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-1.5">
               <Label htmlFor="mov-cliente">{tipo === "recaudo" ? "Referencia o cliente" : "Cliente (opcional)"}</Label>
               <Input id="mov-cliente" value={cliente} onChange={(e) => setCliente(e.target.value)} placeholder="Nombre o referencia" onKeyDown={(e) => esEnter(e) && !pending && !bloqueado && registrar()} />
             </div>
           </div>
+          </fieldset>
 
           <ErrorNotice message={error} className="mt-4" />
 
@@ -200,29 +225,29 @@ export function MovimientosManager({
         </Card>
 
         <Card>
-          <CardHeader className="items-center pb-3">
+          <CardHeader className="items-center">
             <CardTitle className="text-text">
               <h3>Registrados</h3>
             </CardTitle>
-            <CardAction className="row-span-1 self-center text-[0.72rem] text-faint">{movimientos.length}</CardAction>
+            <CardAction className="self-center">
+              <Contador n={movimientos.length} />
+            </CardAction>
           </CardHeader>
           <CardContent>
 
           {movimientos.length === 0 ? (
-            <Empty className="gap-2 rounded-[1rem] border border-dashed border-line-strong py-12 md:py-12">
-              <EmptyHeader>
-                <EmptyMedia className="mb-0 text-faint">
-                  <ArrowDown size={20} />
-                </EmptyMedia>
-                <EmptyTitle className="text-sm font-normal tracking-normal text-muted">Aún no hay movimientos registrados.</EmptyTitle>
-              </EmptyHeader>
+            <Empty fila>
+              <EmptyTitle>Aún no hay movimientos registrados</EmptyTitle>
             </Empty>
           ) : (
-            <ItemGroup className="divide-y divide-line">
+            <ItemGroup variant="cajitas" className="max-lg:divide-y max-lg:divide-linea-fila">
               <AnimatePresence initial={false}>
                 {movimientos.map((m) => {
                   const Ti = TIPOS[m.tipo as Tipo] ?? TIPOS.consignacion_nequi;
                   const nuevo = !yaEstaban.has(m.id) && !reduced();
+                  const detalle = [m.hora ? formatHora(m.hora) : null, [m.convenio, m.cliente].filter(Boolean).join(", ") || null]
+                    .filter(Boolean)
+                    .join(" · ");
                   return (
                     <motion.div
                       key={m.id}
@@ -231,27 +256,33 @@ export function MovimientosManager({
                       initial={{ opacity: 0, y: -8 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, height: 0 }}
-                      transition={{ type: "spring", stiffness: 320, damping: 30 }}
-                      className={cn("rounded-lg", nuevo && "t-flash-ok")}
+                      transition={TRANSICION}
+                      className={cn("rounded-xl", nuevo && "t-flash-ok")}
                     >
                       {editId === m.id ? (
-                        <div className="flex flex-col gap-2.5 py-2.5">
-                          <div className="flex flex-wrap gap-1.5">
-                            {(Object.keys(TIPOS) as Tipo[]).map((t) => {
-                              const Te = TIPOS[t];
-                              return (
-                                <ChoiceChip key={t} selected={eTipo === t} onClick={() => setETipo(t)} icon={<Te.icon size={15} weight="bold" />}>
-                                  {Te.corto}
-                                </ChoiceChip>
-                              );
-                            })}
-                          </div>
+                        // Edición en línea dentro de la misma cajita.
+                        <Item className="flex-col items-stretch gap-2.5 px-0 py-3">
+                          <ToggleGroup
+                            type="single"
+                            variant="segmentado"
+                            value={eTipo}
+                            onValueChange={(v) => v && setETipo(v as Tipo)}
+                            aria-label="Tipo de movimiento"
+                            className="w-full"
+                          >
+                            {(Object.keys(TIPOS) as Tipo[]).map((t) => (
+                              <ToggleGroupItem key={t} value={t} aria-label={TIPOS[t].label}>
+                                {TIPOS[t].corto}
+                              </ToggleGroupItem>
+                            ))}
+                          </ToggleGroup>
                           <div className="grid gap-2 sm:grid-cols-2">
-                            <MoneyInput value={eMonto} onValueChange={setEMonto} autoFocus />
+                            <MoneyInput value={eMonto} onValueChange={setEMonto} autoFocus aria-label="Monto" />
                             <Input
                               value={eCliente}
                               onChange={(e) => setECliente(e.target.value)}
                               placeholder={eTipo === "recaudo" ? "Referencia o cliente" : "Cliente (opcional)"}
+                              aria-label={eTipo === "recaudo" ? "Referencia o cliente" : "Cliente"}
                             />
                           </div>
                           {eTipo === "recaudo" && (
@@ -259,6 +290,7 @@ export function MovimientosManager({
                               value={eConvenio}
                               onChange={(e) => setEConvenio(e.target.value)}
                               placeholder="Código de convenio"
+                              aria-label="Código de convenio"
                               inputMode="numeric"
                             />
                           )}
@@ -267,41 +299,28 @@ export function MovimientosManager({
                               <Check size={16} weight="bold" />
                               Guardar
                             </Button>
-                            <IconButton label="Cancelar" onClick={() => setEditId(null)} disabled={pending} className="text-muted hover:text-foreground">
+                            <IconButton label="Cancelar" size="icon-sm" onClick={() => setEditId(null)} disabled={pending}>
                               <X size={17} />
                             </IconButton>
                           </div>
-                        </div>
+                        </Item>
                       ) : (
-                        <Item className="flex-nowrap gap-3 rounded-none px-0 py-2.5">
-                            <ItemMedia
-                              className={cn(
-                                "size-9 rounded-full",
-                                Ti.salida ? "bg-danger-soft text-danger" : "bg-accent-soft text-accent-strong",
-                              )}
-                            >
-                              <Ti.icon size={15} weight="bold" />
-                            </ItemMedia>
-                            <ItemContent className="min-w-0 gap-0 leading-tight">
-                              <ItemTitle className="w-full min-w-0 gap-1.5 text-[0.92rem] leading-tight text-text">
-                                <span className="tnum">{formatCOP(m.monto)}</span>
-                                <span className="truncate text-[0.78rem] font-normal text-muted">{Ti.corto}</span>
-                              </ItemTitle>
-                              <ItemDescription className="flex items-center gap-1.5 text-[0.74rem] leading-tight text-faint">
-                                {m.hora && (
-                                  <span className="inline-flex shrink-0 items-center gap-1">
-                                    <Clock size={10} />
-                                    {formatHora(m.hora)}
-                                  </span>
-                                )}
-                                {(m.convenio || m.cliente) && (
-                                  <span className="truncate">{[m.convenio, m.cliente].filter(Boolean).join(", ")}</span>
-                                )}
-                              </ItemDescription>
-                            </ItemContent>
-                          <ItemActions className="shrink-0 gap-1">
+                        <Item className="flex-nowrap gap-3 px-0 py-2.5">
+                          <ItemMedia variant="icon">
+                            <Ti.icon size={16} weight="bold" />
+                          </ItemMedia>
+                          <ItemContent className="min-w-0 gap-0.5">
+                            <ItemTitle className="w-full min-w-0 items-baseline gap-1.5">
+                              <span className="tnum">{formatCOP(m.monto)}</span>
+                              <span className="truncate text-meta font-normal text-muted">{Ti.corto}</span>
+                            </ItemTitle>
+                            {detalle && (
+                              <ItemDescription className="truncate text-nowrap text-faint">{detalle}</ItemDescription>
+                            )}
+                          </ItemContent>
+                          <ItemActions className="shrink-0 gap-1.5">
                             {!bloqueado && (
-                              <IconButton label="Editar" onClick={() => abrirEdicion(m)} disabled={pending} className="text-muted hover:text-foreground">
+                              <IconButton label="Editar" onClick={() => abrirEdicion(m)} disabled={pending} className="lg:size-[38px]">
                                 <PencilSimple size={17} />
                               </IconButton>
                             )}
@@ -310,7 +329,8 @@ export function MovimientosManager({
                                 label="Borrar"
                                 onClick={() => setPorBorrar({ id: m.id, monto: m.monto })}
                                 disabled={pending || bloqueado}
-                                className="text-muted hover:text-destructive"
+                                peligro
+                                className="lg:size-[38px]"
                               >
                                 <Trash size={17} />
                               </IconButton>
@@ -331,42 +351,26 @@ export function MovimientosManager({
       {/* Totales por canal */}
       <div className="flex flex-col gap-4 lg:sticky lg:top-8">
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-[0.78rem] font-medium text-muted">Totales del día</CardTitle>
+          <CardHeader>
+            <CardTitle className="text-text">
+              <h3>Totales del día</h3>
+            </CardTitle>
           </CardHeader>
           <CardContent>
-          <ItemGroup className="divide-y divide-line">
-            {(Object.keys(TIPOS) as Tipo[]).map((t) => {
-              const Ti = TIPOS[t];
-              return (
-                <Item key={t} role="listitem" className="flex-nowrap gap-2 rounded-none px-0 py-2.5">
-                  <ItemMedia>
-                    <Ti.icon size={15} className={cn("shrink-0", Ti.salida ? "text-danger" : "text-accent")} />
-                  </ItemMedia>
-                  <ItemContent className="min-w-0">
-                    <ItemTitle className="block w-full truncate font-normal text-muted">{Ti.label}</ItemTitle>
-                  </ItemContent>
-                  <ItemActions className="tnum shrink-0 text-[0.92rem] font-semibold text-text">
-                    <AnimatedMoney value={totales[t]} />
-                  </ItemActions>
-                </Item>
-              );
-            })}
-          </ItemGroup>
+            <Celdas dos>
+              {(Object.keys(TIPOS) as Tipo[]).map((t) => (
+                <Celda key={t} rotulo={TOTAL[t]}>
+                  <AnimatedMoney value={totales[t]} />
+                </Celda>
+              ))}
+            </Celdas>
+            <Button variant="outline" asChild className="mt-4 w-full">
+              <Link href="/cuadre">
+                Cuadre del día
+                <ArrowRight weight="bold" />
+              </Link>
+            </Button>
           </CardContent>
-        </Card>
-
-        <Card className="group transition-colors hover:border-line-strong">
-          <Item asChild className="rounded-[inherit] p-5">
-            <Link href="/cuadre">
-              <ItemContent>
-                <ItemTitle className="text-[0.88rem] text-text">Cuadre del día</ItemTitle>
-              </ItemContent>
-              <ItemActions>
-                <ArrowRight size={18} className="text-accent transition-transform group-hover:translate-x-1" />
-              </ItemActions>
-            </Link>
-          </Item>
         </Card>
       </div>
 

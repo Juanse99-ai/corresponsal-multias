@@ -100,17 +100,21 @@ export function CuadreExport({
     </div>
   );
 
-  // Dialog de shadcn sin caja propia: el contenido es la imagen del cuadre.
-  // Tocar fuera de ella cierra (lo hace el Dialog).
+  // Dialog de shadcn: en el computador sin caja propia (el contenido es la
+  // imagen del cuadre); en el celular, la imagen y los botones van en la hoja.
+  // Tocar fuera cierra (lo hace el Dialog).
   const modal = (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
         showCloseButton={false}
-        className="max-h-[calc(100dvh-2rem)] max-w-[420px] gap-0 overflow-y-auto rounded-none border-0 bg-transparent p-0 shadow-none sm:max-w-[420px]"
+        className="max-w-[420px] gap-0 sm:max-h-[calc(100dvh-2rem)] sm:max-w-[420px] sm:rounded-none sm:bg-transparent sm:p-0 sm:shadow-none"
       >
         <DialogTitle className="sr-only">Cuadre {fechaDMY(fecha)}</DialogTitle>
         <DialogDescription className="sr-only">Descargar o compartir la imagen del cuadre.</DialogDescription>
           <div className="w-full">
+            {/* El filo va afuera de la imagen (en la hoja blanca del celular no se
+                vería su borde) para que no salga en el PNG. */}
+            <div className="rounded-[1.1rem] max-sm:ring-1 max-sm:ring-line">
             <div
               ref={ref}
               style={{ fontFamily: "var(--font-ios)" }}
@@ -169,6 +173,7 @@ export function CuadreExport({
                 Multidiagnósticos AS · Corresponsal Bancolombia
               </div>
             </div>
+            </div>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <Button onClick={descargar} disabled={busy} className="basis-full sm:flex-1 sm:basis-0">
@@ -179,7 +184,7 @@ export function CuadreExport({
                 <ShareNetwork size={17} />
                 Compartir
               </Button>
-              <IconButton label="Cerrar" variant="secondary" onClick={() => setOpen(false)}>
+              <IconButton label="Cerrar" onClick={() => setOpen(false)}>
                 <X size={18} />
               </IconButton>
             </div>
@@ -190,7 +195,7 @@ export function CuadreExport({
 
   return (
     <>
-      <IconButton label="Descargar o compartir el cuadre" onClick={() => setOpen(true)} className="text-muted hover:text-foreground">
+      <IconButton label="Descargar o compartir el cuadre" size="icon-sm" onClick={() => setOpen(true)}>
         <Export size={18} weight="bold" />
       </IconButton>
       {modal}

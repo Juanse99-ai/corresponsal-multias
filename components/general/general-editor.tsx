@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { MoneyInput } from "@/components/ui/money-input";
 import { Textarea } from "@/components/ui/textarea";
 import { AnimatedMoney } from "@/components/ui/animated-number";
+import { TarjetaNavy, NavyRotulo } from "@/components/ui/navy";
 import { cn } from "@/lib/utils";
 import { formatCOP } from "@/lib/format";
 import { computeSaldoTotal } from "@/lib/general";
@@ -76,25 +77,32 @@ export function GeneralEditor({
           </CardTitle>
         </CardHeader>
         <CardContent>
-        <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Campo label="Saldo Luis" id="saldo_luis">
+        <div className="grid grid-cols-1 gap-x-4 gap-y-3.5 sm:grid-cols-2">
+          <Campo
+            label="Saldo Luis"
+            id="saldo_luis"
+            accion={
+              vals.saldo_luis !== saldoLuisSugerido && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    {/* Terciaria pegada al campo: en la fila del rótulo, sin
+                        agrandarla (toque de 44 con el ::after). */}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => set("saldo_luis")(saldoLuisSugerido)}
+                      className="-my-2 h-7 gap-1 px-2 text-meta after:absolute after:inset-x-0 after:-inset-y-2"
+                    >
+                      <ArrowClockwise size={14} />
+                      Usar <span className="tnum">{formatCOP(saldoLuisSugerido)}</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Usar el saldo de la cuenta del Sr. Luis</TooltipContent>
+                </Tooltip>
+              )
+            }
+          >
             <MoneyInput id="saldo_luis" value={vals.saldo_luis} onValueChange={set("saldo_luis")} />
-            {vals.saldo_luis !== saldoLuisSugerido && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => set("saldo_luis")(saldoLuisSugerido)}
-                    className="mt-1 self-start"
-                  >
-                    <ArrowClockwise size={16} />
-                    Usar <span className="tnum">{formatCOP(saldoLuisSugerido)}</span>
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Usar el saldo de la cuenta del Sr. Luis</TooltipContent>
-              </Tooltip>
-            )}
           </Campo>
 
           <Campo label="Saldo Cristian" id="saldo_cristian">
@@ -118,7 +126,7 @@ export function GeneralEditor({
           </Campo>
         </div>
 
-        <div className="mt-4 flex flex-col gap-2">
+        <div className="mt-3.5 flex flex-col gap-1.5">
           <Label htmlFor="nota_g">Nota (opcional)</Label>
           <Textarea
             id="nota_g"
@@ -131,31 +139,48 @@ export function GeneralEditor({
         </CardContent>
       </Card>
 
+      {/* La tarjeta navy: la cifra sobre la que se aprieta Guardar. Mínima: el
+          desglose son los campos de al lado. */}
       <div className="flex flex-col gap-4 lg:sticky lg:top-8">
-        <Card className="relative overflow-hidden border-accent/30 p-6">
-          <p className="text-[0.78rem] font-medium text-muted">Saldo total</p>
-          <p className={cn("mt-2 text-4xl font-semibold tracking-tight", total < 0 ? "text-danger" : "text-text")}>
-            <AnimatedMoney value={total} />
-          </p>
-        </Card>
-
-        <Card className="flex flex-col gap-3 p-5">
-          <Button onClick={guardar} disabled={pending} className="w-full">
+        <TarjetaNavy className="p-[22px]">
+          <NavyRotulo>Saldo total</NavyRotulo>
+          <AnimatedMoney
+            value={total}
+            desdeCero={false}
+            className={cn(
+              "mt-3 block text-display leading-none font-semibold tracking-[-0.8px]",
+              total < 0 ? "text-bad-fg" : "text-white",
+            )}
+          />
+          <Button onClick={guardar} disabled={pending} className="mt-6 w-full">
             <FloppyDisk size={18} weight="fill" />
             {pending ? "Guardando…" : existente ? "Guardar cambios" : "Guardar día"}
           </Button>
-        </Card>
+        </TarjetaNavy>
       </div>
     </div>
   );
 }
 
-function Campo({ label, id, children }: { label: string; id: string; children: React.ReactNode }) {
+function Campo({
+  label,
+  id,
+  accion,
+  children,
+}: {
+  label: string;
+  id: string;
+  /** Acción terciaria a la derecha del rótulo ("Usar $X"). */
+  accion?: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="flex flex-col gap-2">
-      <Label htmlFor={id}>{label}</Label>
+    <div className="flex flex-col gap-1.5">
+      <div className="flex min-h-[12.5px] items-center justify-between gap-2">
+        <Label htmlFor={id}>{label}</Label>
+        {accion}
+      </div>
       {children}
     </div>
   );
 }
-

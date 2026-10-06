@@ -32,6 +32,8 @@ export interface DatePickerProps {
   max?: string;
   /** Fecha mínima elegible (ISO). */
   min?: string;
+  /** "filtro": pastilla de 36 con borde, para la barra de filtros. */
+  variante?: "campo" | "filtro";
   "aria-label"?: string;
 }
 
@@ -48,6 +50,7 @@ export function DatePicker({
   className,
   max,
   min,
+  variante = "campo",
   "aria-label": ariaLabel,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
@@ -64,13 +67,17 @@ export function DatePicker({
           disabled={disabled}
           aria-label={ariaLabel}
           className={cn(
-            // Como los campos rellenos: gris sin borde.
-            "h-11 w-full justify-start rounded-2xl border-transparent bg-campo px-3.5 font-normal shadow-none hover:bg-campo-hover dark:border-transparent dark:bg-campo dark:hover:bg-campo-hover",
+            // Como los campos rellenos: gris sin borde, radio 16 y la misma letra.
+            variante === "campo" &&
+              "h-11 w-full justify-start rounded-2xl border-transparent bg-campo px-3.5 text-base font-normal shadow-none hover:bg-campo-hover lg:text-body dark:shadow-none",
+            // Filtro: pastilla de 36 con borde de campo, como sus vecinos.
+            variante === "filtro" &&
+              "h-9 justify-start gap-1.5 rounded-full border-borde-campo bg-surface px-3.5 text-meta font-normal shadow-none hover:border-borde-boton hover:bg-bg-soft dark:shadow-none",
             !fecha && "text-faint",
             className,
           )}
         >
-          <CalendarBlank className="text-muted" />
+          <CalendarBlank className={variante === "filtro" ? "size-[15px] text-faint" : "text-muted"} />
           <span className="truncate">{fecha ? formatFechaCorta(value) : placeholder}</span>
         </Button>
       </PopoverTrigger>

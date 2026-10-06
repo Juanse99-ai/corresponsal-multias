@@ -13,8 +13,8 @@ export default function LoginPage() {
       <section className="hidden flex-col items-center justify-center gap-5 bg-nav-bg p-10 text-center lg:flex">
         <Logo size={96} className="rounded-[1.5rem]" />
         <div className="leading-tight">
-          <p className="text-lg font-semibold tracking-tight text-nav-text">Barrio Centro Sabanalarga 18</p>
-          <p className="mt-1 text-sm text-nav-muted">Multidiagnósticos AS</p>
+          <p className="text-lead font-semibold tracking-[-0.3px] text-nav-text">Barrio Centro Sabanalarga 18</p>
+          <p className="mt-1 text-body text-nav-muted">Multidiagnósticos AS</p>
         </div>
       </section>
 
@@ -29,14 +29,14 @@ export default function LoginPage() {
         <Logo size={84} className="rounded-[1.4rem] group-has-[input:focus]/login:hidden" />
         <Logo size={40} className="hidden group-has-[input:focus]/login:flex" />
         <div className="leading-tight">
-          <p className="text-[0.82rem] font-semibold tracking-tight text-nav-text">Barrio Centro Sabanalarga 18</p>
-          <p className="mt-0.5 text-[0.72rem] text-nav-muted">Multidiagnósticos AS</p>
+          <p className="text-body font-semibold text-nav-text">Barrio Centro Sabanalarga 18</p>
+          <p className="mt-0.5 text-meta text-nav-muted">Multidiagnósticos AS</p>
         </div>
       </header>
 
       <section className="flex flex-col items-center px-5 pb-10 pt-7 group-has-[input:focus]/login:pt-5 sm:px-10 lg:justify-center lg:py-12">
         <div className="w-full max-w-[380px]">
-          <h1 className="text-[1.75rem] font-bold tracking-tight text-text group-has-[input:focus]/login:text-2xl lg:group-has-[input:focus]/login:text-[1.75rem]">
+          <h1 className="text-kpi font-semibold tracking-[-0.5px] text-text group-has-[input:focus]/login:text-h1 lg:group-has-[input:focus]/login:text-kpi">
             Iniciar sesión
           </h1>
 
@@ -44,7 +44,7 @@ export default function LoginPage() {
             <LoginForm />
           </div>
 
-          <p className="mt-6 text-center text-[0.75rem] text-faint group-has-[input:focus]/login:hidden lg:group-has-[input:focus]/login:block">
+          <p className="mt-6 text-center text-meta text-faint group-has-[input:focus]/login:hidden lg:group-has-[input:focus]/login:block">
             Solo personal autorizado
           </p>
         </div>

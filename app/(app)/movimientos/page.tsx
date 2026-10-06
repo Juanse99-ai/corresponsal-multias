@@ -33,8 +33,9 @@ export default async function MovimientosPage({
       <PageHeader title="Movimientos del día" subtitle={formatFechaLarga(fecha)}>
         <DateNav fecha={fecha} base="/movimientos" />
       </PageHeader>
-      <MovimientosManager key={fecha} fecha={fecha} movimientos={movimientos} bloqueado={bloqueado} isAdmin={isAdmin} />
-      <PrestamosDia key={fecha} fecha={fecha} prestamos={prestamos} isAdmin={isAdmin} bloqueado={bloqueado} />
+      {/* La key reinicia cada parte al cambiar de día; entre hermanas no se repite. */}
+      <MovimientosManager key={`movimientos-${fecha}`} fecha={fecha} movimientos={movimientos} bloqueado={bloqueado} isAdmin={isAdmin} />
+      <PrestamosDia key={`prestamos-${fecha}`} fecha={fecha} prestamos={prestamos} isAdmin={isAdmin} bloqueado={bloqueado} />
     </div>
   );
 }
