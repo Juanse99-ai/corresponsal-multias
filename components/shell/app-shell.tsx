@@ -10,6 +10,7 @@ import { RielPanel } from "@/components/shell/riel-panel";
 import { seccionDe } from "@/components/shell/nav-items";
 import { NuevaVersion } from "@/components/shell/nueva-version";
 import { JalarParaActualizar } from "@/components/shell/jalar-para-actualizar";
+import { VolverDesdeBorde } from "@/components/shell/volver-desde-borde";
 import { BienvenidaSplash } from "@/components/fx/bienvenida-splash";
 import { TRANSICION } from "@/lib/movimiento";
 import { useAtrasCierraVentanas } from "@/lib/use-atras-cierra-ventanas";
@@ -56,6 +57,7 @@ export function AppShell({
 
         <NuevaVersion />
         <JalarParaActualizar />
+        <VolverDesdeBorde />
       </div>
     </MotionConfig>
   );
