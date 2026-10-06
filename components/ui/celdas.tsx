@@ -22,15 +22,18 @@ function Celdas({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-/** Una celda: rótulo de 12,5 arriba y la cifra tabular debajo. */
+/** Una celda: rótulo de 12,5 arriba, la cifra tabular y, si hace falta, un detalle. */
 function Celda({
   rotulo,
   children,
+  detalle,
   grande = false,
   className,
 }: {
   rotulo: React.ReactNode
   children: React.ReactNode
+  /** Debajo de la cifra, en 12,5 gris ("3 consignaciones"). */
+  detalle?: React.ReactNode
   /** Resumen de la pantalla: 22 (17 en el celular) en vez de 15. */
   grande?: boolean
   className?: string
@@ -46,6 +49,7 @@ function Celda({
       >
         {children}
       </span>
+      {detalle != null && <span className="truncate text-meta text-muted">{detalle}</span>}
     </div>
   )
 }

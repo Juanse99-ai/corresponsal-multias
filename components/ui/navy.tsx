@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils"
 function TarjetaNavy({ className, children, ...props }: React.ComponentProps<"div">) {
   return (
     <Card data-tono="navy" className={cn("border-0 bg-navy p-5 text-white shadow-[var(--navy-filo)]", className)} {...props}>
-      <div className="dark sobre-navy flex flex-col">{children}</div>
+      <div className="dark sobre-navy flex h-full flex-col">{children}</div>
     </Card>
   )
 }

@@ -4,21 +4,17 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useReducedMotion } from "framer-motion";
 import { Bar, BarChart, Cell, Pie, PieChart, XAxis } from "recharts";
-import {
-  Calculator,
-  Wallet,
-  CaretRight,
-  CheckCircle,
-  Warning,
-  HandCoins,
-  Plus,
-  TrendUp,
-  ChartPie,
-} from "@phosphor-icons/react/dist/ssr";
+import { CaretRight, CheckCircle, Warning, Plus, ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Celdas, Celda } from "@/components/ui/celdas";
+import { Empty, EmptyTitle } from "@/components/ui/empty";
+import { Item, ItemActions, ItemContent, ItemGroup, ItemMedia, ItemSeparator, ItemTitle } from "@/components/ui/item";
+import { TarjetaNavy, NavyRotulo } from "@/components/ui/navy";
 import { AnimatedMoney } from "@/components/ui/animated-number";
+import { PageHeader } from "@/components/shell/page-header";
 import { cn } from "@/lib/utils";
 import { formatCOP, formatCompactCOP, formatFechaCorta } from "@/lib/format";
 import type { Rol } from "@/lib/cuadre";
@@ -48,15 +44,11 @@ export interface PanelData {
   deudas: { totalPendiente: number; personas: PersonaSaldo[] } | null;
 }
 
-/** Rótulo de tarjeta, como los resúmenes de Salud del iPhone: ícono de color y nombre. */
-const TITULO = "flex items-center gap-2 text-[0.9rem] font-semibold tracking-tight text-text";
-/** Nombre de la cifra, encima del número. */
-const ROTULO = "text-[0.82rem] text-muted";
-/** Tarjeta que abre otra pantalla. */
-const TARJETA_LINK = "flex h-full flex-col transition-colors hover:border-line-strong";
+/** Tarjeta que abre otra pantalla: toda la tarjeta es el enlace. */
+const TARJETA_LINK = "flex h-full flex-col transition-colors duration-[var(--dur-1)] hover:border-line-strong";
 
 function Chevron() {
-  return <CaretRight size={15} weight="bold" className="text-faint transition-transform group-hover:translate-x-0.5" />;
+  return <CaretRight size={15} weight="bold" className="text-inerte transition-transform group-hover:translate-x-0.5" />;
 }
 
 export function PanelView({ data }: { data: PanelData }) {
@@ -67,177 +59,164 @@ export function PanelView({ data }: { data: PanelData }) {
   const pendientes = data.deudas?.personas.filter((p) => p.saldo > 0) ?? [];
 
   return (
-    <div className="flex flex-col gap-5">
-      <header data-titulo>
-        <h1 className="text-[1.5rem] font-medium tracking-[-0.6px] text-text sm:text-[1.625rem]">
-          {data.saludo}, {primer}
-        </h1>
-        <p className="mt-1 text-sm text-muted">{data.mensaje}</p>
-      </header>
+    <div>
+      <PageHeader title={`${data.saludo}, ${primer}`} subtitle={data.mensaje} />
 
+      <div className="flex flex-col gap-4 lg:gap-5">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:gap-5">
-        <Link href="/cuadre" className="group block">
-          <Card
-            className={cn(
-              TARJETA_LINK,
-              data.cuadreHoy && !sinTirilla && (descuadreHoy ? "border-danger/40" : "border-success/40"),
+        {/* La tarjeta navy de la pantalla: la cifra del día sobre la que se actúa. */}
+        <TarjetaNavy className="h-full p-[22px]">
+          <div className="flex items-center justify-between gap-3">
+            <NavyRotulo>Cuadre de hoy</NavyRotulo>
+            {!data.cuadreHoy ? (
+              <Badge variant="secondary">Sin abrir</Badge>
+            ) : sinTirilla ? (
+              <Badge variant="secondary">Sin tirilla</Badge>
+            ) : (
+              <Badge variant={descuadreHoy ? "danger" : "success"}>
+                {descuadreHoy ? <Warning size={11} weight="fill" /> : <CheckCircle size={11} weight="fill" />}
+                {descuadreHoy ? "Descuadre" : "Cuadrado"}
+              </Badge>
             )}
-          >
-            <CardHeader className="items-center pb-2">
-              <CardTitle className={TITULO}>
-                <Calculator size={18} weight="fill" className="text-accent" />
-                Cuadre de hoy
-              </CardTitle>
-              <CardAction className="flex items-center gap-2 self-center">
-                {!data.cuadreHoy ? (
-                  <Badge variant="secondary">Sin abrir</Badge>
-                ) : sinTirilla ? (
-                  <Badge variant="secondary">Sin tirilla</Badge>
-                ) : (
-                  <Badge variant={descuadreHoy ? "danger" : "success"}>
-                    {descuadreHoy ? <Warning size={11} weight="fill" /> : <CheckCircle size={11} weight="fill" />}
-                    {descuadreHoy ? "Descuadre" : "Cuadrado"}
-                  </Badge>
-                )}
-                <Chevron />
-              </CardAction>
-            </CardHeader>
+          </div>
+          {data.cuadreHoy && !sinTirilla && (
+            <>
+              <AnimatedMoney
+                value={data.cuadreHoy.saldo_final}
+                className="mt-3 block text-display leading-none font-semibold tracking-[-0.8px] text-white"
+              />
+              <p className="mt-1.5 text-body text-white/70">Saldo final</p>
+            </>
+          )}
+          <p className={cn("text-body text-white/70", data.cuadreHoy && !sinTirilla ? "mt-1" : "mt-3")}>
+            {!data.cuadreHoy
+              ? "Ábrelo cuando tengas la tirilla."
+              : sinTirilla
+                ? "Escribe el total de la tirilla para ver si el día cuadra."
+                : descuadreHoy
+                  ? data.cuadreHoy.saldo_final > 0
+                    ? `Faltan ${formatCOP(data.cuadreHoy.saldo_final)} por registrar.`
+                    : `Sobran ${formatCOP(Math.abs(data.cuadreHoy.saldo_final))} sin justificar.`
+                  : data.cuadreHoy.estado === "cerrado"
+                    ? "Día cerrado y cuadrado."
+                    : "Todo cuadra. Puedes cerrar el día."}
+          </p>
+          <div className="mt-auto pt-5">
+            <Button asChild className="w-full">
+              <Link href="/cuadre">
+                {data.cuadreHoy ? "Ir al cuadre" : "Abrir el cuadre"}
+                <ArrowRight weight="bold" />
+              </Link>
+            </Button>
+          </div>
+        </TarjetaNavy>
 
-            <CardContent>
-              {!data.cuadreHoy ? (
-                <p className="text-[0.95rem] text-muted">Ábrelo cuando tengas la tirilla.</p>
-              ) : sinTirilla ? (
-                <p className="text-[0.95rem] text-muted">Escribe el total de la tirilla para ver si el día cuadra.</p>
-              ) : (
-                <>
-                  <p className={ROTULO}>Saldo final</p>
-                  <p
-                    className={cn(
-                      "tnum mt-0.5 text-4xl font-semibold tracking-tight",
-                      descuadreHoy ? "text-danger" : "text-success",
-                    )}
-                  >
-                    <AnimatedMoney value={data.cuadreHoy.saldo_final} />
-                  </p>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href="/luis" className="group block">
+        <Link href="/luis" className="group block rounded-3xl">
           <Card className={TARJETA_LINK}>
-            <CardHeader className="items-center pb-2">
-              <CardTitle className={TITULO}>
-                <Wallet size={18} weight="fill" className="text-accent" />
-                Sr. Luis
-              </CardTitle>
+            <CardHeader className="items-center">
+              <CardTitle>Sr. Luis</CardTitle>
               <CardAction className="self-center">
                 <Chevron />
               </CardAction>
             </CardHeader>
-            <CardContent className="flex flex-1 flex-col">
-              <p className={ROTULO}>Consignado hoy</p>
-              <p className="tnum mt-0.5 text-3xl font-semibold tracking-tight text-text">
-                <AnimatedMoney value={data.srLuisHoy} />
-              </p>
-              <p className="mt-1 text-[0.82rem] text-muted">
-                {data.consignacionesHoyCount}{" "}
-                {data.consignacionesHoyCount === 1 ? "consignación" : "consignaciones"}
-              </p>
-              <div className="mt-auto pt-4">
-                <div className="flex items-center justify-between gap-3 border-t border-line pt-3 text-[0.85rem]">
-                  <span className="text-muted">Saldo del Sr. Luis</span>
-                  <span className="tnum font-medium text-text">{formatCOP(data.saldoLuisAcumulado)}</span>
-                </div>
-              </div>
+            <CardContent>
+              <Celdas>
+                <Celda
+                  rotulo="Consignado hoy"
+                  grande
+                  detalle={`${data.consignacionesHoyCount} ${data.consignacionesHoyCount === 1 ? "consignación" : "consignaciones"}`}
+                >
+                  <AnimatedMoney value={data.srLuisHoy} />
+                </Celda>
+                <Celda rotulo="Saldo del Sr. Luis" grande>
+                  <AnimatedMoney value={data.saldoLuisAcumulado} />
+                </Celda>
+              </Celdas>
             </CardContent>
           </Card>
         </Link>
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5">
-        <DistribucionCard distribucion={data.distribucion} tirilla={data.tirillaHoy} />
+        {/* En el celular Préstamos va antes que la torta; en el computador, a la derecha. */}
+        <Link href="/prestamos" className="group block rounded-3xl lg:order-last">
+          <Card className={TARJETA_LINK}>
+            <CardHeader className="items-center">
+              <CardTitle>Préstamos</CardTitle>
+              <CardAction className="self-center">
+                <Chevron />
+              </CardAction>
+            </CardHeader>
+            <CardContent className="flex flex-1 flex-col">
+              {data.deudas ? (
+                <>
+                  <p className="text-meta font-medium text-faint">Total pendiente</p>
+                  <AnimatedMoney
+                    value={data.deudas.totalPendiente}
+                    className="mt-1 block text-kpi leading-none font-semibold tracking-[-0.6px] text-text"
+                  />
+                  {pendientes.length === 0 ? (
+                    <Empty fila className="mt-2">
+                      <EmptyTitle>Nadie le debe al fondo</EmptyTitle>
+                    </Empty>
+                  ) : (
+                    <ItemGroup variant="cajitas" className="mt-4">
+                      {pendientes.slice(0, 4).map((p, i) => (
+                        <div key={p.persona} className="contents">
+                          {i > 0 && <ItemSeparator />}
+                          <Item size="sm" className="flex-nowrap px-0 py-2 lg:px-3">
+                            <ItemContent className="min-w-0">
+                              <ItemTitle className="truncate text-body font-medium">{p.persona}</ItemTitle>
+                            </ItemContent>
+                            <ItemActions>
+                              <span className="tnum text-title font-semibold text-text">{formatCOP(p.saldo)}</span>
+                            </ItemActions>
+                          </Item>
+                        </div>
+                      ))}
+                    </ItemGroup>
+                  )}
+                </>
+              ) : (
+                <Item size="sm" className="flex-nowrap gap-3 px-0 py-1">
+                  <ItemMedia variant="icon">
+                    <Plus weight="bold" />
+                  </ItemMedia>
+                  <ItemContent>
+                    <ItemTitle className="text-body font-semibold">Registrar un préstamo</ItemTitle>
+                  </ItemContent>
+                </Item>
+              )}
+            </CardContent>
+          </Card>
+        </Link>
 
-        {data.deudas ? (
-          <Link href="/prestamos" className="group block">
-            <Card className={TARJETA_LINK}>
-              <CardHeader className="items-center pb-2">
-                <CardTitle className={TITULO}>
-                  <HandCoins size={18} weight="fill" className="text-accent" />
-                  Préstamos
-                </CardTitle>
-                <CardAction className="self-center">
-                  <Chevron />
-                </CardAction>
-              </CardHeader>
-              <CardContent>
-                <p className={ROTULO}>Total pendiente</p>
-                <p className="tnum mt-0.5 text-3xl font-semibold tracking-tight text-text">
-                  <AnimatedMoney value={data.deudas.totalPendiente} />
-                </p>
-                <div className="mt-4 flex flex-col gap-2">
-                  {pendientes.slice(0, 4).map((p) => (
-                    <div key={p.persona} className="flex items-center justify-between gap-3 text-[0.85rem]">
-                      <span className="truncate text-muted">{p.persona}</span>
-                      <span className="tnum shrink-0 text-text">{formatCOP(p.saldo)}</span>
-                    </div>
-                  ))}
-                  {pendientes.length === 0 && <p className="text-[0.85rem] text-success">Nadie le debe al fondo.</p>}
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        ) : (
-          <Link href="/prestamos" className="group block">
-            <Card className={TARJETA_LINK}>
-              <CardHeader className="items-center pb-2">
-                <CardTitle className={TITULO}>
-                  <HandCoins size={18} weight="fill" className="text-accent" />
-                  Préstamos
-                </CardTitle>
-                <CardAction className="self-center">
-                  <Chevron />
-                </CardAction>
-              </CardHeader>
-              <CardContent>
-                <p className="flex items-center gap-1.5 text-[0.95rem] font-medium text-accent-strong">
-                  <Plus size={15} weight="bold" />
-                  Registrar un préstamo
-                </p>
-              </CardContent>
-            </Card>
-          </Link>
-        )}
+        <DistribucionCard distribucion={data.distribucion} tirilla={data.tirillaHoy} />
       </div>
 
       <Card>
-        <CardHeader className="items-center pb-2">
-          <CardTitle className={TITULO}>
-            <TrendUp size={18} weight="fill" className="text-accent" />
-            Últimos cierres
-          </CardTitle>
+        <CardHeader className="items-center">
+          <CardTitle>Últimos cierres</CardTitle>
           {data.recientes.length > 0 && (
-            <CardAction className="flex items-center gap-3 self-center text-[0.78rem] text-muted">
-              <span className="flex items-center gap-1.5">
-                <span className="size-2 rounded-full bg-success" aria-hidden />
+            <CardAction className="flex flex-wrap items-center justify-end gap-1.5 self-center">
+              <Badge punto="ok">
                 {data.stats.cuadrados} {data.stats.cuadrados === 1 ? "cuadrado" : "cuadrados"}
-              </span>
-              <span className="flex items-center gap-1.5">
-                <span className="size-2 rounded-full bg-danger" aria-hidden />
-                {data.stats.descuadres} con descuadre
-              </span>
+              </Badge>
+              <Badge punto="bad">{data.stats.descuadres} con descuadre</Badge>
             </CardAction>
           )}
         </CardHeader>
         <CardContent>
           {data.recientes.length === 0 ? (
-            <p className="text-sm text-muted">Todavía no hay cierres registrados.</p>
+            <Empty fila>
+              <EmptyTitle>Todavía no hay cierres registrados</EmptyTitle>
+            </Empty>
           ) : (
             <RecientesChart recientes={data.recientes} />
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }
@@ -271,17 +250,14 @@ function DistribucionCard({ distribucion, tirilla }: { distribucion: { label: st
 
   return (
     <Card className="h-full">
-      <CardHeader className="pb-2">
-        <CardTitle className={TITULO}>
-          <ChartPie size={18} weight="fill" className="text-accent" />
-          Distribución del día
-        </CardTitle>
+      <CardHeader>
+        <CardTitle>Distribución del día</CardTitle>
       </CardHeader>
       <CardContent>
       {distribucion.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 py-5 text-center">
-          <div className="h-24 w-24 rounded-full border-[11px] border-line" />
-          <p className="text-[0.82rem] text-muted">Abre el cuadre de hoy para ver la distribución.</p>
+        <div className="flex flex-col items-center gap-3 py-4 text-center">
+          <div className="size-24 rounded-full border-[11px] border-surface-2" />
+          <p className="text-body text-muted">Abre el cuadre de hoy para ver la distribución</p>
         </div>
       ) : (
         <div className="flex items-center gap-4 sm:gap-5">
@@ -306,16 +282,16 @@ function DistribucionCard({ distribucion, tirilla }: { distribucion: { label: st
               </PieChart>
             </ChartContainer>
             <div className="pointer-events-none absolute inset-[18px] flex flex-col items-center justify-center rounded-full">
-              <span className="text-[0.68rem] text-muted">Tirilla</span>
-              <span className="tnum text-sm font-semibold text-text">{formatCompactCOP(tirilla)}</span>
+              <span className="text-label text-muted">Tirilla</span>
+              <span className="tnum text-title font-semibold text-text">{formatCompactCOP(tirilla)}</span>
             </div>
           </div>
           <div className="flex min-w-0 flex-1 flex-col gap-2">
             {legend.map((l) => (
-              <div key={l.label} className="flex items-center gap-2 text-[0.78rem]">
-                <span className="h-2.5 w-2.5 shrink-0 rounded-[3px]" style={{ background: l.color }} />
+              <div key={l.label} className="flex items-center gap-2 text-meta">
+                <span className="size-2.5 shrink-0 rounded-[3px]" style={{ background: l.color }} />
                 <span className="min-w-0 flex-1 truncate text-muted">{l.label}</span>
-                <span className="tnum shrink-0 font-medium text-text">{l.pct}</span>
+                <span className="tnum shrink-0 font-semibold text-text">{l.pct}</span>
               </div>
             ))}
           </div>
@@ -331,14 +307,18 @@ const chartConfig = {
   descuadre: { label: "Descuadre", color: "var(--danger)" },
 } satisfies ChartConfig;
 
-/** Tooltip del gráfico: fecha corta y total de la tirilla (lo que antes iba en el title). */
+/** Globo oscuro del gráfico: fecha corta y total de la tirilla, con el punto de su estado. */
 function TooltipCierre({ active, payload }: { active?: boolean; payload?: { payload?: Reciente }[] }) {
   const r = payload?.[0]?.payload;
   if (!active || !r) return null;
+  const descuadre = Math.round(r.saldo_final) !== 0;
   return (
-    <div className="rounded-xl border bg-popover px-3 py-2 text-popover-foreground shadow-md">
-      <p className="text-[0.7rem] text-faint">{formatFechaCorta(r.fecha)}</p>
-      <p className="tnum mt-0.5 text-[0.85rem] font-semibold">{formatCOP(r.total_tirilla)}</p>
+    <div className="globo-grafica min-w-[132px] rounded-lg px-[11px] py-2 text-meta text-white">
+      <p className="text-white/82">{formatFechaCorta(r.fecha)}</p>
+      <p className="mt-0.5 flex items-center gap-1.5">
+        <span aria-hidden className={cn("size-2 rounded-full", descuadre ? "bg-danger" : "bg-success")} />
+        <span className="tnum font-semibold">{formatCOP(r.total_tirilla)}</span>
+      </p>
     </div>
   );
 }
@@ -350,14 +330,14 @@ function RecientesChart({ recientes }: { recientes: Reciente[] }) {
 
   return (
     <div>
-      <ChartContainer config={chartConfig} className="aspect-auto h-28 w-full">
-        <BarChart data={orden} margin={{ top: 0, right: 0, bottom: 0, left: 0 }} barCategoryGap={3}>
+      <ChartContainer config={chartConfig} className="aspect-auto h-36 w-full lg:h-44">
+        <BarChart data={orden} margin={{ top: 0, right: 0, bottom: 0, left: 0 }} barCategoryGap={4}>
           <XAxis dataKey="fecha" hide />
           <ChartTooltip content={<TooltipCierre />} cursor={false} />
           <Bar
             dataKey="total_tirilla"
-            radius={6}
-            // Alto mínimo visible (antes 8 %) aunque la tirilla sea pequeña.
+            radius={[4, 4, 0, 0]}
+            // Alto mínimo visible aunque la tirilla sea pequeña.
             minPointSize={9}
             isAnimationActive={!reduce}
             animationDuration={600}
@@ -366,20 +346,16 @@ function RecientesChart({ recientes }: { recientes: Reciente[] }) {
               if (d.payload) router.push(`/cuadre?fecha=${d.payload.fecha}`);
             }}
           >
-            {orden.map((r) => {
-              const descuadre = Math.round(r.saldo_final) !== 0;
-              return (
-                <Cell
-                  key={r.fecha}
-                  fill={descuadre ? "var(--color-descuadre)" : "var(--color-cuadrado)"}
-                  fillOpacity={descuadre ? 0.7 : 0.6}
-                />
-              );
-            })}
+            {orden.map((r) => (
+              <Cell
+                key={r.fecha}
+                fill={Math.round(r.saldo_final) !== 0 ? "var(--color-descuadre)" : "var(--color-cuadrado)"}
+              />
+            ))}
           </Bar>
         </BarChart>
       </ChartContainer>
-      <div className="mt-2 flex justify-between text-[0.66rem] text-faint">
+      <div className="mt-2 flex justify-between text-meta text-faint">
         <span>{formatFechaCorta(orden[0].fecha)}</span>
         <span>{formatFechaCorta(orden[orden.length - 1].fecha)}</span>
       </div>
