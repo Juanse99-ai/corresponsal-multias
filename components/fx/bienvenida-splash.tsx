@@ -8,6 +8,7 @@ import { formatFechaLarga } from "@/lib/format";
 import { saludoHora, mensajePersonal } from "@/lib/saludos";
 import { useMontado } from "@/lib/use-montado";
 import { entradaEnPantalla, finDeEntrada } from "@/lib/entrada";
+import { CURVA_IOS } from "@/lib/movimiento";
 
 /** ¿Toca mostrarla? Y si cuenta como una de las 2 del día, qué anotar. Solo lee:
  *  la vista se anota en un efecto cuando se muestra. */
@@ -118,7 +119,7 @@ function Splash({ nombre }: { nombre: string }) {
             className="relative flex flex-col items-center gap-4 px-6 text-center"
             initial={{ opacity: 0, y: reducir ? 0 : 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: reducir ? 0 : 0.45, delay: reducir ? 0 : 0.1, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: reducir ? 0 : 0.45, delay: reducir ? 0 : 0.1, ease: CURVA_IOS }}
           >
             <Logo size={64} className="rounded-2xl" />
             <p className="text-[1.75rem] font-semibold tracking-tight text-nav-text sm:text-4xl">

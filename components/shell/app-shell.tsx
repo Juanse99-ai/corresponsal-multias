@@ -10,6 +10,7 @@ import { RielPanel } from "@/components/shell/riel-panel";
 import { seccionDe } from "@/components/shell/nav-items";
 import { NuevaVersion } from "@/components/shell/nueva-version";
 import { BienvenidaSplash } from "@/components/fx/bienvenida-splash";
+import { TRANSICION } from "@/lib/movimiento";
 
 export function AppShell({
   profile,
@@ -29,7 +30,7 @@ export function AppShell({
     : undefined;
 
   return (
-    <MotionConfig reducedMotion="user">
+    <MotionConfig reducedMotion="user" transition={TRANSICION}>
       {/* Computador: la app es una ventana redonda (el marco) sobre el lienzo,
           con el riel y el panel a la izquierda. Celular: el logo arriba y la
           barra de abajo. */}

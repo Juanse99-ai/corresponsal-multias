@@ -22,6 +22,7 @@ import { formatCOP, formatFecha } from "@/lib/format";
 import { computeSaldoTotal } from "@/lib/general";
 import type { GeneralRow } from "@/lib/database.types";
 import { eliminarGeneral } from "@/app/(app)/general/actions";
+import { TRANSICION } from "@/lib/movimiento";
 
 const MotionTableRow = motion.create(TableRow);
 
@@ -141,7 +142,7 @@ export function GeneralTable({ entries }: { entries: GeneralRow[] }) {
                 key={e.id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: Math.min(i * 0.02, 0.3) }}
+                transition={{ ...TRANSICION, delay: Math.min(i * 0.02, 0.3) }}
                 onClick={() => router.push(`/general?fecha=${e.fecha}`)}
                 className="cursor-pointer"
               >

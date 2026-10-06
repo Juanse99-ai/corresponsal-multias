@@ -39,6 +39,7 @@ import { formatCOP, formatHora } from "@/lib/format";
 import type { MovimientoRow } from "@/lib/database.types";
 import { agregarMovimiento, eliminarMovimiento, editarMovimiento } from "@/app/(app)/movimientos/actions";
 import { reduced } from "@/components/fx/reduced";
+import { TRANSICION } from "@/lib/movimiento";
 
 type Tipo = "consignacion_nequi" | "consignacion_bancolombia" | "recaudo" | "retiro";
 
@@ -255,7 +256,7 @@ export function MovimientosManager({
                       initial={{ opacity: 0, y: -8 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, height: 0 }}
-                      transition={{ type: "spring", stiffness: 320, damping: 30 }}
+                      transition={TRANSICION}
                       className={cn("rounded-xl", nuevo && "t-flash-ok")}
                     >
                       {editId === m.id ? (

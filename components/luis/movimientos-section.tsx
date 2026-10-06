@@ -38,6 +38,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatCOP, formatFechaCorta, formatHora, horaBogotaHHMM } from "@/lib/format";
 import { TOPE_CONSIGNACION, TOPE_COMPENSACION } from "@/lib/auditoria";
 import { reduced } from "@/components/fx/reduced";
+import { TRANSICION } from "@/lib/movimiento";
 
 /** Acuse del lote: cuántos entraron, en cuántos días y cuántos ya estaban. */
 function resumenLote(insertados: number, dias: number, repetidos: number): string {
@@ -621,7 +622,7 @@ export function MovimientosSection({
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, height: 0 }}
-                transition={{ type: "spring", stiffness: 320, damping: 30 }}
+                transition={TRANSICION}
               >
                 {editId === c.id ? (
                   // Edición en línea dentro de la misma cajita.

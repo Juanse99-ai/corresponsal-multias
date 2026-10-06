@@ -17,6 +17,7 @@ import { createClient } from "@/lib/supabase/client";
 import { comprimirImagen, pareceImagen, esPdf, tipoDeArchivo } from "@/lib/comprimir-imagen";
 import type { SoporteConUrl } from "@/lib/queries";
 import { registrarSoporte, eliminarSoporte } from "@/app/(app)/cuadre/actions";
+import { TRANSICION } from "@/lib/movimiento";
 
 const BUCKET = "corr-soportes";
 /** Cuántas suben a la vez: más que esto satura el dato móvil y va más lento. */
@@ -224,7 +225,7 @@ export function SoportesSection({
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ type: "spring", stiffness: 320, damping: 28 }}
+                  transition={TRANSICION}
                   role="listitem"
                 >
                 <Item

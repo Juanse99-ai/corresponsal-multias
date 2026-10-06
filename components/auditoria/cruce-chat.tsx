@@ -18,6 +18,7 @@ import { ErrorNotice } from "@/components/ui/error-notice";
 import { cn } from "@/lib/utils";
 import { formatCOP, formatFechaCorta, formatHora, hoyISO } from "@/lib/format";
 import { leerListaWhatsApp, conciliarDia, type Conciliacion, type MovimientoLeido } from "@/lib/luis-parse";
+import { CURVA_IOS, TRANSICION } from "@/lib/movimiento";
 
 /**
  * Cruza lo que Sr. Luis pidió por el grupo contra lo que quedó registrado ese día.
@@ -182,7 +183,7 @@ export function CruceChat({
                       role="listitem"
                       initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: est === "repetido" ? 0.55 : 1, y: 0 }}
-                      transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1], delay: Math.min(i, 12) * 0.02 }}
+                      transition={{ ...TRANSICION, delay: Math.min(i, 12) * 0.02 }}
                     >
                       <Message className="items-end">
                         <MessageContent className="w-auto max-w-[85%] gap-0.5 sm:max-w-[70%]">
@@ -215,7 +216,7 @@ export function CruceChat({
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 6 }}
-                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.3, ease: CURVA_IOS }}
                   className="mx-auto mt-5 max-w-[26rem] rounded-xl border border-fila-borde bg-fila p-3.5"
                 >
                   <div className="grid grid-cols-3 divide-x divide-fila-borde text-center">

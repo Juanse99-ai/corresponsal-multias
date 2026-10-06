@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { cn } from "@/lib/utils";
 import { formatCOP, formatFecha } from "@/lib/format";
 import type { LuisHistDia } from "@/lib/queries";
+import { TRANSICION } from "@/lib/movimiento";
 
 // Fila de tabla de shadcn animada con Framer (React 19 pasa la ref como prop).
 const MotionRow = motion.create(TableRow);
@@ -142,7 +143,7 @@ export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
                 key={d.fecha}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: Math.min(i * 0.02, 0.3) }}
+                transition={{ ...TRANSICION, delay: Math.min(i * 0.02, 0.3) }}
                 onClick={() => router.push(`/luis?fecha=${d.fecha}`)}
                 className="cursor-pointer"
                 title="Ver el día y abrir el reporte" aria-label="Ver el día y abrir el reporte"

@@ -41,6 +41,7 @@ import { PERSONAS_PRESET } from "@/lib/personas";
 import type { DeudaConSaldo } from "@/lib/queries";
 import { registrarPrestamoDia, marcarPrestamoPagado, reabrirPrestamo, eliminarDeuda, editarDeuda } from "@/app/(app)/prestamos/actions";
 import { reduced } from "@/components/fx/reduced";
+import { TRANSICION } from "@/lib/movimiento";
 
 export function PrestamosDia({
   fecha,
@@ -309,7 +310,7 @@ export function PrestamosDia({
                       initial={{ opacity: 0, y: -8 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, height: 0 }}
-                      transition={{ type: "spring", stiffness: 320, damping: 30 }}
+                      transition={TRANSICION}
                       className={cn("rounded-xl", nuevo && "t-flash-ok")}
                     >
                       {editId === d.id ? (
