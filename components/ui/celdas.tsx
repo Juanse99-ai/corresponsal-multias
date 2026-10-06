@@ -14,10 +14,11 @@ function Celdas({ className, dos = false, ...props }: React.ComponentProps<"div"
       className={cn(
         "grid grid-cols-2 overflow-hidden rounded-2xl border border-line *:border-line",
         // Filetes: a la izquierda de cada celda que no abre fila, y arriba de
-        // la segunda fila cuando van dos por fila.
+        // la segunda fila cuando van dos por fila. Si son impares, la última
+        // ocupa la fila entera en vez de quedar sola a media fila.
         dos
-          ? "*:even:border-l *:nth-[n+3]:border-t"
-          : "max-lg:*:even:border-l max-lg:*:nth-[n+3]:border-t lg:auto-cols-fr lg:grid-flow-col lg:grid-cols-none lg:*:not-first:border-l",
+          ? "*:even:border-l *:nth-[n+3]:border-t *:odd:last:col-span-full"
+          : "max-lg:*:even:border-l max-lg:*:nth-[n+3]:border-t max-lg:*:odd:last:col-span-full lg:auto-cols-fr lg:grid-flow-col lg:grid-cols-none lg:*:not-first:border-l",
         className
       )}
       {...props}
