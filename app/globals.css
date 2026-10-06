@@ -6,29 +6,51 @@
 
 /* ============================================================
    App Corresponsal - Multidiagnosticos AS
-   Tema CLARO. Paleta del logo: azul royal (acento), rojo (alertas),
-   blanco. Riel lateral azul marino (no negro). Neutros entintados al azul.
+   Estilo del taller (6 oct 2026, «quiero mudar este diseño»): dos temas,
+   Azul (de día, el claro) y Noche (negro total, el oscuro), con el azul del
+   logo de acento. La app va en un marco redondeado sobre un lienzo; dentro,
+   tarjetas tenues y lo elegido en pastilla blanca. Fuente: la del sistema
+   Apple, como siempre.
    ============================================================ */
 
+/* ---------- Azul (tema claro) ---------- */
 :root {
-  /* Lienzo claro (entintado levemente al azul) */
-  --bg: oklch(0.984 0.004 255);
-  --bg-soft: oklch(0.966 0.006 255);
-  --surface: oklch(1 0.0015 255);
-  --surface-2: oklch(0.963 0.006 255);
-  --elevated: oklch(0.944 0.008 255);
-  --line: oklch(0.905 0.009 255);
-  --line-strong: oklch(0.858 0.013 255);
+  /* Lienzo, marco y capas del estilo */
+  --lienzo: linear-gradient(160deg, #eef2f8 0%, #dfe6f1 100%);
+  --marco: linear-gradient(180deg, #e8edf6 0%, #dfe5f0 100%);
+  --marco-sombra: 0 30px 60px -30px rgba(15, 35, 80, 0.32), 0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+  --panel: rgba(255, 255, 255, 0.62);
+  --blanco: #ffffff;
+  --fila: #ffffff;
+  --fila-borde: #e5eaf2;
+  --fila-hover: #f9fbfe;
+  --tarjeta-borde: rgba(255, 255, 255, 0.85);
+  --tarjeta-sombra: 0 1px 2px rgba(15, 35, 80, 0.05), 0 12px 32px -20px rgba(15, 35, 80, 0.25);
+  --pastilla-sombra: 0 1px 2px rgba(20, 16, 50, 0.08), 0 2px 6px -2px rgba(20, 16, 50, 0.12);
+  --primario-sombra: 0 1px 2px rgba(20, 50, 160, 0.25), 0 6px 16px -6px rgba(29, 78, 216, 0.5);
+  --campo: #eef2f7;
+  --campo-hover: #e6ebf2;
+  --velo: rgba(15, 30, 70, 0.26);
 
-  --text: oklch(0.30 0.032 258);
-  --muted: oklch(0.502 0.026 258);
-  --faint: oklch(0.62 0.02 258);
+  /* Superficies */
+  --bg: #e7ecf4;
+  --bg-soft: #f1f4f9;
+  --surface: #f7f9fc;
+  --surface-2: #edf1f6;
+  --elevated: #e3e8f0;
+  --line: #e0e6ee;
+  --line-strong: #d3dbe6;
 
-  /* Azul del logo */
-  --accent: oklch(0.515 0.172 258);
-  --accent-strong: oklch(0.455 0.18 258);
-  --accent-ink: oklch(0.99 0.01 258);
-  --accent-soft: oklch(0.935 0.045 258);
+  --text: #0f172a;
+  --muted: #475569;
+  --faint: #6b7a90;
+
+  /* Azul del logo: --accent para texto y aros, --accent-fill para rellenos. */
+  --accent: #1d4ed8;
+  --accent-strong: #1e40af;
+  --accent-fill: #1d4ed8;
+  --accent-ink: #ffffff;
+  --accent-soft: #e6edfc;
 
   /* Verde semantico (cuadrado) */
   --success: oklch(0.585 0.13 155);
@@ -38,7 +60,7 @@
   --danger: oklch(0.545 0.2 25);
   --danger-soft: oklch(0.945 0.06 25);
 
-  /* Riel lateral azul marino */
+  /* Azul marino del menú del celular y de la banda del login */
   --nav-bg: oklch(0.268 0.058 260);
   --nav-bg-2: oklch(0.305 0.052 260);
   --nav-text: oklch(0.975 0.01 260);
@@ -60,9 +82,9 @@
   --foreground: var(--text);
   --card: var(--surface);
   --card-foreground: var(--text);
-  --popover: var(--surface);
+  --popover: var(--blanco);
   --popover-foreground: var(--text);
-  --primary: var(--accent);
+  --primary: var(--accent-fill);
   --primary-foreground: var(--accent-ink);
   --secondary: var(--surface-2);
   --secondary-foreground: var(--text);
@@ -74,27 +96,44 @@
   color-scheme: light;
 }
 
-/* ============================================================
-   Modo oscuro: mismos tokens, valores entintados al navy.
-   Sin negros puros; el acento azul se aclara para legibilidad.
-   ============================================================ */
+/* ---------- Noche (tema oscuro): negro de verdad ----------
+   El marco y las tarjetas apenas más claros que el negro, sin sombras (el
+   borde fino separa) y el azul de la marca de acento. */
 .dark {
-  --bg: oklch(0.218 0.018 260);
-  --bg-soft: oklch(0.246 0.02 260);
-  --surface: oklch(0.262 0.022 260);
-  --surface-2: oklch(0.298 0.024 260);
-  --elevated: oklch(0.335 0.026 260);
-  --line: oklch(0.362 0.024 260);
-  --line-strong: oklch(0.43 0.03 260);
+  --lienzo: radial-gradient(1100px 520px at 18% -14%, rgba(37, 99, 235, 0.14), transparent 70%), #000;
+  --marco: #08080a;
+  --marco-sombra: 0 0 0 1px rgba(255, 255, 255, 0.07) inset;
+  --panel: #0e0e11;
+  --blanco: #17171b;
+  --fila: #141418;
+  --fila-borde: rgba(255, 255, 255, 0.07);
+  --fila-hover: #1a1a1f;
+  --tarjeta-borde: rgba(255, 255, 255, 0.07);
+  /* "Sin sombra" escrito como sombra vacía: Tailwind la encadena con otras. */
+  --tarjeta-sombra: 0 0 #0000;
+  --pastilla-sombra: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --primario-sombra: 0 6px 18px -8px rgba(37, 99, 235, 0.75);
+  --campo: #1a1a1f;
+  --campo-hover: #202026;
+  --velo: rgba(0, 0, 0, 0.6);
 
-  --text: oklch(0.945 0.012 260);
-  --muted: oklch(0.745 0.022 260);
-  --faint: oklch(0.6 0.026 260);
+  --bg: #000000;
+  --bg-soft: #0b0b0e;
+  --surface: #0e0e11;
+  --surface-2: #1c1c21;
+  --elevated: #232329;
+  --line: #232329;
+  --line-strong: #2e2e36;
 
-  --accent: oklch(0.62 0.16 258);
-  --accent-strong: oklch(0.82 0.115 258);
-  --accent-ink: oklch(0.16 0.03 260);
-  --accent-soft: oklch(0.37 0.07 260);
+  --text: #f2f2f5;
+  --muted: #a2a2ad;
+  --faint: #8e8e99;
+
+  --accent: #5b8cff;
+  --accent-strong: #7aa2ff;
+  --accent-fill: #2563eb;
+  --accent-ink: #ffffff;
+  --accent-soft: rgba(59, 110, 246, 0.16);
 
   --success: oklch(0.74 0.135 155);
   --success-soft: oklch(0.34 0.06 160);
@@ -102,9 +141,8 @@
   --danger: oklch(0.7 0.165 25);
   --danger-soft: oklch(0.36 0.085 25);
 
-
-  /* Los tokens nav-* (menú overlay + hero del login) NO se redefinen aquí:
-     el menú usa el mismo fondo navy en claro y en oscuro. */
+  /* Los tokens nav-* (menú del celular + banda del login) NO se redefinen
+     aquí: el menú usa el mismo azul marino en los dos temas. */
 
   color-scheme: dark;
 }
@@ -126,6 +164,17 @@
   --color-accent-strong: var(--accent-strong);
   --color-accent-ink: var(--accent-ink);
   --color-accent-soft: var(--accent-soft);
+  --color-accent-fill: var(--accent-fill);
+
+  /* Capas del estilo del taller */
+  --color-blanco: var(--blanco);
+  --color-panel: var(--panel);
+  --color-fila: var(--fila);
+  --color-fila-borde: var(--fila-borde);
+  --color-fila-hover: var(--fila-hover);
+  --color-campo: var(--campo);
+  --color-campo-hover: var(--campo-hover);
+  --color-velo: var(--velo);
 
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
@@ -157,9 +206,9 @@
   --color-foreground: var(--text);
   --color-card: var(--surface);
   --color-card-foreground: var(--text);
-  --color-popover: var(--surface);
+  --color-popover: var(--blanco);
   --color-popover-foreground: var(--text);
-  --color-primary: var(--accent);
+  --color-primary: var(--accent-fill);
   --color-primary-foreground: var(--accent-ink);
   --color-secondary: var(--surface-2);
   --color-secondary-foreground: var(--text);
@@ -186,7 +235,10 @@ html {
 }
 
 body {
-  background-color: var(--bg);
+  /* El lienzo del estilo: degradado suave en Azul, negro con un velo azul
+     arriba en Noche. Fijo, para que no se corra al bajar. */
+  background: var(--lienzo);
+  background-attachment: fixed;
   color: var(--text);
   font-family: var(--font-ios);
   -webkit-font-smoothing: antialiased;

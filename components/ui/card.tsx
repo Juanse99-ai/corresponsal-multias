@@ -6,7 +6,9 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card"
       className={cn(
-        "rounded-[1.25rem] border bg-card text-card-foreground shadow-[0_1px_2px_-1px_oklch(0.4_0.05_258/0.08),0_12px_26px_-16px_oklch(0.4_0.07_258/0.22)]",
+        // Tarjeta tenue del estilo del taller: 24 px de esquina, borde de luz y
+        // sombra suave en Azul; en Noche, solo el borde fino.
+        "rounded-[1.5rem] border border-[var(--tarjeta-borde)] bg-card text-card-foreground shadow-[var(--tarjeta-sombra)]",
         className
       )}
       {...props}
