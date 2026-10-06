@@ -44,13 +44,16 @@ export function SoportesSection({
   contexto = "cuadre",
   titulo = "Soportes del día",
   texto = "Sube la tirilla del datáfono",
-  detalleBorrado = "Sin la tirilla adjunta no podrás cerrar el día." }: {
+  detalleBorrado = "Sin la tirilla adjunta no podrás cerrar el día.",
+  className }: {
   fecha: string;
   soportes: SoporteConUrl[];
   contexto?: string;
   titulo?: string;
   texto?: string;
   detalleBorrado?: string;
+  /** Dentro de una columna con su propio espacio entre tarjetas: "mt-0". */
+  className?: string;
 }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -132,7 +135,7 @@ export function SoportesSection({
   }
 
   return (
-    <Card className="mt-5">
+    <Card className={cn("mt-5", className)}>
       <CardHeader className="items-center">
         <CardTitle className="self-center text-text">
           <h3>{titulo}</h3>

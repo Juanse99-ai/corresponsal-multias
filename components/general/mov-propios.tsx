@@ -3,16 +3,10 @@
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Plus,
-  Trash,
-  Paperclip,
-  ArrowsLeftRight,
-  ArrowDown,
-  ArrowUp,ArrowSquareOut } from "@phosphor-icons/react/dist/ssr";
+import { Plus, Trash, Paperclip, ArrowsLeftRight, ArrowUp, ArrowSquareOut } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -27,7 +21,7 @@ import {
   ItemTitle,
 } from "@/components/ui/item";
 import { MoneyInput } from "@/components/ui/money-input";
-import { cn, esEnter } from "@/lib/utils";
+import { esEnter } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { formatCOP, formatFecha, hoyISO } from "@/lib/format";
@@ -93,44 +87,54 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-text">
-          <ArrowsLeftRight size={17} weight="fill" className="text-accent" />
-          <h3>Mis compensaciones / retiros</h3>
+        <CardTitle className="text-text">
+          <h2>Mis compensaciones / retiros</h2>
         </CardTitle>
       </CardHeader>
 
       <CardContent>
-      <div className="mt-2 flex flex-col gap-4">
-        <Tabs value={tipo} onValueChange={(v) => setTipo(v as typeof tipo)}>
-          <TabsList className="w-full">
-            <TabsTrigger value="compensacion">
-              <ArrowsLeftRight />
-              Compensación
-            </TabsTrigger>
-            <TabsTrigger value="retiro">
-              <ArrowUp />
-              Retiro
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+      <div className="flex flex-col gap-4">
+        <ToggleGroup
+          type="single"
+          variant="segmentado"
+          value={tipo}
+          onValueChange={(v) => v && setTipo(v as typeof tipo)}
+          aria-label="Tipo de movimiento"
+        >
+          <ToggleGroupItem value="compensacion">
+            <ArrowsLeftRight />
+            Compensación
+          </ToggleGroupItem>
+          <ToggleGroupItem value="retiro">
+            <ArrowUp />
+            Retiro
+          </ToggleGroupItem>
+        </ToggleGroup>
 
-        <div className="grid gap-4 sm:grid-cols-[1fr_150px]">
-          <div className="flex flex-col gap-2">
+        <div className="grid gap-x-4 gap-y-3.5 sm:grid-cols-[1fr_150px]">
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="mov-monto">Monto</Label>
             <MoneyInput id="mov-monto" size="lg" value={monto} onValueChange={setMonto} onEnter={() => !pending && registrar()} />
           </div>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1.5">
             <Label htmlFor="mov-fecha">Fecha</Label>
             <DatePicker id="mov-fecha" value={fecha} onChange={setFecha} />
           </div>
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1.5">
           <Label htmlFor="mov-nota">Nota (opcional)</Label>
           <Input id="mov-nota" value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Referencia…" onKeyDown={(e) => esEnter(e) && !pending && registrar()} />
         </div>
 
-        <Button asChild variant="secondary" size="sm" className="max-w-full self-start">
+        {/* Gris relleno de 38 con el clip. El campo de archivo queda enfocable
+            (sr-only) y el aro se pinta en la pastilla. */}
+        <Button
+          asChild
+          variant="secondary"
+          size="sm"
+          className="max-w-full cursor-pointer self-start has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent"
+        >
         <label>
           <Paperclip className="shrink-0" />
           <span className="min-w-0 truncate">{file ? file.name : "Adjuntar anexo (foto o PDF)"}</span>
@@ -138,7 +142,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
             ref={inputRef}
             type="file"
             accept="image/*,application/pdf"
-            className="hidden"
+            className="sr-only"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
           />
         </label>
@@ -146,14 +150,14 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
 
         <ErrorNotice message={error} />
 
-        <Button onClick={registrar} disabled={pending} className="w-full sm:w-auto sm:self-start">
+        <Button variant="secondary" onClick={registrar} disabled={pending} className="w-full sm:w-auto sm:self-start">
           <Plus size={16} weight="bold" />
           {pending ? "Guardando…" : "Registrar movimiento"}
         </Button>
       </div>
 
       {movimientos.length > 0 && (
-        <ItemGroup className="mt-5 divide-y divide-line">
+        <ItemGroup variant="cajitas" className="mt-5 max-lg:divide-y max-lg:divide-linea-fila">
           <AnimatePresence initial={false}>
             {movimientos.map((m) => (
               <motion.div
@@ -164,32 +168,22 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
                 exit={{ opacity: 0, height: 0 }}
                 role="listitem"
               >
-                <Item size="sm" className="flex-nowrap gap-3 rounded-none px-0 py-2.5">
-                  <ItemMedia
-                    className={cn(
-                      "h-8 w-8 rounded-full group-has-[[data-slot=item-description]]/item:translate-y-0 group-has-[[data-slot=item-description]]/item:self-center",
-                      m.tipo === "compensacion" ? "bg-success-soft text-success" : "bg-danger-soft text-danger",
-                    )}
-                  >
-                    {m.tipo === "compensacion" ? <ArrowUp size={14} weight="bold" /> : <ArrowDown size={14} weight="bold" />}
+                <Item className="flex-nowrap gap-3 px-0 py-2.5">
+                  <ItemMedia variant="icon">
+                    {m.tipo === "compensacion" ? <ArrowsLeftRight size={16} weight="bold" /> : <ArrowUp size={16} weight="bold" />}
                   </ItemMedia>
-                  <ItemContent className="min-w-0 gap-0 leading-tight">
-                    <ItemTitle className="tnum text-[0.9rem] leading-tight text-text">{formatCOP(m.monto)}</ItemTitle>
-                    <ItemDescription className="flex min-w-0 items-center gap-1.5 text-[0.7rem] leading-tight text-faint">
-                      <span className="shrink-0">{m.tipo === "compensacion" ? "Compensación" : "Retiro"}, {formatFecha(m.fecha)}</span>
-                      {m.nota && <span className="min-w-0 truncate">· {m.nota}</span>}
+                  <ItemContent className="min-w-0 gap-0.5">
+                    <ItemTitle className="tnum">{formatCOP(m.monto)}</ItemTitle>
+                    <ItemDescription className="truncate text-nowrap text-faint">
+                      {m.tipo === "compensacion" ? "Compensación" : "Retiro"}, {formatFecha(m.fecha)}
+                      {m.nota && ` · ${m.nota}`}
                     </ItemDescription>
                   </ItemContent>
-                  <ItemActions className="shrink-0 gap-1">
+                  <ItemActions className="shrink-0 gap-1.5">
                     {m.url && (
-                      <IconButton
-                        asChild
-                        label={m.soporte_nombre ?? "Anexo"}
-                        size="icon-sm"
-                        className="text-faint hover:text-accent-strong"
-                      >
+                      <IconButton asChild label={m.soporte_nombre ?? "Anexo"} className="lg:size-[38px]">
                         <a href={m.url} target="_blank" rel="noopener noreferrer">
-                          <ArrowSquareOut size={15} />
+                          <ArrowSquareOut size={17} />
                         </a>
                       </IconButton>
                     )}
@@ -198,6 +192,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
                       onClick={() => setPorBorrar({ id: m.id, monto: m.monto })}
                       disabled={pending}
                       peligro
+                      className="lg:size-[38px]"
                     >
                       <Trash size={17} />
                     </IconButton>

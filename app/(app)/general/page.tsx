@@ -74,6 +74,7 @@ export default async function GeneralPage({
           titulo="Soportes del día"
           texto="Sube un soporte (foto o PDF)"
           detalleBorrado="No se puede deshacer."
+          className="mt-0"
         />
         <MovPropios movimientos={movimientos} />
         <GeneralTable entries={entries} />
