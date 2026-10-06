@@ -274,7 +274,7 @@ export function CuadreEditor({
   return (
     <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start">
       {/* ====== Columna de captura ====== */}
-      <Card className="p-5 sm:p-6">
+      <Card className="p-5">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
           <div className="min-w-0">
             <h2 className="truncate text-[0.95rem] font-semibold tracking-tight text-text">Movimientos del día</h2>

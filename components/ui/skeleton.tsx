@@ -23,7 +23,7 @@ function SkeletonHeader() {
 
 function SkeletonCard({ className }: { className?: string }) {
   return (
-    <div className={cn("rounded-[1.25rem] border bg-card p-5 sm:p-6", className)}>
+    <div className={cn("rounded-[1.25rem] border bg-card p-5", className)}>
       <Skeleton className="h-5 w-40" />
       <Skeleton className="mt-4 h-4 w-full" />
       <Skeleton className="mt-2 h-4 w-2/3" />
@@ -33,7 +33,7 @@ function SkeletonCard({ className }: { className?: string }) {
 
 function SkeletonList({ rows = 4, className }: { rows?: number; className?: string }) {
   return (
-    <div className={cn("rounded-[1.25rem] border bg-card p-5 sm:p-6", className)}>
+    <div className={cn("rounded-[1.25rem] border bg-card p-5", className)}>
       <div className="flex flex-col gap-4">
         {Array.from({ length: rows }).map((_, i) => (
           <div key={i} className="flex items-center gap-3">

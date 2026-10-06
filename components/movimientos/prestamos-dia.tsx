@@ -416,7 +416,7 @@ export function PrestamosDia({
 
       {/* Total pendiente */}
       <div className="flex flex-col gap-4 lg:sticky lg:top-8">
-        <Card className="p-5 sm:p-6">
+        <Card className="p-5">
           <p className="text-[0.78rem] font-medium text-muted">Pendiente del día</p>
           <p className="tnum mt-1 text-[1.9rem] font-semibold tracking-tight text-text">
             <AnimatedMoney value={pendiente} />
