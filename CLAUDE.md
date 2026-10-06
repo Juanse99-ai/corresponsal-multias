@@ -62,17 +62,29 @@
   - Composiciones de la app hechas con shadcn: `ConfirmDialog` (AlertDialog),
     `ErrorNotice` (Alert), `MoneyInput` (Input), `ChoiceChip` (Toggle),
     `ThemeToggle` (Switch), `AreaTendencia` (Chart), `DatePicker` (Popover +
-    Calendar, fechas ISO, en español), `IconButton` (Button + Tooltip).
-  - Cuál usar: tablas → `Table`; filas de listas → `Item`; iniciales → `Avatar`;
-    barras de avance → `Progress`; "no hay nada" → `Empty`; fechas →
-    `DatePicker`; ventanas → `Dialog` (o `AlertDialog` si es confirmar algo
+    Calendar, fechas ISO, en español), `IconButton` (Button + Tooltip; `forma`
+    gris dentro de tarjetas, blanco en la cabecera, suelto en barras),
+    `TarjetaNavy` (Card), `Celdas`/`Celda`, `Contador`, `Baldosas` (ToggleGroup),
+    `Plegable` (Collapsible) y `CifraCabecera` (en `PageHeader`).
+  - Cuál usar: tablas → `Table`; filas de listas → `Item` dentro de
+    `ItemGroup variant="cajitas"` (cajitas en el computador, renglones en el
+    celular); iniciales → `Avatar`; barras de avance → `Progress`; "no hay nada"
+    → `Empty` (seco: sin ícono ni punto final); fechas → `DatePicker`; filtros
+    → `DatePicker`/`NativeSelect` con `variante="filtro"` (pastilla de 36);
+    2 a 5 opciones cortas → `ToggleGroup variant="segmentado"`; 3 o 4 opciones
+    con ícono que mueven plata (tipo, medio) → `Baldosas`; cifras que se
+    comparan → `Celdas`; número junto a un título → `Contador`; la cifra sobre
+    la que se aprieta el botón principal → `TarjetaNavy` (solo Cuadre, Panel y
+    Control general); ventanas → `Dialog` (o `AlertDialog` si es confirmar algo
     destructivo); menú → `Sheet`; avisos efímeros → `toast` de sonner (el
     `<Toaster>` y el `TooltipProvider` ya están en `app/providers.tsx`); chat →
     `Message` + `Bubble`.
+  - Cambiar de tema: `useCambiarTema()` de `lib/tema.ts` (fundido de 350 ms),
+    nunca `setTheme` directo.
   - Fuera de shadcn solo quedan los efectos de pantalla completa de
-    `components/fx` y las imágenes que se exportan como PNG (fondo blanco a
-    propósito). Enter en un `Input`:
-    `onKeyDown={(e) => esEnter(e) && fn()}` (`lib/utils.ts`).
+    `components/fx`, los indicadores de los gestos (el círculo de jalar y el del
+    borde) y las imágenes que se exportan como PNG (fondo blanco a propósito).
+    Enter en un `Input`: `onKeyDown={(e) => esEnter(e) && fn()}` (`lib/utils.ts`).
 - Módulos por carpeta. Montos enteros (COP) y
   `lib/format.ts` para formato. Números con clase `.tnum` (misma fuente con
   `tabular-nums` para alinear columnas).
@@ -88,10 +100,15 @@
   (oscuro, negro total `#000`, tarjetas `#0e0e11`, sin sombras). Acento único
   azul. En el computador la app va en un marco redondo (`.marco`) sobre el
   lienzo, con riel de íconos por grupo y panel de secciones
-  (`components/shell/riel-panel.tsx`); el celular conserva su barra y su menú.
+  (`components/shell/riel-panel.tsx`). En el celular, arriba el logo con la lupa
+  y los avisos, y abajo la barra flotante (`components/shell/barra-abajo.tsx`):
+  Panel, Cuadre, Movimientos, Sr. Luis y Tú; Tú abre una hoja con el resto de
+  pantallas, la cuenta, el tema y cerrar sesión. La barra se encoge al bajar,
+  saca la lupa al arrastrar el dedo y baja cuando el teclado está arriba (no
+  con un campo enfocado solo: el autoFocus de Movimientos no la esconde).
   Lo elegido (pestaña, ítem del menú) es pastilla blanca con sombra. Detalle en
-  DESIGN.md. Los tokens `nav-*` (menú del celular + banda de marca del login)
-  son iguales en ambos temas.
+  DESIGN.md. Los tokens `nav-*` (banda de marca del login, bienvenida y
+  celebración) son iguales en ambos temas; las tarjetas navy usan `--navy`.
 - Verde/rojo solo para estado (cuadrado/descuadre), también en gráficos. Sin
   morados/neón, sin emojis. Sin glows decorativos en tarjetas. Iconos:
   `@phosphor-icons/react/dist/ssr`.
@@ -100,8 +117,9 @@
     estilo del taller (`--lienzo`, degradado suave en Azul y un velo azul arriba
     en Noche), detrás del marco.
   - Celular: barra superior de lado a lado con `.barra-material` y línea fina
-    abajo. Computador: la barra va dentro del marco, transparente. Nada de
-    píldoras flotantes de vidrio.
+    abajo. Computador: la barra va dentro del marco, transparente. La barra de
+    abajo del celular es la única cápsula de vidrio flotante (como en el
+    taller); nada más lleva vidrio.
   - Etiquetas en oración normal, sin mayúsculas espaciadas (`uppercase tracking-*`).
     Las imágenes que se exportan (cuadre y reporte del Sr. Luis) sí conservan su
     formato de hoja de cálculo.
@@ -112,14 +130,31 @@
     `Table` dentro de una tarjeta se ven como cajitas separadas 6 px (CSS).
   - Textos concretos y en "tú": sin frases motivacionales, eslóganes ni datos de
     relleno; "del Sr. Luis" con artículo.
-- Animación con Framer Motion y solo con motivo: retroalimentación o cambio de
-  estado (montos que cambian, check al cerrar el día). Sin GSAP ni efectos por
-  letra. La única entrada escalonada es la de cada pantalla por bloques (estilo
-  del taller): `app/(app)/template.tsx` + `.entra-bloques` en CSS, 45 ms entre
-  bloques; no agregues otras.
-- Única excepción: la entrada al abrir la app (`components/fx/entrada.tsx`, logo
-  que da paso a la pantalla) va en CSS (`globals.css`) porque corre antes de que
-  cargue el JavaScript. Sale una vez por sesión, y la bienvenida de 2 veces al
+- Animación con CSS y Framer Motion, solo con motivo: retroalimentación o cambio
+  de estado (montos que cambian, check al cerrar el día). Sin GSAP ni efectos por
+  letra. Una sola curva, la de iOS (`--ease-ios`; en framer, `TRANSICION` y
+  `CURVA_IOS` de `lib/movimiento.ts`), con 120, 220 o 420 ms. Rebote solo en la
+  lupa y la pastilla de la barra de abajo.
+- Entradas escalonadas: la de cada pantalla por bloques (`app/(app)/template.tsx`
+  + `.entra-bloques`, 45 ms entre bloques) y las barras de "Últimos cierres"
+  (`.barra-crece`, 40 ms entre barras); no agregues otras. (Las filas de las
+  tablas del historial y las burbujas del cruce ya entraban de a poco, 20 ms.)
+- Todo se apaga con "reducir movimiento": `MotionConfig reducedMotion="user"`
+  en el AppShell, el bloque `@media (prefers-reduced-motion)` de `globals.css`
+  y, en JavaScript, `matchMedia` (cifras que cuentan, lupa, barra que se
+  encoge, arrastrar hojas, fundido del tema).
+- Gestos del celular, siempre atajos de algo que tiene botón (ninguno guarda,
+  borra ni cobra por sí solo): atrás cierra la ventana u hoja de arriba
+  (`lib/use-atras-cierra-ventanas.ts`, en el AppShell; cada ventana deja una
+  entrada en el historial y Next 16 la acepta); las hojas se arrastran hacia
+  abajo para cerrar (`lib/use-arrastrar-hoja.ts`, ya puesto en Dialog,
+  AlertDialog y Sheet); jalar para actualizar
+  (`components/shell/jalar-para-actualizar.tsx`, por eso `html` lleva
+  `overscroll-behavior: none`); volver desde el borde solo en el iPhone con la
+  app instalada (`components/shell/volver-desde-borde.tsx`).
+- La entrada al abrir la app (`components/fx/entrada.tsx`, logo que da paso a
+  la pantalla) va en CSS (`globals.css`) porque corre antes de que cargue el
+  JavaScript. Sale una vez por sesión, y la bienvenida de 2 veces al
   día espera a que termine (`lib/entrada.ts`).
 - Campos de fecha y hora nativos sin apariencia nativa (`globals.css`): con ella,
   iOS les suma relleno y un ancho mínimo, y se salen de su columna.
