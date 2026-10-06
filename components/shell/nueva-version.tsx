@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { ArrowsClockwise } from "@phosphor-icons/react/dist/ssr";
 
 /** Cada cuánto se pregunta si hay versión nueva, con la app abierta. */
 const CADA = 10 * 60 * 1000;
@@ -40,6 +41,9 @@ export function NuevaVersion() {
         avisado.current = true;
         toast("Hay una versión nueva de la app.", {
           id: "nueva-version",
+          // Pastilla oscura flotante arriba al centro (globals.css), como en el taller.
+          className: "version-nueva",
+          icon: <ArrowsClockwise size={18} weight="bold" />,
           duration: Infinity,
           // Como antes: no se puede descartar, solo actualizar.
           dismissible: false,

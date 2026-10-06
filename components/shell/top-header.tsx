@@ -236,7 +236,7 @@ function HeaderSearch({ personas }: { personas: string[] }) {
       <Popover open={open && !!q.trim()}>
       <PopoverAnchor asChild>
       {/* Abierto en el celular va encima de la barra: fondo sólido para que no se transparente la campana. */}
-      <InputGroup className={cn("rounded-full sm:h-10 sm:w-[240px]", movil && "bg-surface dark:bg-surface sm:bg-surface-2/60 sm:dark:bg-input/30")}>
+      <InputGroup className={cn("rounded-full sm:h-10 sm:w-[240px]", movil && "bg-blanco hover:bg-blanco sm:bg-campo sm:hover:bg-campo-hover")}>
         <InputGroupAddon>
           <MagnifyingGlass className="text-faint" />
         </InputGroupAddon>

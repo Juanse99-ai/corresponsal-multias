@@ -64,7 +64,8 @@ export function DatePicker({
           disabled={disabled}
           aria-label={ariaLabel}
           className={cn(
-            "h-11 w-full justify-start rounded-xl bg-surface-2/60 px-3.5 font-normal",
+            // Como los campos rellenos: gris sin borde.
+            "h-11 w-full justify-start rounded-2xl border-transparent bg-campo px-3.5 font-normal shadow-none hover:bg-campo-hover dark:border-transparent dark:bg-campo dark:hover:bg-campo-hover",
             !fecha && "text-faint",
             className,
           )}
