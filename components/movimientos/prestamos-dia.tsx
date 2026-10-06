@@ -396,7 +396,7 @@ export function PrestamosDia({
                                 label="Borrar"
                                 onClick={() => setConfirmar({ tipo: "borrar", d })}
                                 disabled={pending || bloqueado}
-                                className="text-muted hover:text-destructive"
+                                peligro
                               >
                                 <Trash size={17} />
                               </IconButton>

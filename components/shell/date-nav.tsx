@@ -17,7 +17,7 @@ export function DateNav({ fecha, base }: { fecha: string; base: string }) {
   return (
     <div className="flex items-center gap-2.5">
       <ButtonGroup aria-label="Cambiar de día">
-        <IconButton label="Día anterior" variant="outline" size="icon-sm" className={flecha} asChild>
+        <IconButton label="Día anterior" forma="suelto" size="icon-sm" className={flecha} asChild>
           <Link href={`${base}?fecha=${prev}`} prefetch={false}>
             <CaretLeft size={15} weight="bold" />
           </Link>
@@ -30,7 +30,7 @@ export function DateNav({ fecha, base }: { fecha: string; base: string }) {
             <CaretRight size={15} weight="bold" />
           </Button>
         ) : (
-          <IconButton label="Día siguiente" variant="outline" size="icon-sm" className={flecha} asChild>
+          <IconButton label="Día siguiente" forma="suelto" size="icon-sm" className={flecha} asChild>
             <Link href={`${base}?fecha=${next}`} prefetch={false}>
               <CaretRight size={15} weight="bold" />
             </Link>
@@ -38,7 +38,7 @@ export function DateNav({ fecha, base }: { fecha: string; base: string }) {
         )}
       </ButtonGroup>
       {!esHoy && (
-        <Button variant="outline" size="xs" asChild className="h-9 text-[0.78rem] text-accent-strong">
+        <Button variant="outline" size="sm" asChild className="h-9 text-[0.78rem] text-accent-strong">
           <Link href={base} prefetch={false}>
             Hoy
           </Link>

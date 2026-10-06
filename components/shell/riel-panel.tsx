@@ -85,6 +85,7 @@ export function RielPanel({
             const punto = !on && g.items.some((i) => urgentes.includes(i.href));
             return (
               <IconButton
+                forma="suelto"
                 key={g.id}
                 label={g.label}
                 tooltipSide="right"
@@ -107,6 +108,7 @@ export function RielPanel({
 
         <div className="mt-auto flex flex-col items-center gap-2">
           <IconButton
+            forma="suelto"
             label={noche ? "Tema Azul" : "Tema Noche"}
             tooltipSide="right"
             className={rielBtn}
@@ -117,7 +119,7 @@ export function RielPanel({
 
           <Popover>
             <PopoverTrigger asChild>
-              <IconButton label={`${profile.nombre}, ${ROL[profile.rol] ?? profile.rol}`} tooltipSide="right" className="size-10 rounded-full p-0 hover:bg-transparent">
+              <IconButton forma="suelto" label={`${profile.nombre}, ${ROL[profile.rol] ?? profile.rol}`} tooltipSide="right" className="size-10 rounded-full p-0 hover:bg-transparent">
                 <Avatar className="size-9">
                   <AvatarFallback className="bg-primary text-[0.78rem] font-semibold text-primary-foreground">
                     {iniciales(profile.nombre)}
@@ -161,6 +163,7 @@ export function RielPanel({
           </Popover>
 
           <IconButton
+            forma="suelto"
             label={escondido ? "Mostrar el panel" : "Esconder el panel"}
             tooltipSide="right"
             className={rielBtn}

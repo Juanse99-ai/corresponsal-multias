@@ -197,7 +197,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
                       label="Borrar"
                       onClick={() => setPorBorrar({ id: m.id, monto: m.monto })}
                       disabled={pending}
-                      className="text-muted hover:text-destructive"
+                      peligro
                     >
                       <Trash size={17} />
                     </IconButton>

@@ -179,7 +179,7 @@ export function CuadreExport({
                 <ShareNetwork size={17} />
                 Compartir
               </Button>
-              <IconButton label="Cerrar" variant="secondary" onClick={() => setOpen(false)}>
+              <IconButton label="Cerrar" onClick={() => setOpen(false)}>
                 <X size={18} />
               </IconButton>
             </div>

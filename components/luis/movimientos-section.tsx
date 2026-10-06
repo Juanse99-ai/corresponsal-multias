@@ -550,7 +550,7 @@ export function MovimientosSection({
                       <CollapsibleTrigger asChild>
                         <Button
                           variant="link"
-                          size="xs"
+                          size="sm"
                           className="group/ign h-auto min-h-0 whitespace-normal p-0 text-left text-[0.72rem] font-normal text-faint"
                         >
                           <CaretDown className="size-3 transition-transform group-data-[state=closed]/ign:-rotate-90" />
@@ -671,7 +671,7 @@ export function MovimientosSection({
                       <IconButton label="Editar" onClick={() => abrirEdicion(c)} disabled={pending} className="text-muted hover:text-foreground">
                         <PencilSimple size={17} />
                       </IconButton>
-                      <IconButton label="Borrar" onClick={() => setPorBorrar(c)} disabled={pending} className="text-muted hover:text-destructive">
+                      <IconButton label="Borrar" onClick={() => setPorBorrar(c)} disabled={pending} peligro>
                         <Trash size={17} />
                       </IconButton>
                     </ItemActions>

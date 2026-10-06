@@ -469,6 +469,9 @@ body {
 @layer base {
   input, button, textarea, select { font: inherit; }
 
+  /* Sin el destello gris al tocar en el celular, como en iOS. */
+  a, button, [role="button"] { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+
   /* iOS: con la apariencia nativa, Safari les pone a los campos de fecha y hora
      su propio relleno, un ancho mínimo y box-sizing: content-box, así que crecen
      por fuera de su columna (la hora se montaba sobre la nota). Sin apariencia

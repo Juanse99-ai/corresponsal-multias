@@ -252,6 +252,7 @@ export function SoportesSection({
                   {/* Va sobre la foto: el vidrio claro se perdería, así que lleva fondo
                       oscuro propio, con la misma forma y respuesta que los demás. */}
                   <IconButton
+                    forma="suelto"
                     label="Borrar soporte"
                     size="icon-sm"
                     onClick={() => setPorBorrar(s.id)}

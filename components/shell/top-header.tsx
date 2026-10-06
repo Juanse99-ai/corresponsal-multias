@@ -223,6 +223,7 @@ export function HeaderSearch({ personas, enPanel = false }: { personas: string[]
       {/* Celular: lupa de 44x44. El buscador completo se abre encima del encabezado. */}
       {!enPanel && (
       <IconButton
+        forma="suelto"
         label="Buscar día o persona"
         onClick={() => {
           setMovil(true);
@@ -347,7 +348,7 @@ export function HeaderAvisos({ avisos, urgentes }: { avisos: Aviso[]; urgentes: 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-      <IconButton label={avisos.length ? `Avisos (${avisos.length})` : "Avisos"}>
+      <IconButton forma="suelto" label={avisos.length ? `Avisos (${avisos.length})` : "Avisos"}>
         <span className="relative inline-flex">
           <Bell size={18} weight={avisos.length ? "fill" : "regular"} />
           {avisos.length > 0 && (

@@ -184,7 +184,7 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
                     </div>
                     {isAdmin && (
                       <div className="flex justify-end">
-                        <IconButton label="Borrar cierre" onClick={(e) => borrar(c.id, e)} disabled={pending} className="text-muted hover:text-destructive">
+                        <IconButton label="Borrar cierre" onClick={(e) => borrar(c.id, e)} disabled={pending} peligro>
                           <Trash size={17} />
                         </IconButton>
                       </div>
@@ -236,7 +236,7 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
                     </TableCell>
                     {isAdmin && (
                       <TableCell className="py-0 pr-3 pl-0">
-                        <IconButton label="Borrar cierre" size="icon-sm" onClick={(e) => borrar(c.id, e)} disabled={pending} className="text-muted hover:text-destructive">
+                        <IconButton label="Borrar cierre" size="icon-sm" onClick={(e) => borrar(c.id, e)} disabled={pending} peligro>
                           <Trash size={16} />
                         </IconButton>
                       </TableCell>

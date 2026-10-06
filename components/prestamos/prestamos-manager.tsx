@@ -667,7 +667,7 @@ function DeudaRow({
             </Tooltip>
           )}
           {isAdmin && (
-            <IconButton label="Borrar préstamo" onClick={() => setConfirmando("borrar")} disabled={pending} className="ml-auto text-muted hover:text-destructive">
+            <IconButton label="Borrar préstamo" onClick={() => setConfirmando("borrar")} disabled={pending} peligro className="ml-auto">
               <Trash size={17} />
             </IconButton>
           )}

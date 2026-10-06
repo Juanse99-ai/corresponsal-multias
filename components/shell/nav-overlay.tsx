@@ -82,7 +82,7 @@ export function NavOverlay({
             </div>
           </Link>
           <SheetClose asChild>
-            <IconButton label="Cerrar menú" className={navIconBtn}>
+            <IconButton forma="suelto" label="Cerrar menú" className={navIconBtn}>
               <X size={20} weight="bold" />
             </IconButton>
           </SheetClose>
@@ -252,7 +252,7 @@ function ResumenPanel({
           </ItemContent>
           <ItemActions>
             <form action={signOutAction}>
-              <IconButton type="submit" label="Cerrar sesión" className={navIconBtn}>
+              <IconButton forma="suelto" type="submit" label="Cerrar sesión" className={navIconBtn}>
                 <SignOut size={17} />
               </IconButton>
             </form>

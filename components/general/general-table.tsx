@@ -185,7 +185,7 @@ export function GeneralTable({ entries }: { entries: GeneralRow[] }) {
                         setPorBorrar(e.id);
                       }}
                       disabled={pending}
-                      className="text-muted hover:text-destructive"
+                      peligro
                     >
                       <Trash size={16} />
                     </IconButton>

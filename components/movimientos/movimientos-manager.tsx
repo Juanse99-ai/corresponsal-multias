@@ -310,7 +310,7 @@ export function MovimientosManager({
                                 label="Borrar"
                                 onClick={() => setPorBorrar({ id: m.id, monto: m.monto })}
                                 disabled={pending || bloqueado}
-                                className="text-muted hover:text-destructive"
+                                peligro
                               >
                                 <Trash size={17} />
                               </IconButton>
