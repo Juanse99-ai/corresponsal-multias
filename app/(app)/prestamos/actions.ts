@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { requireSession, requireAdmin } from "@/lib/auth";
 import { diaEstaCerrado } from "@/lib/queries";
+import { hoyISO } from "@/lib/format";
 
 const deudaSchema = z.object({
   persona: z.string().trim().min(1).max(60),
@@ -62,12 +63,12 @@ const abonoSchema = z.object({
 async function saldoDeuda(
   sb: Awaited<ReturnType<typeof createClient>>,
   deudaId: string,
-): Promise<{ fecha: string; monto: number; abonado: number; restante: number } | null> {
-  const { data: deuda } = await sb.from("corr_deudas").select("monto, fecha").eq("id", deudaId).maybeSingle();
+): Promise<{ monto: number; abonado: number; restante: number } | null> {
+  const { data: deuda } = await sb.from("corr_deudas").select("monto").eq("id", deudaId).maybeSingle();
   if (!deuda) return null;
   const { data: abonos } = await sb.from("corr_abonos").select("monto").eq("deuda_id", deudaId);
   const abonado = (abonos ?? []).reduce((s, a) => s + a.monto, 0);
-  return { fecha: deuda.fecha, monto: deuda.monto, abonado, restante: Math.max(0, deuda.monto - abonado) };
+  return { monto: deuda.monto, abonado, restante: Math.max(0, deuda.monto - abonado) };
 }
 
 export async function agregarAbono(raw: unknown): Promise<{ ok: boolean; error?: string }> {
@@ -78,7 +79,10 @@ export async function agregarAbono(raw: unknown): Promise<{ ok: boolean; error?:
   const sb = await createClient();
   const info = await saldoDeuda(sb, p.data.deuda_id);
   if (!info) return { ok: false, error: "El préstamo no existe." };
-  if (session.rol !== "admin" && (await diaEstaCerrado(info.fecha))) {
+  // El abono es de HOY: lo que importa es si hoy está cerrado, no el día del
+  // préstamo (si no, ningún préstamo viejo se podía pagar sin ser admin).
+  const hoy = hoyISO();
+  if (session.rol !== "admin" && (await diaEstaCerrado(hoy))) {
     return { ok: false, error: "El día está cerrado. Solo Juan puede reabrirlo." };
   }
   // No permitir sobrepago (y de paso mata el doble-toque: el 2do envío ve restante 0).
@@ -88,6 +92,7 @@ export async function agregarAbono(raw: unknown): Promise<{ ok: boolean; error?:
   const { error } = await sb.from("corr_abonos").insert({
     deuda_id: p.data.deuda_id,
     monto,
+    fecha: hoy,
     nota: p.data.nota?.trim() || null,
     origen: p.data.origen ?? null,
     created_by: session.id,
@@ -185,7 +190,9 @@ export async function marcarPrestamoPagado(raw: unknown): Promise<{ ok: boolean;
   const sb = await createClient();
   const info = await saldoDeuda(sb, p.data.deuda_id);
   if (!info) return { ok: false, error: "El préstamo no existe." };
-  if (session.rol !== "admin" && (await diaEstaCerrado(info.fecha))) {
+  // Igual que agregarAbono: el pago es de hoy, se revisa el cierre de hoy.
+  const hoy = hoyISO();
+  if (session.rol !== "admin" && (await diaEstaCerrado(hoy))) {
     return { ok: false, error: "El día está cerrado. Solo Juan puede reabrirlo." };
   }
   // Salda por el restante REAL del servidor (no por el monto del cliente): así el
@@ -194,6 +201,7 @@ export async function marcarPrestamoPagado(raw: unknown): Promise<{ ok: boolean;
   const { error } = await sb.from("corr_abonos").insert({
     deuda_id: p.data.deuda_id,
     monto: info.restante,
+    fecha: hoy,
     nota: "Pago registrado desde Movimientos",
     created_by: session.id,
   });
