@@ -21,7 +21,8 @@ const csp = [
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
-  "frame-ancestors 'none'",
+  // Solo la misma app puede meterse en un iframe: las pestañas del computador.
+  "frame-ancestors 'self'",
   "upgrade-insecure-requests",
 ].join("; ");
 
@@ -39,8 +40,9 @@ const nextConfig: NextConfig = {
         source: "/:path*",
         headers: [
           { key: "Content-Security-Policy", value: csp },
-          // Nadie puede embeber la app para engañar al operador con clics.
-          { key: "X-Frame-Options", value: "DENY" },
+          // Ningún otro sitio puede embeber la app para engañar al operador con
+          // clics; ella misma sí, para las pestañas del computador.
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
           // El navegador respeta el tipo de archivo que declara el servidor.
           { key: "X-Content-Type-Options", value: "nosniff" },
           // Al salir a otro sitio no se filtra la ruta interna que se estaba viendo.
