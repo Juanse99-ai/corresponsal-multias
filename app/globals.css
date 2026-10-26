@@ -525,6 +525,27 @@ input[type="number"] { -moz-appearance: textfield; }
     backdrop-filter: none;
   }
 }
+/* ===== Pestañas del computador (components/shell/pestanas.tsx) ==========
+   Con pestañas de más, la barra va sobre el marco y el marco sube a pegarse a
+   ella. Cada pestaña de más es la app entera en un iframe (html.en-ventana),
+   con su marco a la misma altura que el de la principal. Mientras se ve otra
+   pestaña, el marco de la principal se esconde sin desmontarse. */
+@media (min-width: 1024px) {
+  html.con-pestanas { --pestanas-h: 44px; }
+  .pestanas {
+    height: var(--pestanas-h);
+    background: var(--lienzo);
+    background-attachment: fixed;
+  }
+  .pestana-marco { height: calc(100dvh - var(--pestanas-h)); }
+  html.con-pestanas .marco { margin-top: 0; min-height: calc(100dvh - var(--pestanas-h) - 14px); }
+  html.con-pestanas .riel { top: calc(var(--pestanas-h) + 10px); height: calc(100dvh - var(--pestanas-h) - 34px); }
+  html[data-pestana="otra"] .marco { display: none; }
+  html.en-ventana .marco { margin-top: 0; min-height: calc(100dvh - 14px); }
+  html.en-ventana .riel { top: 10px; height: calc(100dvh - 34px); }
+}
+html.en-ventana .entrada { display: none; }
+
 /* El panel del grupo entra corriéndose un poco desde el riel. */
 .panel-entra { animation: panel-entra 320ms var(--ease-smooth-out) both; }
 @keyframes panel-entra { from { opacity: 0; transform: translateX(-6px); } }

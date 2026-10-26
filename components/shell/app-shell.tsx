@@ -12,6 +12,7 @@ import { NuevaVersion } from "@/components/shell/nueva-version";
 import { JalarParaActualizar } from "@/components/shell/jalar-para-actualizar";
 import { VolverDesdeBorde } from "@/components/shell/volver-desde-borde";
 import { BienvenidaSplash } from "@/components/fx/bienvenida-splash";
+import { AbrirConTecla, Pestanas, PuenteVentana, useEnVentana } from "@/components/shell/pestanas";
 import { TRANSICION } from "@/lib/movimiento";
 import { useAtrasCierraVentanas } from "@/lib/use-atras-cierra-ventanas";
 
@@ -26,6 +27,9 @@ export function AppShell({
 }) {
   const pathname = usePathname();
   const isAdmin = profile.rol === "admin";
+  // Dentro de una pestaña del computador: la app va entera, sin bienvenida ni
+  // aviso de versión (eso lo hace la ventana de afuera).
+  const enVentana = useEnVentana();
   // Atrás cierra la ventana u hoja de arriba antes de salirse de la pantalla.
   useAtrasCierraVentanas();
   // Miga de pan sobre el título ("Principal › Cuadre diario"), en el computador.
@@ -39,8 +43,9 @@ export function AppShell({
       {/* Computador: la app es una ventana redonda (el marco) sobre el lienzo,
           con el riel y el panel a la izquierda. Celular: el logo arriba y la
           barra de abajo. */}
+      {!enVentana && <Pestanas />}
       <div className="marco min-h-[100dvh]">
-        <BienvenidaSplash nombre={profile.nombre} />
+        {!enVentana && <BienvenidaSplash nombre={profile.nombre} />}
 
         <RielPanel profile={profile} isAdmin={isAdmin} pathname={pathname} resumen={resumen} />
 
@@ -55,7 +60,9 @@ export function AppShell({
         {/* Celular: la barra de abajo reemplaza al menú de pantalla completa. */}
         <BarraAbajo profile={profile} isAdmin={isAdmin} pathname={pathname} resumen={resumen} />
 
-        <NuevaVersion />
+        {!enVentana && <NuevaVersion />}
+        {enVentana && <PuenteVentana />}
+        <AbrirConTecla />
         <JalarParaActualizar />
         <VolverDesdeBorde />
       </div>
