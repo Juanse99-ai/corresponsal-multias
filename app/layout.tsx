@@ -4,6 +4,7 @@ import { Providers } from "./providers";
 import { PwaRegister } from "@/components/pwa-register";
 import { Entrada } from "@/components/fx/entrada";
 import { COLOR_BARRA_SISTEMA } from "@/lib/colores-tema";
+import { SCRIPT_EN_VENTANA } from "@/lib/ventanas";
 
 export const metadata: Metadata = {
   title: "Barrio Centro Sabanalarga 18 · Multidiagnósticos AS",
@@ -37,6 +38,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="es" suppressHydrationWarning>
       <body className="min-h-[100dvh] antialiased">
         <Providers>
+        <script dangerouslySetInnerHTML={{ __html: SCRIPT_EN_VENTANA }} />
         <Entrada />
         {children}
         <PwaRegister />

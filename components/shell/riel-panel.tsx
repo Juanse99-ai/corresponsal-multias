@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useCambiarTema } from "@/lib/tema";
-import { Moon, SidebarSimple, SignOut, Sun } from "@phosphor-icons/react/dist/ssr";
+import { Browsers, Moon, SidebarSimple, SignOut, Sun } from "@phosphor-icons/react/dist/ssr";
 import { Logo } from "@/components/brand";
 import { IconButton } from "@/components/ui/icon-button";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ActivarAvisos } from "@/components/push/activar-avisos";
 import { HeaderSearch, buildAvisos } from "@/components/shell/top-header";
 import { GRUPOS, NAV, isActive, type Grupo } from "@/components/shell/nav-items";
+import { hrefActual, pedirPestana } from "@/components/shell/pestanas";
 import { signOutAction } from "@/app/login/actions";
 import { useMontado } from "@/lib/use-montado";
 import { cn } from "@/lib/utils";
@@ -74,7 +75,7 @@ export function RielPanel({
   const contador: Record<string, number> = { "/prestamos": resumen.prestamosCount };
 
   return (
-    <aside className="sticky top-6 hidden h-[calc(100dvh-48px)] shrink-0 gap-2.5 lg:flex" aria-label="Menú">
+    <aside className="riel sticky top-6 hidden h-[calc(100dvh-48px)] shrink-0 gap-2.5 lg:flex" aria-label="Menú">
       <div className="flex w-[50px] flex-none flex-col items-center gap-1.5 pt-1 pb-1.5">
         <Link href="/panel" aria-label="Inicio" className="mb-3.5 rounded-xl shadow-[0_1px_2px_rgba(20,16,50,0.08),0_6px_14px_-8px_rgba(20,16,50,0.35)]">
           <Logo size={40} className="rounded-xl" />
@@ -109,6 +110,17 @@ export function RielPanel({
         </nav>
 
         <div className="mt-auto flex flex-col items-center gap-2">
+          {/* La pantalla de ahora, otra vez, en una pestaña aparte (components/shell/pestanas.tsx). */}
+          <IconButton
+            forma="suelto"
+            label="Abrir en otra pestaña"
+            tooltipSide="right"
+            className={rielBtn}
+            onClick={() => pedirPestana(hrefActual(), true)}
+          >
+            <Browsers size={19} />
+          </IconButton>
+
           <IconButton
             forma="suelto"
             label={noche ? "Tema Azul" : "Tema Noche"}
