@@ -18,7 +18,6 @@ import {
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle } from "@/components/ui/alert";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { MoneyInput } from "@/components/ui/money-input";
 import { Textarea } from "@/components/ui/textarea";
@@ -501,38 +500,24 @@ export function CuadreEditor({
                 <Lock size={16} weight="fill" className="shrink-0" />
                 Día cerrado. Solo Juan puede reabrirlo.
               </p>
+            ) : estado !== "cerrado" ? (
+              // Un solo botón: guarda y cierra de una. Antes eran selector + guardar
+              // + cerrar, y si se quedaba un paso el día no llegaba a la base.
+              <Button onClick={() => onGuardar("cerrado")} disabled={pending} className="w-full">
+                <Lock size={18} weight="fill" />
+                {pending ? "Cerrando…" : "Cerrar el día"}
+              </Button>
             ) : (
+              // Solo Juan llega aquí con el día cerrado: corrige o lo reabre.
               <>
-                <Tabs value={estado} onValueChange={(v) => setEstado(v as typeof estado)}>
-                  <TabsList className="w-full">
-                    <TabsTrigger value="abierto">
-                      <LockOpen />
-                      Abierto
-                    </TabsTrigger>
-                    <TabsTrigger value="cerrado">
-                      <Lock />
-                      Cerrado
-                    </TabsTrigger>
-                  </TabsList>
-                </Tabs>
-
-                <Button onClick={() => onGuardar()} disabled={pending} className="w-full">
+                <Button onClick={() => onGuardar("cerrado")} disabled={pending} className="w-full">
                   <FloppyDisk size={18} weight="fill" />
-                  {pending ? "Guardando…" : existente ? "Guardar cambios" : "Guardar cuadre"}
+                  {pending ? "Guardando…" : "Guardar cambios"}
                 </Button>
-
-                {estado !== "cerrado" && (
-                  <Button variant="sobre-oscuro" onClick={() => onGuardar("cerrado")} disabled={pending} className="w-full">
-                    <Lock size={16} />
-                    Cerrar el día
-                  </Button>
-                )}
-
-                {isAdmin && inicial.estado === "cerrado" && estado === "cerrado" && (
-                  <p className="text-center text-meta text-white/55">
-                    Para reabrir: cambia a “Abierto” y guarda los cambios.
-                  </p>
-                )}
+                <Button variant="sobre-oscuro" onClick={() => onGuardar("abierto")} disabled={pending} className="w-full">
+                  <LockOpen size={16} />
+                  Reabrir el día
+                </Button>
               </>
             )}
           </div>
