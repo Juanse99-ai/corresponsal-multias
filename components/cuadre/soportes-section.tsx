@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useNavegacion } from "@/lib/use-navegacion";
 import { motion, AnimatePresence } from "framer-motion";
 import { Trash, FilePdf, Receipt, ArrowSquareOut } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -56,7 +56,7 @@ export function SoportesSection({
   /** Dentro de una columna con su propio espacio entre tarjetas: "mt-0". */
   className?: string;
 }) {
-  const router = useRouter();
+  const router = useNavegacion();
   const inputRef = useRef<HTMLInputElement>(null);
   const [, startTransition] = useTransition();
   const [porBorrar, setPorBorrar] = useState<string | null>(null);

@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useMemo, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useNavegacion } from "@/lib/use-navegacion";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { Scan, Warning, Check, X } from "@phosphor-icons/react/dist/ssr";
@@ -45,7 +45,7 @@ export function ComprobantesLector({
     repetidos?: number;
   }>;
 }) {
-  const router = useRouter();
+  const router = useNavegacion();
   const [pending, startTransition] = useTransition();
   const [items, setItems] = useState<ComprobanteLeido[] | null>(null);
   const [tocados, setTocados] = useState<Set<number>>(() => new Set());

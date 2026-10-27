@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useId, useMemo, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useNavegacion } from "@/lib/use-navegacion";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
@@ -150,7 +150,7 @@ export function PrestamosManager({
 }
 
 function AddDeudaForm() {
-  const router = useRouter();
+  const router = useNavegacion();
   const [pending, startTransition] = useTransition();
   const [persona, setPersona] = useState("Juan Sebastián");
   const [otro, setOtro] = useState("");
@@ -419,7 +419,7 @@ function OrigenPicker({
 
 /** Un abono del historial. Tocar la etiqueta abre el editor del origen. */
 function AbonoItem({ abono, origenes }: { abono: AbonoRow; origenes: string[] }) {
-  const router = useRouter();
+  const router = useNavegacion();
   const id = useId();
   const [pending, startTransition] = useTransition();
   const [editando, setEditando] = useState(false);
@@ -509,7 +509,7 @@ function DeudaRow({
   isAdmin: boolean;
   origenes: string[];
 }) {
-  const router = useRouter();
+  const router = useNavegacion();
   const [pending, startTransition] = useTransition();
   const [abonoOpen, setAbonoOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);

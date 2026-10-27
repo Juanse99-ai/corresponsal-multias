@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useNavegacion } from "@/lib/use-navegacion";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   HandCoins,
@@ -53,7 +53,7 @@ export function PrestamosDia({
   isAdmin: boolean;
   bloqueado?: boolean;
 }) {
-  const router = useRouter();
+  const router = useNavegacion();
   const [pending, startTransition] = useTransition();
   const [persona, setPersona] = useState("");
   const [otro, setOtro] = useState("");

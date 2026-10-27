@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useNavegacion } from "@/lib/use-navegacion";
 import { motion } from "framer-motion";
 import { DownloadSimple, Trash } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardAction, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +27,7 @@ import { TRANSICION } from "@/lib/movimiento";
 const MotionTableRow = motion.create(TableRow);
 
 export function GeneralTable({ entries }: { entries: GeneralRow[] }) {
-  const router = useRouter();
+  const router = useNavegacion();
   const [pending, startTransition] = useTransition();
   const [porBorrar, setPorBorrar] = useState<string | null>(null);
 

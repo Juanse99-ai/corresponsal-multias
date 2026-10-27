@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useNavegacion } from "@/lib/use-navegacion";
 import Link from "next/link";
 import { toast } from "sonner";
 import {
@@ -106,7 +106,7 @@ export function CuadreEditor({
   prestamosEfectivoDia,
   movTotales,
 }: Props) {
-  const router = useRouter();
+  const router = useNavegacion();
   const [pending, startTransition] = useTransition();
   const [celebrar, setCelebrar] = useState(0);
   const [confirmarCierre, setConfirmarCierre] = useState(false);
