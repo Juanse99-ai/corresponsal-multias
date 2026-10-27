@@ -36,6 +36,14 @@
 - Server Components + Server Actions. Lecturas en `lib/queries.ts`, acciones en
   `app/(app)/*/actions.ts`. Clientes Supabase en `lib/supabase/{client,server,middleware}.ts`.
 - Auth/roles en `lib/auth.ts`; protección de rutas en `proxy.ts` (antes middleware).
+- Pestañas del computador como en Biela, **sin iframes**: todas las pantallas
+  abiertas montadas en el mismo árbol (`components/shell/pestanas.tsx`), cada una
+  pintada en el servidor por `cargarPantalla` (`app/(app)/pantallas.tsx`) con su
+  misma `page.tsx`; reglas en `lib/pestanas.ts`. Por eso las pantallas usan
+  `useNavegacion()` (`lib/use-navegacion.ts`) y **no** `useRouter()` para
+  refrescar después de guardar o ir a otra pantalla. Una pantalla nueva se suma
+  a `PAGINAS` y a `CARGAS`. Nada necesita meter la app en un iframe: no se
+  vuelve a permitir en las cabeceras (`frame-ancestors`).
 - UI: **shadcn/ui obligatorio** para todo componente de interfaz (botón, campo,
   tarjeta, diálogo, pestañas, casilla, selector, aviso, popover, gráfico...).
   Viven en `components/ui` (config en `components.json`, estilo new-york, íconos

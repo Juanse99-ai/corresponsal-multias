@@ -228,6 +228,8 @@ export function PestanasProvider({
     const href = hrefActual();
     let inicial = pestanasIniciales(href);
     try {
+      // Las de la versión con iframes (una sola lista para todos) ya no sirven.
+      localStorage.removeItem("corr-pestanas:v1");
       const guardadas = restaurar(JSON.parse(localStorage.getItem(claveGuardadas(usuario)) ?? "null"), permitida);
       if (guardadas) {
         const r = irA(guardadas, href, { aparte: true });
