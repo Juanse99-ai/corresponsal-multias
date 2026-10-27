@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Plus, X } from "@phosphor-icons/react/dist/ssr";
 import { IconButton } from "@/components/ui/icon-button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -120,6 +121,9 @@ interface PestanasApi {
   estado: EstadoPestanas | null;
   contenidos: Record<string, Contenido>;
   ruta: Ruta | null;
+  /** Pestañas con algo escrito y sin guardar (el punto ámbar). */
+  sucias: ReadonlySet<string>;
+  marcarSucia: (id: string, sucia: boolean) => void;
   ir: (href: string, opciones?: { fondo?: boolean; aparte?: boolean }) => void;
   mostrar: (id: string) => void;
   cerrar: (id: string) => void;
@@ -160,13 +164,17 @@ export function PestanasProvider({
   const [estado, setEstado] = useState<EstadoPestanas | null>(null);
   const [contenidos, setContenidos] = useState<Record<string, Contenido>>({});
   const [ruta, setRuta] = useState<Ruta | null>(null);
+  const [sucias, setSucias] = useState<ReadonlySet<string>>(() => new Set());
+  const [porCerrar, setPorCerrar] = useState<string | null>(null);
 
   // Copias al día para los manejadores (teclado, clics, respuestas del servidor).
   const estadoRef = useRef(estado);
   const contenidosRef = useRef(contenidos);
+  const suciasRef = useRef(sucias);
   useLayoutEffect(() => {
     estadoRef.current = estado;
     contenidosRef.current = contenidos;
+    suciasRef.current = sucias;
   });
   const pedidos = useRef(new Map<string, number>());
   const scrolls = useRef(new Map<string, number>());
@@ -233,6 +241,7 @@ export function PestanasProvider({
     setEstado(inicial);
     setRuta({ id, href });
     setContenidos({});
+    setSucias(new Set());
     cargar(id, href, true);
     const enVuelo = pedidos.current;
     const vistos = scrolls.current;
@@ -305,7 +314,8 @@ export function PestanasProvider({
         router.push(href);
         return;
       }
-      const r = irA(actual, destino, opciones);
+      // Con algo sin guardar adelante, la pantalla nueva no la pisa: va al lado.
+      const r = irA(actual, destino, { ...opciones, sucia: suciasRef.current.has(actual.activa) });
       if (r.lleno) {
         toast(`Ya hay ${MAX_PESTANAS} pestañas abiertas. Cierra una para abrir otra.`);
         return;
@@ -323,13 +333,25 @@ export function PestanasProvider({
     [aplicar],
   );
 
-  const cerrar = useCallback(
+  const marcarSucia = useCallback((id: string, sucia: boolean) => {
+    setSucias((s) => {
+      if (s.has(id) === sucia) return s;
+      const otra = new Set(s);
+      if (sucia) otra.add(id);
+      else otra.delete(id);
+      return otra;
+    });
+  }, []);
+
+  const cerrarYa = useCallback(
     (id: string) => {
+      setPorCerrar(null);
       const actual = estadoRef.current;
       if (!actual) return;
       const nuevo = cerrarPestana(actual, id);
       if (nuevo === actual) return;
       aplicar(nuevo);
+      marcarSucia(id, false);
       pedidos.current.delete(id);
       scrolls.current.delete(id);
       setContenidos((c) => {
@@ -339,7 +361,16 @@ export function PestanasProvider({
       });
       setRuta((r) => (r?.id === id ? null : r));
     },
-    [aplicar],
+    [aplicar, marcarSucia],
+  );
+
+  /** Cerrar una pestaña con algo sin guardar pregunta antes. */
+  const cerrar = useCallback(
+    (id: string) => {
+      if (suciasRef.current.has(id)) setPorCerrar(id);
+      else cerrarYa(id);
+    },
+    [cerrarYa],
   );
 
   // Lo que una pantalla le pide al navegador (lib/use-navegacion.ts), por pestaña.
@@ -348,12 +379,19 @@ export function PestanasProvider({
     (id: string) => {
       let nav = navegaciones.current.get(id);
       if (!nav) {
-        nav = { refresh: () => recargar(id), push: (href: string) => ir(href) };
+        // Las pantallas refrescan después de guardar: ya no hay nada pendiente.
+        nav = {
+          refresh: () => {
+            marcarSucia(id, false);
+            recargar(id);
+          },
+          push: (href: string) => ir(href),
+        };
         navegaciones.current.set(id, nav);
       }
       return nav;
     },
-    [recargar, ir],
+    [recargar, ir, marcarSucia],
   );
 
   // Clics en enlaces de la app (riel, avisos, flechas de día, filas): van a la
@@ -396,10 +434,24 @@ export function PestanasProvider({
   }, [estado !== null, mostrar]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const api = useMemo(
-    () => ({ estado, contenidos, ruta, ir, mostrar, cerrar, navegacionDe }),
-    [estado, contenidos, ruta, ir, mostrar, cerrar, navegacionDe],
+    () => ({ estado, contenidos, ruta, sucias, marcarSucia, ir, mostrar, cerrar, navegacionDe }),
+    [estado, contenidos, ruta, sucias, marcarSucia, ir, mostrar, cerrar, navegacionDe],
   );
-  return <PestanasCtx.Provider value={api}>{children}</PestanasCtx.Provider>;
+  const cerrando = porCerrar && estado?.lista.find((p) => p.id === porCerrar);
+  return (
+    <PestanasCtx.Provider value={api}>
+      {children}
+      <ConfirmDialog
+        open={!!cerrando}
+        titulo="¿Cerrar sin guardar?"
+        detalle={cerrando ? `En ${titulo(cerrando.href)} hay algo escrito sin guardar. Si la cierras, se pierde.` : undefined}
+        confirmar="Cerrar sin guardar"
+        tono="warn"
+        onConfirmar={() => porCerrar && cerrarYa(porCerrar)}
+        onCancelar={() => setPorCerrar(null)}
+      />
+    </PestanasCtx.Provider>
+  );
 }
 
 function SinAcceso() {
@@ -414,7 +466,7 @@ function SinAcceso() {
  * Enter activa.
  */
 export function TiraPestanas({ isAdmin }: { isAdmin: boolean }) {
-  const { estado, ir, mostrar, cerrar } = usePestanas();
+  const { estado, sucias, ir, mostrar, cerrar } = usePestanas();
   const lista = useRef<HTMLDivElement>(null);
   if (!estado) return null;
   const todas = estado.lista;
@@ -449,6 +501,7 @@ export function TiraPestanas({ isAdmin }: { isAdmin: boolean }) {
           const on = p.id === estado.activa;
           const nombre = titulo(p.href);
           const Icono = itemDe(rutaDe(p.href))?.icon;
+          const sucia = sucias.has(p.id);
           return (
             <div
               key={p.id}
@@ -456,7 +509,7 @@ export function TiraPestanas({ isAdmin }: { isAdmin: boolean }) {
               role="tab"
               aria-selected={on}
               tabIndex={on ? 0 : -1}
-              title={nombre}
+              title={sucia ? `${nombre}, sin guardar` : nombre}
               onClick={() => mostrar(p.id)}
               onMouseDown={(e) => e.button === 1 && e.preventDefault()}
               onAuxClick={(e) => {
@@ -482,6 +535,7 @@ export function TiraPestanas({ isAdmin }: { isAdmin: boolean }) {
                 />
               )}
               <span className="min-w-0 truncate">{nombre}</span>
+              {sucia && <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-warn-fg" />}
               {varias && (
                 <button
                   type="button"
@@ -541,7 +595,7 @@ export function TiraPestanas({ isAdmin }: { isAdmin: boolean }) {
  * URL muestra la página que ya pintó el servidor hasta que llega la suya.
  */
 export function ContenidoPestanas({ children }: { children: React.ReactNode }) {
-  const { estado, contenidos, ruta, navegacionDe } = usePestanas();
+  const { estado, contenidos, ruta, marcarSucia, navegacionDe } = usePestanas();
   if (!estado) return <>{children}</>;
   return (
     <>
@@ -561,11 +615,58 @@ export function ContenidoPestanas({ children }: { children: React.ReactNode }) {
             <Carga />
           ) : null;
         return (
-          <section key={p.id} hidden={p.id !== estado.activa} aria-label={titulo(p.href)} data-pestana={p.id}>
+          <PaginaPestana key={p.id} id={p.id} activa={p.id === estado.activa} titulo={titulo(p.href)} alEscribir={marcarSucia}>
             <NavegacionCtx.Provider value={navegacionDe(p.id)}>{cuerpo}</NavegacionCtx.Provider>
-          </section>
+          </PaginaPestana>
         );
       })}
     </>
+  );
+}
+
+/**
+ * La página de una pestaña. Escribir en un campo la marca como sin guardar (el
+ * punto ámbar); buscar y filtrar no cuentan. Se limpia cuando la pantalla
+ * guarda (useNavegacion().refresh). El aviso sale después de la tecla y no
+ * durante: este oyente va antes que el de React y marcar ahí repintaba con el
+ * campo aún vacío (en Biela se perdía la primera letra).
+ */
+function PaginaPestana({
+  id,
+  activa,
+  titulo,
+  alEscribir,
+  children,
+}: {
+  id: string;
+  activa: boolean;
+  titulo: string;
+  alEscribir: (id: string, sucia: boolean) => void;
+  children: React.ReactNode;
+}) {
+  const ref = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let marca = 0;
+    function onCambio(e: Event) {
+      const t = e.target;
+      if (!(t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement || t instanceof HTMLSelectElement)) return;
+      if (t.type === "search" || /^Buscar/i.test(t.getAttribute("placeholder") ?? "") || t.closest("[data-sin-guardar=no]")) return;
+      window.clearTimeout(marca);
+      marca = window.setTimeout(() => alEscribir(id, true), 0);
+    }
+    el.addEventListener("input", onCambio);
+    el.addEventListener("change", onCambio);
+    return () => {
+      el.removeEventListener("input", onCambio);
+      el.removeEventListener("change", onCambio);
+      window.clearTimeout(marca);
+    };
+  }, [id, alEscribir]);
+  return (
+    <section ref={ref} hidden={!activa} aria-label={titulo} data-pestana={id}>
+      {children}
+    </section>
   );
 }
