@@ -1,11 +1,27 @@
 "use client";
 
-import { Suspense, useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from "react";
+import {
+  createContext,
+  Suspense,
+  useContext,
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Plus, X } from "@phosphor-icons/react/dist/ssr";
 import { IconButton } from "@/components/ui/icon-button";
-import { NAV, isActive } from "@/components/shell/nav-items";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { GRUPOS, NAV, isActive } from "@/components/shell/nav-items";
 import { useMontado } from "@/lib/use-montado";
 import { cn } from "@/lib/utils";
 import {
@@ -33,12 +49,19 @@ export function useEnVentana(): boolean {
   );
 }
 
+const enVentana = () => document.documentElement.classList.contains("en-ventana");
+
+function itemDe(pathname: string) {
+  return NAV.find((i) => isActive(pathname, i.href));
+}
+
 function nombreDe(pathname: string) {
-  const item = NAV.find((i) => isActive(pathname, i.href));
+  const item = itemDe(pathname);
   return item && (item.corto ?? item.label);
 }
 
 const titulo = (href: string) => tituloDe(href, nombreDe);
+const rutaDe = (href: string) => new URL(href, "http://x").pathname;
 
 function enviar(destino: Window, msg: MensajeVentana) {
   destino.postMessage(msg, location.origin);
@@ -46,16 +69,11 @@ function enviar(destino: Window, msg: MensajeVentana) {
 
 /** Abre `href` en una pestaña nueva, se pida desde la ventana principal o desde una pestaña. */
 export function pedirPestana(href: string, activar: boolean) {
-  if (document.documentElement.classList.contains("en-ventana")) {
+  if (enVentana()) {
     enviar(window.parent, { corr: "ventana", tipo: "abrir", href, activar });
   } else {
     window.dispatchEvent(new CustomEvent(EVENTO_ABRIR, { detail: { href, activar } }));
   }
-}
-
-/** La pantalla que se ve ahora, con su ?fecha=. */
-export function hrefActual() {
-  return location.pathname + location.search;
 }
 
 function useHref() {
@@ -93,13 +111,17 @@ export function AbrirConTecla() {
   return null;
 }
 
-/** Dentro de una pestaña: le cuenta a la principal qué pantalla se ve y trae datos frescos al volver. */
+/**
+ * Dentro de una pestaña: le cuenta a la principal qué pantalla se ve, trae
+ * datos frescos al volver y va a la pantalla que se pida desde el menú de afuera.
+ */
 export function PuenteVentana() {
   const router = useRouter();
   useEffect(() => {
     function onMensaje(e: MessageEvent) {
       if (e.source !== window.parent || e.origin !== location.origin || !esMensajeVentana(e.data)) return;
       if (e.data.tipo === "refrescar") router.refresh();
+      else if (e.data.tipo === "ir" && esRutaInterna(e.data.href)) router.push(e.data.href);
     }
     window.addEventListener("message", onMensaje);
     return () => window.removeEventListener("message", onMensaje);
@@ -142,46 +164,57 @@ function guardadasIniciales(): Pestana[] {
   }
 }
 
-/** Barra de pestañas del computador sobre el marco, y las pestañas de más. */
-export function Pestanas() {
-  const montado = useMontado();
-  return montado ? (
-    <Suspense fallback={null}>
-      <BarraPestanas />
-    </Suspense>
-  ) : null;
+interface PestanasApi {
+  otras: Pestana[];
+  activa: string;
+  marcos: React.RefObject<Map<string, HTMLIFrameElement>>;
+  abrir: (href: string, activar: boolean) => void;
+  mostrar: (id: string) => void;
+  cerrar: (id: string) => void;
+  /** Lleva la pestaña de adelante a `href` (el menú, el buscador). */
+  ir: (href: string) => void;
 }
 
-function BarraPestanas() {
+const PestanasCtx = createContext<PestanasApi | null>(null);
+
+function usePestanas() {
+  const api = useContext(PestanasCtx);
+  if (!api) throw new Error("usePestanas va dentro de <PestanasProvider>");
+  return api;
+}
+
+/** Navegar desde el riel o el buscador: a la pestaña que se está viendo. */
+export function useIr() {
+  return usePestanas().ir;
+}
+
+/** La ruta de la pestaña de adelante, para marcar el renglón del menú. */
+export function usePathnameActivo(pathnamePrincipal: string) {
+  const { otras, activa } = usePestanas();
+  const otra = otras.find((o) => o.id === activa);
+  return otra ? rutaDe(otra.href) : pathnamePrincipal;
+}
+
+/**
+ * Las pestañas del computador. Guarda cuáles hay y cuál se ve; la tira
+ * (TiraPestanas) y el contenido (ContenidoPestanas) la leen. Dentro de una
+ * pestaña no hace nada: ahí solo existe la principal.
+ */
+export function PestanasProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const hrefPrincipal = useHref();
   const [otras, setOtras] = useState<Pestana[]>(guardadasIniciales);
   const [activa, setActiva] = useState(PRINCIPAL);
   const marcos = useRef(new Map<string, HTMLIFrameElement>());
 
   // Se guardan para que sigan ahí al recargar o al volver mañana.
   useEffect(() => {
+    if (enVentana()) return;
     try {
       localStorage.setItem(CLAVE_GUARDADAS, JSON.stringify(otras.map(({ id, href }) => ({ id, href }))));
     } catch {
       /* sin localStorage no se guardan, no es crítico */
     }
   }, [otras]);
-
-  // El CSS esconde el marco de la principal mientras se ve otra pestaña.
-  useEffect(() => {
-    const html = document.documentElement;
-    html.classList.toggle("con-pestanas", otras.length > 0);
-    if (activa === PRINCIPAL) delete html.dataset.pestana;
-    else html.dataset.pestana = "otra";
-  }, [otras.length, activa]);
-  useEffect(
-    () => () => {
-      document.documentElement.classList.remove("con-pestanas");
-      delete document.documentElement.dataset.pestana;
-    },
-    [],
-  );
 
   function abrir(href: string, activar: boolean) {
     if (!esRutaInterna(href)) return;
@@ -219,13 +252,27 @@ function BarraPestanas() {
     setOtras((os) => os.filter((o) => o.id !== id));
   }
 
+  function ir(href: string) {
+    const ventana = activa === PRINCIPAL ? null : marcos.current.get(activa)?.contentWindow;
+    if (!ventana) {
+      router.push(href);
+      return;
+    }
+    enviar(ventana, { corr: "ventana", tipo: "ir", href });
+    setOtras(otras.map((o) => (o.id === activa ? { ...o, href } : o)));
+  }
+
   const alAbrir = useEffectEvent(abrir);
+  const alIr = useEffectEvent(ir);
   const alCambiarHref = useEffectEvent((fuente: MessageEventSource | null, href: string) => {
     const id = [...marcos.current].find(([, f]) => f.contentWindow === fuente)?.[0];
     if (id) setOtras(otras.map((o) => (o.id === id ? { ...o, href } : o)));
   });
+  const alSalirDelComputador = useEffectEvent(() => mostrar(PRINCIPAL));
+  const hayOtraAdelante = activa !== PRINCIPAL;
 
   useEffect(() => {
+    if (enVentana()) return;
     function onMensaje(e: MessageEvent) {
       if (e.origin !== location.origin || !esMensajeVentana(e.data)) return;
       if (e.data.tipo === "abrir") alAbrir(e.data.href, e.data.activar);
@@ -235,73 +282,192 @@ function BarraPestanas() {
       const { href, activar } = (e as CustomEvent<{ href: string; activar: boolean }>).detail;
       alAbrir(href, activar);
     }
+    // En celular y tableta no hay tira: vuelve a la principal.
+    const computador = window.matchMedia(COMPUTADOR);
+    function onCambioAncho() {
+      if (!computador.matches) alSalirDelComputador();
+    }
     window.addEventListener("message", onMensaje);
     window.addEventListener(EVENTO_ABRIR, onAbrir);
+    computador.addEventListener("change", onCambioAncho);
     return () => {
       window.removeEventListener("message", onMensaje);
       window.removeEventListener(EVENTO_ABRIR, onAbrir);
+      computador.removeEventListener("change", onCambioAncho);
     };
   }, []);
 
-  const todas = [{ id: PRINCIPAL, href: hrefPrincipal }, ...otras];
-  const hrefActiva = todas.find((p) => p.id === activa)?.href ?? hrefPrincipal;
+  // Con otra pestaña adelante, los enlaces del riel y de la barra (avisos)
+  // la llevan a ella y no a la principal, que está escondida.
+  useEffect(() => {
+    if (!hayOtraAdelante) return;
+    function onClick(e: MouseEvent) {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const a = e.target instanceof Element ? e.target.closest("a[href]") : null;
+      if (!(a instanceof HTMLAnchorElement) || a.target === "_blank" || a.hasAttribute("download")) return;
+      const url = new URL(a.href);
+      if (url.origin !== location.origin) return;
+      e.preventDefault();
+      alIr(url.pathname + url.search);
+    }
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, [hayOtraAdelante]);
 
   return (
-    <>
-      {otras.length > 0 && (
-        <div role="tablist" aria-label="Pestañas" className="pestanas sticky top-0 z-30 hidden items-center gap-1 px-[14px] lg:flex">
-          {todas.map((p) => {
-            const on = p.id === activa;
-            const nombre = titulo(p.href);
-            return (
-              <div
-                key={p.id}
-                className={cn(
-                  "flex h-8 min-w-0 max-w-[200px] items-center rounded-full text-body transition-colors",
-                  on
-                    ? "bg-blanco font-semibold text-text shadow-[var(--pastilla-sombra)]"
-                    : "font-medium text-muted hover:bg-[var(--menu-hover)] hover:text-text",
-                )}
-              >
+    <PestanasCtx.Provider value={{ otras, activa, marcos, abrir, mostrar, cerrar, ir }}>
+      {children}
+    </PestanasCtx.Provider>
+  );
+}
+
+/**
+ * La tira de la barra de arriba, como en Biela: una cápsula con la pantalla
+ * de cada pestaña (ícono y nombre) y el + que abre otra. La de adelante va
+ * como el renglón activo del menú. La X sale en lugar del ícono al pasar el
+ * mouse; la rueda del mouse también cierra. Flechas para moverse, Supr cierra.
+ */
+export function TiraPestanas({ isAdmin }: { isAdmin: boolean }) {
+  const montado = useMontado();
+  return montado ? (
+    <Suspense fallback={null}>
+      <Tira isAdmin={isAdmin} />
+    </Suspense>
+  ) : null;
+}
+
+function Tira({ isAdmin }: { isAdmin: boolean }) {
+  const { otras, activa, abrir, mostrar, cerrar } = usePestanas();
+  const hrefPrincipal = useHref();
+  const lista = useRef<HTMLDivElement>(null);
+  const todas = [{ id: PRINCIPAL, href: hrefPrincipal }, ...otras];
+  const varias = todas.length > 1;
+  const lleno = todas.length >= MAX_PESTANAS;
+
+  function alTeclear(e: React.KeyboardEvent, i: number) {
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+      e.preventDefault();
+      const p = todas[(i + (e.key === "ArrowRight" ? 1 : -1) + todas.length) % todas.length];
+      mostrar(p.id);
+      requestAnimationFrame(() => lista.current?.querySelector<HTMLElement>(`[data-id="${p.id}"]`)?.focus());
+    } else if (e.key === "Delete" && todas[i].id !== PRINCIPAL) {
+      e.preventDefault();
+      cerrar(todas[i].id);
+    }
+  }
+
+  // El + : las pantallas del menú, por grupo. Si ya está abierta, salta a ella.
+  const grupos = GRUPOS.map((g) => NAV.filter((i) => i.grupo === g.id && (!i.adminOnly || isAdmin))).filter(
+    (g) => g.length > 0,
+  );
+  const abiertaDe = (href: string) => todas.find((p) => isActive(rutaDe(p.href), href));
+
+  return (
+    <div className="hidden h-[46px] min-w-0 items-center gap-0.5 rounded-full bg-[var(--menu-hover)] px-1 shadow-[0_0_0_1px_var(--line)] lg:flex">
+      <div ref={lista} role="tablist" aria-label="Pestañas abiertas" className="flex min-w-0 items-center gap-0.5">
+        {todas.map((p, i) => {
+          const on = p.id === activa;
+          const nombre = titulo(p.href);
+          const Icono = itemDe(rutaDe(p.href))?.icon;
+          const cerrable = p.id !== PRINCIPAL;
+          return (
+            <div
+              key={p.id}
+              data-id={p.id}
+              role="tab"
+              aria-selected={on}
+              tabIndex={on ? 0 : -1}
+              title={nombre}
+              onClick={() => mostrar(p.id)}
+              onMouseDown={(e) => e.button === 1 && e.preventDefault()}
+              onAuxClick={(e) => {
+                if (e.button === 1 && cerrable) {
+                  e.preventDefault();
+                  cerrar(p.id);
+                }
+              }}
+              onKeyDown={(e) => alTeclear(e, i)}
+              className={cn(
+                "group relative flex h-[38px] min-w-16 max-w-[220px] cursor-pointer items-center gap-[7px] rounded-full px-3 text-body whitespace-nowrap select-none transition-[background-color,color,scale] duration-150 active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+                on
+                  ? "shrink-0 bg-menu-activo font-semibold text-text shadow-[var(--pastilla-sombra)]"
+                  : "shrink font-medium text-muted hover:bg-[var(--menu-hover)] hover:text-text",
+              )}
+            >
+              {Icono && (
+                <Icono
+                  size={16}
+                  weight={on ? "fill" : "regular"}
+                  aria-hidden
+                  className={cn("shrink-0 transition-opacity", cerrable && "group-hover:opacity-0 group-focus-visible:opacity-0")}
+                />
+              )}
+              <span className="min-w-0 truncate">{nombre}</span>
+              {cerrable && (
                 <button
                   type="button"
-                  role="tab"
-                  aria-selected={on}
-                  onClick={() => mostrar(p.id)}
-                  className={cn(
-                    "h-full min-w-0 flex-1 truncate rounded-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                    p.id === PRINCIPAL ? "px-3.5" : "pl-3.5 pr-1",
-                  )}
+                  tabIndex={-1}
+                  aria-label={`Cerrar ${nombre}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    cerrar(p.id);
+                  }}
+                  className="pointer-events-none absolute top-1/2 left-2 flex size-6 -translate-y-1/2 items-center justify-center rounded-full opacity-0 transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-focus-visible:opacity-100 hover:bg-fill"
                 >
-                  {nombre}
+                  <X size={12} weight="bold" />
                 </button>
-                {p.id !== PRINCIPAL && (
-                  <button
-                    type="button"
-                    aria-label={`Cerrar ${nombre}`}
-                    title={`Cerrar ${nombre}`}
-                    onClick={() => cerrar(p.id)}
-                    className="mr-1 flex size-6 shrink-0 items-center justify-center rounded-full text-faint hover:bg-[var(--menu-hover)] hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    <X size={12} weight="bold" />
-                  </button>
-                )}
-              </div>
-            );
-          })}
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild disabled={lleno}>
           <IconButton
             forma="suelto"
-            label="Pestaña nueva"
-            className="size-8 rounded-full text-muted hover:bg-[var(--menu-hover)] hover:text-text"
-            onClick={() => abrir(hrefActiva, true)}
+            label={lleno ? `Ya hay ${MAX_PESTANAS}: cierra una para abrir otra` : "Abrir otra pestaña"}
+            className={cn("size-[38px] shrink-0 rounded-full text-text hover:bg-[var(--menu-hover)] disabled:opacity-35", !varias && "ml-0.5")}
           >
-            <Plus size={16} weight="bold" />
+            <Plus size={18} weight="bold" />
           </IconButton>
-        </div>
-      )}
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" sideOffset={8} className="w-60">
+          {grupos.map((items, gi) => (
+            <div key={items[0].grupo}>
+              {gi > 0 && <DropdownMenuSeparator />}
+              {items.map((item) => {
+                const Icono = item.icon;
+                const ya = abiertaDe(item.href);
+                return (
+                  <DropdownMenuItem key={item.href} onSelect={() => (ya ? mostrar(ya.id) : abrir(item.href, true))}>
+                    <Icono size={18} />
+                    <span className="flex-1">{item.label}</span>
+                    {ya && <span className="text-meta font-medium text-faint">Abierta</span>}
+                  </DropdownMenuItem>
+                );
+              })}
+            </div>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+}
 
-      <div className="hidden lg:block">
-        {otras
+/**
+ * El lugar del contenido: la página de la principal o, si hay otra pestaña
+ * adelante, su iframe. Las de atrás quedan escondidas y no quitadas, así
+ * conservan lo que tenían.
+ */
+export function ContenidoPestanas({ children }: { children: React.ReactNode }) {
+  const { otras, activa, marcos } = usePestanas();
+  const montado = useMontado();
+  return (
+    <>
+      <div style={activa === PRINCIPAL ? undefined : { display: "none" }}>{children}</div>
+      {montado &&
+        otras
           .filter((p) => p.cargada)
           .map((p) => (
             <iframe
@@ -313,11 +479,9 @@ function BarraPestanas() {
               src={p.src}
               title={titulo(p.href)}
               className="pestana-marco w-full border-0"
-              // Escondida y no quitada: así conserva lo que tenía.
               style={{ display: p.id === activa ? "block" : "none" }}
             />
           ))}
-      </div>
     </>
   );
 }

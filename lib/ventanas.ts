@@ -1,8 +1,11 @@
 /**
- * Pestañas del computador: cada pestaña de más es la app entera dentro de un
- * iframe del mismo sitio, así cada una conserva lo que se estaba escribiendo o
- * viendo. La principal es la página de siempre. Aquí va lo que no depende de
- * React: el protocolo de mensajes, los nombres y lo que se guarda.
+ * Pestañas del computador, como en Biela: la tira va en la barra de arriba y
+ * el riel y la barra quedan fijos; solo cambia el contenido. Cada pestaña de
+ * más es la app dentro de un iframe del mismo sitio que ocupa el lugar del
+ * contenido (adentro se esconden riel y barra), así cada una conserva lo que
+ * se estaba escribiendo o viendo. La principal es la página de siempre. Aquí
+ * va lo que no depende de React: el protocolo de mensajes, los nombres y lo
+ * que se guarda.
  */
 
 /** Más de esto pesa en el computador (cada pestaña es la app completa). */
@@ -27,7 +30,9 @@ export type MensajeVentana =
   /** Pedir una pestaña nueva (hijo → principal). */
   | { corr: "ventana"; tipo: "abrir"; href: string; activar: boolean }
   /** La pestaña vuelve a verse: traer los datos frescos (principal → hijo). */
-  | { corr: "ventana"; tipo: "refrescar" };
+  | { corr: "ventana"; tipo: "refrescar" }
+  /** El menú de afuera pide otra pantalla para la pestaña de adelante (principal → hijo). */
+  | { corr: "ventana"; tipo: "ir"; href: string };
 
 export function esMensajeVentana(data: unknown): data is MensajeVentana {
   return typeof data === "object" && data !== null && (data as { corr?: unknown }).corr === "ventana";

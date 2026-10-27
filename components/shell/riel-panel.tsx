@@ -2,10 +2,9 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { useCambiarTema } from "@/lib/tema";
-import { Browsers, Moon, SidebarSimple, SignOut, Sun } from "@phosphor-icons/react/dist/ssr";
+import { Moon, SidebarSimple, SignOut, Sun } from "@phosphor-icons/react/dist/ssr";
 import { Logo } from "@/components/brand";
 import { IconButton } from "@/components/ui/icon-button";
 import { Button } from "@/components/ui/button";
@@ -15,7 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { ActivarAvisos } from "@/components/push/activar-avisos";
 import { HeaderSearch, buildAvisos } from "@/components/shell/top-header";
 import { GRUPOS, NAV, isActive, type Grupo } from "@/components/shell/nav-items";
-import { hrefActual, pedirPestana } from "@/components/shell/pestanas";
+import { useIr, usePathnameActivo } from "@/components/shell/pestanas";
 import { signOutAction } from "@/app/login/actions";
 import { useMontado } from "@/lib/use-montado";
 import { cn } from "@/lib/utils";
@@ -43,7 +42,7 @@ export function iniciales(nombre: string) {
 export function RielPanel({
   profile,
   isAdmin,
-  pathname,
+  pathname: pathnamePrincipal,
   resumen,
 }: {
   profile: { nombre: string; rol: Rol; email: string };
@@ -51,7 +50,9 @@ export function RielPanel({
   pathname: string;
   resumen: HeaderResumen;
 }) {
-  const router = useRouter();
+  // Con otra pestaña adelante, el menú marca y mueve esa pestaña.
+  const pathname = usePathnameActivo(pathnamePrincipal);
+  const ir = useIr();
   const { resolvedTheme } = useTheme();
   const cambiarTema = useCambiarTema();
   const montado = useMontado();
@@ -97,7 +98,7 @@ export function RielPanel({
                 onClick={() => {
                   setVisto(g.id);
                   if (escondido) setEscondido(false);
-                  if (g.id !== delActivo?.id) router.push(g.items[0].href);
+                  if (g.id !== delActivo?.id) ir(g.items[0].href);
                 }}
               >
                 <Icono size={19} weight={on ? "fill" : "regular"} />
@@ -110,17 +111,6 @@ export function RielPanel({
         </nav>
 
         <div className="mt-auto flex flex-col items-center gap-2">
-          {/* La pantalla de ahora, otra vez, en una pestaña aparte (components/shell/pestanas.tsx). */}
-          <IconButton
-            forma="suelto"
-            label="Abrir en otra pestaña"
-            tooltipSide="right"
-            className={rielBtn}
-            onClick={() => pedirPestana(hrefActual(), true)}
-          >
-            <Browsers size={19} />
-          </IconButton>
-
           <IconButton
             forma="suelto"
             label={noche ? "Tema Azul" : "Tema Noche"}
