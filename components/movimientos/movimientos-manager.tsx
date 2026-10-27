@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useNavegacion } from "@/lib/use-navegacion";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -72,7 +72,7 @@ export function MovimientosManager({
   bloqueado?: boolean;
   isAdmin?: boolean;
 }) {
-  const router = useRouter();
+  const router = useNavegacion();
   const [pending, startTransition] = useTransition();
   const [tipo, setTipo] = useState<Tipo>("consignacion_nequi");
   const [monto, setMonto] = useState(0);

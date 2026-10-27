@@ -525,30 +525,6 @@ input[type="number"] { -moz-appearance: textfield; }
     backdrop-filter: none;
   }
 }
-/* ===== Pestañas del computador (components/shell/pestanas.tsx) ==========
-   Como en Biela: la tira va en la barra de arriba y el riel y la barra no se
-   mueven. Una pestaña de más es un iframe en el lugar del contenido: alto del
-   marco menos sus márgenes (14 + 14), su relleno (10 + 10) y la barra (48).
-   Adentro (html.en-ventana) va solo el contenido, sin marco, riel ni barra, y
-   con fondo transparente para que se vea el marco de afuera. */
-@media (min-width: 1024px) {
-  .pestana-marco { height: calc(100dvh - 96px); }
-  html.en-ventana .marco {
-    display: block;
-    margin: 0;
-    min-height: 0;
-    padding: 0;
-    border-radius: 0;
-    background: none;
-    box-shadow: none;
-  }
-  html.en-ventana .riel,
-  html.en-ventana .barra-arriba { display: none; }
-}
-html.en-ventana,
-html.en-ventana body { background: transparent; }
-html.en-ventana .entrada { display: none; }
-
 /* El panel del grupo entra corriéndose un poco desde el riel. */
 .panel-entra { animation: panel-entra 320ms var(--ease-smooth-out) both; }
 @keyframes panel-entra { from { opacity: 0; transform: translateX(-6px); } }

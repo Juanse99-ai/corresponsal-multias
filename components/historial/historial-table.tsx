@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useNavegacion } from "@/lib/use-navegacion";
 import { motion } from "framer-motion";
 import { DownloadSimple, Trash, X } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
@@ -23,7 +23,7 @@ import { TRANSICION } from "@/lib/movimiento";
 const MotionRow = motion.create(TableRow);
 
 export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isAdmin: boolean }) {
-  const router = useRouter();
+  const router = useNavegacion();
   const [pending, startTransition] = useTransition();
   const [desde, setDesde] = useState("");
   const [hasta, setHasta] = useState("");

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useNavegacion } from "@/lib/use-navegacion";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Trash, Paperclip, ArrowsLeftRight, ArrowUp, ArrowSquareOut } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,7 +32,7 @@ import { agregarMovPropio, eliminarMovPropio } from "@/app/(app)/general/actions
 const BUCKET = "corr-soportes";
 
 export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) {
-  const router = useRouter();
+  const router = useNavegacion();
   const inputRef = useRef<HTMLInputElement>(null);
   const [pending, startTransition] = useTransition();
   const [tipo, setTipo] = useState<"compensacion" | "retiro">("compensacion");

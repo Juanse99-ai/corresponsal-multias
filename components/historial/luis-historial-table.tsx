@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavegacion } from "@/lib/use-navegacion";
 import { motion } from "framer-motion";
 import { DownloadSimple, CaretRight, X } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
@@ -20,7 +20,7 @@ import { TRANSICION } from "@/lib/movimiento";
 const MotionRow = motion.create(TableRow);
 
 export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
-  const router = useRouter();
+  const router = useNavegacion();
   const [desde, setDesde] = useState("");
   const [hasta, setHasta] = useState("");
 

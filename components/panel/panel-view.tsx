@@ -2,7 +2,7 @@
 
 import { useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useNavegacion } from "@/lib/use-navegacion";
 import { useInView, useReducedMotion } from "framer-motion";
 import { Bar, BarChart, Cell, Pie, PieChart, Rectangle, XAxis, type BarShapeProps } from "recharts";
 import { CaretRight, CheckCircle, Warning, Plus, ArrowRight } from "@phosphor-icons/react/dist/ssr";
@@ -343,7 +343,7 @@ function GuiaPunteada({ x = 0, y = 0, width = 0, height = 0 }: { x?: number; y?:
 }
 
 function RecientesChart({ recientes }: { recientes: Reciente[] }) {
-  const router = useRouter();
+  const router = useNavegacion();
   const orden = [...recientes].reverse(); // antiguo -> reciente
   // La barra bajo el mouse: las demás bajan a .45 para leerla sola.
   const [activa, setActiva] = useState<number | null>(null);

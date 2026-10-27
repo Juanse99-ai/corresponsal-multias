@@ -2,18 +2,20 @@
 
 import {
   createContext,
-  Suspense,
+  useCallback,
   useContext,
   useEffect,
-  useEffectEvent,
+  useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   useSyncExternalStore,
 } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Plus, X } from "@phosphor-icons/react/dist/ssr";
 import { IconButton } from "@/components/ui/icon-button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,34 +24,71 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { GRUPOS, NAV, isActive } from "@/components/shell/nav-items";
-import { useMontado } from "@/lib/use-montado";
+import { NavegacionCtx, type Navegacion } from "@/lib/use-navegacion";
+import { hoyISO } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import {
-  CLAVE_GUARDADAS,
-  EVENTO_ABRIR,
   MAX_PESTANAS,
-  esMensajeVentana,
+  activar,
+  cerrar as cerrarPestana,
   esRutaInterna,
-  leerGuardadas,
+  irA,
+  normalizar,
+  paraGuardar,
+  pestanaActiva,
+  pestanasIniciales,
+  restaurar,
+  rutaDe,
   tituloDe,
-  type MensajeVentana,
-} from "@/lib/ventanas";
+  type EstadoPestanas,
+} from "@/lib/pestanas";
+import { cargarPantalla } from "@/app/(app)/pantallas";
+import CargaPanel from "@/app/(app)/panel/loading";
+import CargaCuadre from "@/app/(app)/cuadre/loading";
+import CargaMovimientos from "@/app/(app)/movimientos/loading";
+import CargaLuis from "@/app/(app)/luis/loading";
+import CargaPrestamos from "@/app/(app)/prestamos/loading";
+import CargaAuditoria from "@/app/(app)/auditoria/loading";
+import CargaGeneral from "@/app/(app)/general/loading";
+import CargaHistorial from "@/app/(app)/historial/loading";
+import CargaBitacora from "@/app/(app)/bitacora/loading";
 
-const PRINCIPAL = "principal";
+/**
+ * Pestañas del computador, como en Biela: varias pantallas abiertas a la vez,
+ * cada una donde se dejó. Sin iframes: todas las pantallas abiertas quedan
+ * montadas en este mismo árbol y solo se ve la de adelante. Cada una la pinta
+ * el servidor (cargarPantalla) con la misma page.tsx de su ruta; al refrescar,
+ * React compara y conserva lo escrito. La URL sigue a la de adelante con
+ * history.replaceState, que Next acepta sin desmontar nada. Las reglas (abrir,
+ * saltar, cerrar, restaurar) están en lib/pestanas.ts. En celular y tableta no
+ * hay pestañas: la página de siempre y la barra de abajo.
+ */
+
 const COMPUTADOR = "(min-width: 1024px)";
+const claveGuardadas = (usuario: string) => `corr-pestanas:v2:${usuario}`;
 
-const sinSuscripcion = () => () => {};
+const CARGAS: Record<string, () => React.ReactNode> = {
+  "/panel": CargaPanel,
+  "/cuadre": CargaCuadre,
+  "/movimientos": CargaMovimientos,
+  "/luis": CargaLuis,
+  "/prestamos": CargaPrestamos,
+  "/auditoria": CargaAuditoria,
+  "/general": CargaGeneral,
+  "/historial": CargaHistorial,
+  "/bitacora": CargaBitacora,
+};
 
-/** true dentro de una pestaña (el script de lib/ventanas.ts marca <html> antes de pintar). */
-export function useEnVentana(): boolean {
-  return useSyncExternalStore(
-    sinSuscripcion,
-    () => document.documentElement.classList.contains("en-ventana"),
-    () => false,
-  );
+function suscribirAncho(cb: () => void) {
+  const mq = window.matchMedia(COMPUTADOR);
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
 }
 
-const enVentana = () => document.documentElement.classList.contains("en-ventana");
+/** true en el computador (desde 1024 px), ya en el navegador. */
+function useEscritorio(): boolean {
+  return useSyncExternalStore(suscribirAncho, () => window.matchMedia(COMPUTADOR).matches, () => false);
+}
 
 function itemDe(pathname: string) {
   return NAV.find((i) => isActive(pathname, i.href));
@@ -61,118 +100,34 @@ function nombreDe(pathname: string) {
 }
 
 const titulo = (href: string) => tituloDe(href, nombreDe);
-const rutaDe = (href: string) => new URL(href, "http://x").pathname;
+const hrefActual = () => normalizar(location.pathname + location.search, hoyISO());
 
-function enviar(destino: Window, msg: MensajeVentana) {
-  destino.postMessage(msg, location.origin);
-}
-
-/** Abre `href` en una pestaña nueva, se pida desde la ventana principal o desde una pestaña. */
-export function pedirPestana(href: string, activar: boolean) {
-  if (enVentana()) {
-    enviar(window.parent, { corr: "ventana", tipo: "abrir", href, activar });
-  } else {
-    window.dispatchEvent(new CustomEvent(EVENTO_ABRIR, { detail: { href, activar } }));
-  }
-}
-
-function useHref() {
-  const pathname = usePathname();
-  const q = useSearchParams().toString();
-  return q ? `${pathname}?${q}` : pathname;
-}
-
-/**
- * Ctrl o Cmd + clic (o la rueda) sobre un enlace de la app lo abre en una
- * pestaña de la app, detrás de la que se está viendo, como en el navegador.
- * Solo en el computador: es donde viven las pestañas.
- */
-export function AbrirConTecla() {
-  useEffect(() => {
-    const computador = window.matchMedia(COMPUTADOR);
-    function onClick(e: MouseEvent) {
-      const conTecla = e.type === "auxclick" ? e.button === 1 : e.button === 0 && (e.metaKey || e.ctrlKey);
-      if (!conTecla || !computador.matches) return;
-      const a = e.target instanceof Element ? e.target.closest("a[href]") : null;
-      if (!(a instanceof HTMLAnchorElement) || a.target === "_blank" || a.hasAttribute("download")) return;
-      const url = new URL(a.href);
-      if (url.origin !== location.origin) return;
-      e.preventDefault();
-      e.stopPropagation();
-      pedirPestana(url.pathname + url.search, false);
-    }
-    document.addEventListener("click", onClick, true);
-    document.addEventListener("auxclick", onClick, true);
-    return () => {
-      document.removeEventListener("click", onClick, true);
-      document.removeEventListener("auxclick", onClick, true);
-    };
-  }, []);
-  return null;
-}
-
-/**
- * Dentro de una pestaña: le cuenta a la principal qué pantalla se ve, trae
- * datos frescos al volver y va a la pantalla que se pida desde el menú de afuera.
- */
-export function PuenteVentana() {
-  const router = useRouter();
-  useEffect(() => {
-    function onMensaje(e: MessageEvent) {
-      if (e.source !== window.parent || e.origin !== location.origin || !esMensajeVentana(e.data)) return;
-      if (e.data.tipo === "refrescar") router.refresh();
-      else if (e.data.tipo === "ir" && esRutaInterna(e.data.href)) router.push(e.data.href);
-    }
-    window.addEventListener("message", onMensaje);
-    return () => window.removeEventListener("message", onMensaje);
-  }, [router]);
-  return (
-    <Suspense fallback={null}>
-      <AvisarHref />
-    </Suspense>
-  );
-}
-
-function AvisarHref() {
-  const href = useHref();
-  useEffect(() => {
-    enviar(window.parent, { corr: "ventana", tipo: "href", href });
-  }, [href]);
-  return null;
-}
-
-interface Pestana {
-  id: string;
-  /** La pantalla que se ve ahora (cambia al navegar dentro). */
+/** Lo que el servidor pintó para una pestaña y para qué pantalla. */
+interface Contenido {
   href: string;
-  /** Con la que se abrió: cambiarla recargaría el iframe y se perdería lo escrito. */
-  src: string;
-  /** Las que vuelven de localStorage cargan cuando se abren por primera vez. */
-  cargada: boolean;
+  nodo: React.ReactNode;
+  /** Reemplaza a la página que ya se veía: entra sin animación. */
+  quieta?: boolean;
 }
 
-function nuevoId() {
-  return `p${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
-}
-
-function guardadasIniciales(): Pestana[] {
-  if (typeof window === "undefined") return [];
-  try {
-    return leerGuardadas(localStorage.getItem(CLAVE_GUARDADAS)).map((g) => ({ ...g, src: g.href, cargada: false }));
-  } catch {
-    return [];
-  }
+/** La pestaña que muestra la página de la ruta (children) mientras llega la suya. */
+interface Ruta {
+  id: string;
+  href: string;
 }
 
 interface PestanasApi {
-  otras: Pestana[];
-  activa: string;
-  marcos: React.RefObject<Map<string, HTMLIFrameElement>>;
-  abrir: (href: string, activar: boolean) => void;
+  /** null fuera del computador o antes de restaurar: ahí no hay pestañas. */
+  estado: EstadoPestanas | null;
+  contenidos: Record<string, Contenido>;
+  ruta: Ruta | null;
+  /** Pestañas con algo escrito y sin guardar (el punto ámbar). */
+  sucias: ReadonlySet<string>;
+  marcarSucia: (id: string, sucia: boolean) => void;
+  ir: (href: string, opciones?: { fondo?: boolean; aparte?: boolean }) => void;
   mostrar: (id: string) => void;
   cerrar: (id: string) => void;
-  /** Lleva la pestaña de adelante a `href` (el menú, el buscador). */
-  ir: (href: string) => void;
+  navegacionDe: (id: string) => Navegacion;
 }
 
 const PestanasCtx = createContext<PestanasApi | null>(null);
@@ -183,164 +138,340 @@ function usePestanas() {
   return api;
 }
 
-/** Navegar desde el riel o el buscador: a la pestaña que se está viendo. */
+/** Navegar desde el riel, el buscador o los avisos: en la pestaña de adelante. */
 export function useIr() {
   return usePestanas().ir;
 }
 
 /** La ruta de la pestaña de adelante, para marcar el renglón del menú. */
-export function usePathnameActivo(pathnamePrincipal: string) {
-  const { otras, activa } = usePestanas();
-  const otra = otras.find((o) => o.id === activa);
-  return otra ? rutaDe(otra.href) : pathnamePrincipal;
+export function usePathnameActivo(pathname: string) {
+  const { estado } = usePestanas();
+  return estado ? rutaDe(pestanaActiva(estado).href) : pathname;
 }
 
-/**
- * Las pestañas del computador. Guarda cuáles hay y cuál se ve; la tira
- * (TiraPestanas) y el contenido (ContenidoPestanas) la leen. Dentro de una
- * pestaña no hace nada: ahí solo existe la principal.
- */
-export function PestanasProvider({ children }: { children: React.ReactNode }) {
+export function PestanasProvider({
+  usuario,
+  isAdmin,
+  children,
+}: {
+  /** De quién son las pestañas guardadas en este equipo. */
+  usuario: string;
+  isAdmin: boolean;
+  children: React.ReactNode;
+}) {
   const router = useRouter();
-  const [otras, setOtras] = useState<Pestana[]>(guardadasIniciales);
-  const [activa, setActiva] = useState(PRINCIPAL);
-  const marcos = useRef(new Map<string, HTMLIFrameElement>());
+  const escritorio = useEscritorio();
+  const [estado, setEstado] = useState<EstadoPestanas | null>(null);
+  const [contenidos, setContenidos] = useState<Record<string, Contenido>>({});
+  const [ruta, setRuta] = useState<Ruta | null>(null);
+  const [sucias, setSucias] = useState<ReadonlySet<string>>(() => new Set());
+  const [porCerrar, setPorCerrar] = useState<string | null>(null);
 
-  // Se guardan para que sigan ahí al recargar o al volver mañana.
-  useEffect(() => {
-    if (enVentana()) return;
-    try {
-      localStorage.setItem(CLAVE_GUARDADAS, JSON.stringify(otras.map(({ id, href }) => ({ id, href }))));
-    } catch {
-      /* sin localStorage no se guardan, no es crítico */
-    }
-  }, [otras]);
-
-  function abrir(href: string, activar: boolean) {
-    if (!esRutaInterna(href)) return;
-    if (otras.length >= MAX_PESTANAS - 1) {
-      toast(`Ya hay ${MAX_PESTANAS} pestañas abiertas. Cierra una para abrir otra.`);
-      return;
-    }
-    const id = nuevoId();
-    setOtras([...otras, { id, href, src: href, cargada: true }]);
-    if (activar) setActiva(id);
-  }
-
-  function mostrar(id: string) {
-    if (id === activa) return;
-    setActiva(id);
-    // Lo que se guardó en otra pestaña llega al volver; lo escrito no se pierde.
-    if (id === PRINCIPAL) {
-      router.refresh();
-      return;
-    }
-    const p = otras.find((o) => o.id === id);
-    if (!p) return;
-    if (!p.cargada) setOtras(otras.map((o) => (o.id === id ? { ...o, cargada: true } : o)));
-    else {
-      const ventana = marcos.current.get(id)?.contentWindow;
-      if (ventana) enviar(ventana, { corr: "ventana", tipo: "refrescar" });
-    }
-  }
-
-  function cerrar(id: string) {
-    const i = otras.findIndex((o) => o.id === id);
-    if (i < 0) return;
-    // Como en el navegador: queda la de la derecha, o la de la izquierda.
-    if (id === activa) mostrar(otras[i + 1]?.id ?? otras[i - 1]?.id ?? PRINCIPAL);
-    setOtras((os) => os.filter((o) => o.id !== id));
-  }
-
-  function ir(href: string) {
-    const ventana = activa === PRINCIPAL ? null : marcos.current.get(activa)?.contentWindow;
-    if (!ventana) {
-      router.push(href);
-      return;
-    }
-    enviar(ventana, { corr: "ventana", tipo: "ir", href });
-    setOtras(otras.map((o) => (o.id === activa ? { ...o, href } : o)));
-  }
-
-  const alAbrir = useEffectEvent(abrir);
-  const alIr = useEffectEvent(ir);
-  const alCambiarHref = useEffectEvent((fuente: MessageEventSource | null, href: string) => {
-    const id = [...marcos.current].find(([, f]) => f.contentWindow === fuente)?.[0];
-    if (id) setOtras(otras.map((o) => (o.id === id ? { ...o, href } : o)));
+  // Copias al día para los manejadores (teclado, clics, respuestas del servidor).
+  const estadoRef = useRef(estado);
+  const contenidosRef = useRef(contenidos);
+  const suciasRef = useRef(sucias);
+  useLayoutEffect(() => {
+    estadoRef.current = estado;
+    contenidosRef.current = contenidos;
+    suciasRef.current = sucias;
   });
-  const alSalirDelComputador = useEffectEvent(() => mostrar(PRINCIPAL));
-  const hayOtraAdelante = activa !== PRINCIPAL;
+  const pedidos = useRef(new Map<string, number>());
+  const scrolls = useRef(new Map<string, number>());
+  const seqPedido = useRef(0);
 
-  useEffect(() => {
-    if (enVentana()) return;
-    function onMensaje(e: MessageEvent) {
-      if (e.origin !== location.origin || !esMensajeVentana(e.data)) return;
-      if (e.data.tipo === "abrir") alAbrir(e.data.href, e.data.activar);
-      else if (e.data.tipo === "href" && esRutaInterna(e.data.href)) alCambiarHref(e.source, e.data.href);
-    }
-    function onAbrir(e: Event) {
-      const { href, activar } = (e as CustomEvent<{ href: string; activar: boolean }>).detail;
-      alAbrir(href, activar);
-    }
-    // En celular y tableta no hay tira: vuelve a la principal.
-    const computador = window.matchMedia(COMPUTADOR);
-    function onCambioAncho() {
-      if (!computador.matches) alSalirDelComputador();
-    }
-    window.addEventListener("message", onMensaje);
-    window.addEventListener(EVENTO_ABRIR, onAbrir);
-    computador.addEventListener("change", onCambioAncho);
-    return () => {
-      window.removeEventListener("message", onMensaje);
-      window.removeEventListener(EVENTO_ABRIR, onAbrir);
-      computador.removeEventListener("change", onCambioAncho);
-    };
+  const permitida = useCallback(
+    (pathname: string) => {
+      const item = itemDe(pathname);
+      return !!item && (!item.adminOnly || isAdmin);
+    },
+    [isAdmin],
+  );
+
+  /** Trae del servidor la pantalla de una pestaña. Lo que llega tarde (la
+   *  pestaña ya cambió de pantalla o se pidió otra vez) se descarta. */
+  const cargar = useCallback((id: string, href: string, quieta = false) => {
+    const n = ++seqPedido.current;
+    pedidos.current.set(id, n);
+    cargarPantalla(href)
+      .then((nodo) => {
+        if (pedidos.current.get(id) !== n) return;
+        pedidos.current.delete(id);
+        setContenidos((c) => {
+          // Al refrescar la misma pantalla se queda como entró (sin volver a animar).
+          const antes = c[id]?.href === href ? c[id].quieta : quieta;
+          return { ...c, [id]: { href, nodo: nodo ?? <SinAcceso />, quieta: antes } };
+        });
+        setRuta((r) => (r?.id === id ? null : r));
+      })
+      .catch(() => {
+        if (pedidos.current.get(id) !== n) return;
+        pedidos.current.delete(id);
+        toast.error("No se pudo cargar la pantalla. Revisa la conexión.");
+      });
   }, []);
 
-  // Con otra pestaña adelante, los enlaces del riel y de la barra (avisos)
-  // la llevan a ella y no a la principal, que está escondida.
+  /** Datos frescos de una pestaña (después de guardar o al volver a ella). */
+  const recargar = useCallback(
+    (id: string) => {
+      const p = estadoRef.current?.lista.find((o) => o.id === id);
+      if (p) cargar(id, p.href);
+    },
+    [cargar],
+  );
+
+  // Al entrar al computador: las pestañas guardadas de este usuario, más la
+  // pantalla de la URL (la puerta de entrada). La de la URL muestra la página
+  // que ya pintó el servidor mientras llega la suya.
   useEffect(() => {
-    if (!hayOtraAdelante) return;
+    if (!escritorio) return;
+    const href = hrefActual();
+    let inicial = pestanasIniciales(href);
+    try {
+      // Las de la versión con iframes (una sola lista para todos) ya no sirven.
+      localStorage.removeItem("corr-pestanas:v1");
+      const guardadas = restaurar(JSON.parse(localStorage.getItem(claveGuardadas(usuario)) ?? "null"), permitida);
+      if (guardadas) {
+        const r = irA(guardadas, href, { aparte: true });
+        inicial = r.lleno ? irA(guardadas, href).estado : r.estado;
+      }
+    } catch {
+      /* sin localStorage: arranca solo con la de la URL */
+    }
+    const id = pestanaActiva(inicial).id;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- el estado guardado solo existe en el navegador
+    setEstado(inicial);
+    setRuta({ id, href });
+    setContenidos({});
+    setSucias(new Set());
+    cargar(id, href, true);
+    const enVuelo = pedidos.current;
+    const vistos = scrolls.current;
+    return () => {
+      setEstado(null);
+      setRuta(null);
+      setContenidos({});
+      enVuelo.clear();
+      vistos.clear();
+      // De vuelta a una sola página: Next trae la de la URL que dejó la pestaña.
+      router.refresh();
+    };
+  }, [escritorio, usuario, permitida, cargar, router]);
+
+  // Se recuerdan por usuario, para que sigan ahí al recargar o al volver mañana.
+  useEffect(() => {
+    if (!estado) return;
+    try {
+      localStorage.setItem(claveGuardadas(usuario), JSON.stringify(paraGuardar(estado)));
+    } catch {
+      /* sin localStorage no se recuerdan, no es crítico */
+    }
+  }, [estado, usuario]);
+
+  const frente = estado ? pestanaActiva(estado) : null;
+
+  // La URL y el scroll siguen a la de adelante. Una pestaña que la cambió de
+  // pantalla arranca arriba; una que vuelve, donde se dejó.
+  useEffect(() => {
+    if (!frente) return;
+    if (hrefActual() !== frente.href) history.replaceState(null, "", frente.href);
+    const y = scrolls.current.get(frente.id) ?? 0;
+    requestAnimationFrame(() => window.scrollTo({ top: y, behavior: "instant" }));
+  }, [frente?.id, frente?.href]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // La de adelante sin su pantalla (recién abierta o cambiada): se pide.
+  useEffect(() => {
+    if (!frente) return;
+    const c = contenidos[frente.id];
+    if ((!c || c.href !== frente.href) && !pedidos.current.has(frente.id)) cargar(frente.id, frente.href);
+  }, [frente, contenidos, cargar]);
+
+  /** Única entrada para cambiar las pestañas: guarda el scroll de la que se deja
+   *  y trae datos frescos de la que vuelve adelante. */
+  const aplicar = useCallback(
+    (nuevo: EstadoPestanas) => {
+      const antes = estadoRef.current;
+      if (!antes) return;
+      if (nuevo.activa !== antes.activa) {
+        scrolls.current.set(antes.activa, window.scrollY);
+        const vuelve = nuevo.lista.find((p) => p.id === nuevo.activa);
+        const c = vuelve && contenidosRef.current[vuelve.id];
+        if (vuelve && c && c.href === vuelve.href) cargar(vuelve.id, vuelve.href);
+      }
+      const frenteNuevo = pestanaActiva(nuevo);
+      const frenteAntes = antes.lista.find((p) => p.id === frenteNuevo.id);
+      if (frenteAntes && frenteAntes.href !== frenteNuevo.href) scrolls.current.delete(frenteNuevo.id);
+      estadoRef.current = nuevo;
+      setEstado(nuevo);
+    },
+    [cargar],
+  );
+
+  const ir = useCallback(
+    (href: string, opciones: { fondo?: boolean; aparte?: boolean } = {}) => {
+      const actual = estadoRef.current;
+      const destino = esRutaInterna(href) ? normalizar(href, hoyISO()) : null;
+      // Sin pestañas, o a algo que no es una pantalla (login, salir): Next de siempre.
+      if (!actual || !destino || !permitida(rutaDe(destino))) {
+        router.push(href);
+        return;
+      }
+      // Con algo sin guardar adelante, la pantalla nueva no la pisa: va al lado.
+      const r = irA(actual, destino, { ...opciones, sucia: suciasRef.current.has(actual.activa) });
+      if (r.lleno) {
+        toast(`Ya hay ${MAX_PESTANAS} pestañas abiertas. Cierra una para abrir otra.`);
+        return;
+      }
+      aplicar(r.estado);
+    },
+    [aplicar, permitida, router],
+  );
+
+  const mostrar = useCallback(
+    (id: string) => {
+      const actual = estadoRef.current;
+      if (actual) aplicar(activar(actual, id));
+    },
+    [aplicar],
+  );
+
+  const marcarSucia = useCallback((id: string, sucia: boolean) => {
+    setSucias((s) => {
+      if (s.has(id) === sucia) return s;
+      const otra = new Set(s);
+      if (sucia) otra.add(id);
+      else otra.delete(id);
+      return otra;
+    });
+  }, []);
+
+  const cerrarYa = useCallback(
+    (id: string) => {
+      setPorCerrar(null);
+      const actual = estadoRef.current;
+      if (!actual) return;
+      const nuevo = cerrarPestana(actual, id);
+      if (nuevo === actual) return;
+      aplicar(nuevo);
+      marcarSucia(id, false);
+      pedidos.current.delete(id);
+      scrolls.current.delete(id);
+      setContenidos((c) => {
+        const resto = { ...c };
+        delete resto[id];
+        return resto;
+      });
+      setRuta((r) => (r?.id === id ? null : r));
+    },
+    [aplicar, marcarSucia],
+  );
+
+  /** Cerrar una pestaña con algo sin guardar pregunta antes. */
+  const cerrar = useCallback(
+    (id: string) => {
+      if (suciasRef.current.has(id)) setPorCerrar(id);
+      else cerrarYa(id);
+    },
+    [cerrarYa],
+  );
+
+  // Lo que una pantalla le pide al navegador (lib/use-navegacion.ts), por pestaña.
+  const navegaciones = useRef(new Map<string, Navegacion>());
+  const navegacionDe = useCallback(
+    (id: string) => {
+      let nav = navegaciones.current.get(id);
+      if (!nav) {
+        // Las pantallas refrescan después de guardar: ya no hay nada pendiente.
+        nav = {
+          refresh: () => {
+            marcarSucia(id, false);
+            recargar(id);
+          },
+          push: (href: string) => ir(href),
+        };
+        navegaciones.current.set(id, nav);
+      }
+      return nav;
+    },
+    [recargar, ir, marcarSucia],
+  );
+
+  // Clics en enlaces de la app (riel, avisos, flechas de día, filas): van a la
+  // pestaña de adelante. Ctrl o Cmd + clic, o la rueda, la abren detrás.
+  useEffect(() => {
+    if (!estado) return;
     function onClick(e: MouseEvent) {
-      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      if (e.defaultPrevented || e.shiftKey || e.altKey) return;
+      const detras = e.type === "auxclick" ? e.button === 1 : e.button === 0 && (e.metaKey || e.ctrlKey);
+      if (!detras && (e.type !== "click" || e.button !== 0)) return;
       const a = e.target instanceof Element ? e.target.closest("a[href]") : null;
       if (!(a instanceof HTMLAnchorElement) || a.target === "_blank" || a.hasAttribute("download")) return;
       const url = new URL(a.href);
-      if (url.origin !== location.origin) return;
+      if (url.origin !== location.origin || !permitida(url.pathname)) return;
       e.preventDefault();
-      alIr(url.pathname + url.search);
+      ir(url.pathname + url.search, { fondo: detras });
     }
     document.addEventListener("click", onClick, true);
-    return () => document.removeEventListener("click", onClick, true);
-  }, [hayOtraAdelante]);
+    document.addEventListener("auxclick", onClick, true);
+    return () => {
+      document.removeEventListener("click", onClick, true);
+      document.removeEventListener("auxclick", onClick, true);
+    };
+  }, [estado !== null, ir, permitida]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Alt + 1…6 salta a esa pestaña, pero no mientras se escribe en un campo.
+  useEffect(() => {
+    if (!estado) return;
+    function onKey(e: KeyboardEvent) {
+      if (!e.altKey || e.ctrlKey || e.metaKey || !/^Digit[1-6]$/.test(e.code)) return;
+      const t = e.target;
+      if (t instanceof HTMLElement && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+      const p = estadoRef.current?.lista[Number(e.code.slice(5)) - 1];
+      if (!p) return;
+      e.preventDefault();
+      mostrar(p.id);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [estado !== null, mostrar]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const api = useMemo(
+    () => ({ estado, contenidos, ruta, sucias, marcarSucia, ir, mostrar, cerrar, navegacionDe }),
+    [estado, contenidos, ruta, sucias, marcarSucia, ir, mostrar, cerrar, navegacionDe],
+  );
+  const cerrando = porCerrar && estado?.lista.find((p) => p.id === porCerrar);
   return (
-    <PestanasCtx.Provider value={{ otras, activa, marcos, abrir, mostrar, cerrar, ir }}>
+    <PestanasCtx.Provider value={api}>
       {children}
+      <ConfirmDialog
+        open={!!cerrando}
+        titulo="¿Cerrar sin guardar?"
+        detalle={cerrando ? `En ${titulo(cerrando.href)} hay algo escrito sin guardar. Si la cierras, se pierde.` : undefined}
+        confirmar="Cerrar sin guardar"
+        tono="warn"
+        onConfirmar={() => porCerrar && cerrarYa(porCerrar)}
+        onCancelar={() => setPorCerrar(null)}
+      />
     </PestanasCtx.Provider>
   );
+}
+
+function SinAcceso() {
+  return <p className="py-16 text-center text-body text-muted">Esta pantalla no está disponible para tu usuario.</p>;
 }
 
 /**
  * La tira de la barra de arriba, como en Biela: una cápsula con la pantalla
  * de cada pestaña (ícono y nombre) y el + que abre otra. La de adelante va
  * como el renglón activo del menú. La X sale en lugar del ícono al pasar el
- * mouse; la rueda del mouse también cierra. Flechas para moverse, Supr cierra.
+ * mouse; la rueda del mouse también cierra. Flechas para moverse, Supr cierra,
+ * Enter activa.
  */
 export function TiraPestanas({ isAdmin }: { isAdmin: boolean }) {
-  const montado = useMontado();
-  return montado ? (
-    <Suspense fallback={null}>
-      <Tira isAdmin={isAdmin} />
-    </Suspense>
-  ) : null;
-}
-
-function Tira({ isAdmin }: { isAdmin: boolean }) {
-  const { otras, activa, abrir, mostrar, cerrar } = usePestanas();
-  const hrefPrincipal = useHref();
+  const { estado, sucias, ir, mostrar, cerrar } = usePestanas();
   const lista = useRef<HTMLDivElement>(null);
-  const todas = [{ id: PRINCIPAL, href: hrefPrincipal }, ...otras];
+  if (!estado) return null;
+  const todas = estado.lista;
   const varias = todas.length > 1;
   const lleno = todas.length >= MAX_PESTANAS;
 
@@ -350,9 +481,12 @@ function Tira({ isAdmin }: { isAdmin: boolean }) {
       const p = todas[(i + (e.key === "ArrowRight" ? 1 : -1) + todas.length) % todas.length];
       mostrar(p.id);
       requestAnimationFrame(() => lista.current?.querySelector<HTMLElement>(`[data-id="${p.id}"]`)?.focus());
-    } else if (e.key === "Delete" && todas[i].id !== PRINCIPAL) {
+    } else if (e.key === "Delete" && varias) {
       e.preventDefault();
       cerrar(todas[i].id);
+    } else if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      mostrar(todas[i].id);
     }
   }
 
@@ -360,16 +494,16 @@ function Tira({ isAdmin }: { isAdmin: boolean }) {
   const grupos = GRUPOS.map((g) => NAV.filter((i) => i.grupo === g.id && (!i.adminOnly || isAdmin))).filter(
     (g) => g.length > 0,
   );
-  const abiertaDe = (href: string) => todas.find((p) => isActive(rutaDe(p.href), href));
+  const abiertaDe = (href: string) => todas.find((p) => p.href === href);
 
   return (
     <div className="hidden h-[46px] min-w-0 items-center gap-0.5 rounded-full bg-[var(--menu-hover)] px-1 shadow-[0_0_0_1px_var(--line)] lg:flex">
       <div ref={lista} role="tablist" aria-label="Pestañas abiertas" className="flex min-w-0 items-center gap-0.5">
         {todas.map((p, i) => {
-          const on = p.id === activa;
+          const on = p.id === estado.activa;
           const nombre = titulo(p.href);
           const Icono = itemDe(rutaDe(p.href))?.icon;
-          const cerrable = p.id !== PRINCIPAL;
+          const sucia = sucias.has(p.id);
           return (
             <div
               key={p.id}
@@ -377,11 +511,11 @@ function Tira({ isAdmin }: { isAdmin: boolean }) {
               role="tab"
               aria-selected={on}
               tabIndex={on ? 0 : -1}
-              title={nombre}
+              title={sucia ? `${nombre}, sin guardar` : nombre}
               onClick={() => mostrar(p.id)}
               onMouseDown={(e) => e.button === 1 && e.preventDefault()}
               onAuxClick={(e) => {
-                if (e.button === 1 && cerrable) {
+                if (e.button === 1 && varias) {
                   e.preventDefault();
                   cerrar(p.id);
                 }
@@ -399,11 +533,12 @@ function Tira({ isAdmin }: { isAdmin: boolean }) {
                   size={16}
                   weight={on ? "fill" : "regular"}
                   aria-hidden
-                  className={cn("shrink-0 transition-opacity", cerrable && "group-hover:opacity-0 group-focus-visible:opacity-0")}
+                  className={cn("shrink-0 transition-opacity", varias && "group-hover:opacity-0 group-focus-visible:opacity-0")}
                 />
               )}
               <span className="min-w-0 truncate">{nombre}</span>
-              {cerrable && (
+              {sucia && <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-warn-fg" />}
+              {varias && (
                 <button
                   type="button"
                   tabIndex={-1}
@@ -440,7 +575,7 @@ function Tira({ isAdmin }: { isAdmin: boolean }) {
                 const Icono = item.icon;
                 const ya = abiertaDe(item.href);
                 return (
-                  <DropdownMenuItem key={item.href} onSelect={() => (ya ? mostrar(ya.id) : abrir(item.href, true))}>
+                  <DropdownMenuItem key={item.href} onSelect={() => (ya ? mostrar(ya.id) : ir(item.href, { aparte: true }))}>
                     <Icono size={18} />
                     <span className="flex-1">{item.label}</span>
                     {ya && <span className="text-meta font-medium text-faint">Abierta</span>}
@@ -456,32 +591,84 @@ function Tira({ isAdmin }: { isAdmin: boolean }) {
 }
 
 /**
- * El lugar del contenido: la página de la principal o, si hay otra pestaña
- * adelante, su iframe. Las de atrás quedan escondidas y no quitadas, así
- * conservan lo que tenían.
+ * El lugar del contenido. Fuera del computador, la página de la ruta. En el
+ * computador, todas las pestañas montadas y solo la de adelante a la vista:
+ * las de atrás conservan lo escrito, los filtros y el scroll. La pestaña de la
+ * URL muestra la página que ya pintó el servidor hasta que llega la suya.
  */
 export function ContenidoPestanas({ children }: { children: React.ReactNode }) {
-  const { otras, activa, marcos } = usePestanas();
-  const montado = useMontado();
+  const { estado, contenidos, ruta, marcarSucia, navegacionDe } = usePestanas();
+  if (!estado) return <>{children}</>;
   return (
     <>
-      <div style={activa === PRINCIPAL ? undefined : { display: "none" }}>{children}</div>
-      {montado &&
-        otras
-          .filter((p) => p.cargada)
-          .map((p) => (
-            <iframe
-              key={p.id}
-              ref={(el) => {
-                if (el) marcos.current.set(p.id, el);
-                else marcos.current.delete(p.id);
-              }}
-              src={p.src}
-              title={titulo(p.href)}
-              className="pestana-marco w-full border-0"
-              style={{ display: p.id === activa ? "block" : "none" }}
-            />
-          ))}
+      {estado.lista.map((p) => {
+        const c = contenidos[p.id];
+        const Carga = CARGAS[rutaDe(p.href)];
+        const cuerpo =
+          c && c.href === p.href ? (
+            // La key cambia con la pantalla: otra pantalla en la misma pestaña
+            // entra de cero, como al navegar; refrescar la misma no la desmonta.
+            <div key={p.href} className={c.quieta ? undefined : "entra-bloques"}>
+              {c.nodo}
+            </div>
+          ) : ruta?.id === p.id && ruta.href === p.href ? (
+            children
+          ) : Carga ? (
+            <Carga />
+          ) : null;
+        return (
+          <PaginaPestana key={p.id} id={p.id} activa={p.id === estado.activa} titulo={titulo(p.href)} alEscribir={marcarSucia}>
+            <NavegacionCtx.Provider value={navegacionDe(p.id)}>{cuerpo}</NavegacionCtx.Provider>
+          </PaginaPestana>
+        );
+      })}
     </>
+  );
+}
+
+/**
+ * La página de una pestaña. Escribir en un campo la marca como sin guardar (el
+ * punto ámbar); buscar y filtrar no cuentan. Se limpia cuando la pantalla
+ * guarda (useNavegacion().refresh). El aviso sale después de la tecla y no
+ * durante: este oyente va antes que el de React y marcar ahí repintaba con el
+ * campo aún vacío (en Biela se perdía la primera letra).
+ */
+function PaginaPestana({
+  id,
+  activa,
+  titulo,
+  alEscribir,
+  children,
+}: {
+  id: string;
+  activa: boolean;
+  titulo: string;
+  alEscribir: (id: string, sucia: boolean) => void;
+  children: React.ReactNode;
+}) {
+  const ref = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let marca = 0;
+    function onCambio(e: Event) {
+      const t = e.target;
+      if (!(t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement || t instanceof HTMLSelectElement)) return;
+      if (t.type === "search" || /^Buscar/i.test(t.getAttribute("placeholder") ?? "") || t.closest("[data-sin-guardar=no]")) return;
+      window.clearTimeout(marca);
+      marca = window.setTimeout(() => alEscribir(id, true), 0);
+    }
+    el.addEventListener("input", onCambio);
+    el.addEventListener("change", onCambio);
+    return () => {
+      el.removeEventListener("input", onCambio);
+      el.removeEventListener("change", onCambio);
+      window.clearTimeout(marca);
+    };
+  }, [id, alEscribir]);
+  return (
+    <section ref={ref} hidden={!activa} aria-label={titulo} data-pestana={id}>
+      {children}
+    </section>
   );
 }

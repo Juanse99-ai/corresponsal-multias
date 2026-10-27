@@ -5,7 +5,7 @@
 //  - Páginas y datos: SIEMPRE red (nunca servir saldos/datos viejos). Si no hay
 //    conexión, se muestra una página "sin conexión" en vez de números obsoletos.
 
-const STATIC_CACHE = "corr-static-v2";
+const STATIC_CACHE = "corr-static-v3";
 const OFFLINE_URL = "/offline.html";
 
 self.addEventListener("install", (event) => {

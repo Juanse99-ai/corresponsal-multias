@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useMemo, useRef, useState, useTransition, type ChangeEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useNavegacion } from "@/lib/use-navegacion";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { Plus, Trash, PencilSimple, ArrowDown, Receipt, WhatsappLogo, ClipboardText, FileArrowUp, Warning, Check, X, CaretDown } from "@phosphor-icons/react/dist/ssr";
@@ -105,7 +105,7 @@ export function MovimientosSection({
   eliminar: (id: string) => Promise<{ ok: boolean; error?: string }>;
   editar: (raw: unknown) => Promise<{ ok: boolean; error?: string }>;
 }) {
-  const router = useRouter();
+  const router = useNavegacion();
   const [pending, startTransition] = useTransition();
   const [monto, setMonto] = useState(0);
   const [hora, setHora] = useState(horaBogotaHHMM);
