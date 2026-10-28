@@ -1,12 +1,11 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
-import { Info } from "@phosphor-icons/react/dist/ssr";
+import { useActionState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { signInAction, type LoginState } from "@/app/login/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Spinner } from "@/components/ui/spinner";
 import { ErrorNotice } from "@/components/ui/error-notice";
 
@@ -19,7 +18,6 @@ const sinSoltarFoco = (e: React.MouseEvent) => e.preventDefault();
 
 export function LoginForm() {
   const [state, action, pending] = useActionState(signInAction, initial);
-  const [olvido, setOlvido] = useState(false);
   const usuarioRef = useRef<HTMLInputElement>(null);
 
   // Solo en el PC: en el celular, enfocar al abrir saca el teclado y tapa la marca.
@@ -51,12 +49,11 @@ export function LoginForm() {
             <Label htmlFor="password">Contraseña</Label>
             {/* Toque de 44 sin agrandar la fila del rótulo. */}
             <Button
+              asChild
               variant="link"
-              onMouseDown={sinSoltarFoco}
-              onClick={() => setOlvido(true)}
               className="-my-3 h-11 px-1 text-body font-medium hover:no-underline hover:text-accent-strong"
             >
-              ¿Olvidaste?
+              <Link href="/recuperar">¿Olvidaste?</Link>
             </Button>
           </div>
           <Input
@@ -68,15 +65,6 @@ export function LoginForm() {
             aria-invalid={state.error ? true : undefined}
           />
         </div>
-      </div>
-
-      <div aria-live="polite">
-        {olvido && (
-          <Alert variant="muted" className="mt-3">
-            <Info weight="fill" />
-            <AlertDescription>Pídele a Juan que te la restablezca.</AlertDescription>
-          </Alert>
-        )}
       </div>
 
       <ErrorNotice message={state.error} className="mt-3" />
