@@ -61,7 +61,7 @@ export function NuevaVersion() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 12 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 mx-auto flex max-w-md items-center gap-3 rounded-card border border-accent/30 bg-surface px-4 py-3 shadow-lg sm:inset-x-auto sm:right-4"
+          className="fixed inset-x-3 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] md:bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 mx-auto flex max-w-md items-center gap-3 rounded-card border border-accent/30 bg-surface px-4 py-3 shadow-lg sm:inset-x-auto sm:right-4"
           role="status"
         >
           <p className="min-w-0 flex-1 text-[0.84rem] text-text">

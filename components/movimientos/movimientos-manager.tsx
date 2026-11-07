@@ -310,7 +310,7 @@ export function MovimientosManager({
       </div>
 
       {/* Totales por canal */}
-      <div className="flex flex-col gap-4 lg:sticky lg:top-8">
+      <div className="flex flex-col gap-4 lg:sticky lg:top-[7.5rem]">
         <Card className="p-5 sm:p-6">
           <p className="mb-3 text-[0.78rem] font-medium uppercase tracking-wide text-faint">Totales del día</p>
           <div className="flex flex-col divide-y divide-line">

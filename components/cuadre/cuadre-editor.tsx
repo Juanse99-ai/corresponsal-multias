@@ -490,7 +490,7 @@ export function CuadreEditor({
       </Card>
 
       {/* ====== Columna de resultado ====== */}
-      <div className="flex flex-col gap-4 lg:sticky lg:top-8">
+      <div className="flex flex-col gap-4 lg:sticky lg:top-[7.5rem]">
         <SaldoHero saldo={saldo} descuadre={descuadre} estado={estado} sinEmpezar={sinEmpezar} />
 
         <Card className="p-5">

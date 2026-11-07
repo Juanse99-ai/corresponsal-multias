@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { signInAction, type LoginState } from "@/app/login/actions";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,12 @@ export function LoginForm() {
           placeholder="••••••••"
           required
         />
+        <Link
+          href="/recuperar"
+          className="self-end text-[0.8rem] font-medium text-accent-strong underline-offset-4 hover:underline"
+        >
+          ¿Olvidaste tu contraseña?
+        </Link>
       </Field>
 
       <ErrorNotice message={state.error} />

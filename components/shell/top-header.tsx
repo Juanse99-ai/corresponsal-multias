@@ -134,7 +134,7 @@ export function TopHeader({
 }) {
   const avisos = useMemo(() => buildAvisos(resumen), [resumen]);
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-line bg-bg/80 px-3 py-2.5 backdrop-blur-xl sm:px-6 lg:px-8 relative">
+    <header className="relative flex items-center justify-between gap-3 px-3 py-2.5 sm:px-6 lg:px-8">
       <div className="flex items-center gap-2.5 sm:gap-3.5">
         <Button variant="secondary" size="sm" onClick={onOpenMenu} aria-label="Abrir menú" className="w-10 px-0 sm:w-auto sm:px-4">
           <List size={18} weight="bold" />

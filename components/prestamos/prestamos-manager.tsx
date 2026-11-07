@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useId, useMemo, useState, useTransition } from "react";
+import { Fragment, useCallback, useId, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -29,6 +29,7 @@ import { AnimatedMoney } from "@/components/ui/animated-number";
 import { cn } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { BottomSheet, useEsCelular } from "@/components/ui/bottom-sheet";
 import { formatCOP, formatFecha, hoyISO } from "@/lib/format";
 import { PERSONAS_PRESET } from "@/lib/personas";
 import type { DeudaConSaldo, PersonaGrupo } from "@/lib/queries";
@@ -119,7 +120,7 @@ export function PrestamosManager({
         )}
       </div>
 
-      <div className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-8">
+      <div className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-[7.5rem]">
         {isAdmin && (
           <Card className="relative overflow-hidden border-accent/30 p-6">
             <p className="text-[0.78rem] font-medium uppercase tracking-wide text-faint">Total pendiente</p>
@@ -517,6 +518,7 @@ function DeudaRow({
   const [err, setErr] = useState<string | null>(null);
   // Confirmación propia para las dos acciones destructivas de la fila.
   const [confirmando, setConfirmando] = useState<null | "borrar" | "reabrir">(null);
+  const enHoja = useEsCelular();
 
   const pct = deuda.monto > 0 ? Math.min(100, (deuda.abonado / deuda.monto) * 100) : 0;
   const saldada = deuda.saldo <= 0;
@@ -543,6 +545,28 @@ function DeudaRow({
       router.refresh();
     });
   }
+
+  const cerrarAbono = useCallback(() => setAbonoOpen(false), []);
+
+  const camposAbono = (
+    <>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor={`ab-${deuda.id}`}>Abono</Label>
+        <MoneyInput id={`ab-${deuda.id}`} value={abono} onValueChange={setAbono} onEnter={() => !pending && abonar()} />
+      </div>
+      <OrigenPicker
+        id={`or-${deuda.id}`}
+        value={origen}
+        onChange={setOrigen}
+        sugeridos={origenes}
+        onEnter={() => !pending && abonar()}
+      />
+      <Button size="md" onClick={abonar} disabled={pending} className="w-full sm:w-auto sm:self-end">
+        <Check size={17} weight="bold" />
+        {pending ? "Registrando…" : "Confirmar abono"}
+      </Button>
+    </>
+  );
 
   function borrar() {
     setConfirmando(null);
@@ -652,35 +676,33 @@ function DeudaRow({
         </div>
 
         <AnimatePresence>
-          {abonoOpen && !saldada && (
+          {abonoOpen && !saldada && !enHoja && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               className="overflow-hidden"
             >
-              <div className="mt-3 flex flex-col gap-3 border-t border-line pt-3">
-                <div className="flex flex-col gap-1.5">
-                  <Label htmlFor={`ab-${deuda.id}`}>Abono</Label>
-                  <MoneyInput id={`ab-${deuda.id}`} value={abono} onValueChange={setAbono} onEnter={() => !pending && abonar()} />
-                </div>
-                <OrigenPicker
-                  id={`or-${deuda.id}`}
-                  value={origen}
-                  onChange={setOrigen}
-                  sugeridos={origenes}
-                  onEnter={() => !pending && abonar()}
-                />
-                <Button size="md" onClick={abonar} disabled={pending} className="w-full sm:w-auto sm:self-end">
-                  <Check size={17} weight="bold" />
-                  {pending ? "Registrando…" : "Confirmar abono"}
-                </Button>
-              </div>
+              <div className="mt-3 flex flex-col gap-3 border-t border-line pt-3">{camposAbono}</div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        <ErrorNotice message={err} className="mt-3" />
+        {/* En celular el abono sube en una hoja, al alcance del pulgar. */}
+        <BottomSheet
+          open={abonoOpen && !saldada && enHoja}
+          onClose={cerrarAbono}
+          titulo={`Abono de ${deuda.persona}`}
+          detalle={`Debe ${formatCOP(deuda.saldo)}${deuda.descripcion ? ` · ${deuda.descripcion}` : ""}`}
+        >
+          <div className="flex flex-col gap-3 pb-1">
+            <ErrorNotice message={err} />
+            {camposAbono}
+          </div>
+        </BottomSheet>
+
+        {/* Con la hoja abierta el error sale adentro; aquí quedaría tapado. */}
+        <ErrorNotice message={abonoOpen && enHoja ? null : err} className="mt-3" />
 
         <AnimatePresence>
           {historyOpen && deuda.abonos.length > 0 && (

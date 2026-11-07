@@ -398,7 +398,7 @@ export function PrestamosDia({
       </div>
 
       {/* Total pendiente */}
-      <div className="flex flex-col gap-4 lg:sticky lg:top-8">
+      <div className="flex flex-col gap-4 lg:sticky lg:top-[7.5rem]">
         <Card className="p-5 sm:p-6">
           <p className="text-[0.78rem] font-medium uppercase tracking-wide text-faint">Pendiente del día</p>
           <p className="tnum mt-1 text-[1.9rem] font-semibold tracking-tight text-text">

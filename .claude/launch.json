@@ -7,6 +7,26 @@
       "runtimeArgs": [],
       "port": 3000,
       "autoPort": true
+    },
+    {
+      "name": "corresponsal-ventanas",
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": [
+        "-c",
+        "cd /Users/juansecp12/maestro-repos/corresponsal-ventanas && export PATH=\"$HOME/.nvm/versions/node/v22.21.0/bin:$PATH\" && exec npm run dev -- --port \"${PORT:-3001}\""
+      ],
+      "port": 3001,
+      "autoPort": true
+    },
+    {
+      "name": "corresponsal-recuperar",
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": [
+        "-c",
+        "cd /Users/juansecp12/maestro-repos/corresponsal-recuperar && export PATH=\"$HOME/.nvm/versions/node/v22.21.0/bin:$PATH\" && exec npm run dev -- --port \"${PORT:-3002}\""
+      ],
+      "port": 3002,
+      "autoPort": true
     }
   ]
 }

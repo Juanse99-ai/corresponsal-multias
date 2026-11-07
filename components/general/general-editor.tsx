@@ -128,7 +128,7 @@ export function GeneralEditor({
         </div>
       </Card>
 
-      <div className="flex flex-col gap-4 lg:sticky lg:top-8">
+      <div className="flex flex-col gap-4 lg:sticky lg:top-[7.5rem]">
         <Card className="relative overflow-hidden border-accent/30 p-6">
           <p className="text-[0.78rem] font-medium uppercase tracking-wide text-faint">Saldo total</p>
           <p className={cn("mt-2 text-4xl font-semibold tracking-tight", total < 0 ? "text-danger" : "text-text")}>
