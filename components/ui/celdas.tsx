@@ -50,7 +50,7 @@ function Celda({
       <span className="truncate text-meta text-faint">{rotulo}</span>
       <span
         className={cn(
-          "tnum truncate font-semibold",
+          "tnum truncate font-medium",
           grande ? "text-lead tracking-[-0.3px] lg:text-h1" : "text-title",
           tono === "ok" ? "text-ok-fg" : tono === "bad" ? "text-bad-fg" : "text-text",
         )}

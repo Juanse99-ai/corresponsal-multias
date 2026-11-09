@@ -62,7 +62,7 @@ export function ConfirmDialog({
         </AlertDialogHeader>
 
         {typeof monto === "number" && (
-          <p className="tnum text-kpi font-semibold tracking-[-0.6px] text-text">
+          <p className="tnum text-kpi font-medium tracking-[-0.6px] text-text">
             {formatCOP(monto)}
           </p>
         )}

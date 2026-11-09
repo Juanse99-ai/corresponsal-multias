@@ -125,7 +125,7 @@ export function RielPanel({
             <PopoverTrigger asChild>
               <IconButton forma="suelto" label={`${profile.nombre}, ${ROL[profile.rol] ?? profile.rol}`} tooltipSide="right" className="size-10 rounded-full p-0 hover:bg-transparent">
                 <Avatar className="size-9">
-                  <AvatarFallback className="bg-primary text-meta font-semibold text-primary-foreground">
+                  <AvatarFallback className="bg-primary text-meta font-medium text-primary-foreground">
                     {iniciales(profile.nombre)}
                   </AvatarFallback>
                 </Avatar>
@@ -135,7 +135,7 @@ export function RielPanel({
               <ItemGroup>
                 <Item size="sm" className="rounded-none border-0">
                   <ItemContent className="min-w-0 gap-0.5">
-                    <ItemTitle className="w-full truncate text-title font-semibold text-text">{profile.nombre}</ItemTitle>
+                    <ItemTitle className="w-full truncate text-title font-medium text-text">{profile.nombre}</ItemTitle>
                     <ItemDescription className="text-meta text-faint">{ROL[profile.rol] ?? profile.rol}</ItemDescription>
                   </ItemContent>
                 </Item>
@@ -183,7 +183,7 @@ export function RielPanel({
           key={grupo.id}
           className="panel-entra flex w-[240px] flex-none flex-col rounded-[20px] border border-[var(--tarjeta-borde)] bg-panel px-2 pt-3.5 pb-2.5 shadow-[var(--tarjeta-sombra)]"
         >
-          <h2 className="px-2 pb-3 text-lead font-semibold tracking-[-0.3px] text-text">{grupo.label}</h2>
+          <h2 className="px-2 pb-3 text-lead font-medium tracking-[-0.3px] text-text">{grupo.label}</h2>
           <HeaderSearch enPanel personas={isAdmin ? resumen.personas : []} />
 
           <nav aria-label={grupo.label} className="flex flex-1 flex-col gap-0.5">
@@ -197,7 +197,7 @@ export function RielPanel({
                   asChild
                   className={cn(
                     "h-[38px] flex-nowrap gap-2.5 rounded-xl border-0 px-2.5 py-0 text-body font-medium text-text [a]:hover:bg-[var(--menu-hover)]",
-                    activo && "bg-blanco font-semibold shadow-[var(--pastilla-sombra)] [a]:hover:bg-blanco",
+                    activo && "bg-blanco font-medium shadow-[var(--pastilla-sombra)] [a]:hover:bg-blanco",
                   )}
                 >
                   <Link href={item.href} aria-current={activo ? "page" : undefined}>
@@ -205,7 +205,7 @@ export function RielPanel({
                       <Icono size={18} weight={activo ? "fill" : "regular"} className={activo ? "text-text" : "text-muted"} />
                     </ItemMedia>
                     <ItemContent className="min-w-0">
-                      <ItemTitle className={cn("truncate", activo ? "font-semibold" : "font-medium")}>{item.label}</ItemTitle>
+                      <ItemTitle className={cn("truncate", activo ? "font-medium" : "font-medium")}>{item.label}</ItemTitle>
                     </ItemContent>
                     {n > 0 && (
                       <ItemActions>
@@ -219,7 +219,7 @@ export function RielPanel({
           </nav>
 
           <div className="border-t border-line px-2 pt-2.5">
-            <p className="truncate text-body font-semibold text-text">{profile.nombre}</p>
+            <p className="truncate text-body font-medium text-text">{profile.nombre}</p>
             <p className="text-meta text-faint">{ROL[profile.rol] ?? profile.rol}</p>
           </div>
         </div>

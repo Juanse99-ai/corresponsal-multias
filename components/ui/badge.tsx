@@ -8,7 +8,7 @@ import { Slot } from "radix-ui"
 // ficha o un botón. Con `punto`, el fondo es gris y el color va solo en un
 // punto de 7 px (para listas largas).
 const badgeVariants = cva(
-  "inline-flex w-fit shrink-0 items-center justify-center gap-1.5 overflow-hidden rounded-full border border-transparent px-2.5 py-[5px] text-meta leading-none font-semibold whitespace-nowrap transition-[color,box-shadow] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent focus-visible:outline-solid [&>svg]:pointer-events-none [&>svg]:size-3",
+  "inline-flex w-fit shrink-0 items-center justify-center gap-1.5 overflow-hidden rounded-full border border-transparent px-2.5 py-[5px] text-meta leading-none font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent focus-visible:outline-solid [&>svg]:pointer-events-none [&>svg]:size-3",
   {
     variants: {
       variant: {

@@ -148,7 +148,7 @@ export function GeneralEditor({
             value={total}
             desdeCero={false}
             className={cn(
-              "mt-3 block text-display leading-none font-semibold tracking-[-0.8px]",
+              "mt-3 block text-display leading-none font-medium tracking-[-0.8px]",
               total < 0 ? "text-bad-fg" : "text-white",
             )}
           />

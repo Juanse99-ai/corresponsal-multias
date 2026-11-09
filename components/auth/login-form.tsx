@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { ErrorNotice } from "@/components/ui/error-notice";
+import { COMPUTADOR } from "@/lib/cortes";
 
 const initial: LoginState = { error: null };
 
@@ -22,7 +23,7 @@ export function LoginForm() {
 
   // Solo en el PC: en el celular, enfocar al abrir saca el teclado y tapa la marca.
   useEffect(() => {
-    if (window.matchMedia("(min-width: 1024px)").matches) usuarioRef.current?.focus();
+    if (window.matchMedia(COMPUTADOR).matches) usuarioRef.current?.focus();
   }, []);
 
   return (

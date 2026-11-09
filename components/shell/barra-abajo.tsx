@@ -369,24 +369,24 @@ export function BarraAbajo({
             if ((e.target as Element | null)?.closest?.(".gbar")) e.preventDefault();
           }}
         >
-          <SheetTitle className="px-2 pt-2.5 pb-2 text-h1 font-semibold tracking-[-0.4px] text-text">Tú</SheetTitle>
+          <SheetTitle className="px-2 pt-2.5 pb-2 text-h1 font-medium tracking-[-0.4px] text-text">Tú</SheetTitle>
 
           {principales.length > 0 && (
             <FilasHoja items={principales} pathname={pathname} pendientes={pendientes} onIr={() => setAbierta(false)} />
           )}
           {admin.length > 0 && (
             <>
-              <h3 className="px-3 pt-3 pb-1 text-meta font-semibold text-faint">Administración</h3>
+              <h3 className="px-3 pt-3 pb-1 text-meta font-medium text-faint">Administración</h3>
               <FilasHoja items={admin} pathname={pathname} pendientes={pendientes} onIr={() => setAbierta(false)} />
             </>
           )}
 
           <div className="mt-2 flex items-center gap-3 border-t border-line px-2 pt-3 pb-2.5">
-            <span className="grid size-11 shrink-0 place-items-center rounded-full bg-accent-fill text-body font-semibold text-white">
+            <span className="grid size-11 shrink-0 place-items-center rounded-full bg-accent-fill text-body font-medium text-white">
               {iniciales(profile.nombre)}
             </span>
             <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-              <span className="truncate text-title font-semibold text-text">{profile.nombre}</span>
+              <span className="truncate text-title font-medium text-text">{profile.nombre}</span>
               <span className="text-meta text-faint">{ROL[profile.rol] ?? profile.rol}</span>
             </span>
             <ThemeToggle sobre="claro" />
@@ -457,7 +457,7 @@ function FilasHoja({
                 <Icono size={21} className={activo ? "text-accent" : "text-muted"} />
               </ItemMedia>
               <ItemContent className="min-w-0">
-                <ItemTitle className={cn("truncate text-[17px]", activo ? "font-semibold" : "font-normal")}>
+                <ItemTitle className={cn("truncate text-title", activo ? "font-medium" : "font-normal")}>
                   {item.label}
                 </ItemTitle>
               </ItemContent>

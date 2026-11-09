@@ -32,7 +32,7 @@ export function ListaHallazgos({ hallazgos }: { hallazgos: Hallazgo[] }) {
         <p className="flex items-start gap-2 rounded-lg bg-ok-bg px-3 py-2.5 text-meta text-ok-fg">
           <CheckCircle size={15} weight="fill" className="mt-px shrink-0" />
           <span>
-            <span className="font-semibold">Sin hallazgos.</span> Ningún registro pasa del tope, no hay duplicados y
+            <span className="font-medium">Sin hallazgos.</span> Ningún registro pasa del tope, no hay duplicados y
             todos los días tienen su cuadre.
           </span>
         </p>
@@ -50,7 +50,7 @@ export function ListaHallazgos({ hallazgos }: { hallazgos: Hallazgo[] }) {
         .map((grupo) => (
           <Fragment key={grupo.titulo}>
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-meta font-semibold tracking-normal text-faint">
+              <CardTitle className="flex items-center gap-2 text-meta font-medium tracking-normal text-faint">
                 <h2>{grupo.titulo}</h2>
                 <Contador n={grupo.items.length} tono={grupo.grave ? "peligro" : "aviso"} />
               </CardTitle>
@@ -78,7 +78,7 @@ export function ListaHallazgos({ hallazgos }: { hallazgos: Hallazgo[] }) {
                               <span className="text-meta font-normal text-faint">{formatFechaCorta(h.fecha)}</span>
                             </span>
                             {h.monto !== null && (
-                              <span className="tnum shrink-0 text-title font-semibold text-text">{formatCOP(h.monto)}</span>
+                              <span className="tnum shrink-0 text-title font-medium text-text">{formatCOP(h.monto)}</span>
                             )}
                           </ItemTitle>
                           <ItemDescription className="line-clamp-none leading-snug text-balance text-muted">

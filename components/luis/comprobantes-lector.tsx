@@ -154,7 +154,7 @@ export function ComprobantesLector({
                   {seleccion.length} de {items.length}{" "}
                   {items.length === 1 ? "comprobante" : "comprobantes"}
                 </p>
-                <p className="tnum shrink-0 text-title font-semibold text-text">
+                <p className="tnum shrink-0 text-title font-medium text-text">
                   {formatCOP(total)}
                 </p>
               </div>
@@ -190,7 +190,7 @@ export function ComprobantesLector({
                             </ItemMedia>
                             <ItemContent className="min-w-0 gap-0 leading-tight">
                               <ItemTitle className="w-full items-baseline justify-between gap-2 leading-tight">
-                                <span className="tnum font-semibold text-text">
+                                <span className="tnum font-medium text-text">
                                   {utilizable ? formatCOP(c.monto as number) : "Sin monto"}
                                 </span>
                                 <span className="tnum shrink-0 text-meta font-normal text-faint">
@@ -207,7 +207,7 @@ export function ComprobantesLector({
                                   <>
                                     {/* El separador va fuera del inline-flex: adentro se
                                         come el espacio final y queda "Revísala ·Depósito". */}
-                                    <span className="inline-flex items-center gap-1 font-semibold text-warn-fg">
+                                    <span className="inline-flex items-center gap-1 font-medium text-warn-fg">
                                       <Warning size={11} weight="fill" />
                                       Revísala
                                     </span>

@@ -82,7 +82,7 @@ export function GeneralTable({ entries }: { entries: GeneralRow[] }) {
       </CardHeader>
 
       {/* Celular: renglones en la misma tarjeta. Nueve columnas no caben en un teléfono. */}
-      <ItemGroup className="divide-y divide-linea-fila px-5 pb-3 md:hidden">
+      <ItemGroup className="divide-y divide-linea-fila px-5 pb-3 sm:hidden">
         {entries.map((e) => {
           const total = computeSaldoTotal(e);
           return (
@@ -99,7 +99,7 @@ export function GeneralTable({ entries }: { entries: GeneralRow[] }) {
                 }}
               >
                 <ItemContent className="min-w-0 gap-1">
-                  <ItemTitle className="text-title font-semibold">{formatFecha(e.fecha)}</ItemTitle>
+                  <ItemTitle className="text-title font-medium">{formatFecha(e.fecha)}</ItemTitle>
                   <ItemDescription className="line-clamp-none text-faint">
                     Saldo Luis <span className="tnum text-muted">{formatCOP(e.saldo_luis)}</span>, cupo{" "}
                     <span className="tnum text-muted">{formatCOP(e.cupo_disponible)}</span>, efectivo{" "}
@@ -109,7 +109,7 @@ export function GeneralTable({ entries }: { entries: GeneralRow[] }) {
                 </ItemContent>
                 <ItemActions className="shrink-0 flex-col items-end gap-0.5">
                   <span className="text-meta text-faint">Saldo total</span>
-                  <span className={cn("tnum text-lead font-semibold", total < 0 ? "text-bad-fg" : "text-text")}>
+                  <span className={cn("tnum text-lead font-medium", total < 0 ? "text-bad-fg" : "text-text")}>
                     {formatCOP(total)}
                   </span>
                 </ItemActions>
@@ -119,7 +119,7 @@ export function GeneralTable({ entries }: { entries: GeneralRow[] }) {
         })}
       </ItemGroup>
 
-      <Table contenedorClassName="max-md:hidden">
+      <Table contenedorClassName="max-sm:hidden">
         <TableHeader>
           <TableRow>
             <TableHead>Fecha</TableHead>
@@ -154,7 +154,7 @@ export function GeneralTable({ entries }: { entries: GeneralRow[] }) {
                 <TableCell className="tnum text-right text-muted">{formatCOP(e.nequis)}</TableCell>
                 <TableCell className="tnum text-right text-muted">{formatCOP(e.monedas)}</TableCell>
                 <TableCell className="tnum text-right text-muted">{formatCOP(e.deudas_terceros)}</TableCell>
-                <TableCell className={cn("tnum text-right font-semibold", total < 0 ? "text-bad-fg" : "text-text")}>{formatCOP(total)}</TableCell>
+                <TableCell className={cn("tnum text-right font-medium", total < 0 ? "text-bad-fg" : "text-text")}>{formatCOP(total)}</TableCell>
                 <TableCell className="py-0 pr-2 pl-0">
                   <IconButton
                     label="Borrar registro"

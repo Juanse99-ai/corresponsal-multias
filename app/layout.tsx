@@ -4,6 +4,7 @@ import { Providers } from "./providers";
 import { PwaRegister } from "@/components/pwa-register";
 import { Entrada } from "@/components/fx/entrada";
 import { COLOR_BARRA_SISTEMA } from "@/lib/colores-tema";
+import { FiltrosLente, SCRIPT_LENTE } from "@/components/fx/filtros-lente";
 
 export const metadata: Metadata = {
   title: "Barrio Centro Sabanalarga 18 · Multidiagnósticos AS",
@@ -35,7 +36,11 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: SCRIPT_LENTE }} />
+      </head>
       <body className="min-h-[100dvh] antialiased">
+        <FiltrosLente />
         <Providers>
         <Entrada />
         {children}

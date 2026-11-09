@@ -314,7 +314,7 @@ export function MovimientosSection({
         <CardTitle className="text-text">{titulo}</CardTitle>
         <CardDescription>{subtitulo}</CardDescription>
         <CardAction className="flex flex-col items-end gap-1">
-          <AnimatedMoney value={total} className="text-title font-semibold text-text" />
+          <AnimatedMoney value={total} className="text-title font-medium text-text" />
           <Contador
             n={items.length}
             aria-label={`${items.length} ${items.length === 1 ? "movimiento" : "movimientos"}`}
@@ -329,7 +329,7 @@ export function MovimientosSection({
         <Label htmlFor={`monto-${tono}`}>Monto</Label>
         <MoneyInput id={`monto-${tono}`} size="lg" value={monto} onValueChange={setMonto} onEnter={() => !pending && registrar()} />
         {monto > tope && (
-          <p className="flex items-start gap-1.5 text-meta font-semibold text-warn-fg">
+          <p className="flex items-start gap-1.5 text-meta font-medium text-warn-fg">
             <Warning size={14} weight="fill" className="mt-px shrink-0" />
             {tono === "consig"
               ? "El datáfono no pasa de $3.000.000 por consignación: si fue un monto grande, va partido en varias."
@@ -387,7 +387,7 @@ export function MovimientosSection({
             className="overflow-hidden"
           >
             <div className="mt-4 border-t border-linea-fila pt-4">
-              <p className="text-title font-semibold text-text">Chat de WhatsApp</p>
+              <p className="text-title font-medium text-text">Chat de WhatsApp</p>
               <div className="mt-2.5 flex gap-2">
                 <Button size="sm" variant="secondary" onClick={pegarDelPortapapeles}>
                   <ClipboardText size={16} />
@@ -471,7 +471,7 @@ export function MovimientosSection({
                             ? "movimiento"
                             : "movimientos"}
                         </p>
-                        <p className="tnum shrink-0 text-title font-semibold text-text">{formatCOP(totalSeleccion)}</p>
+                        <p className="tnum shrink-0 text-title font-medium text-text">{formatCOP(totalSeleccion)}</p>
                       </div>
 
                       {/* Cada fila se puede desmarcar: en el grupo también escriben
@@ -480,7 +480,7 @@ export function MovimientosSection({
                         {lote.dias.map((d) => (
                           <div key={d.fecha}>
                             {variosDias && (
-                              <p className="sticky top-0 z-10 flex items-baseline justify-between gap-2 bg-card py-1.5 text-meta font-semibold text-faint">
+                              <p className="sticky top-0 z-[2] flex items-baseline justify-between gap-2 bg-card py-1.5 text-meta font-medium text-faint">
                                 <span className={cn(d.fecha === fecha && "text-accent-strong")}>
                                   {formatFechaCorta(d.fecha)}
                                   {d.fecha === fecha && ", día abierto"}
@@ -515,7 +515,7 @@ export function MovimientosSection({
                                         </ItemMedia>
                                         <ItemContent className="min-w-0 gap-0 leading-tight">
                                           <ItemTitle className="w-full items-baseline justify-between gap-2 leading-tight">
-                                            <span className="tnum font-semibold text-text">{formatCOP(m.monto)}</span>
+                                            <span className="tnum font-medium text-text">{formatCOP(m.monto)}</span>
                                             <span className="tnum shrink-0 text-meta font-normal text-faint">
                                               {m.hora ? formatHora(m.hora) : "sin hora"}
                                             </span>

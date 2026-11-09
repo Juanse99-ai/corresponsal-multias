@@ -22,7 +22,7 @@ export default function SinAccesoPage() {
             <Prohibit weight="bold" />
           </DialogIcon>
           <div className="flex min-w-0 flex-1 flex-col gap-1.5 pt-px">
-            <h1 className="text-h1 font-semibold tracking-[-0.4px] text-text">Tu usuario no tiene acceso</h1>
+            <h1 className="text-h1 font-medium tracking-[-0.4px] text-text">Tu usuario no tiene acceso</h1>
             <p className="text-body text-muted">
               Esta cuenta no está habilitada para la app del corresponsal (Barrio Centro Sabanalarga 18).
               Si crees que es un error, pídele a Juan que te dé acceso.

@@ -122,7 +122,7 @@ export function CruceChat({
     <Card className="flex flex-col overflow-hidden">
       {/* Cabecera: título y, como fila de filtros, de quién son los pedidos y el día. */}
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2.5 px-5 pt-5 pb-4 sm:px-6">
-        <h2 className="text-lead font-semibold tracking-[-0.3px] text-text">Cruce con el grupo</h2>
+        <h2 className="text-lead font-medium tracking-[-0.3px] text-text">Cruce con el grupo</h2>
         <div className="flex flex-wrap items-center gap-2">
           {remitentes.length > 1 && (
             <NativeSelect
@@ -161,7 +161,7 @@ export function CruceChat({
           </Empty>
         ) : (
           <>
-            <div className="sticky top-0 z-10 mb-3 flex justify-center">
+            <div className="sticky top-0 z-[2] mb-3 flex justify-center">
               <Badge variant="secondary" className="font-medium">
                 {formatFechaCorta(fecha)}
                 {nombreLuis ? ` · ${nombreLuis}` : ""}
@@ -189,7 +189,7 @@ export function CruceChat({
                         <MessageContent className="w-auto max-w-[85%] gap-0.5 sm:max-w-[70%]">
                           <Bubble variant="outline" className="max-w-full">
                             <BubbleContent className="rounded-2xl rounded-bl-md px-3.5">
-                              <p className={cn("tnum text-title font-semibold text-text", est === "repetido" && "line-through")}>
+                              <p className={cn("tnum text-title font-medium text-text", est === "repetido" && "line-through")}>
                                 {formatCOP(p.monto)}
                               </p>
                               {p.nota && <p className="text-meta leading-snug text-muted">{p.nota}</p>}
@@ -313,7 +313,7 @@ function Cifra({ rotulo, tono, children }: { rotulo: string; tono?: "ok" | "bad"
       <span className="truncate text-meta text-faint">{rotulo}</span>
       <span
         className={cn(
-          "tnum truncate text-title font-semibold",
+          "tnum truncate text-title font-medium",
           tono === "ok" ? "text-ok-fg" : tono === "bad" ? "text-bad-fg" : "text-text",
         )}
       >

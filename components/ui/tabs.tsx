@@ -33,8 +33,8 @@ function opcionSegmentado(on: "active" | "on") {
   return cn(
     "relative inline-flex h-[38px] shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-full px-4 text-body font-medium whitespace-nowrap text-riel-tinta transition-[color,transform] duration-[var(--dur-1)] outline-none select-none hover:text-text active:scale-[0.96] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent focus-visible:outline-solid disabled:pointer-events-none disabled:text-faint lg:h-[34px] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
     on === "active"
-      ? "data-[state=active]:bg-riel-on data-[state=active]:font-semibold data-[state=active]:text-riel-on-tinta data-[state=active]:shadow-riel-on"
-      : "data-[state=on]:bg-riel-on data-[state=on]:font-semibold data-[state=on]:text-riel-on-tinta data-[state=on]:shadow-riel-on"
+      ? "data-[state=active]:bg-riel-on data-[state=active]:font-medium data-[state=active]:text-riel-on-tinta data-[state=active]:shadow-riel-on"
+      : "data-[state=on]:bg-riel-on data-[state=on]:font-medium data-[state=on]:text-riel-on-tinta data-[state=on]:shadow-riel-on"
   )
 }
 

@@ -84,7 +84,7 @@ export function PanelView({ data }: { data: PanelData }) {
             <>
               <AnimatedMoney
                 value={data.cuadreHoy.saldo_final}
-                className="mt-3 block text-display leading-none font-semibold tracking-[-0.8px] text-white"
+                className="mt-3 block text-display leading-none font-medium tracking-[-0.8px] text-white"
               />
               <p className="mt-1.5 text-body text-white/70">Saldo final</p>
             </>
@@ -154,7 +154,7 @@ export function PanelView({ data }: { data: PanelData }) {
                   <p className="text-meta font-medium text-faint">Total pendiente</p>
                   <AnimatedMoney
                     value={data.deudas.totalPendiente}
-                    className="mt-1 block text-kpi leading-none font-semibold tracking-[-0.6px] text-text"
+                    className="mt-1 block text-kpi leading-none font-medium tracking-[-0.6px] text-text"
                   />
                   {pendientes.length === 0 ? (
                     <Empty fila className="mt-2">
@@ -170,7 +170,7 @@ export function PanelView({ data }: { data: PanelData }) {
                               <ItemTitle className="truncate text-body font-medium">{p.persona}</ItemTitle>
                             </ItemContent>
                             <ItemActions>
-                              <span className="tnum text-title font-semibold text-text">{formatCOP(p.saldo)}</span>
+                              <span className="tnum text-title font-medium text-text">{formatCOP(p.saldo)}</span>
                             </ItemActions>
                           </Item>
                         </div>
@@ -184,7 +184,7 @@ export function PanelView({ data }: { data: PanelData }) {
                     <Plus weight="bold" />
                   </ItemMedia>
                   <ItemContent>
-                    <ItemTitle className="text-body font-semibold">Registrar un préstamo</ItemTitle>
+                    <ItemTitle className="text-body font-medium">Registrar un préstamo</ItemTitle>
                   </ItemContent>
                 </Item>
               )}
@@ -284,7 +284,7 @@ function DistribucionCard({ distribucion, tirilla }: { distribucion: { label: st
             </ChartContainer>
             <div className="pointer-events-none absolute inset-[18px] flex flex-col items-center justify-center rounded-full">
               <span className="text-label text-muted">Tirilla</span>
-              <span className="tnum text-title font-semibold text-text">{formatCompactCOP(tirilla)}</span>
+              <span className="tnum text-title font-medium text-text">{formatCompactCOP(tirilla)}</span>
             </div>
           </div>
           <div className="flex min-w-0 flex-1 flex-col gap-2">
@@ -292,7 +292,7 @@ function DistribucionCard({ distribucion, tirilla }: { distribucion: { label: st
               <div key={l.label} className="flex items-center gap-2 text-meta">
                 <span className="size-2.5 shrink-0 rounded-[3px]" style={{ background: l.color }} />
                 <span className="min-w-0 flex-1 truncate text-muted">{l.label}</span>
-                <span className="tnum shrink-0 font-semibold text-text">{l.pct}</span>
+                <span className="tnum shrink-0 font-medium text-text">{l.pct}</span>
               </div>
             ))}
           </div>
@@ -318,7 +318,7 @@ function TooltipCierre({ active, payload }: { active?: boolean; payload?: { payl
       <p className="text-white/82">{formatFechaCorta(r.fecha)}</p>
       <p className="mt-0.5 flex items-center gap-1.5">
         <span aria-hidden className={cn("size-2 rounded-full", descuadre ? "bg-danger" : "bg-success")} />
-        <span className="tnum font-semibold">{formatCOP(r.total_tirilla)}</span>
+        <span className="tnum font-medium">{formatCOP(r.total_tirilla)}</span>
       </p>
     </div>
   );

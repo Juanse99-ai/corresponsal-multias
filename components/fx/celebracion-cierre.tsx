@@ -46,7 +46,7 @@ export function CelebracionCierre({ play, fecha, cuadrado }: { play: number; fec
           onKeyDown={(e) => {
             if (e.key === "Escape" || e.key === "Enter" || e.key === " ") cerrar();
           }}
-          className="fixed inset-0 z-[200] flex items-center justify-center outline-none"
+          className="fixed inset-0 z-[var(--z-encima)] flex items-center justify-center outline-none"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -86,14 +86,14 @@ export function CelebracionCierre({ play, fecha, cuadrado }: { play: number; fec
                 <LockSimple size={38} weight="fill" />
               </span>
             )}
-            <p className="text-2xl font-semibold tracking-tight text-nav-text sm:text-3xl">Día cerrado</p>
-            <p className="text-[0.95rem] text-nav-text/80">
+            <p className="text-h1 font-medium tracking-tight text-nav-text">Día cerrado</p>
+            <p className="text-title text-nav-text/80">
               {cuadrado ? "Quedó cuadrado." : "Quedó con diferencia. Revísalo mañana."}
             </p>
-            <p className="text-[0.82rem] text-nav-text/55">{formatFechaLarga(fecha)}</p>
+            <p className="text-body text-nav-text/55">{formatFechaLarga(fecha)}</p>
           </motion.div>
           <p
-            className="pointer-events-none absolute inset-x-0 bottom-9 text-center text-[0.82rem] text-nav-text/55"
+            className="pointer-events-none absolute inset-x-0 bottom-9 text-center text-body text-nav-text/55"
             style={{ marginBottom: "env(safe-area-inset-bottom)" }}
           >
             Toca para continuar

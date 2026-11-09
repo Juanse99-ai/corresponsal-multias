@@ -36,7 +36,7 @@ function TooltipCOP({
     // Globo oscuro del taller: fecha y la cifra con su nombre.
     <div className="globo-grafica min-w-[132px] rounded-lg px-[11px] py-2 text-meta text-white">
       <p className="text-white/82">{label ? etiquetaDia(label) : ""}</p>
-      <p className="tnum mt-0.5 flex items-center gap-1.5 font-semibold">
+      <p className="tnum mt-0.5 flex items-center gap-1.5 font-medium">
         <span aria-hidden className="size-2 shrink-0 rounded-full bg-accent" />
         {formatCOP(v)} <span className="font-normal text-white/82">{nombre}</span>
       </p>

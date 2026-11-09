@@ -92,11 +92,11 @@ export function ActivarAvisos({ sobre = "menu" }: { sobre?: "menu" | "claro" }) 
   }
 
   if (state === "loading")
-    return <span className={cn("text-[0.72rem]", tenue)}>…</span>;
+    return <span className={cn("text-meta", tenue)}>…</span>;
   if (state === "unsupported")
-    return <span className={cn("text-[0.72rem]", tenue)}>Instala la app para activarlos</span>;
+    return <span className={cn("text-meta", tenue)}>Instala la app para activarlos</span>;
   if (state === "denied")
-    return <span className={cn("text-[0.72rem]", tenue)}>Bloqueados en ajustes</span>;
+    return <span className={cn("text-meta", tenue)}>Bloqueados en ajustes</span>;
 
   const on = state === "on";
   const working = state === "working";
@@ -108,7 +108,7 @@ export function ActivarAvisos({ sobre = "menu" }: { sobre?: "menu" | "claro" }) 
       disabled={working}
       aria-pressed={on}
       className={cn(
-        "border text-[0.84rem]",
+        "border text-body",
         claro
           ? on
             ? "border-transparent bg-accent-soft text-accent-strong hover:bg-accent-soft hover:text-accent-strong"

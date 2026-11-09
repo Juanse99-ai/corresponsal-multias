@@ -54,7 +54,7 @@ export function CifraCabecera({
       {divisor && <span aria-hidden className="h-11 w-px self-center bg-line-strong" />}
       <div className="flex min-w-0 flex-col gap-1">
         <span className="text-meta font-medium text-faint">{rotulo}</span>
-        <span className="tnum text-kpi leading-none font-semibold tracking-[-0.6px] text-text">{children}</span>
+        <span className="tnum text-kpi leading-none font-medium tracking-[-0.6px] text-text">{children}</span>
         {chip && <span className="mt-1 flex">{chip}</span>}
       </div>
     </div>

@@ -137,7 +137,7 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
         <>
         {/* Celular: renglones en la misma tarjeta. La tabla obligaba a arrastrar
             en horizontal dentro de una página que ya se desliza en vertical. */}
-        <ItemGroup className="divide-y divide-linea-fila px-5 pb-3 md:hidden">
+        <ItemGroup className="divide-y divide-linea-fila px-5 pb-3 sm:hidden">
           {filtrados.map((c) => {
             const descuadre = Math.round(c.saldo_final) !== 0;
             return (
@@ -171,7 +171,7 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
                     </ItemDescription>
                   </ItemContent>
                   <ItemActions className="shrink-0 flex-col items-end gap-1">
-                    <span className={cn("tnum text-lead font-semibold", descuadre ? "text-bad-fg" : "text-text")}>
+                    <span className={cn("tnum text-lead font-medium", descuadre ? "text-bad-fg" : "text-text")}>
                       {formatCOP(c.saldo_final)}
                     </span>
                     {isAdmin && (
@@ -186,7 +186,7 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
           })}
         </ItemGroup>
 
-        <Table contenedorClassName="max-md:hidden">
+        <Table contenedorClassName="max-sm:hidden">
           <TableHeader>
             <TableRow>
               <TableHead>Fecha</TableHead>
@@ -214,7 +214,7 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
                   <TableCell className="tnum text-right text-text">{formatCOP(c.total_tirilla)}</TableCell>
                   <TableCell className="tnum text-right text-muted">{formatCOP(c.sr_luis)}</TableCell>
                   <TableCell className="tnum text-right text-muted">{formatCOP(c.compensado)}</TableCell>
-                  <TableCell className={cn("tnum text-right font-semibold", descuadre ? "text-bad-fg" : "text-text")}>
+                  <TableCell className={cn("tnum text-right font-medium", descuadre ? "text-bad-fg" : "text-text")}>
                     {formatCOP(c.saldo_final)}
                   </TableCell>
                   <TableCell className="text-right">

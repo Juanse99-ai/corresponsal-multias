@@ -39,7 +39,7 @@ function DialogOverlay({
   return (
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
-      className={cn("velo fixed inset-0 z-50", className)}
+      className={cn("velo fixed inset-0 z-[var(--z-ventana)]", className)}
       {...props}
     />
   )
@@ -67,7 +67,7 @@ function DialogContent({
           // apenas más claro que el negro); entra creciendo desde 0,95. En el
           // celular es una hoja que sube desde abajo con su agarradera. Las
           // animaciones están en globals.css (.ventana).
-          "ventana fixed top-[50%] left-[50%] z-50 grid max-h-[90vh] w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 overflow-y-auto overscroll-contain rounded-3xl border-0 bg-blanco p-[22px] shadow-ventana outline-none sm:max-w-lg",
+          "ventana fixed top-[50%] left-[50%] z-[var(--z-ventana)] grid max-h-[90vh] w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 overflow-y-auto overscroll-contain rounded-3xl border-0 bg-blanco p-[22px] shadow-ventana outline-none sm:max-w-lg",
           "max-sm:top-auto max-sm:bottom-0 max-sm:left-0 max-sm:max-h-[92vh] max-sm:max-w-none max-sm:translate-x-0 max-sm:translate-y-0 max-sm:rounded-b-none max-sm:px-[18px] max-sm:pt-[26px] max-sm:pb-[calc(18px+env(safe-area-inset-bottom,0px))]",
           "max-sm:before:absolute max-sm:before:top-2 max-sm:before:left-1/2 max-sm:before:h-[5px] max-sm:before:w-[38px] max-sm:before:-translate-x-1/2 max-sm:before:rounded max-sm:before:bg-fill-2",
           className
@@ -197,7 +197,7 @@ function DialogTitle({
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-lead font-semibold tracking-[-0.2px] sm:text-h1 sm:tracking-[-0.4px]", className)}
+      className={cn("text-lead font-medium tracking-[-0.2px] sm:text-h1 sm:tracking-[-0.4px]", className)}
       {...props}
     />
   )

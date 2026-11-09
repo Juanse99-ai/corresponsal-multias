@@ -20,7 +20,7 @@ export function AuthLayout({
       <section className="hidden flex-col items-center justify-center gap-5 bg-nav-bg p-10 text-center lg:flex">
         <Logo size={96} className="rounded-[1.5rem]" />
         <div className="leading-tight">
-          <p className="text-lead font-semibold tracking-[-0.3px] text-nav-text">Barrio Centro Sabanalarga 18</p>
+          <p className="text-lead font-medium tracking-[-0.3px] text-nav-text">Barrio Centro Sabanalarga 18</p>
           <p className="mt-1 text-body text-nav-muted">Multidiagnósticos AS</p>
         </div>
       </section>
@@ -36,14 +36,14 @@ export function AuthLayout({
         <Logo size={84} className="rounded-[1.4rem] group-has-[input:focus]/login:hidden" />
         <Logo size={40} className="hidden group-has-[input:focus]/login:flex" />
         <div className="leading-tight">
-          <p className="text-body font-semibold text-nav-text">Barrio Centro Sabanalarga 18</p>
+          <p className="text-body font-medium text-nav-text">Barrio Centro Sabanalarga 18</p>
           <p className="mt-0.5 text-meta text-nav-muted">Multidiagnósticos AS</p>
         </div>
       </header>
 
       <section className="flex flex-col items-center px-5 pb-10 pt-7 group-has-[input:focus]/login:pt-5 sm:px-10 lg:justify-center lg:py-12">
         <div className="w-full max-w-[380px]">
-          <h1 className="text-kpi font-semibold tracking-[-0.5px] text-text group-has-[input:focus]/login:text-h1 lg:group-has-[input:focus]/login:text-kpi">
+          <h1 className="text-kpi font-medium tracking-[-0.5px] text-text group-has-[input:focus]/login:text-h1 lg:group-has-[input:focus]/login:text-kpi">
             {titulo}
           </h1>
           {detalle && <p className="mt-1.5 text-body text-text-2">{detalle}</p>}

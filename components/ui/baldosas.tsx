@@ -59,7 +59,7 @@ export function Baldosa({
       <span aria-hidden className="text-muted group-data-[state=on]/baldosa:text-accent [&_svg]:size-5">
         {icono}
       </span>
-      <span className="text-body leading-tight font-semibold">{nombre}</span>
+      <span className="text-body leading-tight font-medium">{nombre}</span>
       {detalle && <span className="text-label leading-tight text-faint">{detalle}</span>}
     </ToggleGroupPrimitive.Item>
   );

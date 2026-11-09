@@ -87,7 +87,7 @@ function ToggleGroupItem({
           ? opcionSegmentado("on")
           : cn(
               toggleVariants({ variant: v, size: context.size || size }),
-              "w-auto min-w-0 shrink-0 px-3 focus:z-10 focus-visible:z-10"
+              "w-auto min-w-0 shrink-0 px-3 focus:z-[1] focus-visible:z-[1]"
             ),
         className
       )}

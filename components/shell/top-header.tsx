@@ -147,13 +147,13 @@ export function TopHeader({
     // por debajo al hacer scroll. Computador: dentro del marco, transparente y
     // sin línea (globals.css); el menú, la marca y el buscador están en el riel
     // y el panel de la izquierda.
-    <header className="barra-material barra-arriba sticky top-0 z-20 border-b border-line/80 lg:static lg:border-b-0" style={{ paddingTop: "env(safe-area-inset-top)" }}>
+    <header className="barra-material barra-arriba sticky top-0 z-[var(--z-sticky)] border-b border-line/80 lg:static lg:border-b-0" style={{ paddingTop: "env(safe-area-inset-top)" }}>
       <div className="relative mx-auto flex h-14 max-w-[1240px] items-center justify-between gap-3 px-1.5 sm:px-4 lg:h-12 lg:max-w-none lg:px-2">
       <div className="flex min-w-0 items-center gap-1.5 sm:gap-3">
         {/* Sin botón de menú: abajo está la barra. El logo lleva al Panel. */}
         <Link href="/panel" aria-label="Inicio" className="ml-2 flex items-center gap-2 rounded-xl shadow-[0_1px_2px_rgba(20,16,50,0.08),0_4px_10px_-6px_rgba(20,16,50,0.3)] sm:ml-0 lg:hidden">
           <Logo size={40} className="rounded-xl" />
-          <span className="hidden text-sm font-semibold tracking-tight text-text sm:block">Barrio Centro Sabanalarga 18</span>
+          <span className="hidden text-body font-medium tracking-tight text-text sm:block">Barrio Centro Sabanalarga 18</span>
         </Link>
         {/* Computador: las pestañas en el lugar del título, como en Biela. */}
         <TiraPestanas isAdmin={isAdmin} />
@@ -234,7 +234,7 @@ export function HeaderSearch({ personas, enPanel = false }: { personas: string[]
       onSubmit={onSubmit}
       className={cn(
         "relative",
-        enPanel ? "mb-2.5" : movil ? "absolute inset-x-1.5 top-1.5 z-30 sm:static sm:inset-auto" : "hidden sm:block",
+        enPanel ? "mb-2.5" : movil ? "absolute inset-x-1.5 top-1.5 z-[2] sm:static sm:inset-auto" : "hidden sm:block",
       )}
     >
       <Popover open={open && !!q.trim()}>
@@ -361,7 +361,7 @@ export function HeaderAvisos({ avisos, urgentes }: { avisos: Aviso[]; urgentes: 
 
       <PopoverContent align="end" sideOffset={10} className="w-[min(22rem,84vw)] overflow-hidden p-0">
             <div className="flex items-center justify-between gap-3 px-4 pt-3.5 pb-1.5">
-              <p className="text-title font-semibold text-text">Avisos</p>
+              <p className="text-title font-medium text-text">Avisos</p>
               <Contador n={avisos.length} />
             </div>
             {avisos.length === 0 ? (

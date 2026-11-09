@@ -214,7 +214,7 @@ export function SoportesSection({
       <ErrorNotice message={error} className="mt-3" />
 
       {soportes.length > 0 && (
-        <ItemGroup className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+        <ItemGroup className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           <AnimatePresence initial={false}>
             {soportes.map((s) => {
               const esImagen = (s.mime ?? "").startsWith("image/");
@@ -236,7 +236,7 @@ export function SoportesSection({
                   <a href={s.url ?? "#"} target="_blank" rel="noopener noreferrer" className="block h-full w-full">
                     {esImagen && s.url ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={s.url} alt={s.nombre ?? "soporte"} className="h-full w-full object-cover transition-transform duration-500 group-hover/item:scale-105" />
+                      <img src={s.url} alt={s.nombre ?? "soporte"} className="h-full w-full object-cover transition-transform duration-[var(--dur-4)] group-hover/item:scale-105" />
                     ) : (
                       <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-3 text-center">
                         <FilePdf size={28} className="text-muted" weight="fill" />

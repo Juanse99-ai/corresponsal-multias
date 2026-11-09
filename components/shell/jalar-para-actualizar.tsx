@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ArrowClockwise } from "@phosphor-icons/react/dist/ssr";
 import { cn } from "@/lib/utils";
 import { contarAbiertas } from "@/lib/use-atras-cierra-ventanas";
+import { HASTA_TABLET } from "@/lib/cortes";
 
 const UMBRAL = 70; // px que baja el dedo para que actualice
 const ARRANQUE = 8;
@@ -63,7 +64,7 @@ export function JalarParaActualizar() {
 
     const alTocar = (e: TouchEvent) => {
       if (ocupado.current || e.touches.length !== 1) return;
-      if (!window.matchMedia("(max-width: 1023px)").matches) return;
+      if (!window.matchMedia(HASTA_TABLET).matches) return;
       if (window.scrollY > 0 || contarAbiertas() > 0) return;
       if (e.target instanceof Element && e.target.closest(NO_JALA)) return;
       const x0 = e.touches[0].clientX;
@@ -117,7 +118,7 @@ export function JalarParaActualizar() {
       <div
         ref={circulo}
         aria-hidden
-        className="pointer-events-none fixed left-1/2 z-30 grid size-10 place-items-center rounded-full bg-blanco text-muted opacity-0 shadow-[0_4px_14px_rgba(15,23,42,0.18)] data-[listo]:bg-accent-fill data-[listo]:text-white lg:hidden"
+        className="pointer-events-none fixed left-1/2 z-[var(--z-flota)] grid size-10 place-items-center rounded-full bg-blanco text-muted opacity-0 shadow-[0_4px_14px_rgba(15,23,42,0.18)] data-[listo]:bg-accent-fill data-[listo]:text-white lg:hidden"
         style={{ top: "calc(env(safe-area-inset-top, 0px) + 56px)", transform: `translate(-50%, ${ARRIBA}px)` }}
       >
         <ArrowClockwise size={20} weight="bold" className={cn(cargando && "animate-spin")} />

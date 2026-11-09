@@ -26,6 +26,7 @@ import {
 import { GRUPOS, NAV, isActive } from "@/components/shell/nav-items";
 import { NavegacionCtx, type Navegacion } from "@/lib/use-navegacion";
 import { hoyISO } from "@/lib/format";
+import { COMPUTADOR } from "@/lib/cortes";
 import { cn } from "@/lib/utils";
 import {
   MAX_PESTANAS,
@@ -64,7 +65,6 @@ import CargaBitacora from "@/app/(app)/bitacora/loading";
  * hay pestañas: la página de siempre y la barra de abajo.
  */
 
-const COMPUTADOR = "(min-width: 1024px)";
 const claveGuardadas = (usuario: string) => `corr-pestanas:v2:${usuario}`;
 
 const CARGAS: Record<string, () => React.ReactNode> = {
@@ -85,7 +85,7 @@ function suscribirAncho(cb: () => void) {
   return () => mq.removeEventListener("change", cb);
 }
 
-/** true en el computador (desde 1024 px), ya en el navegador. */
+/** true en el computador (desde 961 px), ya en el navegador. */
 function useEscritorio(): boolean {
   return useSyncExternalStore(suscribirAncho, () => window.matchMedia(COMPUTADOR).matches, () => false);
 }
@@ -522,9 +522,9 @@ export function TiraPestanas({ isAdmin }: { isAdmin: boolean }) {
               }}
               onKeyDown={(e) => alTeclear(e, i)}
               className={cn(
-                "group relative flex h-[38px] min-w-16 max-w-[220px] cursor-pointer items-center gap-[7px] rounded-full px-3 text-body whitespace-nowrap select-none transition-[background-color,color,scale] duration-150 active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+                "group relative flex h-[38px] min-w-16 max-w-[220px] cursor-pointer items-center gap-[7px] rounded-full px-3 text-body whitespace-nowrap select-none transition-[background-color,color,scale] duration-[var(--dur-1)] active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
                 on
-                  ? "shrink-0 bg-menu-activo font-semibold text-text shadow-[var(--pastilla-sombra)]"
+                  ? "shrink-0 bg-menu-activo font-medium text-text shadow-[var(--pastilla-sombra)]"
                   : "shrink font-medium text-muted hover:bg-[var(--menu-hover)] hover:text-text",
               )}
             >

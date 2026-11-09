@@ -318,7 +318,7 @@ function PersonaCard({
 
           <span className="min-w-0 flex-1">
             <span className="flex min-w-0 items-center gap-2">
-              <span className="truncate text-title font-semibold text-text">{grupo.persona}</span>
+              <span className="truncate text-title font-medium text-text">{grupo.persona}</span>
               {alDia && <Badge variant="success">Al día</Badge>}
             </span>
             {!open && (
@@ -341,7 +341,7 @@ function PersonaCard({
             )}
           </span>
 
-          <span className={cn("tnum shrink-0 text-lead font-semibold", alDia ? "text-ok-fg" : "text-text")}>
+          <span className={cn("tnum shrink-0 text-lead font-medium", alDia ? "text-ok-fg" : "text-text")}>
             {formatCOP(alDia ? 0 : grupo.saldo)}
           </span>
         </CollapsibleTrigger>
@@ -457,7 +457,7 @@ function AbonoItem({ abono, origenes }: { abono: AbonoRow; origenes: string[] })
           <Tag size={15} className="shrink-0" />
           <span className="truncate">{abono.origen ?? "Poner origen"}</span>
         </Button>
-        <span className="tnum ml-auto shrink-0 text-body font-semibold text-ok-fg">+{formatCOP(abono.monto)}</span>
+        <span className="tnum ml-auto shrink-0 text-body font-medium text-ok-fg">+{formatCOP(abono.monto)}</span>
       </div>
 
       <AnimatePresence initial={false}>
@@ -584,7 +584,7 @@ function DeudaRow({
             </ItemDescription>
           </ItemContent>
           <ItemActions className="block shrink-0 text-right">
-            <p className={cn("tnum text-title font-semibold", saldada ? "text-ok-fg" : "text-text")}>
+            <p className={cn("tnum text-title font-medium", saldada ? "text-ok-fg" : "text-text")}>
               {saldada ? formatCOP(0) : formatCOP(deuda.saldo)}
             </p>
             {deuda.abonado > 0 && (

@@ -276,7 +276,7 @@ export function CuadreEditor({
       {/* ====== Columna de captura ====== */}
       <Card className="p-5">
         <div className="mb-[18px] flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-          <h2 className="min-w-0 truncate text-lead font-semibold tracking-[-0.3px] text-text">Movimientos del día</h2>
+          <h2 className="min-w-0 truncate text-lead font-medium tracking-[-0.3px] text-text">Movimientos del día</h2>
           <div className="flex shrink-0 items-center gap-2">
             <Badge variant={estado === "cerrado" ? "success" : "secondary"}>
               {estado === "cerrado" ? <Lock size={12} weight="fill" /> : <LockOpen size={12} />}
@@ -327,13 +327,13 @@ export function CuadreEditor({
               <Wallet size={18} />
             </ItemMedia>
             <ItemContent className="min-w-0 gap-0.5">
-              <ItemTitle className="text-body font-semibold text-text">Sr. Luis</ItemTitle>
+              <ItemTitle className="text-body font-medium text-text">Sr. Luis</ItemTitle>
               <ItemDescription className="truncate text-nowrap text-meta text-muted">
                 {consignacionesCount} {consignacionesCount === 1 ? "consignación" : "consignaciones"}
               </ItemDescription>
             </ItemContent>
             <ItemActions className="shrink-0 gap-1.5">
-              <span className="tnum text-title font-semibold text-text">{formatCOP(srLuis)}</span>
+              <span className="tnum text-title font-medium text-text">{formatCOP(srLuis)}</span>
               <CaretRight size={14} weight="bold" className="text-inerte transition-transform group-hover/item:translate-x-0.5" />
             </ItemActions>
           </Link>
@@ -383,7 +383,7 @@ export function CuadreEditor({
 
         {/* Arqueo de caja física: una sección de la misma tarjeta. */}
         <section className="mt-6">
-          <h3 className="text-title font-semibold text-text">Arqueo de caja</h3>
+          <h3 className="text-title font-medium text-text">Arqueo de caja</h3>
           <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-3.5 sm:grid-cols-2">
             <Campo label="Fondo en caja" id="fondo_caja">
               <MoneyInput id="fondo_caja" value={vals.fondo_caja} onValueChange={set("fondo_caja")} />
@@ -409,7 +409,7 @@ export function CuadreEditor({
               cajaCuadra ? "bg-ok-bg text-ok-fg" : "bg-bad-bg text-bad-fg",
             )}
           >
-            <p className="flex items-center gap-1.5 text-body font-semibold">
+            <p className="flex items-center gap-1.5 text-body font-medium">
               {cajaCuadra ? <CheckCircle size={16} weight="fill" /> : <Warning size={16} weight="fill" />}
               {cajaCuadra
                 ? "Caja cuadrada"
@@ -418,7 +418,7 @@ export function CuadreEditor({
                   : "Falta efectivo en caja"}
             </p>
             {!cajaCuadra && (
-              <p className="tnum mt-1.5 text-h1 leading-none font-semibold tracking-[-0.3px] lg:text-kpi lg:tracking-[-0.6px]">
+              <p className="tnum mt-1.5 text-h1 leading-none font-medium tracking-[-0.3px] lg:text-kpi lg:tracking-[-0.6px]">
                 {diferenciaCaja > 0 ? "+" : ""}
                 {formatCOP(diferenciaCaja)}
               </p>
@@ -468,7 +468,7 @@ export function CuadreEditor({
             <AnimatedMoney
               value={saldo}
               desdeCero={false}
-              className="mt-3 block text-display leading-none font-semibold tracking-[-0.8px] text-white"
+              className="mt-3 block text-display leading-none font-medium tracking-[-0.8px] text-white"
             />
           )}
           <p className="mt-2.5 text-body leading-relaxed text-white/70">
@@ -552,8 +552,8 @@ function Campo({ label, id, children }: { label: string; id: string; children: R
 function FilaArqueo({ rotulo, valor, fuerte = false }: { rotulo: string; valor: number; fuerte?: boolean }) {
   return (
     <div className={cn("flex items-center justify-between gap-3 py-2.5", !fuerte && "border-b border-linea-fila")}>
-      <span className={fuerte ? "font-semibold text-text" : "text-muted"}>{rotulo}</span>
-      <span className={cn("tnum text-text", fuerte && "font-semibold")}>{formatCOP(valor)}</span>
+      <span className={fuerte ? "font-medium text-text" : "text-muted"}>{rotulo}</span>
+      <span className={cn("tnum text-text", fuerte && "font-medium")}>{formatCOP(valor)}</span>
     </div>
   );
 }

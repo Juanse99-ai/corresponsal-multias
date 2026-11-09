@@ -21,7 +21,7 @@ export function Contador({
     <span
       data-slot="contador"
       className={cn(
-        "inline-block shrink-0 rounded-full border border-line bg-bg-soft px-2 py-0.5 text-label leading-[1.4] font-bold whitespace-nowrap text-muted tabular-nums",
+        "inline-block shrink-0 rounded-full border border-line bg-bg-soft px-2 py-0.5 text-label leading-[1.4] font-medium whitespace-nowrap text-muted tabular-nums",
         tono === "aviso" && "border-transparent bg-warn-bg text-warn-fg",
         tono === "peligro" && "border-transparent bg-bad-bg text-bad-fg",
         className,

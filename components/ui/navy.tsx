@@ -18,7 +18,7 @@ function TarjetaNavy({ className, children, ...props }: React.ComponentProps<"di
 
 /** Rótulo de la cifra: 12,5/600 en blanco al 55 %. */
 function NavyRotulo({ className, ...props }: React.ComponentProps<"p">) {
-  return <p className={cn("text-meta leading-none font-semibold text-white/55", className)} {...props} />
+  return <p className={cn("text-meta leading-none font-medium text-white/55", className)} {...props} />
 }
 
 /** Fila del desglose: rótulo en blanco al 60 % y cifra blanca tabular. */
@@ -37,11 +37,11 @@ function NavyFila({
 }) {
   return (
     <div className={cn("flex items-center justify-between gap-3 py-[7px]", className)}>
-      <span className={cn("min-w-0 text-meta", fuerte ? "font-semibold text-white" : "text-white/60")}>{rotulo}</span>
+      <span className={cn("min-w-0 text-meta", fuerte ? "font-medium text-white" : "text-white/60")}>{rotulo}</span>
       <span
         className={cn(
           "tnum shrink-0 text-body",
-          fuerte ? "font-semibold" : "font-normal",
+          fuerte ? "font-medium" : "font-normal",
           negativo ? "text-[#fca5a5]" : "text-white",
         )}
       >

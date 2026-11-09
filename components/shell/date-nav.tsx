@@ -23,7 +23,7 @@ export function DateNav({ fecha, base }: { fecha: string; base: string }) {
           <CaretLeft size={20} />
         </Link>
       </IconButton>
-      <span className="tnum min-w-[4.75rem] text-center text-title font-semibold text-text">
+      <span className="tnum min-w-[4.75rem] text-center text-title font-medium text-text">
         {esHoy ? "Hoy" : formatFechaCorta(fecha)}
       </span>
       {esFuturoOHoy ? (

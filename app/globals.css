@@ -4,6 +4,16 @@
 /* Modo oscuro por clase en <html> (next-themes attribute="class"). */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Pasar el mouse solo con mouse (Biela, 6 oct 2026): en el celular un toque
+   dejaba la fila pintada. El foco de teclado va siempre. */
+@custom-variant hover {
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      @slot;
+    }
+  }
+}
+
 /* ============================================================
    App Corresponsal - Multidiagnosticos AS
    Estilo del taller (6 oct 2026, «quiero mudar este diseño»): dos temas,
@@ -13,101 +23,110 @@
    Apple, como siempre.
    ============================================================ */
 
-/* ---------- Azul (tema claro) ---------- */
+/* ---------- Claro (tema de día) ----------
+   El fondo Claro de Biela con la paleta Cobalto, que es como Biela sale de
+   serie desde el 2 nov 2026 (src/estilo-claro.css y src/colores.css del taller):
+   lienzo casi blanco y neutro, sin degradado ni marco; tarjetas blancas con
+   filo fino; tinta neutra; el azul cobalto para lo activo y lo pulsable. */
 :root {
-  /* Lienzo, marco y capas del estilo */
-  --lienzo: linear-gradient(160deg, #eef2f8 0%, #dfe6f1 100%);
-  --marco: linear-gradient(180deg, #e8edf6 0%, #dfe5f0 100%);
-  --marco-sombra: 0 30px 60px -30px rgba(15, 35, 80, 0.32), 0 0 0 1px rgba(255, 255, 255, 0.6) inset;
-  --panel: rgba(255, 255, 255, 0.62);
+  /* Lienzo, marco y capas del estilo. El marco es del color del lienzo: en
+     Claro no se ve, solo ordena el riel, el panel y la página. */
+  --lienzo: #f6f7f9;
+  --marco: #f6f7f9;
+  --marco-sombra: none;
+  --panel: #ffffff;
   --blanco: #ffffff;
   --fila: #ffffff;
-  --fila-borde: #e5eaf2;
-  --fila-hover: #f9fbfe;
-  --tarjeta-borde: rgba(255, 255, 255, 0.85);
-  --tarjeta-sombra: 0 1px 2px rgba(15, 35, 80, 0.05), 0 12px 32px -20px rgba(15, 35, 80, 0.25);
-  --pastilla-sombra: 0 1px 2px rgba(20, 16, 50, 0.08), 0 2px 6px -2px rgba(20, 16, 50, 0.12);
-  --primario-sombra: 0 1px 2px rgba(20, 50, 160, 0.25), 0 6px 16px -6px rgba(29, 78, 216, 0.5);
-  --campo: #eef2f7;
-  --campo-hover: #e6ebf2;
-  --velo: rgba(15, 30, 70, 0.26);
+  --fila-borde: #eceef1;
+  --fila-hover: #f4f5f7;
+  --tarjeta-borde: #e6e8ec;
+  --tarjeta-sombra: 0 1px 2px rgba(0, 0, 0, 0.03);
+  --pastilla-sombra: 0 1px 3px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.08);
+  --primario-sombra: none;
+  /* Campos: relleno y filete suave (~1,6:1, a propósito; Biela, 2 nov 2026). */
+  --campo: #f4f5f7;
+  --campo-hover: #f1f2f5;
+  --campo-borde: #cdd1d8;
+  --velo: rgba(0, 0, 0, 0.24);
   /* El velo de las ventanas desenfoca el fondo, como una hoja de iOS. */
   --velo-blur: blur(14px) saturate(1.15);
-  --menu-hover: rgba(255, 255, 255, 0.55);
-  /* El ítem elegido de un menú: pastilla blanca. */
-  --menu-activo: #ffffff;
+  --menu-hover: rgba(0, 0, 0, 0.04);
+  /* El ítem elegido de un menú: pastilla gris sobre el panel blanco. */
+  --menu-activo: #f1f2f5;
 
   /* Superficies */
-  --bg: #e7ecf4;
-  --bg-soft: #f1f4f9;
-  --surface: #f7f9fc;
-  --surface-2: #edf1f6;
-  --elevated: #e3e8f0;
-  --line: #e0e6ee;
-  --line-strong: #d3dbe6;
+  --bg: #f6f7f9;
+  --bg-soft: #f4f5f7;
+  --surface: #ffffff;
+  --surface-2: #f1f2f5;
+  --elevated: #eceef1;
+  --line: #e6e8ec;
+  --line-strong: #cdd1d8;
   /* Entre renglones de una lista sin cajitas y bajo la cabecera de una tabla. */
-  --linea-fila: #e5eaf2;
-  --linea-cabecera: #dbe2ec;
-  /* Contorno de un botón y de un campo de filtro (3:1 sobre la mesa). */
-  --borde-boton: #78859a;
-  --borde-campo: #d3dae3;
+  --linea-fila: #eceef1;
+  --linea-cabecera: #eceef1;
+  /* Contorno de un botón y de un campo de filtro. */
+  --borde-boton: #cdd1d8;
+  --borde-campo: #cdd1d8;
 
-  /* Tinta en cinco pesos: dato, secundario, rótulo, metadato y lo que no se
-     pulsa. --faint baja a #57677d: #6b7a90 daba 3,68:1 sobre la mesa y no
-     pasaba AA. --inerte nunca es texto. */
-  --text: #0f172a;
-  --text-2: #334155;
-  --muted: #475569;
-  --faint: #57677d;
-  --inerte: #94a3b8;
-  --vacio: #b0bac6;
+  /* Tinta neutra (sin el azul pizarra). La jerarquía la da el gris, no el
+     tamaño ni el negrito. --inerte es el gris terciario de Apple (3,4:1): para
+     íconos quietos, nunca para texto. */
+  --text: #14161a;
+  --text-2: #3a3f47;
+  --muted: #667080;
+  --faint: #667080;
+  --inerte: #8a8a8e;
+  --vacio: #a6abb3;
 
-  /* Azul del logo: --accent para texto y aros, --accent-fill para rellenos. */
-  --accent: #1d4ed8;
-  --accent-strong: #1e40af;
-  --accent-fill: #1d4ed8;
+  /* Cobalto: --accent para texto y aros, --accent-fill para rellenos. */
+  --accent: #1d5fd6;
+  --accent-strong: #184fb3;
+  --accent-fill: #1d5fd6;
   --accent-ink: #ffffff;
-  --accent-soft: #e6edfc;
+  --accent-soft: #e9f0fc;
   /* Círculo del ícono de las ventanas. */
-  --accent-soft-2: #dbeafe;
+  --accent-soft-2: #dde7fa;
 
   /* Verde semantico (cuadrado) */
-  --success: oklch(0.585 0.13 155);
-  --success-soft: oklch(0.935 0.06 155);
+  --success: #1b7f4b;
+  --success-soft: #eaf5ef;
 
-  /* Rojo del logo (descuadre / negativos) */
-  --danger: oklch(0.545 0.2 25);
-  --danger-soft: oklch(0.945 0.06 25);
+  /* Rojo (descuadre / negativos) */
+  --danger: #b4232f;
+  --danger-soft: #fbecee;
 
   /* Estados de plata en pares fondo/letra. La LETRA de un estado sobre su
-     fondo suave va con el par (text-ok-fg sobre bg-ok-bg); --success y
-     --danger quedan para rellenos, puntos y gráficas (text-success sobre
-     bg-success-soft da 3,3:1 y no pasa AA). */
-  --ok-bg: #dcfce7;
-  --ok-fg: #166534;
-  --bad-bg: #fee2e2;
-  --bad-fg: #b91c1c;
-  --warn-bg: #fef3c7;
-  --warn-fg: #92400e;
-  --info-bg: #dbeafe;
-  --info-fg: #1e40af;
+     fondo suave va con el par (text-ok-fg sobre bg-ok-bg). Los mismos tonos
+     pintan el cuadro de un ícono según el tipo de plata (lib/tonos.ts). */
+  --ok-bg: #eaf5ef;
+  --ok-fg: #1b7f4b;
+  --bad-bg: #fbecee;
+  --bad-fg: #b4232f;
+  --warn-bg: #fbf3e0;
+  --warn-fg: #8a5a00;
+  --info-bg: #e9f0fc;
+  --info-fg: #1d5fd6;
+  --purple-bg: #f1effa;
+  --purple-fg: #5b4ab0;
   --ok-fill: #15803d;
   --danger-fill: #dc2626;
 
-  /* Navy: la única cifra por pantalla sobre la que se aprieta un botón. */
-  --navy: #0d1b35;
+  /* Navy: la única cifra por pantalla sobre la que se aprieta un botón. Toma el
+     tono oscuro de Cobalto. */
+  --navy: #101a30;
   --navy-filo: 0 0 0 0 transparent;
 
   /* Rellenos grises de iOS: Cancelar, botón apagado, agarradera. */
   --fill: rgba(120, 120, 128, 0.12);
   --fill-2: rgba(120, 120, 128, 0.16);
 
-  /* Segmentados y pestañas en riel (opción A, la eligió el dueño): el riel
-     hundido y más oscuro que la página, la elegida en pastilla blanca. */
-  --riel: #dde3ee;
-  --riel-sombra: inset 0 1px 2px rgba(20, 16, 50, 0.09), inset 0 0 0 1px rgba(20, 16, 50, 0.04);
+  /* Segmentados y pestañas en riel: el riel gris claro, la elegida en
+     pastilla blanca con sombra. */
+  --riel: #efeff1;
+  --riel-sombra: inset 0 0 0 1px rgba(0, 0, 0, 0.035);
   --riel-on: #ffffff;
-  --riel-on-sombra: 0 1px 3px rgba(20, 16, 50, 0.16), 0 0 0 0.5px rgba(20, 16, 50, 0.1);
+  --riel-on-sombra: 0 1px 3px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.08);
   --riel-on-tinta: var(--text);
   --riel-tinta: var(--text-2);
 
@@ -117,24 +136,54 @@
   --sombra-md: 0 6px 18px rgba(15, 23, 42, 0.1), 0 2px 6px rgba(15, 23, 42, 0.05);
   --sombra-lg: 0 18px 40px rgba(15, 23, 42, 0.16), 0 4px 12px rgba(15, 23, 42, 0.06);
   --sombra-ventana: 0 30px 80px -20px rgba(15, 35, 80, 0.35);
+  --vidrio-sombra: 0 18px 40px -16px rgba(15, 35, 80, 0.3);
 
-  /* Barra de abajo del celular (vidrio claro) y su lupa. */
-  --gbar-fondo: rgba(255, 255, 255, 0.8);
-  --gbar-sombra: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 0 0 0.5px rgba(255, 255, 255, 0.7),
-    0 0 0 0.5px rgba(15, 35, 80, 0.1), 0 12px 32px -12px rgba(15, 35, 80, 0.4);
-  --gbar-pastilla: rgba(15, 23, 42, 0.08);
-  --gbar-tinta: var(--text-2);
+  /* Barra de abajo del celular: vidrio vivo con borde de lente (Biela, 2 y
+     8 nov 2026). Velo al 55 % con 8 px de desenfoque, brillo que baja desde
+     arriba, aro de luz más claro arriba que abajo y luz que entra por la
+     esquina de arriba a la izquierda. */
+  --barra-vidrio: rgba(255, 255, 255, 0.55);
+  --barra-filtro: blur(8px) saturate(1.8);
+  --barra-filo: inset 0 -1px 1px rgba(15, 35, 80, 0.08), 0 0 0 0.5px rgba(15, 35, 80, 0.14);
+  --barra-sombra: 0 12px 32px -12px rgba(15, 35, 80, 0.4);
+  --barra-brillo: rgba(255, 255, 255, 0.55);
+  --barra-aro-a: rgba(255, 255, 255, 0.95);
+  --barra-aro-b: rgba(255, 255, 255, 0.5);
+  --barra-aro-c: rgba(255, 255, 255, 0.3);
+  --barra-lente: inset 1.5px 1.5px 1px -0.5px rgba(255, 255, 255, 0.85), inset -1.5px -1.5px 1px -0.5px rgba(255, 255, 255, 0.4),
+    inset 0 0 10px rgba(255, 255, 255, 0.3);
+  --barra-esquinas: radial-gradient(70px 36px at 10% 0%, rgba(255, 255, 255, 0.55), transparent 70%),
+    radial-gradient(70px 36px at 92% 100%, rgba(255, 255, 255, 0.28), transparent 70%);
+  /* La pastilla de la elegida, y la gota clara al llegar a otra pestaña. */
+  --pil: rgba(15, 23, 42, 0.08);
+  --pil-luz: rgba(255, 255, 255, 0.3);
+  --pil-lente: inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.9), inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.45),
+    inset 0 0 6px rgba(255, 255, 255, 0.25);
+  --pil-clara: rgba(255, 255, 255, 0.78);
+  --pil-brillo: inset 0 1px 0 #fff, 0 3px 10px -3px rgba(15, 35, 80, 0.28);
+  --gbar-tinta: #000000;
   --gbar-tinta-on: var(--accent);
   --gbar-globo-filo: rgba(255, 255, 255, 0.95);
   --lupa-fondo: rgba(255, 255, 255, 0.55);
   --lupa-sombra: inset 0 1.5px 1px rgba(255, 255, 255, 0.95), inset 0 -1px 1px rgba(255, 255, 255, 0.5),
     inset 0 0 0 0.5px rgba(255, 255, 255, 0.8), 0 10px 26px -6px rgba(15, 35, 80, 0.35), 0 0 0 0.5px rgba(15, 35, 80, 0.12);
 
-  /* Avisos en pastilla: oscura en los dos temas. */
-  --aviso-fondo: #16181d;
-  --aviso-sombra: 0 14px 34px -12px rgba(10, 14, 30, 0.55), 0 2px 6px rgba(10, 14, 30, 0.16);
+  /* Vidrio con lente de lo que flota sobre la página: menús, desplegables,
+     calendarios, el buscador y las cápsulas de la barra de arriba del
+     computador (Biela, 8 nov 2026). Nunca en tarjetas ni ventanas. */
+  --lente-velo: rgba(255, 255, 255, 0.42);
+  --lente-brillo: linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 50%, rgba(15, 35, 80, 0.035));
+  --lente-esquinas: radial-gradient(70px 30px at 12% 0%, rgba(255, 255, 255, 0.9), transparent 70%),
+    radial-gradient(60px 26px at 90% 100%, rgba(15, 35, 80, 0.06), transparent 70%);
+  --lente-borde: inset 1.5px 1.5px 1px -0.5px #fff, inset -1.5px -1.5px 1px -0.5px rgba(15, 35, 80, 0.14),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.55), inset 0 0 12px rgba(15, 35, 80, 0.05);
+  --lente-filo: 0 0 0 0.5px rgba(15, 35, 80, 0.2), 0 6px 18px -8px rgba(15, 35, 80, 0.28);
 
-  /* Azul marino del menú del celular y de la banda del login */
+  /* Avisos: la tarjeta de la app, con el color solo en el círculo del ícono. */
+  --aviso-fondo: var(--blanco);
+  --aviso-sombra: 0 0 0 1px var(--line), var(--sombra-md);
+
+  /* Azul marino de la banda del login y la bienvenida */
   --nav-bg: oklch(0.268 0.058 260);
   --nav-bg-2: oklch(0.305 0.052 260);
   --nav-text: oklch(0.975 0.01 260);
@@ -189,6 +238,7 @@
   --primario-sombra: 0 6px 18px -8px rgba(37, 99, 235, 0.75);
   --campo: #1a1a1f;
   --campo-hover: #202026;
+  --campo-borde: #2e2e36;
   --velo: rgba(0, 0, 0, 0.6);
   --menu-hover: rgba(255, 255, 255, 0.05);
   --menu-activo: #1c1c22;
@@ -212,12 +262,14 @@
   --inerte: #6f6f78;
   --vacio: #5a5a62;
 
-  --accent: #5b8cff;
-  --accent-strong: #7aa2ff;
+  /* Cobalto de noche: el acento se aclara para leerse sobre negro; el relleno
+     del botón sigue oscuro porque lleva letra blanca. */
+  --accent: #7aa2ff;
+  --accent-strong: #9bbbff;
   --accent-fill: #2563eb;
   --accent-ink: #ffffff;
-  --accent-soft: rgba(59, 110, 246, 0.16);
-  --accent-soft-2: rgba(59, 110, 246, 0.26);
+  --accent-soft: rgba(122, 162, 255, 0.16);
+  --accent-soft-2: rgba(122, 162, 255, 0.26);
 
   --success: oklch(0.74 0.135 155);
   --success-soft: oklch(0.34 0.06 160);
@@ -233,8 +285,10 @@
   --bad-fg: #fca5a5;
   --warn-bg: rgba(251, 191, 36, 0.16);
   --warn-fg: #fbbf24;
-  --info-bg: rgba(96, 165, 250, 0.16);
-  --info-fg: #93c5fd;
+  --info-bg: rgba(122, 162, 255, 0.16);
+  --info-fg: #9bbbff;
+  --purple-bg: rgba(196, 181, 253, 0.16);
+  --purple-fg: #c4b5fd;
 
   /* El navy se perdía contra el negro: sube un tono y lleva filo azul. */
   --navy: #0f1a33;
@@ -257,21 +311,44 @@
   --sombra-lg: 0 24px 60px rgba(0, 0, 0, 0.65);
   --sombra-ventana: 0 30px 80px -20px rgba(0, 0, 0, 0.7);
 
-  --gbar-fondo: rgba(40, 40, 44, 0.8);
-  --gbar-sombra: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 0 0 0.5px rgba(255, 255, 255, 0.1),
-    0 14px 36px -10px rgba(0, 0, 0, 0.85);
-  --gbar-pastilla: rgba(0, 0, 0, 0.45);
-  --gbar-tinta: rgba(255, 255, 255, 0.86);
+  --vidrio-sombra: 0 18px 40px -16px rgba(0, 0, 0, 0.8);
+  --barra-vidrio: rgba(40, 40, 44, 0.55);
+  --barra-filo: inset 0 -1px 1px rgba(0, 0, 0, 0.35), 0 0 0 0.5px rgba(255, 255, 255, 0.08);
+  --barra-sombra: 0 14px 36px -10px rgba(0, 0, 0, 0.85);
+  --barra-brillo: rgba(255, 255, 255, 0.12);
+  --barra-aro-a: rgba(255, 255, 255, 0.5);
+  --barra-aro-b: rgba(255, 255, 255, 0.22);
+  --barra-aro-c: rgba(255, 255, 255, 0.12);
+  --barra-lente: inset 1.5px 1.5px 1px -0.5px rgba(255, 255, 255, 0.35), inset -1.5px -1.5px 1px -0.5px rgba(255, 255, 255, 0.14),
+    inset 0 0 10px rgba(255, 255, 255, 0.08);
+  --barra-esquinas: radial-gradient(70px 36px at 10% 0%, rgba(255, 255, 255, 0.2), transparent 70%),
+    radial-gradient(70px 36px at 92% 100%, rgba(255, 255, 255, 0.1), transparent 70%);
+  --pil: rgba(0, 0, 0, 0.45);
+  --pil-luz: rgba(255, 255, 255, 0.07);
+  --pil-lente: inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.4), inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.18),
+    inset 0 0 6px rgba(255, 255, 255, 0.08);
+  --pil-clara: rgba(255, 255, 255, 0.2);
+  --pil-brillo: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 3px 10px -3px rgba(0, 0, 0, 0.6);
+  --gbar-tinta: #ffffff;
   --gbar-tinta-on: #ffffff;
   --gbar-globo-filo: #2c2c30;
   --lupa-fondo: rgba(70, 70, 78, 0.42);
   --lupa-sombra: inset 0 1.5px 1px rgba(255, 255, 255, 0.55), inset 0 -1px 1px rgba(255, 255, 255, 0.18),
     inset 0 0 0 0.5px rgba(255, 255, 255, 0.3), 0 10px 26px -6px rgba(0, 0, 0, 0.7);
 
-  --aviso-fondo: #202026;
-  --aviso-sombra: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 14px 34px -12px rgba(0, 0, 0, 0.7);
+  --lente-velo: rgba(40, 40, 44, 0.55);
+  --lente-brillo: linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 55%);
+  --lente-esquinas: radial-gradient(70px 30px at 12% 0%, rgba(255, 255, 255, 0.22), transparent 70%),
+    radial-gradient(70px 30px at 90% 100%, rgba(255, 255, 255, 0.1), transparent 70%);
+  --lente-borde: inset 1.5px 1.5px 1px -0.5px rgba(255, 255, 255, 0.35), inset -1.5px -1.5px 1px -0.5px rgba(255, 255, 255, 0.14),
+    inset 0 0 10px rgba(255, 255, 255, 0.08);
+  --lente-filo: inset 0 -1px 1px rgba(0, 0, 0, 0.35), 0 0 0 0.5px rgba(255, 255, 255, 0.1);
 
-  /* Los tokens nav-* (menú del celular + banda del login) NO se redefinen
+  --aviso-fondo: var(--blanco);
+  --aviso-sombra: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 14px 34px -12px rgba(0, 0, 0, 0.7);
+  --gbar-globo: #ff453a;
+
+  /* Los tokens nav-* (banda del login y bienvenida) NO se redefinen
      aquí: el menú usa el mismo azul marino en los dos temas. */
 
   color-scheme: dark;
@@ -336,29 +413,48 @@
   --color-warn-fg: var(--warn-fg);
   --color-info-bg: var(--info-bg);
   --color-info-fg: var(--info-fg);
+  --color-purple-bg: var(--purple-bg);
+  --color-purple-fg: var(--purple-fg);
+  --color-campo-borde: var(--campo-borde);
   --color-ok-fill: var(--ok-fill);
   --color-danger-fill: var(--danger-fill);
 
-  /* Escala de letra del taller: ocho tamaños y ninguno más.
-     label 11, meta 12,5, body 13,5, title 15, lead 17, h1 22, kpi 26,
-     display 32. Excepción: 16 px (text-base) en los campos del celular,
-     para que iOS no acerque la pantalla al tocarlos. */
-  --text-label: 11px;
-  --text-label--line-height: 1.2;
+  /* Escala de letra de Biela (29 oct 2026, «menos es más»): cinco tamaños y
+     dos pesos (400 y 500). La jerarquía la da el gris, no el tamaño ni el
+     negrito. test/escala.test.ts falla si aparece otro tamaño u otro peso.
+       12,5 dato de apoyo, contador, pie de tabla, pista, pastilla
+       13,5 celda, campo, rótulo, texto corrido
+       15   encabezado de tarjeta y de sección, botón, título de ventana
+       22   título de página, cifra de cabecera
+       32   cifra grande (la de la tarjeta navy)
+     Los nombres viejos (label, lead, kpi) apuntan a esta escala. Excepciones:
+     16 px (text-base) en los campos del celular, para que iOS no acerque la
+     pantalla, y 10 px en los nombres de la barra de abajo (.gbar__t). */
+  --text-label: 12.5px;
+  --text-label--line-height: 1.3;
   --text-meta: 12.5px;
   --text-meta--line-height: 1.4;
   --text-body: 13.5px;
   --text-body--line-height: 1.5;
   --text-title: 15px;
   --text-title--line-height: 1.3;
-  --text-lead: 17px;
-  --text-lead--line-height: 1.25;
+  --text-lead: 15px;
+  --text-lead--line-height: 1.3;
   --text-h1: 22px;
   --text-h1--line-height: 1.15;
-  --text-kpi: 26px;
-  --text-kpi--line-height: 1.05;
+  --text-kpi: 22px;
+  --text-kpi--line-height: 1.1;
   --text-display: 32px;
   --text-display--line-height: 1.05;
+
+  /* Cortes de pantalla de Biela (21 oct 2026): tres anchos y nada más.
+     Celular hasta 600, tablet hasta 960 y computador desde 961; 1200 separa
+     el portátil del monitor. sm = desde 601, lg = desde 961, xl = desde 1200.
+     En JavaScript, los mismos en lib/cortes.ts. test/cortes.test.ts los revisa. */
+  --breakpoint-*: initial;
+  --breakpoint-sm: 601px;
+  --breakpoint-lg: 961px;
+  --breakpoint-xl: 1200px;
 
   /* Radios: 4 sm, 8 lg, 12 xl, 16 2xl, 24 3xl y pastilla; faltaban 20 (panel)
      y 30 (marco del computador). */
@@ -508,7 +604,7 @@ input[type="number"] { -moz-appearance: textfield; }
    La app entera es una ventana de 30 px de esquina sobre el lienzo, con el
    riel y el panel a la izquierda. La barra de arriba queda dentro del marco,
    transparente y sin línea. En celular y tableta no hay marco. */
-@media (min-width: 1024px) {
+@media (min-width: 961px) {
   .marco {
     display: flex;
     gap: 12px;
@@ -526,13 +622,13 @@ input[type="number"] { -moz-appearance: textfield; }
   }
 }
 /* El panel del grupo entra corriéndose un poco desde el riel. */
-.panel-entra { animation: panel-entra 320ms var(--ease-smooth-out) both; }
+.panel-entra { animation: panel-entra var(--dur-2) var(--ease-smooth-out) both; }
 @keyframes panel-entra { from { opacity: 0; transform: translateX(-6px); } }
 
 /* ===== Pantallas (estilo del taller) ====================================== */
 /* Miga de pan sobre el título de la pantalla, solo en el computador. El texto
    lo pone el AppShell en --miga ("Principal › Cuadre diario"). */
-@media (min-width: 1024px) {
+@media (min-width: 961px) {
   [data-titulo]::before {
     content: var(--miga, none);
     display: block;
@@ -549,8 +645,8 @@ input[type="number"] { -moz-appearance: textfield; }
    esqueleto de carga no entra: la que entra es la pantalla. */
 @keyframes bloque-entra { from { opacity: 0; transform: translateY(10px); } }
 .entra-bloques > * > * {
-  animation: bloque-entra 420ms var(--ease-smooth-out) backwards;
-  animation-delay: calc(var(--bq, 0) * 45ms);
+  animation: bloque-entra var(--dur-2) var(--ease-smooth-out) backwards;
+  animation-delay: calc(var(--bq, 0) * var(--dur-paso));
 }
 .entra-bloques > * > :nth-child(2) { --bq: 1; }
 .entra-bloques > * > :nth-child(3) { --bq: 2; }
@@ -561,7 +657,7 @@ input[type="number"] { -moz-appearance: textfield; }
 
 /* Tablas dentro de una tarjeta, en el computador: cada fila es una cajita
    (blanca en Azul) separada 6 px de la siguiente, sin filete corrido. */
-@media (min-width: 1024px) {
+@media (min-width: 961px) {
   [data-slot="card"] > [data-slot="table-container"] { padding: 0 12px 12px; }
   [data-slot="card"] [data-slot="table"] { border-collapse: separate; border-spacing: 0 6px; }
   [data-slot="card"] [data-slot="table-body"] > tr > td {
@@ -585,7 +681,7 @@ input[type="number"] { -moz-appearance: textfield; }
 /* Listas de Item en cajitas (ItemGroup variant="cajitas"): en el computador
    cada fila es una cajita separada 6 px, como las filas de una tabla; en el
    celular quedan los renglones a sangre con su línea. */
-@media (min-width: 1024px) {
+@media (min-width: 961px) {
   [data-slot="item-group"][data-variant="cajitas"] { gap: 6px; }
   [data-slot="item-group"][data-variant="cajitas"] [data-slot="item-separator"] { display: none; }
   [data-slot="item-group"][data-variant="cajitas"] [data-slot="item"] {
@@ -629,7 +725,7 @@ input[type="number"] { -moz-appearance: textfield; }
 .segmentado.w-full > * { flex: 1 1 0; min-width: max-content; }
 /* En el celular cada opción mide lo que su texto y, si no caben, el riel se
    desliza de lado; el borde del lado donde quedan opciones se desvanece. */
-@media (max-width: 1023px) {
+@media (max-width: 960px) {
   .segmentado {
     overflow-x: auto;
     overflow-y: hidden;
@@ -640,7 +736,7 @@ input[type="number"] { -moz-appearance: textfield; }
   .segmentado > * { flex: 1 0 auto; padding-inline: 12px; }
 }
 @supports (animation-timeline: scroll()) {
-  @media (max-width: 1023px) {
+  @media (max-width: 960px) {
     .segmentado { animation: segmentado-bordes linear both; animation-timeline: scroll(self inline); }
   }
   @keyframes segmentado-bordes {
@@ -662,7 +758,7 @@ input[type="number"] { -moz-appearance: textfield; }
 .globo-grafica {
   background: #15171c;
   box-shadow: 0 10px 26px -10px rgba(10, 14, 30, 0.5);
-  animation: globo-entra 160ms var(--ease-ios);
+  animation: globo-entra var(--dur-1) var(--ease-ios);
 }
 .dark .globo-grafica { background: #26262d; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 10px 26px -10px rgba(0, 0, 0, 0.7); }
 @keyframes globo-entra { from { opacity: 0; translate: 0 4px; scale: 0.96; } }
@@ -672,8 +768,8 @@ input[type="number"] { -moz-appearance: textfield; }
    (disableTransitionOnChange) para que nada se tiña por partes encima. */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 350ms;
-  animation-timing-function: ease-in-out;
+  animation-duration: var(--dur-3);
+  animation-timing-function: var(--ease-ios);
 }
 
 /* Barras de las gráficas (panel-view.tsx, guía 8.23): cada una crece desde
@@ -683,8 +779,8 @@ input[type="number"] { -moz-appearance: textfield; }
 .barra-crece {
   transform-box: fill-box;
   transform-origin: 50% 100%;
-  animation: barra-crece 560ms var(--ease-ios) backwards;
-  animation-delay: calc(260ms + var(--m, 0) * 40ms);
+  animation: barra-crece var(--dur-4) var(--ease-ios) backwards;
+  animation-delay: calc(var(--dur-2) + var(--m, 0) * var(--dur-paso));
   transition: opacity var(--dur-2) var(--ease-ios);
 }
 @keyframes barra-crece { from { transform: scaleY(0); } }
@@ -699,7 +795,7 @@ input[type="number"] { -moz-appearance: textfield; }
   inset: 0;
   transform: translateX(-100%);
   background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.18), transparent);
-  animation: brillo 1.3s ease-in-out infinite;
+  animation: brillo var(--dur-6) linear infinite;
 }
 @keyframes brillo { to { transform: translateX(100%); } }
 
@@ -714,12 +810,12 @@ input[type="number"] { -moz-appearance: textfield; }
   backdrop-filter: var(--velo-blur);
 }
 .velo[data-state="open"] { animation: velo-entra var(--dur-2) var(--ease-ios); }
-.velo[data-state="closed"] { animation: velo-sale 260ms ease-in forwards; }
-.ventana[data-state="open"] { animation: ventana-entra 280ms var(--ease-ios); }
-.ventana[data-state="closed"] { animation: ventana-sale 180ms cubic-bezier(0.4, 0, 1, 1) forwards; }
-@media (max-width: 639px) {
+.velo[data-state="closed"] { animation: velo-sale var(--dur-sale) var(--ease-ios) forwards; }
+.ventana[data-state="open"] { animation: ventana-entra var(--dur-2) var(--ease-ios); }
+.ventana[data-state="closed"] { animation: ventana-sale var(--dur-sale) var(--ease-ios) forwards; }
+@media (max-width: 600px) {
   .ventana[data-state="open"] { animation: hoja-entra var(--dur-3) var(--ease-ios); }
-  .ventana[data-state="closed"] { animation: hoja-sale 280ms var(--ease-ios) forwards; }
+  .ventana[data-state="closed"] { animation: hoja-sale var(--dur-sale) var(--ease-ios) forwards; }
 }
 @keyframes velo-entra { from { opacity: 0; } }
 @keyframes velo-sale { to { opacity: 0; } }
@@ -728,22 +824,22 @@ input[type="number"] { -moz-appearance: textfield; }
 @keyframes hoja-entra { from { transform: translateY(100%); } }
 @keyframes hoja-sale { to { transform: translateY(100%); } }
 
-/* ===== Avisos en pastilla (components/ui/sonner.tsx) =====================
-   Pastilla oscura en los dos temas; el punto de color lo pone el ícono. El
-   error lleva además su filo rojo. Sube 10 px y crece un poco al aparecer
-   (también arriba a la derecha, donde sonner la bajaba). Centrados, en la
-   tableta y en el aviso de versión nueva, miden lo que su texto. */
+/* ===== Avisos (components/ui/sonner.tsx) ==================================
+   La tarjeta de la app (Biela, 7 oct 2026): papel, filo y sombra, esquina de
+   20, y el color solo en el círculo del ícono. Sube 10 px y crece un poco al
+   aparecer. Al guardar, el check se dibuja (Biela, «del video de flotas»).
+   Centrados, en la tableta y en el aviso de versión nueva, miden lo que su
+   texto. */
 [data-sonner-toast].aviso {
   background: var(--aviso-fondo);
   box-shadow: var(--aviso-sombra);
-  animation: aviso-sube 320ms var(--ease-ios);
-}
-[data-sonner-toast].aviso[data-type="error"] {
-  box-shadow: inset 0 0 0 1.5px rgba(240, 82, 82, 0.7), 0 14px 34px -12px rgba(120, 10, 10, 0.5), 0 2px 6px rgba(10, 14, 30, 0.16);
+  animation: aviso-sube var(--dur-2) var(--ease-ios);
 }
 [data-sonner-toast][data-y-position="top"][data-mounted="false"] { --y: translateY(14px); }
 [data-sonner-toaster][data-x-position="center"] [data-sonner-toast] { left: 0; right: 0; margin-inline: auto; }
 @keyframes aviso-sube { from { translate: 0 10px; scale: 0.96; } }
+.aviso-check path { stroke-dasharray: 16; stroke-dashoffset: 0; animation: aviso-check-dibuja var(--dur-2) var(--ease-ios) var(--dur-0) backwards; }
+@keyframes aviso-check-dibuja { from { stroke-dashoffset: 16; } }
 /* Con una ventana abierta Radix deja la página sin toques: el aviso los
    recupera para que su botón se pueda pulsar. */
 [data-sonner-toast] { pointer-events: auto; }
@@ -756,7 +852,8 @@ input[type="number"] { -moz-appearance: textfield; }
   margin-left: auto;
   padding: 0 14px;
   border: 0;
-  background: #2563eb;
+  background: var(--accent-fill);
+  color: var(--accent-ink);
 }
 
 /* ===== Barra de abajo del celular (components/shell/barra-abajo.tsx) ======
@@ -765,13 +862,13 @@ input[type="number"] { -moz-appearance: textfield; }
    con los pendientes y "Tú" al final con las iniciales. Solo en el celular y
    la tableta; en el computador manda el riel. */
 .gbar { display: none; }
-@media (max-width: 1023px) {
+@media (max-width: 960px) {
   .gbar {
     position: fixed;
     left: var(--gbar-lado);
     right: var(--gbar-lado);
     bottom: var(--gbar-abajo);
-    z-index: 45;
+    z-index: calc(var(--z-sticky) + 15);
     display: grid;
     grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr));
     align-items: center;
@@ -780,26 +877,72 @@ input[type="number"] { -moz-appearance: textfield; }
     margin: 0 auto;
     padding: 0 7px;
     border-radius: 999px;
-    background: var(--gbar-fondo);
-    -webkit-backdrop-filter: blur(22px) saturate(1.8);
-    backdrop-filter: blur(22px) saturate(1.8);
-    box-shadow: var(--gbar-sombra);
+    /* Vidrio vivo con borde de lente (Biela, 2 y 8 nov 2026). */
+    background: var(--barra-vidrio);
+    -webkit-backdrop-filter: var(--barra-filtro);
+    backdrop-filter: var(--barra-filtro);
+    box-shadow: var(--barra-filo), var(--barra-lente), var(--barra-sombra);
     touch-action: none;
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
-    transition: transform 380ms var(--ease-ios), opacity var(--dur-2);
+    transition: transform var(--dur-3) var(--ease-ios), opacity var(--dur-2);
+  }
+  /* El brillo que baja desde arriba con la luz de las esquinas, y el aro de
+     1 px más claro arriba que abajo (degradado enmascarado). */
+  .gbar::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: var(--barra-esquinas), linear-gradient(180deg, var(--barra-brillo), transparent 48%);
+  }
+  .gbar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    padding: 1px;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(180deg, var(--barra-aro-a), var(--barra-aro-b) 55%, var(--barra-aro-c));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  }
+  /* Refracción de verdad en Chromium (html[data-lente], lib/lente.ts): el
+     filtro SVG #lg-barra dobla lo de atrás cerca del borde antes del
+     desenfoque; ahí el velo baja a 40 % y el desenfoque a 3 px. */
+  @media (prefers-reduced-transparency: no-preference) and (prefers-contrast: no-preference) {
+    :root[data-lente] { --barra-vidrio: rgba(255, 255, 255, 0.4); }
+    :root[data-lente].dark { --barra-vidrio: rgba(40, 40, 44, 0.45); }
+    :root[data-lente] .gbar {
+      -webkit-backdrop-filter: url(#lg-barra) blur(3px) saturate(1.8);
+      backdrop-filter: url(#lg-barra) blur(3px) saturate(1.8);
+    }
+  }
+  @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+    .gbar {
+      background: var(--blanco);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      box-shadow: inset 0 0 0 1px var(--line-strong), var(--barra-sombra);
+    }
+    .gbar::before, .gbar::after { display: none; }
   }
   /* Con la hoja de un grupo arriba, la barra queda sobre el velo y se puede
      tocar (Radix deja el resto de la página sin toques). */
-  .gbar.gbar--arriba { z-index: 60; pointer-events: auto; }
+  .gbar.gbar--arriba { z-index: calc(var(--z-ventana) + 1); pointer-events: auto; }
   /* Al bajar por la pantalla se encoge desde su centro (Instagram en iOS 26:
      397 × 59 pasa a 332 × 49); al subir vuelve. Con el dedo encima crece un
-     poco, con rebote. */
+     poco, sin rebote (Biela, 9 oct 2026: encogida, la curva que se pasaba la
+     hacía brincar). */
   .gbar.gbar--chica { transform: scale(var(--gbar-chica)); }
   .gbar.gbar--toca {
     transform: scale(var(--gbar-toca));
-    transition: transform 260ms var(--ease-rebote), opacity var(--dur-2);
+    transition: transform var(--dur-2) var(--ease-ios), opacity var(--dur-2);
   }
   /* Mientras se escribe baja: sobre el teclado taparía el campo. */
   .gbar.gbar--abajo { transform: translateY(calc(100% + 30px)); opacity: 0; pointer-events: none; }
@@ -810,9 +953,15 @@ input[type="number"] { -moz-appearance: textfield; }
     width: min(calc((100% - 14px) / var(--n, 5) - 4px), 86px);
     transform: translateX(-50%);
     border-radius: 999px;
-    background: var(--gbar-pastilla);
+    background: linear-gradient(180deg, var(--pil-luz), transparent 60%), var(--pil);
+    box-shadow: var(--pil-lente);
     pointer-events: none;
-    transition: left 380ms var(--ease-rebote-suave), opacity 160ms;
+    transition: left var(--dur-3) var(--ease-rebote-suave), opacity var(--dur-1), background-color var(--dur-2) var(--ease-ios);
+  }
+  /* Con el dedo encima de la elegida (sin la lupa), la pastilla se aclara. */
+  .gbar:not(.gbar--toca):has(.gbar__b[data-sobre]:active) .gbar__pil {
+    background: var(--pil-clara);
+    box-shadow: var(--pil-lente), var(--pil-brillo);
   }
   .gbar__pil--bajo { opacity: 0; }
   .gbar__b {
@@ -844,8 +993,8 @@ input[type="number"] { -moz-appearance: textfield; }
   .gbar__t {
     max-width: calc(100% + 10px);
     overflow: hidden;
-    font-size: 11px;
-    font-weight: 600;
+    font-size: 10px;
+    font-weight: 500;
     line-height: 1.1;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -858,8 +1007,8 @@ input[type="number"] { -moz-appearance: textfield; }
     border-radius: 50%;
     background: var(--accent-fill);
     color: #fff;
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 10px;
+    font-weight: 500;
     letter-spacing: 0.2px;
     box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9);
   }
@@ -875,8 +1024,8 @@ input[type="number"] { -moz-appearance: textfield; }
     border-radius: 999px;
     background: var(--gbar-globo);
     color: #fff;
-    font-size: 11px;
-    font-weight: 600;
+    font-size: 10px;
+    font-weight: 500;
     line-height: 1;
     font-variant-numeric: tabular-nums;
     box-shadow: 0 0 0 2px var(--gbar-globo-filo);
@@ -899,7 +1048,7 @@ input[type="number"] { -moz-appearance: textfield; }
     box-shadow: var(--lupa-sombra);
     pointer-events: none;
     transform: scale(var(--sx, 1), var(--sy, 1));
-    transition: transform 140ms ease-out;
+    transition: transform var(--dur-1) var(--ease-ios);
     will-change: translate, transform;
   }
   .gbar__lente::before {
@@ -927,12 +1076,12 @@ input[type="number"] { -moz-appearance: textfield; }
       radial-gradient(90% 60% at 80% 110%, rgba(255, 255, 255, 0.18), transparent 60%);
     pointer-events: none;
   }
-  .gbar__lente--entra { animation: lente-entra 300ms var(--ease-rebote) both; }
+  .gbar__lente--entra { animation: lente-entra var(--dur-2) var(--ease-rebote) both; }
   .gbar__lente--sale {
     transform: scale(0.8, 0.72);
     opacity: 0;
-    transition: translate 300ms var(--ease-rebote-suave), width 300ms, transform 280ms cubic-bezier(0.4, 0, 0.2, 1),
-      opacity 200ms 90ms;
+    transition: translate var(--dur-2) var(--ease-rebote-suave), width var(--dur-2), transform var(--dur-2) var(--ease-ios),
+      opacity var(--dur-2) var(--dur-0);
   }
   @keyframes lente-entra { from { opacity: 0.2; transform: scale(0.72, 0.66); } }
   .gbar__lupa {
@@ -957,11 +1106,11 @@ input[type="number"] { -moz-appearance: textfield; }
 
 /* La hoja de un grupo de la barra (components/ui/sheet.tsx, side="barra"):
    sube sobre la barra con las cuatro esquinas redondas. */
-.hoja-barra[data-state="open"] { animation: hoja-barra-entra 340ms var(--ease-ios); }
-.hoja-barra[data-state="closed"] { animation: hoja-barra-sale 200ms cubic-bezier(0.4, 0, 1, 1) forwards; }
+.hoja-barra[data-state="open"] { animation: hoja-barra-entra var(--dur-3) var(--ease-ios); }
+.hoja-barra[data-state="closed"] { animation: hoja-barra-sale var(--dur-sale) var(--ease-ios) forwards; }
 /* Cerrada arrastrándola (lib/use-arrastrar-hoja.ts): sigue hacia abajo desde
    donde la soltó el dedo, no vuelve a subir para irse. */
-.hoja-barra[data-arrastrada][data-state="closed"] { animation: hoja-barra-baja 260ms var(--ease-ios) forwards; }
+.hoja-barra[data-arrastrada][data-state="closed"] { animation: hoja-barra-baja var(--dur-2) var(--ease-ios) forwards; }
 @keyframes hoja-barra-baja { to { opacity: 0; transform: translateY(100%); } }
 @keyframes hoja-barra-entra { from { opacity: 0; transform: translateY(24px) scale(0.98); } }
 @keyframes hoja-barra-sale { to { opacity: 0; transform: translateY(24px) scale(0.98); } }
@@ -981,15 +1130,48 @@ input[type="number"] { -moz-appearance: textfield; }
 }
 
 /* ===== Movimiento (estilo del taller) ===================================== */
-/* Tokens compartidos: toda animación nueva debe leer de aquí, no hardcodear.
-   Una sola curva, la del cajón de iOS (arranca decidida y frena pareja), y
-   tres duraciones: 120 ms hover y color, 220 ms entrar o salir, 420 ms hojas
-   y entrada por bloques. Los nombres viejos apuntan a la escala nueva. */
+/* Tokens compartidos (los de Biela, 21 oct 2026): ninguna transición ni
+   animación de CSS escribe ms o s a mano (test/duraciones.test.ts). Una sola
+   curva, la del cajón de iOS (arranca decidida y frena pareja). Tres
+   duraciones de trabajo y, alrededor, los pasos de una cascada y lo largo:
+     --dur-fila  18 ms entre fila y fila de una lista que entra
+     --dur-paso  30 ms entre bloque y bloque de una cascada
+     --dur-0     80 ms retraso corto, apretar
+     --dur-1    120 ms pasar el mouse, foco, cambio de color
+     --dur-2    220 ms entrar o salir, segmentado, plegable, ventana
+     --dur-3    420 ms hoja del celular
+     --dur-4    600 ms entrada larga, cifras que ruedan
+     --dur-5    900 ms lo que se cuenta despacio
+     --dur-6   1600 ms ciclos: cargando, brillo
+   Lo que se va sale con la misma curva y más corto que lo que entra (ventana
+   y velo en --dur-sale, 180 ms). Nada sale con ease-in. */
 :root {
   --ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-fila: 18ms;
+  --dur-paso: 30ms;
+  --dur-0: 80ms;
   --dur-1: 120ms;
   --dur-2: 220ms;
   --dur-3: 420ms;
+  --dur-4: 600ms;
+  --dur-5: 900ms;
+  --dur-6: 1600ms;
+  --dur-sale: 180ms;
+  /* Presionar: lo chico que se toca cede a 0,96 (Biela, 6 oct 2026). */
+  --presion: 0.96;
+
+  /* Capas con nombre (Biela, 21 oct 2026). Lo que va justo encima o debajo de
+     una capa se escribe calc(var(--z-capa) ± n); dentro de un componente, para
+     ordenar sus piezas, enteros de -1 a 9. Ningún otro número
+     (test/capas.test.ts). */
+  --z-base: 20;
+  --z-sticky: 30;
+  --z-flota: 60;
+  --z-ventana: 100;
+  --z-menu: 120;
+  --z-encima: 1000;
+  --z-globo: 1200;
+  --z-aviso: 9999;
   --duration-quick: var(--dur-1);
   --duration-fast: var(--dur-2);
   --duration-slow: var(--dur-3);
@@ -1039,7 +1221,7 @@ input[type="number"] { -moz-appearance: textfield; }
 /* Destello de fila recién agregada. Con el token --success en vez de un rgba
    copiado a mano, así también se ve bien en tema oscuro. */
 .t-flash-ok {
-  animation: t-flash-ok 1.2s ease-out both;
+  animation: t-flash-ok var(--dur-5) var(--ease-ios) both;
 }
 @keyframes t-flash-ok {
   from { background-color: color-mix(in oklch, var(--success) 22%, transparent); }
@@ -1052,7 +1234,7 @@ input[type="number"] { -moz-appearance: textfield; }
 .entrada {
   position: fixed;
   inset: 0;
-  z-index: 100;
+  z-index: var(--z-aviso);
   display: grid;
   place-items: center;
   background: var(--bg);

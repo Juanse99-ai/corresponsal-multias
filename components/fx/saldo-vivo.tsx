@@ -12,13 +12,13 @@ export function SaldoVivo({ saldo, descuadre }: { saldo: number; descuadre: bool
   return (
     <div
       className={cn(
-        "flex min-w-0 items-center gap-3 transition-colors duration-500",
+        "flex min-w-0 items-center gap-3 transition-colors duration-[var(--dur-4)]",
         descuadre ? "text-danger" : "text-success",
       )}
     >
       <span
         className={cn(
-          "flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors duration-500 sm:h-14 sm:w-14",
+          "flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors duration-[var(--dur-4)] sm:h-14 sm:w-14",
           descuadre ? "bg-danger-soft" : "bg-success-soft",
         )}
       >
@@ -38,7 +38,7 @@ export function SaldoVivo({ saldo, descuadre }: { saldo: number; descuadre: bool
       <AnimatedMoney
         value={saldo}
         desdeCero={false}
-        className="tnum min-w-0 flex-1 text-[1.75rem] leading-none font-semibold tracking-tight sm:text-4xl"
+        className="tnum min-w-0 flex-1 text-display leading-none font-medium tracking-tight"
       />
     </div>
   );

@@ -95,7 +95,7 @@ export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
       ) : (
         <>
         {/* Celular: renglones en la misma tarjeta en vez de arrastrar la tabla. */}
-        <ItemGroup className="divide-y divide-linea-fila px-5 pb-3 md:hidden">
+        <ItemGroup className="divide-y divide-linea-fila px-5 pb-3 sm:hidden">
           {filtrados.map((d) => (
             <Item key={d.fecha} asChild className="cursor-pointer flex-nowrap items-start gap-3 rounded-none px-0 py-3">
               <div
@@ -118,7 +118,7 @@ export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
                   </ItemDescription>
                 </ItemContent>
                 <ItemActions className="shrink-0 flex-col items-end gap-0.5">
-                  <span className="tnum text-lead font-semibold text-text">{formatCOP(d.acumulado)}</span>
+                  <span className="tnum text-lead font-medium text-text">{formatCOP(d.acumulado)}</span>
                   <span className="text-meta text-faint">Acumulado a favor</span>
                 </ItemActions>
               </div>
@@ -126,7 +126,7 @@ export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
           ))}
         </ItemGroup>
 
-        <Table contenedorClassName="max-md:hidden">
+        <Table contenedorClassName="max-sm:hidden">
           <TableHeader>
             <TableRow>
               <TableHead>Fecha</TableHead>
@@ -154,7 +154,7 @@ export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
                 <TableCell className={cn("tnum text-right font-medium", d.saldoDia < 0 ? "text-bad-fg" : "text-text")}>
                   {formatCOP(d.saldoDia)}
                 </TableCell>
-                <TableCell className="tnum text-right font-semibold text-text">{formatCOP(d.acumulado)}</TableCell>
+                <TableCell className="tnum text-right font-medium text-text">{formatCOP(d.acumulado)}</TableCell>
                 <TableCell className="pr-4 text-right">
                   <CaretRight size={15} className="text-inerte" />
                 </TableCell>

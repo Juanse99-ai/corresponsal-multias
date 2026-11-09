@@ -432,7 +432,7 @@ export function PrestamosDia({
           <p className="text-meta font-medium text-faint">Pendiente del día</p>
           <AnimatedMoney
             value={pendiente}
-            className="mt-1 block text-kpi leading-none font-semibold tracking-[-0.6px] text-text"
+            className="mt-1 block text-kpi leading-none font-medium tracking-[-0.6px] text-text"
           />
           <Celdas dos className="mt-4">
             <Celda rotulo="Prestado">{formatCOP(prestado)}</Celda>

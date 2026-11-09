@@ -101,7 +101,7 @@ function Splash({ nombre }: { nombre: string }) {
           onKeyDown={(e) => {
             if (e.key === "Escape" || e.key === "Enter" || e.key === " ") setShow(false);
           }}
-          className="fixed inset-0 z-[200] flex items-center justify-center outline-none"
+          className="fixed inset-0 z-[var(--z-encima)] flex items-center justify-center outline-none"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -122,13 +122,13 @@ function Splash({ nombre }: { nombre: string }) {
             transition={{ duration: reducir ? 0 : 0.45, delay: reducir ? 0 : 0.1, ease: CURVA_IOS }}
           >
             <Logo size={64} className="rounded-2xl" />
-            <p className="text-[1.75rem] font-semibold tracking-tight text-nav-text sm:text-4xl">
+            <p className="text-display font-medium tracking-tight text-nav-text">
               {saludo}, {primer}
             </p>
-            <p className="max-w-[28ch] text-base text-nav-text/75 sm:text-lg">{linea}</p>
+            <p className="max-w-[28ch] text-title text-nav-text/75">{linea}</p>
           </motion.div>
           <p
-            className="pointer-events-none absolute inset-x-0 bottom-9 text-center text-[0.82rem] text-nav-text/55"
+            className="pointer-events-none absolute inset-x-0 bottom-9 text-center text-body text-nav-text/55"
             style={{ marginBottom: "env(safe-area-inset-bottom)" }}
           >
             Toca para continuar

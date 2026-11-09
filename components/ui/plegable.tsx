@@ -84,7 +84,7 @@ export function Plegable({
             <span
               className={cn(
                 "text-text",
-                tarjeta ? "text-lead font-semibold tracking-[-0.3px]" : "text-body font-semibold",
+                tarjeta ? "text-lead font-medium tracking-[-0.3px]" : "text-body font-medium",
               )}
             >
               {titulo}

@@ -1,4 +1,5 @@
 import { useCallback, type PointerEvent as ReactPointerEvent, type TouchEvent as ReactTouchEvent } from "react";
+import { CELULAR } from "@/lib/cortes";
 
 const UMBRAL_PX = 110;
 const UMBRAL_VEL = 0.6; // px/ms
@@ -27,7 +28,7 @@ const CABECERA = "[data-slot=dialog-header],[data-slot=alert-dialog-header],[dat
 export function useArrastrarHoja({ siempre = false }: { siempre?: boolean } = {}) {
   const empezar = useCallback(
     (hoja: HTMLElement, destino: EventTarget | null, y0: number, conDedo: boolean) => {
-      const esHoja = siempre || window.matchMedia("(max-width: 639px)").matches;
+      const esHoja = siempre || window.matchMedia(CELULAR).matches;
       if (!esHoja || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       if (destino instanceof Element && destino.closest(NO_ARRASTRA)) return;
       const enAgarre =

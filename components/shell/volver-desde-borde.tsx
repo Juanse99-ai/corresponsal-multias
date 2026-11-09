@@ -81,7 +81,7 @@ export function VolverDesdeBorde() {
     <div
       ref={circulo}
       aria-hidden
-      className="pointer-events-none fixed left-0 z-30 grid size-10 place-items-center rounded-full bg-blanco text-muted opacity-0 shadow-[0_4px_14px_rgba(15,23,42,0.18)] data-[listo]:bg-accent-fill data-[listo]:text-white lg:hidden"
+      className="pointer-events-none fixed left-0 z-[var(--z-flota)] grid size-10 place-items-center rounded-full bg-blanco text-muted opacity-0 shadow-[0_4px_14px_rgba(15,23,42,0.18)] data-[listo]:bg-accent-fill data-[listo]:text-white lg:hidden"
       style={{ transform: `translateX(${ESCONDIDO}px)` }}
     >
       <ArrowLeft size={20} weight="bold" />

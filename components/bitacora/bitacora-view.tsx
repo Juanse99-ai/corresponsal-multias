@@ -354,7 +354,7 @@ export function BitacoraView({ entries }: { entries: AuditEntry[] }) {
             {grupos.map(([dia, items]) => (
               <section key={dia} aria-label={labelDia(dia)}>
                 <div className="mb-1.5 flex items-center gap-2">
-                  <h3 className="text-meta font-semibold text-faint">{labelDia(dia)}</h3>
+                  <h3 className="text-meta font-medium text-faint">{labelDia(dia)}</h3>
                   <Contador n={items.length} />
                 </div>
                 <div role="list">
@@ -426,7 +426,7 @@ function Fila({
         <CollapsibleTrigger className="group/evento flex min-w-0 items-start gap-2 rounded-lg py-1.5 text-left outline-none focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-solid">
           <span className="min-w-0 flex-1">
             <span className="block text-body text-text">
-              <span className="font-semibold">{e.actorNombre}</span> {acc.verbo} {tabla}
+              <span className="font-medium">{e.actorNombre}</span> {acc.verbo} {tabla}
             </span>
             {detalle && <span className="tnum block text-meta text-muted">{detalle}</span>}
           </span>

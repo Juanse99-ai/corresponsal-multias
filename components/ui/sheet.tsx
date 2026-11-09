@@ -36,7 +36,7 @@ function SheetOverlay({
     <SheetPrimitive.Overlay
       data-slot="sheet-overlay"
       className={cn(
-        "velo fixed inset-0 z-50",
+        "velo fixed inset-0 z-[var(--z-ventana)]",
         className
       )}
       {...props}
@@ -67,7 +67,7 @@ function SheetContent({
         <SheetPrimitive.Content
           data-slot="sheet-content"
           className={cn(
-            "hoja-barra fixed inset-x-2.5 bottom-[var(--gbar-sitio)] z-50 mx-auto flex max-h-[calc(100dvh-var(--gbar-sitio)-40px)] max-w-[560px] flex-col overflow-y-auto overscroll-contain rounded-3xl bg-blanco px-2.5 pt-1 pb-3 text-text shadow-ventana outline-none",
+            "hoja-barra fixed inset-x-2.5 bottom-[var(--gbar-sitio)] z-[var(--z-ventana)] mx-auto flex max-h-[calc(100dvh-var(--gbar-sitio)-40px)] max-w-[560px] flex-col overflow-y-auto overscroll-contain rounded-3xl bg-blanco px-2.5 pt-1 pb-3 text-text shadow-ventana outline-none",
             className
           )}
           onTouchStart={(e) => {
@@ -94,7 +94,7 @@ function SheetContent({
         onTouchStart={onTouchStart}
         onPointerDown={onPointerDown}
         className={cn(
-          "fixed z-50 flex flex-col gap-4 bg-background shadow-lg transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:animate-in data-[state=open]:duration-500",
+          "fixed z-[var(--z-ventana)] flex flex-col gap-4 bg-background shadow-lg transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-[var(--dur-sale)] data-[state=open]:animate-in data-[state=open]:duration-[var(--dur-3)]",
           side === "right" &&
             "inset-y-0 right-0 h-full w-3/4 border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm",
           side === "left" &&
@@ -146,7 +146,7 @@ function SheetTitle({
   return (
     <SheetPrimitive.Title
       data-slot="sheet-title"
-      className={cn("font-semibold text-foreground", className)}
+      className={cn("font-medium text-foreground", className)}
       {...props}
     />
   )
@@ -159,7 +159,7 @@ function SheetDescription({
   return (
     <SheetPrimitive.Description
       data-slot="sheet-description"
-      className={cn("text-sm text-muted", className)}
+      className={cn("text-body text-muted", className)}
       {...props}
     />
   )
