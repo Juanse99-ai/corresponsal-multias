@@ -5,6 +5,8 @@ import { useNavegacion } from "@/lib/use-navegacion";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { Scan, Warning, Check, X } from "@phosphor-icons/react/dist/ssr";
+import { Cajon } from "@/components/ui/plegable";
+import { tintaTono } from "@/lib/tonos";
 import { Card, CardHeader, CardTitle, CardAction, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
@@ -20,6 +22,7 @@ import {
 } from "@/components/ui/item";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
+import { Senal } from "@/components/ui/senal";
 import { ErrorNotice } from "@/components/ui/error-notice";
 import { formatCOP, formatHora, horaBogotaHHMM } from "@/lib/format";
 import type { ComprobanteLeido } from "@/app/(app)/luis/actions";
@@ -124,18 +127,21 @@ export function ComprobantesLector({
   if (cantidadFotos === 0) return null;
 
   return (
-    <Card className="mt-5 p-0">
-      <CardHeader className="gap-3 pb-0">
-        <CardTitle className="min-w-0 self-center text-text">Llenar consignaciones desde las fotos</CardTitle>
-        {!items && (
-          <CardAction className="self-center">
-            <Button variant="outline" size="sm" onClick={leer} disabled={pending} className="shrink-0">
-              <Scan size={16} weight="bold" />
-              {pending ? "Leyendo…" : `Leer ${cantidadFotos} ${cantidadFotos === 1 ? "foto" : "fotos"}`}
-            </Button>
-          </CardAction>
-        )}
-      </CardHeader>
+    <Cajon
+      pantalla="luis"
+      id="lector"
+      className="mt-5"
+      titulo="Llenar desde las fotos"
+      icono={<Scan size={18} weight="bold" className={tintaTono("info")} />}
+      acciones={
+        !items && (
+          <Button variant="outline" size="sm" onClick={leer} cargando={pending} className="shrink-0">
+            {!pending && <Scan size={16} weight="bold" />}
+            {pending ? "Leyendo…" : `Leer ${cantidadFotos} ${cantidadFotos === 1 ? "foto" : "fotos"}`}
+          </Button>
+        )
+      }
+    >
       <CardContent>
 
       <ErrorNotice message={error} className="mt-3" />
@@ -198,20 +204,18 @@ export function ComprobantesLector({
                                 </span>
                               </ItemTitle>
                               <ItemDescription className="line-clamp-none truncate leading-tight">
+                                {/* El aviso va como señal (punto de color y letra gris)
+                                    y el dato sigue con coma (Biela: sin punto medio). */}
                                 {!utilizable && (
-                                  <span className="text-bad-fg">
-                                    {c.error ?? "No es una tirilla legible"} ·{" "}
-                                  </span>
+                                  <>
+                                    <Senal tono="bad">{c.error ?? "No es una tirilla legible"}</Senal>
+                                    {", "}
+                                  </>
                                 )}
                                 {utilizable && !c.seguro && (
                                   <>
-                                    {/* El separador va fuera del inline-flex: adentro se
-                                        come el espacio final y queda "Revísala ·Depósito". */}
-                                    <span className="inline-flex items-center gap-1 font-medium text-warn-fg">
-                                      <Warning size={11} weight="fill" />
-                                      Revísala
-                                    </span>
-                                    {" · "}
+                                    <Senal tono="warn">Revísala</Senal>
+                                    {", "}
                                   </>
                                 )}
                                 {notaDe(c) ?? c.nombre ?? ""}
@@ -261,6 +265,6 @@ export function ComprobantesLector({
         )}
       </AnimatePresence>
       </CardContent>
-    </Card>
+    </Cajon>
   );
 }

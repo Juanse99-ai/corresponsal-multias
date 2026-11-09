@@ -127,11 +127,21 @@ export function Plegable({
   );
 }
 
+function leerPlegadas(clave: string): Record<string, boolean> {
+  try {
+    const g = JSON.parse(localStorage.getItem(clave) || "{}");
+    return g && typeof g === "object" ? g : {};
+  } catch {
+    return {};
+  }
+}
+
 /**
  * Cajones que se dejaron recogidos en una pantalla. Es una preferencia de cada
  * equipo (localStorage, una clave por pantalla): sin almacenamiento, o con el
  * guardado dañado, salen todos abiertos. Los historiales no pasan por aquí:
- * arrancan recogidos cada vez.
+ * arrancan recogidos cada vez. Al guardar se vuelve a leer lo guardado, así
+ * varios cajones de la misma pantalla no se pisan.
  *   const [abierto, alternar] = usePlegadas("cuadre");
  *   <Plegable abierto={abierto("arqueo")} onAbiertoChange={alternar("arqueo")} …>
  */
@@ -140,24 +150,44 @@ export function usePlegadas(pantalla: string) {
   const [plegadas, setPlegadas] = React.useState<Record<string, boolean>>({});
   // Lo guardado solo existe en el navegador: se lee después de montar.
   React.useEffect(() => {
-    try {
-      const g = JSON.parse(localStorage.getItem(clave) || "{}");
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- lo guardado solo existe en el navegador
-      if (g && typeof g === "object") setPlegadas(g);
-    } catch {
-      /* sin almacenamiento: todo abierto */
-    }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- lo guardado solo existe en el navegador
+    setPlegadas(leerPlegadas(clave));
   }, [clave]);
   const abierto = (id: string) => !plegadas[id];
-  const alternar = (id: string) => (a: boolean) =>
-    setPlegadas((p) => {
-      const n = { ...p, [id]: !a };
-      try {
-        localStorage.setItem(clave, JSON.stringify(n));
-      } catch {
-        /* se olvida al recargar */
-      }
-      return n;
-    });
+  const alternar = (id: string) => (a: boolean) => {
+    const n = { ...leerPlegadas(clave), [id]: !a };
+    try {
+      localStorage.setItem(clave, JSON.stringify(n));
+    } catch {
+      /* se olvida al recargar */
+    }
+    setPlegadas(n);
+  };
   return [abierto, alternar] as const;
+}
+
+/**
+ * Un cajón de pantalla, listo para usar (Biela, CLAUDE.md «Cajones que se
+ * recogen»): la tarjeta con su botón para recoger. Lo recogido se recuerda por
+ * pantalla en este equipo; con `historial`, arranca recogido cada vez y no se
+ * recuerda.
+ *   <Cajon pantalla="movimientos" id="lista" titulo="Del día" contador={n} cifra={total}>…</Cajon>
+ */
+export function Cajon({
+  pantalla,
+  id,
+  historial = false,
+  ...props
+}: Omit<React.ComponentProps<typeof Plegable>, "abierto" | "onAbiertoChange" | "defaultAbierto" | "variante"> & {
+  pantalla: string;
+  id: string;
+  historial?: boolean;
+}) {
+  const [abierto, alternar] = usePlegadas(pantalla);
+  const [verHistorial, setVerHistorial] = React.useState(false);
+  return historial ? (
+    <Plegable {...props} abierto={verHistorial} onAbiertoChange={setVerHistorial} />
+  ) : (
+    <Plegable {...props} abierto={abierto(id)} onAbiertoChange={alternar(id)} />
+  );
 }

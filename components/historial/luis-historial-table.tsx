@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useNavegacion } from "@/lib/use-navegacion";
 import { motion } from "framer-motion";
-import { DownloadSimple, CaretRight, X } from "@phosphor-icons/react/dist/ssr";
+import { DownloadSimple, X } from "@phosphor-icons/react/dist/ssr";
 import { Card } from "@/components/ui/card";
 import { IconButton } from "@/components/ui/icon-button";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -12,7 +12,8 @@ import { Empty, EmptyTitle } from "@/components/ui/empty";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemTitle } from "@/components/ui/item";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { formatCOP, formatFecha } from "@/lib/format";
+import { FlechaFila } from "@/components/ui/flecha-fila";
+import { formatCOP, formatDia } from "@/lib/format";
 import type { LuisHistDia } from "@/lib/queries";
 import { TRANSICION } from "@/lib/movimiento";
 
@@ -110,7 +111,7 @@ export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
                 }}
               >
                 <ItemContent className="min-w-0 gap-1">
-                  <ItemTitle>{formatFecha(d.fecha)}</ItemTitle>
+                  <ItemTitle>{formatDia(d.fecha)}</ItemTitle>
                   <ItemDescription className="line-clamp-none text-faint">
                     Consignaciones <span className="tnum text-muted">{formatCOP(d.consignaciones)}</span>, cupo{" "}
                     <span className="tnum text-muted">{formatCOP(d.compensaciones)}</span>, del día{" "}
@@ -148,7 +149,7 @@ export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
                 className="cursor-pointer"
                 title="Ver el día y abrir el reporte" aria-label="Ver el día y abrir el reporte"
               >
-                <TableCell className="font-medium text-text">{formatFecha(d.fecha)}</TableCell>
+                <TableCell className="font-medium text-text">{formatDia(d.fecha)}</TableCell>
                 <TableCell className="tnum text-right text-muted">{formatCOP(d.consignaciones)}</TableCell>
                 <TableCell className="tnum text-right text-muted">{formatCOP(d.compensaciones)}</TableCell>
                 <TableCell className={cn("tnum text-right font-medium", d.saldoDia < 0 ? "text-bad-fg" : "text-text")}>
@@ -156,7 +157,7 @@ export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
                 </TableCell>
                 <TableCell className="tnum text-right font-medium text-text">{formatCOP(d.acumulado)}</TableCell>
                 <TableCell className="pr-4 text-right">
-                  <CaretRight size={15} className="text-inerte" />
+                  <FlechaFila />
                 </TableCell>
               </MotionRow>
             ))}

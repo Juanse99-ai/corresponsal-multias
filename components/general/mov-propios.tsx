@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { useNavegacion } from "@/lib/use-navegacion";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Trash, Paperclip, ArrowsLeftRight, ArrowUp, ArrowSquareOut } from "@phosphor-icons/react/dist/ssr";
+import { Cajon } from "@/components/ui/plegable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -24,7 +25,7 @@ import { MoneyInput } from "@/components/ui/money-input";
 import { esEnter } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { formatCOP, formatFecha, hoyISO } from "@/lib/format";
+import { formatCOP, hoyISO, formatDia } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
 import type { MovPropioConUrl } from "@/lib/queries";
 import { agregarMovPropio, eliminarMovPropio } from "@/app/(app)/general/actions";
@@ -85,14 +86,8 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-text">
-          <h2>Mis compensaciones / retiros</h2>
-        </CardTitle>
-      </CardHeader>
-
-      <CardContent>
+    <Cajon pantalla="general" id="mis-compensaciones-retiros" titulo="Mis compensaciones / retiros">
+      <CardContent className="pt-4">
       <div className="flex flex-col gap-4">
         <ToggleGroup
           type="single"
@@ -175,8 +170,8 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
                   <ItemContent className="min-w-0 gap-0.5">
                     <ItemTitle className="tnum">{formatCOP(m.monto)}</ItemTitle>
                     <ItemDescription className="truncate text-nowrap text-faint">
-                      {m.tipo === "compensacion" ? "Compensación" : "Retiro"}, {formatFecha(m.fecha)}
-                      {m.nota && ` · ${m.nota}`}
+                      {m.tipo === "compensacion" ? "Compensación" : "Retiro"}, {formatDia(m.fecha)}
+                      {m.nota && `, ${m.nota}`}
                     </ItemDescription>
                   </ItemContent>
                   <ItemActions className="shrink-0 gap-1.5">
@@ -212,6 +207,6 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
         onConfirmar={() => porBorrar && borrar(porBorrar.id)}
         onCancelar={() => setPorBorrar(null)}
       />
-    </Card>
+    </Cajon>
   );
 }

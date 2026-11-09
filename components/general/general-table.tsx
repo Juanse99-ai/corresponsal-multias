@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useNavegacion } from "@/lib/use-navegacion";
 import { motion } from "framer-motion";
 import { DownloadSimple, Trash } from "@phosphor-icons/react/dist/ssr";
+import { Cajon } from "@/components/ui/plegable";
 import { Card, CardAction, CardHeader, CardTitle } from "@/components/ui/card";
 import { IconButton } from "@/components/ui/icon-button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -18,7 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { formatCOP, formatFecha } from "@/lib/format";
+import { formatCOP, formatDia } from "@/lib/format";
 import { computeSaldoTotal } from "@/lib/general";
 import type { GeneralRow } from "@/lib/database.types";
 import { eliminarGeneral } from "@/app/(app)/general/actions";
@@ -69,20 +70,22 @@ export function GeneralTable({ entries }: { entries: GeneralRow[] }) {
   }
 
   return (
-    <Card>
-      <CardHeader className="items-center">
-        <CardTitle className="text-text">
-          <h2>Historial</h2>
-        </CardTitle>
-        <CardAction className="self-center">
-          <IconButton label="Descargar Excel" size="icon-sm" onClick={exportar}>
-            <DownloadSimple size={18} weight="bold" />
-          </IconButton>
-        </CardAction>
-      </CardHeader>
-
+    // Un historial: arranca recogido cada vez (Biela, «Cajones que se recogen»).
+    <Cajon
+      pantalla="general"
+      id="historial"
+      historial
+      titulo="Historial"
+      contador={entries.length}
+      pista={entries[0] ? `Último ${formatDia(entries[0].fecha)}` : undefined}
+      acciones={
+        <IconButton label="Descargar Excel" size="icon-sm" onClick={exportar}>
+          <DownloadSimple size={18} weight="bold" />
+        </IconButton>
+      }
+    >
       {/* Celular: renglones en la misma tarjeta. Nueve columnas no caben en un teléfono. */}
-      <ItemGroup className="divide-y divide-linea-fila px-5 pb-3 sm:hidden">
+      <ItemGroup className="divide-y divide-linea-fila px-5 pt-1 pb-3 sm:hidden">
         {entries.map((e) => {
           const total = computeSaldoTotal(e);
           return (
@@ -99,7 +102,7 @@ export function GeneralTable({ entries }: { entries: GeneralRow[] }) {
                 }}
               >
                 <ItemContent className="min-w-0 gap-1">
-                  <ItemTitle className="text-title font-medium">{formatFecha(e.fecha)}</ItemTitle>
+                  <ItemTitle className="text-title font-medium">{formatDia(e.fecha)}</ItemTitle>
                   <ItemDescription className="line-clamp-none text-faint">
                     Saldo Luis <span className="tnum text-muted">{formatCOP(e.saldo_luis)}</span>, cupo{" "}
                     <span className="tnum text-muted">{formatCOP(e.cupo_disponible)}</span>, efectivo{" "}
@@ -146,7 +149,7 @@ export function GeneralTable({ entries }: { entries: GeneralRow[] }) {
                 onClick={() => router.push(`/general?fecha=${e.fecha}`)}
                 className="cursor-pointer"
               >
-                <TableCell className="font-medium text-text">{formatFecha(e.fecha)}</TableCell>
+                <TableCell className="font-medium text-text">{formatDia(e.fecha)}</TableCell>
                 <TableCell className="tnum text-right text-muted">{formatCOP(e.saldo_luis)}</TableCell>
                 <TableCell className={cn("tnum text-right", e.saldo_cristian < 0 ? "text-bad-fg" : "text-muted")}>{formatCOP(e.saldo_cristian)}</TableCell>
                 <TableCell className="tnum text-right text-muted">{formatCOP(e.cupo_disponible)}</TableCell>
@@ -180,6 +183,6 @@ export function GeneralTable({ entries }: { entries: GeneralRow[] }) {
         onConfirmar={() => porBorrar && borrar(porBorrar)}
         onCancelar={() => setPorBorrar(null)}
       />
-    </Card>
+    </Cajon>
   );
 }

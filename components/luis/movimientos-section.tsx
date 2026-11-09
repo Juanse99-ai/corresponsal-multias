@@ -35,6 +35,9 @@ import { AnimatedMoney } from "@/components/ui/animated-number";
 import { cn, esEnter } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Senal } from "@/components/ui/senal";
+import { Cajon } from "@/components/ui/plegable";
+import { tintaTono } from "@/lib/tonos";
 import { formatCOP, formatFechaCorta, formatHora, horaBogotaHHMM } from "@/lib/format";
 import { TOPE_CONSIGNACION, TOPE_COMPENSACION } from "@/lib/auditoria";
 import { reduced } from "@/components/fx/reduced";
@@ -309,18 +312,17 @@ export function MovimientosSection({
   }
 
   return (
-    <Card className="flex flex-col p-0">
-      <CardHeader className="pb-0">
-        <CardTitle className="text-text">{titulo}</CardTitle>
-        <CardDescription>{subtitulo}</CardDescription>
-        <CardAction className="flex flex-col items-end gap-1">
-          <AnimatedMoney value={total} className="text-title font-medium text-text" />
-          <Contador
-            n={items.length}
-            aria-label={`${items.length} ${items.length === 1 ? "movimiento" : "movimientos"}`}
-          />
-        </CardAction>
-      </CardHeader>
+    // Un cajón por lado de la cuenta (Biela): ícono con su color, el total a la
+    // vista aunque esté recogido y la pista de qué es.
+    <Cajon
+      pantalla="luis"
+      id={tono}
+      titulo={titulo}
+      icono={<Icon size={18} weight="bold" className={tintaTono(tono === "consig" ? "ok" : "purple")} />}
+      contador={items.length}
+      pista={subtitulo}
+      cifra={<AnimatedMoney value={total} />}
+    >
       <CardContent className="flex flex-col">
 
       {/* Monto protagonista y el resto compacto: en celular el teclado numérico de
@@ -329,12 +331,11 @@ export function MovimientosSection({
         <Label htmlFor={`monto-${tono}`}>Monto</Label>
         <MoneyInput id={`monto-${tono}`} size="lg" value={monto} onValueChange={setMonto} onEnter={() => !pending && registrar()} />
         {monto > tope && (
-          <p className="flex items-start gap-1.5 text-meta font-medium text-warn-fg">
-            <Warning size={14} weight="fill" className="mt-px shrink-0" />
+          <Senal tono="warn" className="text-meta">
             {tono === "consig"
               ? "El datáfono no pasa de $3.000.000 por consignación: si fue un monto grande, va partido en varias."
               : "Las transferencias del Sr. Luis topan en $9.999.999: si mandó más, van en varias."}
-          </p>
+          </Senal>
         )}
       </div>
       {/* Hora con ancho fijo y la nota con el resto; si no caben, la nota baja a su
@@ -373,7 +374,7 @@ export function MovimientosSection({
             className="w-full sm:w-auto"
           >
             <WhatsappLogo size={17} weight="fill" />
-            Pegar de WhatsApp
+            Desde WhatsApp
           </Button>
         )}
       </div>
@@ -557,11 +558,11 @@ export function MovimientosSection({
                           className="group/ign h-auto min-h-0 whitespace-normal p-0 text-left text-meta font-normal text-faint"
                         >
                           <CaretDown className="size-3 transition-transform group-data-[state=closed]/ign:-rotate-90" />
-                          {lote.ignoradas.length === 1 ? "Se ignoró 1 línea" : `Se ignoraron ${lote.ignoradas.length} líneas`} (fotos,
-                          números de cuenta, texto sin monto)
+                          {lote.ignoradas.length === 1 ? "1 ignorada" : `${lote.ignoradas.length} ignoradas`}
                         </Button>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
+                        <p className="mt-1">Fotos, números de cuenta y texto sin monto.</p>
                         {/* El chat exportado trae miles de líneas: se muestran unas pocas. */}
                         <ScrollArea className="mt-1 [&>[data-slot=scroll-area-viewport]]:max-h-32">
                           <ul className="pl-3">
@@ -654,7 +655,7 @@ export function MovimientosSection({
                       <ItemTitle className="tnum">{formatCOP(c.monto)}</ItemTitle>
                       {(c.hora || c.nota) && (
                         <ItemDescription className="line-clamp-none truncate text-faint">
-                          {[c.hora ? formatHora(c.hora) : null, c.nota].filter(Boolean).join(" · ")}
+                          {[c.hora ? formatHora(c.hora) : null, c.nota].filter(Boolean).join(", ")}
                         </ItemDescription>
                       )}
                     </ItemContent>
@@ -684,6 +685,6 @@ export function MovimientosSection({
         onCancelar={() => setPorBorrar(null)}
       />
       </CardContent>
-    </Card>
+    </Cajon>
   );
 }

@@ -6,15 +6,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Plus,
   Trash,
-  CaretRight,
+  CaretDown,
   ArrowCounterClockwise,
   Tag,
   Check,
   X,
   Eraser,
   Coins,
+  HandCoins,
 } from "@phosphor-icons/react/dist/ssr";
 import { toast } from "sonner";
+import { Cajon, Plegable } from "@/components/ui/plegable";
+import { tintaTono } from "@/lib/tonos";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
@@ -23,7 +26,6 @@ import { Progress } from "@/components/ui/progress";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Empty, EmptyDescription, EmptyTitle } from "@/components/ui/empty";
 import { Contador } from "@/components/ui/contador";
-import { Plegable } from "@/components/ui/plegable";
 import {
   Item,
   ItemActions,
@@ -44,7 +46,7 @@ import { MoneyInput } from "@/components/ui/money-input";
 import { cn, esEnter } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
-import { formatCOP, formatFecha, hoyISO } from "@/lib/format";
+import { formatCOP, hoyISO, formatDia } from "@/lib/format";
 import { PERSONAS_PRESET } from "@/lib/personas";
 import type { DeudaConSaldo, PersonaGrupo } from "@/lib/queries";
 import type { AbonoRow } from "@/lib/database.types";
@@ -86,21 +88,18 @@ export function PrestamosManager({
   return (
     <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start">
       <div className="min-w-0">
-        <Card>
-          <CardHeader className="items-center">
-            <CardTitle className="flex items-center gap-2 text-text">
-              <h2>Quién debe</h2>
-              <Contador n={deben.length} />
-            </CardTitle>
-            {deben.length > 0 && (
-              <p className="tnum text-meta text-faint">
-                {deben.length === 1 ? "1 persona debe" : `${deben.length} personas deben`} {formatCOP(totalPendiente)}
-              </p>
-            )}
-          </CardHeader>
-
+        <Cajon
+          pantalla="prestamos"
+          id="quien-debe"
+          titulo="Quién debe"
+          icono={<HandCoins size={18} className={tintaTono("warn")} />}
+          contador={deben.length}
+          // El total ya va en la cabecera para el admin: aquí no se repite
+          // (Biela, 8 nov 2026: cada dato se dice una sola vez).
+          cifra={!isAdmin && deben.length > 0 ? formatCOP(totalPendiente) : null}
+        >
           {deben.length === 0 ? (
-            <CardContent>
+            <CardContent className="pt-4">
               <Empty fila>
                 <EmptyTitle>Nadie tiene préstamos pendientes</EmptyTitle>
                 <EmptyDescription>Regístralo en Nuevo préstamo</EmptyDescription>
@@ -109,7 +108,7 @@ export function PrestamosManager({
           ) : (
             // En el computador cada persona es una cajita que se abre; en el
             // celular, renglones con su línea.
-            <div className="flex flex-col px-5 pb-3 lg:gap-1.5 lg:px-3">
+            <div className="flex flex-col px-5 pt-2 pb-3 lg:gap-1.5 lg:px-3">
               <AnimatePresence initial={false}>
                 {deben.map((g, i) => (
                   <PersonaCard
@@ -139,7 +138,7 @@ export function PrestamosManager({
               </Plegable>
             </div>
           )}
-        </Card>
+        </Cajon>
       </div>
 
       <div className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-8">
@@ -198,12 +197,8 @@ function AddDeudaForm() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-text">Nuevo préstamo</CardTitle>
-      </CardHeader>
-
-      <CardContent className="flex flex-col gap-3.5">
+    <Cajon pantalla="prestamos" id="nuevo" titulo="Nuevo préstamo" icono={<Plus size={18} weight="bold" className={tintaTono("warn")} />}>
+      <CardContent className="flex flex-col gap-3.5 pt-4">
         <div className="flex flex-col gap-1.5">
           <Label id="grp-persona">Persona</Label>
           <div role="group" aria-labelledby="grp-persona" className="flex flex-wrap gap-2">
@@ -272,7 +267,7 @@ function AddDeudaForm() {
           {pending ? "Registrando…" : "Registrar préstamo"}
         </Button>
       </CardContent>
-    </Card>
+    </Cajon>
   );
 }
 
@@ -307,11 +302,6 @@ function PersonaCard({
       <Collapsible asChild open={open} onOpenChange={setOpen}>
       <div className="overflow-hidden">
         <CollapsibleTrigger className="group/persona flex w-full items-center gap-3 rounded-xl py-3 text-left transition-colors duration-[var(--dur-1)] outline-none hover:bg-fila-hover focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent focus-visible:outline-solid lg:px-3">
-          <CaretRight
-            aria-hidden
-            weight="bold"
-            className="size-3.5 shrink-0 text-muted transition-transform duration-[var(--dur-2)] ease-ios group-data-[state=open]/persona:rotate-90"
-          />
           <Avatar size="lg" aria-hidden="true">
             <AvatarFallback className={cn(alDia && "bg-ok-bg text-ok-fg")}>{iniciales(grupo.persona)}</AvatarFallback>
           </Avatar>
@@ -344,6 +334,12 @@ function PersonaCard({
           <span className={cn("tnum shrink-0 text-lead font-medium", alDia ? "text-ok-fg" : "text-text")}>
             {formatCOP(alDia ? 0 : grupo.saldo)}
           </span>
+          {/* La flecha del cajón al final, a la derecha recogido y abajo abierto (Biela). */}
+          <CaretDown
+            aria-hidden
+            weight="bold"
+            className="size-3.5 shrink-0 -rotate-90 text-muted transition-transform duration-[var(--dur-2)] ease-ios group-data-[state=open]/persona:rotate-0"
+          />
         </CollapsibleTrigger>
 
         {/* Sin abonos la barra es un riel gris decorativo: no se dibuja. */}
@@ -442,7 +438,7 @@ function AbonoItem({ abono, origenes }: { abono: AbonoRow; origenes: string[] })
   return (
     <Item role="listitem" size="sm" className="gap-0 rounded-none px-0 py-2">
       <div className="flex basis-full items-center gap-2 text-meta">
-        <span className="shrink-0 text-faint">{formatFecha(abono.fecha)}</span>
+        <span className="shrink-0 text-faint">{formatDia(abono.fecha)}</span>
         <Button
           size="sm"
           variant={abono.origen ? "secondary" : "ghost"}
@@ -577,7 +573,7 @@ function DeudaRow({
             <ItemTitle className="flex-wrap gap-1.5 font-normal">
               {deuda.concepto && <Badge variant="secondary">{deuda.concepto}</Badge>}
               {saldada && <Badge variant="success">Pagado</Badge>}
-              <span className="text-meta text-faint">{formatFecha(deuda.fecha)}</span>
+              <span className="text-meta text-faint">{formatDia(deuda.fecha)}</span>
             </ItemTitle>
             <ItemDescription className="line-clamp-1 text-body text-muted">
               {deuda.descripcion || "Sin motivo anotado"}

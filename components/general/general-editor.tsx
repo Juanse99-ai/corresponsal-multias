@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { useNavegacion } from "@/lib/use-navegacion";
 import { toast } from "sonner";
 import { FloppyDisk, ArrowClockwise } from "@phosphor-icons/react/dist/ssr";
+import { Cajon } from "@/components/ui/plegable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -70,13 +71,8 @@ export function GeneralEditor({
 
   return (
     <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-text">
-            <h2>Balance del día</h2>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+      <Cajon pantalla="general" id="balance-del-dia" titulo="Balance del día">
+        <CardContent className="pt-4">
         <div className="grid grid-cols-1 gap-x-4 gap-y-3.5 sm:grid-cols-2">
           <Campo
             label="Saldo Luis"
@@ -137,7 +133,7 @@ export function GeneralEditor({
           />
         </div>
         </CardContent>
-      </Card>
+      </Cajon>
 
       {/* La tarjeta navy: la cifra sobre la que se aprieta Guardar. Mínima: el
           desglose son los campos de al lado. */}

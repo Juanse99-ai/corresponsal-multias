@@ -3,7 +3,9 @@
 import { useRef, useState, useTransition } from "react";
 import { useNavegacion } from "@/lib/use-navegacion";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash, FilePdf, Receipt, ArrowSquareOut } from "@phosphor-icons/react/dist/ssr";
+import { Trash, FilePdf, Receipt, ArrowSquareOut, Paperclip } from "@phosphor-icons/react/dist/ssr";
+import { Cajon } from "@/components/ui/plegable";
+import { tintaTono } from "@/lib/tonos";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { IconButton } from "@/components/ui/icon-button";
 import { Progress } from "@/components/ui/progress";
@@ -136,19 +138,15 @@ export function SoportesSection({
   }
 
   return (
-    <Card className={cn("mt-5", className)}>
-      <CardHeader className="items-center">
-        <CardTitle className="self-center text-text">
-          <h3>{titulo}</h3>
-        </CardTitle>
-        {soportes.length > 0 && (
-          <CardAction className="self-center">
-            <Contador n={soportes.length} />
-          </CardAction>
-        )}
-      </CardHeader>
-
-      <CardContent>
+    <Cajon
+      pantalla={contexto}
+      id="soportes"
+      className={cn("mt-5", className)}
+      titulo={titulo}
+      icono={<Paperclip size={18} weight="bold" className={tintaTono("purple")} />}
+      contador={soportes.length || null}
+    >
+      <CardContent className="pt-4">
 
       <label
         onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
@@ -278,6 +276,6 @@ export function SoportesSection({
         onCancelar={() => setPorBorrar(null)}
       />
       </CardContent>
-    </Card>
+    </Cajon>
   );
 }

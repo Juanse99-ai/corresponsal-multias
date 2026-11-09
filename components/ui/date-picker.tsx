@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { formatFechaCorta } from "@/lib/format";
+import { formatCampo } from "@/lib/format";
 
 /** "2026-09-03" → Date local a medianoche (sin corrimiento de zona horaria). */
 function aDate(iso: string): Date | undefined {
@@ -78,7 +78,7 @@ export function DatePicker({
           )}
         >
           <CalendarBlank className={variante === "filtro" ? "size-[15px] text-faint" : "text-muted"} />
-          <span className="truncate">{fecha ? formatFechaCorta(value) : placeholder}</span>
+          <span className="truncate">{fecha ? formatCampo(value) : placeholder}</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto overflow-hidden p-0" align="start">

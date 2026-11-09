@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Calculator, Wallet } from "@phosphor-icons/react/dist/ssr";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Cajon } from "@/components/ui/plegable";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AreaTendencia } from "@/components/ui/area-chart";
 import { HistorialTable } from "./historial-table";
@@ -26,15 +27,11 @@ function TendenciaCard({
 }) {
   if (datos.length < 2) return null;
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-text">{titulo}</CardTitle>
-        <CardDescription>{subtitulo}</CardDescription>
-      </CardHeader>
-      <CardContent>
+    <Cajon pantalla="historial" id={`tendencia-${nombre}`} titulo={titulo} pista={subtitulo} pistaSiempre>
+      <CardContent className="pt-4">
         <AreaTendencia datos={datos} nombre={nombre} />
       </CardContent>
-    </Card>
+    </Cajon>
   );
 }
 

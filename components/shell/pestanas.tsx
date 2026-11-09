@@ -447,7 +447,7 @@ export function PestanasProvider({
         open={!!cerrando}
         titulo="¿Cerrar sin guardar?"
         detalle={cerrando ? `En ${titulo(cerrando.href)} hay algo escrito sin guardar. Si la cierras, se pierde.` : undefined}
-        confirmar="Cerrar sin guardar"
+        confirmar="Descartar"
         tono="warn"
         onConfirmar={() => porCerrar && cerrarYa(porCerrar)}
         onCancelar={() => setPorCerrar(null)}

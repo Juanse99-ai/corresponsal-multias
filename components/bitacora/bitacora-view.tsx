@@ -6,7 +6,7 @@ import {
   PencilSimple,
   Trash,
   MagnifyingGlass,
-  CaretRight,
+  CaretDown,
   ArrowRight,
   DownloadSimple,
   Calculator,
@@ -30,7 +30,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/in
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChoiceChip } from "@/components/ui/choice-chip";
 import { cn } from "@/lib/utils";
-import { addDiasISO, formatCOP, formatFecha, formatHoraISO } from "@/lib/format";
+import { addDiasISO, formatCOP, formatHoraISO, formatDia } from "@/lib/format";
 import type { AuditEntry } from "@/lib/queries";
 
 type AccionTipo = "INSERT" | "UPDATE" | "DELETE";
@@ -129,7 +129,7 @@ function fmtVal(campo: string, v: unknown): string {
     const n = Number(v);
     return Number.isNaN(n) ? String(v) : formatCOP(n);
   }
-  if (campo === "fecha") return formatFecha(String(v));
+  if (campo === "fecha") return formatDia(String(v));
   if (CAMPOS_CON_VALOR.has(campo)) return VALOR[String(v)] ?? String(v);
   return String(v);
 }
@@ -215,7 +215,7 @@ export function BitacoraView({ entries }: { entries: AuditEntry[] }) {
 
   const hoy = diaBogota(new Date().toISOString());
   const ayer = addDiasISO(hoy, -1);
-  const labelDia = (d: string) => (d === hoy ? "Hoy" : d === ayer ? "Ayer" : formatFecha(d));
+  const labelDia = (d: string) => (d === hoy ? "Hoy" : d === ayer ? "Ayer" : formatDia(d));
 
   const hayFiltro = modulo !== "todos" || accion !== "todas" || actor !== "todos" || !!desde || !!hasta || !!q;
   function limpiar() {
@@ -401,7 +401,7 @@ function Fila({
   const monto = montoDe(e);
   const Icono = acc.icon;
   const cambios = cambiosDe(e);
-  const detalle = [e.fecha_dato ? `del ${formatFecha(e.fecha_dato)}` : null, monto != null ? formatCOP(monto) : null]
+  const detalle = [e.fecha_dato ? `del ${formatDia(e.fecha_dato)}` : null, monto != null ? formatCOP(monto) : null]
     .filter(Boolean)
     .join(", ");
 
@@ -430,10 +430,10 @@ function Fila({
             </span>
             {detalle && <span className="tnum block text-meta text-muted">{detalle}</span>}
           </span>
-          <CaretRight
+          <CaretDown
             aria-hidden
             weight="bold"
-            className="mt-1 size-3.5 shrink-0 text-inerte transition-transform duration-[var(--dur-2)] ease-ios group-data-[state=open]/evento:rotate-90"
+            className="mt-1 size-3.5 shrink-0 -rotate-90 text-inerte transition-transform duration-[var(--dur-2)] ease-ios group-data-[state=open]/evento:rotate-0"
           />
         </CollapsibleTrigger>
 

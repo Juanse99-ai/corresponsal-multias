@@ -58,7 +58,7 @@ export function NuevaClaveForm({ correo }: { correo: string }) {
             Guardando…
           </>
         ) : (
-          "Guardar y entrar"
+          "Guardar"
         )}
       </Button>
     </form>

@@ -23,8 +23,8 @@ export function Senal({
   children: React.ReactNode;
 }) {
   return (
-    <span data-slot="senal" className={cn("inline-flex items-center gap-1.5 text-muted", className)}>
-      <span aria-hidden className={cn("size-1.5 shrink-0 rounded-full", PUNTO[tono])} />
+    <span data-slot="senal" className={cn("inline-flex items-start gap-1.5 text-muted", className)}>
+      <span aria-hidden className={cn("mt-[0.5lh] size-1.5 shrink-0 -translate-y-1/2 rounded-full", PUNTO[tono])} />
       {children}
     </span>
   );

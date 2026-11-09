@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition, type ChangeEvent, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ClipboardText, FileArrowUp, Check, CheckCircle, Warning, ArrowsLeftRight } from "@phosphor-icons/react/dist/ssr";
+import { ClipboardText, FileArrowUp, Check, CheckCircle, Warning, ArrowsLeftRight, WhatsappLogo } from "@phosphor-icons/react/dist/ssr";
+import { Cajon } from "@/components/ui/plegable";
+import { tintaTono } from "@/lib/tonos";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
@@ -119,10 +121,15 @@ export function CruceChat({
   }, [cruce]);
 
   return (
-    <Card className="flex flex-col overflow-hidden">
-      {/* Cabecera: título y, como fila de filtros, de quién son los pedidos y el día. */}
-      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2.5 px-5 pt-5 pb-4 sm:px-6">
-        <h2 className="text-lead font-medium tracking-[-0.3px] text-text">Cruce con el grupo</h2>
+    <Cajon
+      pantalla="auditoria"
+      id="cruce"
+      titulo="Cruce con el grupo"
+      icono={<WhatsappLogo size={18} weight="fill" className={tintaTono("ok")} />}
+      className="flex flex-col overflow-hidden"
+    >
+      {/* Fila de filtros: de quién son los pedidos y el día. */}
+      <div className="flex flex-wrap items-center justify-end gap-x-3 gap-y-2.5 px-5 pt-4 pb-4 sm:px-6">
         <div className="flex flex-wrap items-center gap-2">
           {remitentes.length > 1 && (
             <NativeSelect
@@ -164,7 +171,7 @@ export function CruceChat({
             <div className="sticky top-0 z-[2] mb-3 flex justify-center">
               <Badge variant="secondary" className="font-medium">
                 {formatFechaCorta(fecha)}
-                {nombreLuis ? ` · ${nombreLuis}` : ""}
+                {nombreLuis ? `, ${nombreLuis}` : ""}
               </Badge>
             </div>
 
@@ -302,7 +309,7 @@ export function CruceChat({
           </Button>
         </div>
       </div>
-    </Card>
+    </Cajon>
   );
 }
 

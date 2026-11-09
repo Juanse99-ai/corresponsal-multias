@@ -16,6 +16,7 @@ import {
   X,
   DotsThree,
 } from "@phosphor-icons/react/dist/ssr";
+import { Cajon } from "@/components/ui/plegable";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
@@ -192,13 +193,8 @@ export function PrestamosDia({
     <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start">
       {/* Registro + lista */}
       <div className="flex flex-col gap-5">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-text">
-              <h2>Registrar préstamo</h2>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <Cajon pantalla="movimientos" id="registrar-prestamo" titulo="Registrar préstamo">
+          <CardContent className="pt-4">
 
           {bloqueado && (
             <Alert variant="muted" className="mb-4">
@@ -275,18 +271,10 @@ export function PrestamosDia({
             {pending ? "Registrando…" : "Registrar préstamo"}
           </Button>
           </CardContent>
-        </Card>
+        </Cajon>
 
-        <Card>
-          <CardHeader className="items-center">
-            <CardTitle className="text-text">
-              <h3>Préstamos del día</h3>
-            </CardTitle>
-            <CardAction className="self-center">
-              <Contador n={prestamos.length} />
-            </CardAction>
-          </CardHeader>
-          <CardContent>
+        <Cajon pantalla="movimientos" id="prestamos-del-dia" titulo="Préstamos del día" contador={prestamos.length}>
+          <CardContent className="pt-4">
 
           {prestamos.length === 0 ? (
             <Empty fila>
@@ -351,7 +339,7 @@ export function PrestamosDia({
                               {saldado && <Badge variant="success">Devuelto</Badge>}
                             </ItemTitle>
                             <ItemDescription className="truncate text-nowrap text-faint">
-                              {[d.persona, d.concepto].filter(Boolean).join(", ")} · {formatHoraISO(d.created_at)}
+                              {[d.persona, d.concepto, formatHoraISO(d.created_at)].filter(Boolean).join(", ")}
                               {!saldado && d.abonado > 0 && <span className="tnum">, queda {formatCOP(d.saldo)}</span>}
                             </ItemDescription>
                           </ItemContent>
@@ -423,7 +411,7 @@ export function PrestamosDia({
             </ItemGroup>
           )}
           </CardContent>
-        </Card>
+        </Cajon>
       </div>
 
       {/* Total pendiente */}

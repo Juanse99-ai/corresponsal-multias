@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useNavegacion } from "@/lib/use-navegacion";
 import { useInView, useReducedMotion } from "framer-motion";
 import { Bar, BarChart, Cell, Pie, PieChart, Rectangle, XAxis, type BarShapeProps } from "recharts";
-import { CaretRight, CheckCircle, Warning, Plus, ArrowRight } from "@phosphor-icons/react/dist/ssr";
+import { CheckCircle, Warning, Plus, ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,7 @@ import { TarjetaNavy, NavyRotulo } from "@/components/ui/navy";
 import { AnimatedMoney } from "@/components/ui/animated-number";
 import { PageHeader } from "@/components/shell/page-header";
 import { cn } from "@/lib/utils";
+import { FlechaFila } from "@/components/ui/flecha-fila";
 import { formatCOP, formatCompactCOP, formatFechaCorta } from "@/lib/format";
 import type { Rol } from "@/lib/cuadre";
 import type { PersonaSaldo } from "@/lib/queries";
@@ -49,7 +50,7 @@ export interface PanelData {
 const TARJETA_LINK = "flex h-full flex-col transition-colors duration-[var(--dur-1)] hover:border-line-strong";
 
 function Chevron() {
-  return <CaretRight size={15} weight="bold" className="text-inerte transition-transform group-hover:translate-x-0.5" />;
+  return <FlechaFila className="transition-transform group-hover:translate-x-0.5" />;
 }
 
 export function PanelView({ data }: { data: PanelData }) {

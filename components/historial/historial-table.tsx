@@ -14,7 +14,7 @@ import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemTitle }
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { formatCOP, formatFecha } from "@/lib/format";
+import { formatCOP, formatDia } from "@/lib/format";
 import type { CuadreRow } from "@/lib/database.types";
 import { eliminarCuadre } from "@/app/(app)/cuadre/actions";
 import { TRANSICION } from "@/lib/movimiento";
@@ -159,7 +159,7 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
                 >
                   <ItemContent className="min-w-0 gap-1">
                     <ItemTitle className="w-full min-w-0 flex-wrap gap-2">
-                      <span>{formatFecha(c.fecha)}</span>
+                      <span>{formatDia(c.fecha)}</span>
                       <Badge punto={descuadre ? "bad" : c.estado === "cerrado" ? "ok" : "gris"}>
                         {descuadre ? "Descuadre" : c.estado === "cerrado" ? "Cerrado" : "Abierto"}
                       </Badge>
@@ -210,7 +210,7 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
                   onClick={() => router.push(`/cuadre?fecha=${c.fecha}`)}
                   className="cursor-pointer"
                 >
-                  <TableCell className="font-medium text-text">{formatFecha(c.fecha)}</TableCell>
+                  <TableCell className="font-medium text-text">{formatDia(c.fecha)}</TableCell>
                   <TableCell className="tnum text-right text-text">{formatCOP(c.total_tirilla)}</TableCell>
                   <TableCell className="tnum text-right text-muted">{formatCOP(c.sr_luis)}</TableCell>
                   <TableCell className="tnum text-right text-muted">{formatCOP(c.compensado)}</TableCell>

@@ -45,7 +45,25 @@ export function formatFecha(iso: string): string {
   return `${d} ${MESES[m - 1]} ${y}`;
 }
 
-/** ISO -> "lun 16 jun" */
+/**
+ * Fecha de lista, tabla y ficha (Biela, 22 oct 2026): "19 oct", con el año
+ * solo si no es el de hoy ("4 mar 2025"). Es uno de los dos formatos de fecha
+ * en pantalla; el otro es formatCampo. Los títulos, el saludo y lo que sale de
+ * la app (imágenes, mensajes) no son fechas de lista.
+ */
+export function formatDia(iso: string): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  const actual = Number(hoyISO().slice(0, 4));
+  return y === actual ? `${d} ${MESES[m - 1]}` : `${d} ${MESES[m - 1]} ${y}`;
+}
+
+/** Fecha en un campo (el DatePicker): "16/06/2026". */
+export function formatCampo(iso: string): string {
+  const [y, m, d] = iso.split("-");
+  return `${d}/${m}/${y}`;
+}
+
+/** ISO -> "lun 16 jun" (navegar entre días, separadores, gráficas). */
 export function formatFechaCorta(iso: string): string {
   const [y, m, d] = iso.split("-").map(Number);
   const wd = new Date(Date.UTC(y, m - 1, d)).getUTCDay();

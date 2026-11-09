@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import Link from "next/link";
-import { CheckCircle, WarningCircle, Info, CaretRight } from "@phosphor-icons/react/dist/ssr";
+import { CheckCircle, WarningCircle, Info } from "@phosphor-icons/react/dist/ssr";
+import { Cajon } from "@/components/ui/plegable";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Contador } from "@/components/ui/contador";
 import {
@@ -13,7 +14,8 @@ import {
   ItemActions,
 } from "@/components/ui/item";
 import { cn } from "@/lib/utils";
-import { formatCOP, formatFechaCorta } from "@/lib/format";
+import { FlechaFila } from "@/components/ui/flecha-fila";
+import { formatCOP, formatDia } from "@/lib/format";
 import type { Hallazgo } from "@/lib/auditoria";
 
 /** A dónde lleva cada hallazgo para revisarlo. */
@@ -40,22 +42,24 @@ export function ListaHallazgos({ hallazgos }: { hallazgos: Hallazgo[] }) {
     );
   }
 
+  // Un cajón por gravedad (Biela, «Cajones que se recogen»).
   return (
-    <Card>
+    <div className="flex flex-col gap-5">
       {[
         { titulo: "Revisar", items: graves, grave: true },
         { titulo: "Vale la pena mirar", items: avisos, grave: false },
       ]
         .filter((g) => g.items.length > 0)
         .map((grupo) => (
-          <Fragment key={grupo.titulo}>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-meta font-medium tracking-normal text-faint">
-                <h2>{grupo.titulo}</h2>
-                <Contador n={grupo.items.length} tono={grupo.grave ? "peligro" : "aviso"} />
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="not-last:pb-2">
+          <Cajon
+            key={grupo.titulo}
+            pantalla="auditoria"
+            id={grupo.grave ? "revisar" : "mirar"}
+            titulo={grupo.titulo}
+            contador={grupo.items.length}
+            tono={grupo.grave ? "peligro" : "aviso"}
+          >
+            <CardContent className="pt-3">
               <ItemGroup variant="cajitas" className="max-lg:divide-y max-lg:divide-linea-fila">
                 {grupo.items.map((h, i) => (
                   <Fragment key={`${h.tipo}-${h.fecha}-${i}`}>
@@ -75,7 +79,7 @@ export function ListaHallazgos({ hallazgos }: { hallazgos: Hallazgo[] }) {
                           <ItemTitle className="w-full items-start justify-between gap-3">
                             <span className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0">
                               <span className="text-body font-medium text-text">{h.titulo}</span>
-                              <span className="text-meta font-normal text-faint">{formatFechaCorta(h.fecha)}</span>
+                              <span className="text-meta font-normal text-faint">{formatDia(h.fecha)}</span>
                             </span>
                             {h.monto !== null && (
                               <span className="tnum shrink-0 text-title font-medium text-text">{formatCOP(h.monto)}</span>
@@ -86,7 +90,7 @@ export function ListaHallazgos({ hallazgos }: { hallazgos: Hallazgo[] }) {
                           </ItemDescription>
                         </ItemContent>
                         <ItemActions className="shrink-0 self-center">
-                          <CaretRight size={14} weight="bold" className="text-inerte" />
+                          <FlechaFila />
                         </ItemActions>
                       </Link>
                     </Item>
@@ -94,8 +98,8 @@ export function ListaHallazgos({ hallazgos }: { hallazgos: Hallazgo[] }) {
                 ))}
               </ItemGroup>
             </CardContent>
-          </Fragment>
+          </Cajon>
         ))}
-    </Card>
+    </div>
   );
 }

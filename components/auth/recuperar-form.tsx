@@ -67,7 +67,7 @@ export function RecuperarForm({ enlaceVencido }: { enlaceVencido: boolean }) {
             Enviando…
           </>
         ) : (
-          "Enviarme el enlace"
+          "Enviar enlace"
         )}
       </Button>
 

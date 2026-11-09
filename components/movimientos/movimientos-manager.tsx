@@ -18,7 +18,9 @@ import {
   X,
 } from "@phosphor-icons/react/dist/ssr";
 import type { Icon } from "@phosphor-icons/react";
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
+import { Cajon } from "@/components/ui/plegable";
+import { fondoTono, tintaTono, type Tono } from "@/lib/tonos";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { Empty, EmptyTitle } from "@/components/ui/empty";
@@ -48,6 +50,15 @@ const TIPOS: Record<Tipo, { label: string; corto: string; icon: Icon; salida: bo
   consignacion_bancolombia: { label: "Consignación a Bancolombia", corto: "Bancolombia", icon: Bank, salida: false },
   recaudo: { label: "Recaudo", corto: "Recaudo", icon: Receipt, salida: false },
   retiro: { label: "Retiro", corto: "Retiro", icon: ArrowUp, salida: true } };
+
+/** El color de cada tipo en el cuadro de su ícono (Biela, «íconos con su color»):
+ *  verde lo que entra en efectivo, azul el recaudo, rojo lo que sale. */
+const TONO_TIPO: Record<Tipo, Tono> = {
+  consignacion_nequi: "ok",
+  consignacion_bancolombia: "ok",
+  recaudo: "info",
+  retiro: "bad",
+};
 
 /** Rótulo de cada total en las celdas del día. */
 const TOTAL: Record<Tipo, string> = {
@@ -157,13 +168,8 @@ export function MovimientosManager({
     <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start">
       {/* Registro + lista */}
       <div className="flex flex-col gap-5">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-text">
-              <h2>Registrar movimiento</h2>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <Cajon pantalla="movimientos" id="registrar" titulo="Registrar movimiento" icono={<Plus size={18} weight="bold" className={tintaTono("ok")} />}>
+          <CardContent className="pt-4">
 
           {bloqueado && (
             <Alert variant="muted" className="mb-4">
@@ -222,18 +228,10 @@ export function MovimientosManager({
             {pending ? "Registrando…" : `Registrar ${tipo === "retiro" ? "retiro" : tipo === "recaudo" ? "recaudo" : "consignación"}`}
           </Button>
           </CardContent>
-        </Card>
+        </Cajon>
 
-        <Card>
-          <CardHeader className="items-center">
-            <CardTitle className="text-text">
-              <h3>Registrados</h3>
-            </CardTitle>
-            <CardAction className="self-center">
-              <Contador n={movimientos.length} />
-            </CardAction>
-          </CardHeader>
-          <CardContent>
+        <Cajon pantalla="movimientos" id="registrados" titulo="Registrados" contador={movimientos.length}>
+          <CardContent className="pt-4">
 
           {movimientos.length === 0 ? (
             <Empty fila>
@@ -247,7 +245,7 @@ export function MovimientosManager({
                   const nuevo = !yaEstaban.has(m.id) && !reduced();
                   const detalle = [m.hora ? formatHora(m.hora) : null, [m.convenio, m.cliente].filter(Boolean).join(", ") || null]
                     .filter(Boolean)
-                    .join(" · ");
+                    .join(", ");
                   return (
                     <motion.div
                       key={m.id}
@@ -306,7 +304,7 @@ export function MovimientosManager({
                         </Item>
                       ) : (
                         <Item className="flex-nowrap gap-3 px-0 py-2.5">
-                          <ItemMedia variant="icon">
+                          <ItemMedia variant="icon" className={fondoTono(TONO_TIPO[m.tipo as Tipo])}>
                             <Ti.icon size={16} weight="bold" />
                           </ItemMedia>
                           <ItemContent className="min-w-0 gap-0.5">
@@ -345,18 +343,13 @@ export function MovimientosManager({
             </ItemGroup>
           )}
           </CardContent>
-        </Card>
+        </Cajon>
       </div>
 
       {/* Totales por canal */}
       <div className="flex flex-col gap-4 lg:sticky lg:top-8">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-text">
-              <h3>Totales del día</h3>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <Cajon pantalla="movimientos" id="totales" titulo="Totales del día">
+          <CardContent className="pt-4">
             <Celdas dos>
               {(Object.keys(TIPOS) as Tipo[]).map((t) => (
                 <Celda key={t} rotulo={TOTAL[t]}>
@@ -371,7 +364,7 @@ export function MovimientosManager({
               </Link>
             </Button>
           </CardContent>
-        </Card>
+        </Cajon>
       </div>
 
       <ConfirmDialog

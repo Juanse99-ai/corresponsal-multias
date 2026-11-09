@@ -9,13 +9,16 @@ import {
   Wallet,
   Warning,
   CheckCircle,
-  CaretRight,
   Lock,
   LockOpen,
   ArrowClockwise,
   Receipt,
+  Money,
+  ArrowDownLeft,
+  ArrowUpRight,
+  HandCoins,
+  Bank,
 } from "@phosphor-icons/react/dist/ssr";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
@@ -48,6 +51,10 @@ import {
 import { guardarCuadre } from "@/app/(app)/cuadre/actions";
 import { CuadreExport } from "@/components/cuadre/cuadre-export";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Plegable, usePlegadas } from "@/components/ui/plegable";
+import { Deslizar } from "@/components/ui/deslizar";
+import { FlechaFila } from "@/components/ui/flecha-fila";
+import { fondoTono, tintaTono, type Tono } from "@/lib/tonos";
 
 interface Inicial {
   total_tirilla: number;
@@ -110,6 +117,11 @@ export function CuadreEditor({
   const [pending, startTransition] = useTransition();
   const [celebrar, setCelebrar] = useState(0);
   const [confirmarCierre, setConfirmarCierre] = useState(false);
+  // Cada intento de cerrar que no sigue (falta algo, se canceló) devuelve el
+  // círculo del deslizador a su sitio con una key nueva.
+  const [intento, setIntento] = useState(0);
+  // Lo que se recoge en el Cuadre se recuerda en este equipo (Biela).
+  const [abierto, alternar] = usePlegadas("cuadre");
 
   const [vals, setVals] = useState({
     total_tirilla: inicial.total_tirilla,
@@ -231,12 +243,14 @@ export function CuadreEditor({
     if (estadoFinal === "cerrado") {
       if (soportesCount === 0) {
         toast.error("Adjunta la tirilla del datáfono (abajo) antes de cerrar el día.");
+        setIntento((n) => n + 1);
         return;
       }
       if (descuadre || !cajaCuadra) {
         // Exige explicación escrita (queda para Juan) y confirmación antes de cerrar descuadrado.
         if (!nota.trim()) {
           toast.error("El día no cuadra. Escribe en la nota por qué, antes de cerrarlo.");
+          setIntento((n) => n + 1);
           return;
         }
         setConfirmarCierre(true);
@@ -267,186 +281,214 @@ export function CuadreEditor({
         router.refresh();
       } else {
         toast.error(res.error ?? "No se pudo guardar.");
+        setIntento((n) => n + 1);
       }
     });
   }
 
+  // Lo que falta para cerrar, dicho en el deslizador apagado (Biela: el rótulo
+  // dice qué falta, no se queda gris y mudo).
+  const faltaParaCerrar =
+    sinEmpezar ? "Escribe la tirilla" : soportesCount === 0 ? "Adjunta la tirilla" : (descuadre || !cajaCuadra) && !nota.trim() ? "Escribe la nota" : "";
+
   return (
     <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start">
-      {/* ====== Columna de captura ====== */}
-      <Card className="p-5">
-        <div className="mb-[18px] flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-          <h2 className="min-w-0 truncate text-lead font-medium tracking-[-0.3px] text-text">Movimientos del día</h2>
-          <div className="flex shrink-0 items-center gap-2">
-            <Badge variant={estado === "cerrado" ? "success" : "secondary"}>
-              {estado === "cerrado" ? <Lock size={12} weight="fill" /> : <LockOpen size={12} />}
-              {estado === "cerrado" ? "Cerrado" : "Abierto"}
-            </Badge>
-            <CuadreExport
-              fecha={fecha}
-              lineas={lineas}
-              suma={suma}
-              tirilla={vals.total_tirilla}
-              saldo={saldo}
-              descuadre={descuadre}
-              estado={estado}
-              arqueo={{
-                entro: consignacionesCash,
-                retiros: vals.ret_real,
-                prestamosEfectivo: prestamosEfectivoDia,
-                compensado: vals.compensado,
-                esperado: esperadoCaja,
-                contado: vals.efectivo_contado,
-                diferencia: diferenciaCaja,
-              }}
-            />
-          </div>
-        </div>
-
-        {locked && (
-          <Alert variant="muted" className="mb-4">
-            <Lock weight="fill" />
-            <AlertTitle className="line-clamp-none font-normal">Día cerrado. Solo Juan puede reabrirlo para editar.</AlertTitle>
-          </Alert>
-        )}
-
-        <fieldset disabled={locked} className="contents">
-
-        {/* Total tirilla: el primer campo y el grande. */}
-        <Campo label="Total tirilla" id="total_tirilla">
-          <MoneyInput id="total_tirilla" size="lg" value={vals.total_tirilla} onValueChange={set("total_tirilla")} />
-        </Campo>
-
-        {/* Sr. Luis (lectura): fila que lleva a su cuenta. */}
-        <Item
-          asChild
-          className="mt-4 flex-nowrap gap-3 rounded-xl border-fila-borde bg-fila px-3 py-2.5 [a]:hover:bg-fila-hover"
+      {/* ====== Columna de captura: dos cajones que se recogen ====== */}
+      <div className="flex min-w-0 flex-col gap-5">
+        <Plegable
+          titulo="Movimientos del día"
+          icono={<Receipt size={18} className={tintaTono("purple")} />}
+          cifra={abierto("movimientos") ? null : formatCOP(vals.total_tirilla)}
+          abierto={abierto("movimientos")}
+          onAbiertoChange={alternar("movimientos")}
+          acciones={
+            <>
+              {estado === "cerrado" && (
+                <Badge variant="success">
+                  <Lock size={12} weight="fill" />
+                  Cerrado
+                </Badge>
+              )}
+              <CuadreExport
+                fecha={fecha}
+                lineas={lineas}
+                suma={suma}
+                tirilla={vals.total_tirilla}
+                saldo={saldo}
+                descuadre={descuadre}
+                estado={estado}
+                arqueo={{
+                  entro: consignacionesCash,
+                  retiros: vals.ret_real,
+                  prestamosEfectivo: prestamosEfectivoDia,
+                  compensado: vals.compensado,
+                  esperado: esperadoCaja,
+                  contado: vals.efectivo_contado,
+                  diferencia: diferenciaCaja,
+                }}
+              />
+            </>
+          }
         >
-          <Link href="/luis">
-            <ItemMedia variant="icon" className="group-has-[[data-slot=item-description]]/item:translate-y-0 group-has-[[data-slot=item-description]]/item:self-center">
-              <Wallet size={18} />
-            </ItemMedia>
-            <ItemContent className="min-w-0 gap-0.5">
-              <ItemTitle className="text-body font-medium text-text">Sr. Luis</ItemTitle>
-              <ItemDescription className="truncate text-nowrap text-meta text-muted">
-                {consignacionesCount} {consignacionesCount === 1 ? "consignación" : "consignaciones"}
-              </ItemDescription>
-            </ItemContent>
-            <ItemActions className="shrink-0 gap-1.5">
-              <span className="tnum text-title font-medium text-text">{formatCOP(srLuis)}</span>
-              <CaretRight size={14} weight="bold" className="text-inerte transition-transform group-hover/item:translate-x-0.5" />
-            </ItemActions>
-          </Link>
-        </Item>
-
-        {(movCount > 0 || prestamosCount > 0) && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="secondary" onClick={traerDeMovimientos} className="mt-4 w-full">
-                <ArrowClockwise size={16} weight="bold" />
-                Traer totales del día
-                <Contador n={movCount + prestamosCount} />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              {[
-                movCount > 0 ? `${movCount} movimiento${movCount === 1 ? "" : "s"}` : null,
-                prestamosCount > 0 ? `${prestamosCount} préstamo${prestamosCount === 1 ? "" : "s"}` : null,
-              ]
-                .filter(Boolean)
-                .join(" y ")}
-            </TooltipContent>
-          </Tooltip>
-        )}
-
-        {/* Desglose electrónico (lo que pasó por Bancolombia) */}
-        <div className="mt-4 grid grid-cols-1 gap-x-4 gap-y-3.5 sm:grid-cols-2">
-          <Campo label="Nequis" id="nequis_e">
-            <MoneyInput id="nequis_e" value={vals.nequis} onValueChange={set("nequis")} />
-          </Campo>
-          <Campo label="Bancolombia" id="bancolombia_e">
-            <MoneyInput id="bancolombia_e" value={vals.bancolombia} onValueChange={set("bancolombia")} />
-          </Campo>
-          <Campo label="Recaudos" id="recaudos_e">
-            <MoneyInput id="recaudos_e" value={vals.recaudos} onValueChange={set("recaudos")} />
-          </Campo>
-          <Campo label="Préstamos por transferencia" id="prestamos_consignaciones">
-            <MoneyInput id="prestamos_consignaciones" value={vals.prestamos_consignaciones} onValueChange={set("prestamos_consignaciones")} />
-          </Campo>
-          <Campo label="Compensado" id="compensado">
-            <MoneyInput id="compensado" value={vals.compensado} onValueChange={set("compensado")} />
-          </Campo>
-          <Campo label="Retiros" id="ret_real">
-            <MoneyInput id="ret_real" value={vals.ret_real} onValueChange={set("ret_real")} />
-          </Campo>
-        </div>
-
-        {/* Arqueo de caja física: una sección de la misma tarjeta. */}
-        <section className="mt-6">
-          <h3 className="text-title font-medium text-text">Arqueo de caja</h3>
-          <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-3.5 sm:grid-cols-2">
-            <Campo label="Fondo en caja" id="fondo_caja">
-              <MoneyInput id="fondo_caja" value={vals.fondo_caja} onValueChange={set("fondo_caja")} />
-            </Campo>
-            <Campo label="Efectivo contado" id="efectivo_contado">
-              <MoneyInput id="efectivo_contado" value={vals.efectivo_contado} onValueChange={set("efectivo_contado")} />
-            </Campo>
-          </div>
-          <div className="mt-3 flex flex-col text-body">
-            <FilaArqueo rotulo="Efectivo que entró (consignaciones)" valor={consignacionesCash} />
-            <FilaArqueo rotulo="− Retiros" valor={vals.ret_real} />
-            <FilaArqueo rotulo="− Préstamos en efectivo" valor={prestamosEfectivoDia} />
-            <FilaArqueo rotulo="− Compensado (al banco)" valor={vals.compensado} />
-            <FilaArqueo rotulo="Esperado en caja" valor={esperadoCaja} fuerte />
-          </div>
-
-          {/* La diferencia como celda de cifra grande, en el par de su estado: que
-              se note de una si la caja cuadra. El monto va debajo del título para
-              que el texto tenga todo el ancho en el celular. */}
-          <div
-            className={cn(
-              "mt-3 rounded-2xl px-4 py-3.5 transition-colors duration-[var(--dur-2)]",
-              cajaCuadra ? "bg-ok-bg text-ok-fg" : "bg-bad-bg text-bad-fg",
+          <div className="p-4 sm:p-5">
+            {locked && (
+              <Alert variant="muted" className="mb-4">
+                <Lock weight="fill" />
+                <AlertTitle className="line-clamp-none font-normal">Día cerrado. Solo Juan puede reabrirlo para editar.</AlertTitle>
+              </Alert>
             )}
-          >
-            <p className="flex items-center gap-1.5 text-body font-medium">
-              {cajaCuadra ? <CheckCircle size={16} weight="fill" /> : <Warning size={16} weight="fill" />}
-              {cajaCuadra
-                ? "Caja cuadrada"
-                : diferenciaCaja > 0
-                  ? "Sobra efectivo en caja"
-                  : "Falta efectivo en caja"}
-            </p>
-            {!cajaCuadra && (
-              <p className="tnum mt-1.5 text-h1 leading-none font-medium tracking-[-0.3px] lg:text-kpi lg:tracking-[-0.6px]">
-                {diferenciaCaja > 0 ? "+" : ""}
-                {formatCOP(diferenciaCaja)}
-              </p>
-            )}
-            <p className="mt-1.5 text-meta">
-              {cajaCuadra
-                ? "Lo contado coincide con lo esperado."
-                : "Revisa el efectivo contado o los movimientos."}
-            </p>
-          </div>
-        </section>
 
-        <div className="mt-5 flex flex-col gap-1.5">
-          <Label htmlFor="nota">Nota</Label>
-          <Textarea
-            id="nota"
-            value={nota}
-            onChange={(e) => setNota(e.target.value)}
-            rows={2}
-            placeholder="Observación del día…"
-            aria-describedby="nota-ayuda"
-          />
-          <p id="nota-ayuda" className="text-meta text-faint">
-            Si el día no cuadra, explica aquí por qué antes de cerrarlo.
-          </p>
-        </div>
-        </fieldset>
-      </Card>
+            <fieldset disabled={locked} className="contents">
+              {/* Total tirilla: el primer campo y el grande. */}
+              <Campo label="Total tirilla" id="total_tirilla">
+                <MoneyInput id="total_tirilla" size="lg" value={vals.total_tirilla} onValueChange={set("total_tirilla")} />
+              </Campo>
+
+              {/* Sr. Luis (lectura): fila que lleva a su cuenta. */}
+              <Item
+                asChild
+                className="mt-4 flex-nowrap gap-3 rounded-xl border-fila-borde bg-fila px-3 py-2.5 [a]:hover:bg-fila-hover"
+              >
+                <Link href="/luis">
+                  <ItemMedia
+                    variant="icon"
+                    className={cn(
+                      "group-has-[[data-slot=item-description]]/item:translate-y-0 group-has-[[data-slot=item-description]]/item:self-center",
+                      fondoTono("purple"),
+                    )}
+                  >
+                    <Wallet size={18} />
+                  </ItemMedia>
+                  <ItemContent className="min-w-0 gap-0.5">
+                    <ItemTitle className="text-body font-medium text-text">Sr. Luis</ItemTitle>
+                    <ItemDescription className="truncate text-nowrap text-meta text-muted">
+                      {consignacionesCount} {consignacionesCount === 1 ? "consignación" : "consignaciones"}
+                    </ItemDescription>
+                  </ItemContent>
+                  <ItemActions className="shrink-0 gap-1.5">
+                    <span className="tnum text-title font-medium text-text">{formatCOP(srLuis)}</span>
+                    <FlechaFila />
+                  </ItemActions>
+                </Link>
+              </Item>
+
+              {(movCount > 0 || prestamosCount > 0) && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="secondary" onClick={traerDeMovimientos} className="mt-4 w-full">
+                      <ArrowClockwise size={16} weight="bold" />
+                      Traer totales
+                      <Contador n={movCount + prestamosCount} />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {[
+                      movCount > 0 ? `${movCount} movimiento${movCount === 1 ? "" : "s"}` : null,
+                      prestamosCount > 0 ? `${prestamosCount} préstamo${prestamosCount === 1 ? "" : "s"}` : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" y ")}
+                  </TooltipContent>
+                </Tooltip>
+              )}
+
+              {/* Desglose electrónico (lo que pasó por Bancolombia) */}
+              <div className="mt-4 grid grid-cols-1 gap-x-4 gap-y-3.5 sm:grid-cols-2">
+                <Campo label="Nequis" id="nequis_e">
+                  <MoneyInput id="nequis_e" value={vals.nequis} onValueChange={set("nequis")} />
+                </Campo>
+                <Campo label="Bancolombia" id="bancolombia_e">
+                  <MoneyInput id="bancolombia_e" value={vals.bancolombia} onValueChange={set("bancolombia")} />
+                </Campo>
+                <Campo label="Recaudos" id="recaudos_e">
+                  <MoneyInput id="recaudos_e" value={vals.recaudos} onValueChange={set("recaudos")} />
+                </Campo>
+                <Campo label="Préstamos por transferencia" id="prestamos_consignaciones">
+                  <MoneyInput id="prestamos_consignaciones" value={vals.prestamos_consignaciones} onValueChange={set("prestamos_consignaciones")} />
+                </Campo>
+                <Campo label="Compensado" id="compensado">
+                  <MoneyInput id="compensado" value={vals.compensado} onValueChange={set("compensado")} />
+                </Campo>
+                <Campo label="Retiros" id="ret_real">
+                  <MoneyInput id="ret_real" value={vals.ret_real} onValueChange={set("ret_real")} />
+                </Campo>
+              </div>
+            </fieldset>
+          </div>
+        </Plegable>
+
+        {/* Arqueo de caja física: su propio cajón, con lo esperado a la vista
+            aunque esté recogido. */}
+        <Plegable
+          titulo="Arqueo de caja"
+          icono={<Money size={18} className={tintaTono("ok")} />}
+          cifra={abierto("arqueo") ? null : formatCOP(esperadoCaja)}
+          abierto={abierto("arqueo")}
+          onAbiertoChange={alternar("arqueo")}
+        >
+          <div className="p-4 sm:p-5">
+            <fieldset disabled={locked} className="contents">
+              <div className="grid grid-cols-1 gap-x-4 gap-y-3.5 sm:grid-cols-2">
+                <Campo label="Fondo en caja" id="fondo_caja">
+                  <MoneyInput id="fondo_caja" value={vals.fondo_caja} onValueChange={set("fondo_caja")} />
+                </Campo>
+                <Campo label="Efectivo contado" id="efectivo_contado">
+                  <MoneyInput id="efectivo_contado" value={vals.efectivo_contado} onValueChange={set("efectivo_contado")} />
+                </Campo>
+              </div>
+              <ul className="mt-3 flex list-none flex-col p-0 text-body">
+                <FilaArqueo icono={ArrowDownLeft} tono="ok" rotulo="Entró por consignaciones" valor={consignacionesCash} signo="+ " />
+                <FilaArqueo icono={ArrowUpRight} tono="bad" rotulo="Retiros" valor={vals.ret_real} signo="− " />
+                <FilaArqueo icono={HandCoins} tono="warn" rotulo="Préstamos en efectivo" valor={prestamosEfectivoDia} signo="− " />
+                <FilaArqueo icono={Bank} tono="warn" rotulo="Compensado al banco" valor={vals.compensado} signo="− " />
+              </ul>
+              <div className="mt-3 flex items-end justify-between gap-4 border-t border-line pt-3">
+                <span className="text-body text-muted">Esperado en caja</span>
+                <span className="tnum text-h1 leading-none font-medium tracking-[-0.6px] text-text">{formatCOP(esperadoCaja)}</span>
+              </div>
+
+              {/* La diferencia en el par de su estado: que se note de una si la
+                  caja cuadra. */}
+              <div
+                className={cn(
+                  "mt-4 rounded-2xl px-4 py-3.5 transition-colors duration-[var(--dur-2)]",
+                  cajaCuadra ? "bg-ok-bg text-ok-fg" : "bg-bad-bg text-bad-fg",
+                )}
+              >
+                <p className="flex items-center gap-1.5 text-body font-medium">
+                  {cajaCuadra ? <CheckCircle size={16} weight="fill" /> : <Warning size={16} weight="fill" />}
+                  {cajaCuadra
+                    ? "Caja cuadrada"
+                    : diferenciaCaja > 0
+                      ? "Sobra efectivo en caja"
+                      : "Falta efectivo en caja"}
+                </p>
+                {!cajaCuadra && (
+                  <p className="tnum mt-1.5 text-h1 leading-none font-medium tracking-[-0.6px]">
+                    {diferenciaCaja > 0 ? "+" : ""}
+                    {formatCOP(diferenciaCaja)}
+                  </p>
+                )}
+              </div>
+
+              <div className="mt-5 flex flex-col gap-1.5">
+                <Label htmlFor="nota">Nota</Label>
+                <Textarea
+                  id="nota"
+                  value={nota}
+                  onChange={(e) => setNota(e.target.value)}
+                  rows={2}
+                  placeholder="Observación del día…"
+                  aria-describedby="nota-ayuda"
+                />
+                <p id="nota-ayuda" className="text-meta text-muted">
+                  Si el día no cuadra, explica aquí por qué antes de cerrarlo.
+                </p>
+              </div>
+            </fieldset>
+          </div>
+        </Plegable>
+      </div>
 
       {/* ====== Resultado: la tarjeta navy (la cifra sobre la que se guarda o se cierra) ====== */}
       <div className="flex flex-col gap-4 lg:sticky lg:top-8">
@@ -501,22 +543,29 @@ export function CuadreEditor({
                 Día cerrado. Solo Juan puede reabrirlo.
               </p>
             ) : estado !== "cerrado" ? (
-              // Un solo botón: guarda y cierra de una. Antes eran selector + guardar
-              // + cerrar, y si se quedaba un paso el día no llegaba a la base.
-              <Button onClick={() => onGuardar("cerrado")} disabled={pending} className="w-full">
-                <Lock size={18} weight="fill" />
-                {pending ? "Cerrando…" : "Cerrar el día"}
-              </Button>
+              // Cerrar con un gesto (Biela, 8 nov 2026): el candado se desliza
+              // hasta el final y guarda y cierra de una. Apagado, dice qué falta.
+              // Con el teclado, Enter hace lo mismo. Si el día no cuadra, sale
+              // la confirmación de siempre antes de cerrar.
+              <Deslizar
+                key={intento}
+                texto="Cerrar día"
+                apagado={!pending ? faltaParaCerrar : ""}
+                onListo={() => onGuardar("cerrado")}
+                onTeclado={() => onGuardar("cerrado")}
+                cargando={pending}
+                textoHecho="Día cerrado"
+              />
             ) : (
               // Solo Juan llega aquí con el día cerrado: corrige o lo reabre.
               <>
-                <Button onClick={() => onGuardar("cerrado")} disabled={pending} className="w-full">
-                  <FloppyDisk size={18} weight="fill" />
+                <Button onClick={() => onGuardar("cerrado")} cargando={pending} className="w-full">
+                  {!pending && <FloppyDisk size={18} weight="fill" />}
                   {pending ? "Guardando…" : "Guardar cambios"}
                 </Button>
                 <Button variant="sobre-oscuro" onClick={() => onGuardar("abierto")} disabled={pending} className="w-full">
                   <LockOpen size={16} />
-                  Reabrir el día
+                  Reabrir día
                 </Button>
               </>
             )}
@@ -528,10 +577,13 @@ export function CuadreEditor({
         open={confirmarCierre}
         titulo="El día no cuadra. ¿Cerrarlo así?"
         detalle={`${motivoDescuadre.charAt(0).toUpperCase()}${motivoDescuadre.slice(1)}. Tu nota queda guardada como explicación.${isAdmin ? "" : " Después solo Juan podrá reabrirlo."}`}
-        confirmar="Sí, cerrar así"
+        confirmar="Cerrar así"
         tono="warn"
         onConfirmar={() => guardar("cerrado")}
-        onCancelar={() => setConfirmarCierre(false)}
+        onCancelar={() => {
+          setConfirmarCierre(false);
+          setIntento((n) => n + 1);
+        }}
       />
 
       <CelebracionCierre play={celebrar} fecha={fecha} cuadrado={!descuadre} />
@@ -548,12 +600,30 @@ function Campo({ label, id, children }: { label: string; id: string; children: R
   );
 }
 
-/** Renglón del arqueo: rótulo y cifra con su línea. */
-function FilaArqueo({ rotulo, valor, fuerte = false }: { rotulo: string; valor: number; fuerte?: boolean }) {
+/** Renglón del arqueo: ícono con el color de su tipo de plata, rótulo y cifra. */
+function FilaArqueo({
+  icono: Icono,
+  tono,
+  rotulo,
+  valor,
+  signo = "",
+}: {
+  icono: React.ElementType;
+  tono: Tono;
+  rotulo: string;
+  valor: number;
+  signo?: string;
+}) {
   return (
-    <div className={cn("flex items-center justify-between gap-3 py-2.5", !fuerte && "border-b border-linea-fila")}>
-      <span className={fuerte ? "font-medium text-text" : "text-muted"}>{rotulo}</span>
-      <span className={cn("tnum text-text", fuerte && "font-medium")}>{formatCOP(valor)}</span>
-    </div>
+    <li className="flex items-center gap-3 border-b border-linea-fila py-2.5 last:border-0">
+      <span className={cn("grid size-8 shrink-0 place-items-center rounded-[10px]", fondoTono(tono))}>
+        <Icono size={16} weight="bold" />
+      </span>
+      <span className="min-w-0 flex-1 text-text-2">{rotulo}</span>
+      <span className="tnum text-text">
+        {valor ? signo : ""}
+        {formatCOP(valor)}
+      </span>
+    </li>
   );
 }
