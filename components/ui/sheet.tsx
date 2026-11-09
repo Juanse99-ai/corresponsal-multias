@@ -109,9 +109,11 @@ function SheetContent({
       >
         {children}
         {showCloseButton && (
-          <SheetPrimitive.Close className="absolute top-4 right-4 rounded-xs opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none data-[state=open]:bg-secondary">
-            <X className="size-4" />
-            <span className="sr-only">Close</span>
+          <SheetPrimitive.Close
+            aria-label="Cerrar"
+            className="x-liquida absolute top-2.5 right-2.5 grid size-11 place-items-center rounded-full outline-none focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-solid disabled:pointer-events-none"
+          >
+            <X />
           </SheetPrimitive.Close>
         )}
       </SheetPrimitive.Content>

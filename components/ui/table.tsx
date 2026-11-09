@@ -29,8 +29,9 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
     <thead
       data-slot="table-header"
-      // Cabecera sin filete: rótulos de 12,5/600 en el gris claro.
-      className={cn("[&_tr]:border-0 [&_tr]:hover:bg-transparent", className)}
+      // Cabecera sin franja (Biela, 2 nov 2026): rótulo gris en peso normal y
+      // una línea fina.
+      className={cn("[&_tr]:border-0 [&_tr]:border-b [&_tr]:border-linea-fila [&_tr]:hover:bg-transparent", className)}
       {...props}
     />
   )
@@ -77,7 +78,7 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
     <th
       data-slot="table-head"
       className={cn(
-        "h-[26px] px-3 text-left align-middle text-meta font-medium whitespace-nowrap text-faint [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+        "h-[34px] px-3 text-left align-middle text-meta font-normal whitespace-nowrap text-muted [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
         className
       )}
       {...props}

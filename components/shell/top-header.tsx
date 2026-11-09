@@ -162,7 +162,10 @@ export function TopHeader({
         <div className="contents lg:hidden">
           <HeaderSearch personas={isAdmin ? resumen.personas : []} />
         </div>
-        <HeaderAvisos avisos={avisos} urgentes={avisosUrgentes(avisos)} />
+        {/* En el computador, los avisos van en su cápsula de vidrio (Biela). */}
+        <div className="avisos-capsula">
+          <HeaderAvisos avisos={avisos} urgentes={avisosUrgentes(avisos)} />
+        </div>
       </div>
       </div>
     </header>

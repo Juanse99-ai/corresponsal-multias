@@ -382,7 +382,7 @@ export function BarraAbajo({
           )}
 
           <div className="mt-2 flex items-center gap-3 border-t border-line px-2 pt-3 pb-2.5">
-            <span className="grid size-11 shrink-0 place-items-center rounded-full bg-accent-fill text-body font-medium text-white">
+            <span className="grid size-11 shrink-0 place-items-center rounded-full bg-riel-sel text-body font-medium text-white dark:bg-[#3a3a43]">
               {iniciales(profile.nombre)}
             </span>
             <span className="flex min-w-0 flex-1 flex-col gap-0.5">

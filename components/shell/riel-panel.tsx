@@ -25,7 +25,9 @@ const ROL: Record<Rol, string> = { admin: "Administrador", operador: "Operador" 
 
 // Botón redondo del riel (40 px); el grupo elegido es un círculo azul.
 const rielBtn = "size-10 rounded-full text-muted hover:bg-[var(--menu-hover)] hover:text-text";
-const rielOn = "bg-primary text-primary-foreground shadow-[var(--primario-sombra)] hover:bg-primary hover:text-primary-foreground";
+// Lo elegido del riel en tinta oscura (Biela, --riel-sel), no en el azul: el azul
+// queda para la acción principal.
+const rielOn = "bg-riel-sel text-white hover:bg-riel-sel hover:text-white dark:bg-[#3a3a43]";
 
 export function iniciales(nombre: string) {
   const partes = nombre.trim().split(/\s+/).filter(Boolean);
@@ -103,7 +105,7 @@ export function RielPanel({
               >
                 <Icono size={19} weight={on ? "fill" : "regular"} />
                 {punto && (
-                  <span aria-hidden className="absolute top-[7px] right-[7px] size-2 rounded-full bg-danger ring-2 ring-[#e8edf6] dark:ring-[#08080a]" />
+                  <span aria-hidden className="absolute top-[7px] right-[7px] size-2 rounded-full bg-danger ring-2 ring-[var(--lienzo)] dark:ring-[#08080a]" />
                 )}
               </IconButton>
             );
@@ -125,7 +127,7 @@ export function RielPanel({
             <PopoverTrigger asChild>
               <IconButton forma="suelto" label={`${profile.nombre}, ${ROL[profile.rol] ?? profile.rol}`} tooltipSide="right" className="size-10 rounded-full p-0 hover:bg-transparent">
                 <Avatar className="size-9">
-                  <AvatarFallback className="bg-primary text-meta font-medium text-primary-foreground">
+                  <AvatarFallback className="bg-riel-sel text-meta font-medium text-white dark:bg-[#3a3a43]">
                     {iniciales(profile.nombre)}
                   </AvatarFallback>
                 </Avatar>

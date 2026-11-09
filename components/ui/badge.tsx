@@ -3,12 +3,12 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { Slot } from "radix-ui"
 
-// Chip de estado del taller: pastilla 12,5/600 en el par de su estado
-// (fondo suave y letra que pasa AA). Es solo lectura: si se toca, es una
-// ficha o un botón. Con `punto`, el fondo es gris y el color va solo en un
-// punto de 7 px (para listas largas).
+// Chip de estado (Biela, limpieza del 2 nov 2026): pastilla 12,5/400 con el
+// fondo de su tono, sin filo ni punto. Es solo lectura: si se toca, es una
+// ficha o un botón. Con `punto`, el fondo toma el tono del punto (de lejos, un
+// estado gris con punto se ve igual a los demás).
 const badgeVariants = cva(
-  "inline-flex w-fit shrink-0 items-center justify-center gap-1.5 overflow-hidden rounded-full border border-transparent px-2.5 py-[5px] text-meta leading-none font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent focus-visible:outline-solid [&>svg]:pointer-events-none [&>svg]:size-3",
+  "inline-flex w-fit shrink-0 items-center justify-center gap-1.5 overflow-hidden rounded-full border border-transparent px-2.5 py-[5px] text-meta leading-none font-normal whitespace-nowrap transition-[color,box-shadow] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent focus-visible:outline-solid [&>svg]:pointer-events-none [&>svg]:size-3",
   {
     variants: {
       variant: {
@@ -33,11 +33,11 @@ const badgeVariants = cva(
 )
 
 const PUNTO = {
-  ok: "bg-success",
-  bad: "bg-danger",
-  warn: "bg-warn-fg",
-  info: "bg-accent",
-  gris: "bg-faint",
+  ok: "bg-ok-bg text-ok-fg",
+  bad: "bg-bad-bg text-bad-fg",
+  warn: "bg-warn-bg text-warn-fg",
+  info: "bg-info-bg text-info-fg",
+  gris: "bg-surface-2 text-text-2",
 } as const
 
 function Badge({
@@ -61,12 +61,11 @@ function Badge({
       data-variant={punto ? "punto" : variant}
       className={cn(
         badgeVariants({ variant }),
-        punto && "bg-surface-2 text-text-2",
+        punto && PUNTO[punto],
         className
       )}
       {...props}
     >
-      {punto && <span aria-hidden className={cn("size-[7px] shrink-0 rounded-full", PUNTO[punto])} />}
       {children}
     </Comp>
   )

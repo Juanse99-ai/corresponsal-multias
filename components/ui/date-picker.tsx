@@ -69,7 +69,7 @@ export function DatePicker({
           className={cn(
             // Como los campos rellenos: gris sin borde, radio 16 y la misma letra.
             variante === "campo" &&
-              "h-11 w-full justify-start rounded-2xl border-transparent bg-campo px-3.5 text-base font-normal shadow-none hover:bg-campo-hover lg:text-body dark:shadow-none",
+              "h-11 w-full justify-start rounded-2xl border-campo-borde bg-campo px-3.5 text-base font-normal shadow-none hover:bg-campo-hover lg:text-body dark:shadow-none",
             // Filtro: pastilla de 36 con borde de campo, como sus vecinos.
             variante === "filtro" &&
               "h-9 justify-start gap-1.5 rounded-full border-borde-campo bg-surface px-3.5 text-meta font-normal shadow-none hover:border-borde-boton hover:bg-bg-soft dark:shadow-none",

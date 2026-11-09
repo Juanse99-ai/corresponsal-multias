@@ -497,7 +497,7 @@ export function TiraPestanas({ isAdmin }: { isAdmin: boolean }) {
   const abiertaDe = (href: string) => todas.find((p) => p.href === href);
 
   return (
-    <div className="hidden h-[46px] min-w-0 items-center gap-0.5 rounded-full bg-[var(--menu-hover)] px-1 shadow-[0_0_0_1px_var(--line)] lg:flex">
+    <div className="capsula-lente hidden h-[46px] min-w-0 items-center gap-0.5 rounded-full px-1 lg:flex">
       <div ref={lista} role="tablist" aria-label="Pestañas abiertas" className="flex min-w-0 items-center gap-0.5">
         {todas.map((p, i) => {
           const on = p.id === estado.activa;

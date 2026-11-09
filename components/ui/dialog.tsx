@@ -86,10 +86,10 @@ function DialogContent({
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            className="absolute top-[18px] right-[18px] grid size-9 place-items-center rounded-full text-muted transition-colors duration-[var(--dur-1)] outline-none after:absolute after:-inset-1 hover:bg-surface-2 hover:text-text focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-solid disabled:pointer-events-none max-sm:top-[18px] max-sm:right-3 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-[18px]"
+            aria-label="Cerrar"
+            className="x-liquida absolute top-[14px] right-[14px] grid size-11 place-items-center rounded-full outline-none focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-solid disabled:pointer-events-none max-sm:top-[14px] max-sm:right-2"
           >
             <X />
-            <span className="sr-only">Cerrar</span>
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Content>
@@ -126,8 +126,10 @@ function DialogIcon({
 }
 
 /**
- * Cabecera de la ventana. Con `icono`, el círculo de color va a la izquierda
- * del título y la descripción (estilo del taller).
+ * Cabecera de la ventana. Con `icono` y un tono de riesgo (warn o bad), el
+ * círculo de color va a la izquierda del título; las demás ventanas van sin
+ * círculo (Biela, limpieza del 2 nov 2026: «sin círculo junto a títulos ni
+ * ventanas, salvo las que avisan de riesgo»).
  */
 function DialogHeader({
   className,
@@ -139,7 +141,7 @@ function DialogHeader({
   icono?: React.ReactNode
   tono?: keyof typeof TONO_ICONO
 }) {
-  if (icono) {
+  if (icono && (tono === "warn" || tono === "bad")) {
     return (
       <div
         data-slot="dialog-header"
@@ -197,7 +199,7 @@ function DialogTitle({
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-lead font-medium tracking-[-0.2px] sm:text-h1 sm:tracking-[-0.4px]", className)}
+      className={cn("text-title font-medium tracking-[-0.2px]", className)}
       {...props}
     />
   )
