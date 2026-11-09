@@ -63,6 +63,7 @@ export function Plegable({
   };
   const verPista = pista != null && pista !== "" && pista !== false && (pistaSiempre || !open);
   const tarjeta = variante === "tarjeta";
+  const Encabezado = tarjeta ? "h2" : "h3";
 
   return (
     <CollapsiblePrimitive.Root
@@ -81,6 +82,9 @@ export function Plegable({
           tarjeta ? "m-1 rounded-[20px]" : "rounded-xl",
         )}
       >
+        {/* Títulos en escalera (Biela, 19 oct 2026): el de la página es el único
+            h1; el de cada cajón, h2, y el de un renglón dentro, h3. */}
+        <Encabezado className="m-0 flex min-w-0 flex-1 font-[inherit]">
         <CollapsiblePrimitive.Trigger
           className={cn(
             "flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 text-left outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent focus-visible:outline-solid",
@@ -103,6 +107,7 @@ export function Plegable({
             {verPista && <span className="line-clamp-2 text-meta text-muted">{pista}</span>}
           </span>
         </CollapsiblePrimitive.Trigger>
+        </Encabezado>
         {cifra != null && cifra !== false && (
           <span className="tnum shrink-0 text-title font-medium text-text">{cifra}</span>
         )}
