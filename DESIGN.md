@@ -1,10 +1,85 @@
 # DESIGN.md — Corresponsal · Multidiagnósticos AS
 
 Registro: **product** (app de operación interna). Escena que fija el tema: Ivana operando
-todo el día desde un PC en un local iluminado, leyendo cifras de plata → **tema Azul**
-(claro) por defecto; **Noche** para quien la prefiera.
+todo el día desde un PC en un local iluminado, leyendo cifras de plata → **tema Claro**
+por defecto; **Noche** para quien la prefiera.
 
-## Estilo del taller (6 oct 2026)
+## Reglas de Biela (9 nov 2026, manda sobre lo de abajo si chocan)
+
+El dueño pidió aplicar al corresponsal las reglas actuales de la app del taller (Biela,
+repo `taller-automotriz-app`, `DESIGN.md` y `CLAUDE.md`), «emúlala pero con las funciones
+del corresponsal». Se tomó todo lo que es sistema y aspecto; la lógica del cuadre, las
+rutas y los permisos no cambiaron.
+
+- **Fondo Claro con Cobalto** (lo que Biela trae de serie desde el 2 nov 2026): lienzo
+  `#f6f7f9` sin degradado y sin marco visible, tarjetas blancas con filo `#e6e8ec` y
+  sombra mínima, tinta neutra (`#14161a`, `#3a3f47`, `#667080`), acento cobalto
+  `#1d5fd6`. La selección del riel y la cara de la cuenta van en tinta oscura
+  (`--riel-sel`), no en azul. Noche queda igual, con el acento de Cobalto (`#7aa2ff`).
+- **Letra**: cinco tamaños (12,5, 13,5, 15, 22 y 32) y dos pesos (400 y 500). La jerarquía
+  la da el gris, no el tamaño ni el negrito. Excepciones: 16 en los campos del celular y
+  10 en los nombres de la barra de abajo.
+- **Tiempos** con nombre: `--dur-fila` 18, `--dur-paso` 30, `--dur-0` 80, `--dur-1` 120,
+  `--dur-2` 220, `--dur-3` 420, `--dur-4` 600, `--dur-5` 900, `--dur-6` 1600 y
+  `--dur-sale` 180 (lo que se va sale más corto que lo que entra, nunca con ease-in).
+  Ningún ms a mano. Bloques de pantalla a 30 ms entre sí.
+- **Cortes**: celular hasta 600, tablet hasta 960, computador desde 961, monitor desde
+  1200 (`sm`, `lg`, `xl` de Tailwind y `lib/cortes.ts`).
+- **Capas** con nombre: `--z-base` 20, `--z-sticky` 30, `--z-flota` 60, `--z-ventana`
+  100, `--z-menu` 120, `--z-encima` 1000, `--z-globo` 1200, `--z-aviso` 9999.
+- **Vidrio en lo que flota**: la barra de abajo (vidrio vivo al 55 % con borde de lente),
+  los menús, desplegables, calendarios y popovers (`.vidrio-lente`), la tira de pestañas y
+  los avisos del computador (`.capsula-lente`, `.avisos-capsula`) y la × de cerrar de
+  ventanas y hojas (`.x-liquida`, una gota de 36 px con 44 de toque). En Chromium el borde
+  dobla lo de atrás con los filtros SVG de `components/fx/filtros-lente.tsx`
+  (`html[data-lente]`). Tarjetas, listas y ventanas siguen sólidas. Opaco con «reducir
+  transparencia» o «más contraste».
+- **Cajones que se recogen**: toda tarjeta o bloque de pantalla es un `Cajon`
+  (`components/ui/plegable.tsx`): todo el encabezado se toca, se sombrea con el mouse y la
+  flecha pequeña va al final (abajo abierta, a la derecha recogida). Recogido queda el
+  encabezado con su cifra. Lo recogido se recuerda por pantalla en el equipo; los
+  historiales arrancan recogidos siempre. Las listas principales de Historial y Bitácora,
+  los resúmenes en celdas, los vacíos y las fichas del Panel (que son enlaces) siguen como
+  tarjeta.
+- **Íconos con su color** (`lib/tonos.ts`): el cuadro del ícono dice de qué tipo es la
+  plata. Verde lo que entra en efectivo, rojo lo que sale, azul recaudo y banco, ámbar
+  préstamos y compensado, morado Sr. Luis, tirilla y soportes. Las cifras siguen en tinta.
+- **Deslizar para cerrar el día** (`components/ui/deslizar.tsx`): en la tarjeta navy del
+  Cuadre el candado se desliza hasta el final y guarda y cierra de una. Apagado, dice qué
+  falta («Escribe la tirilla», «Adjunta la tirilla», «Escribe la nota»). Con el teclado,
+  Enter. Si el día no cuadra, sale la confirmación de siempre.
+- **Cabeceras y barras sin repetir**: arriba el título y, como control, la fecha. No van
+  pastillas de aviso ni cifras que ya están en las tarjetas; cada dato se dice una vez.
+- **Botones** de una o dos palabras (el detalle va en el título de lo que abren);
+  `Button cargando` conserva su color con la ruedita mientras trabaja.
+- **Textos**: sin punto medio en pantalla (solo en el título de la pestaña del navegador
+  y en las imágenes que se exportan); un aviso dentro de un texto es `Senal` (punto de
+  color de 6 px y letra gris), ningún texto entero en rojo o ámbar.
+- **Fin de fila**: una sola flecha, `FlechaFila` (16 px en tinta inerte).
+- **Fechas**: «19 oct» en listas (con el año si no es el actual, `formatDia`) y
+  «dd/mm/aaaa» en el campo (`formatCampo`). Títulos, navegación entre días y separadores
+  siguen con su formato largo o corto.
+- **Estados** con el fondo de su tono, sin filo ni punto, en peso 400. **Avatares**
+  neutros. **Cabecera de tabla** sin franja: rótulo gris y una línea fina.
+- **Campos** rellenos con filete suave (`--campo-borde`, ~1,6:1 a propósito). **Casilla**
+  de 20 px con esquina de 4. **Interruptor** de iOS en verde.
+- **Ventanas**: título de 15; el círculo del ícono solo si avisan de riesgo (ámbar o
+  rojo).
+- **Avisos** (sonner): la tarjeta de la app, con el color solo en el círculo de 30 px del
+  ícono; al guardar, el check se dibuja.
+- **Ingreso**: papel claro, la marca arriba a la izquierda, la fecha y la hora en una
+  pastilla arriba al centro, el saludo por la hora en dos renglones, campos en pastilla de
+  52 sin rótulo a la vista y, a la derecha, el panel redondo con la marca.
+- **Pruebas**: `test/diseno-base.test.ts` (letra, pesos, tiempos, cortes, capas) y
+  `test/diseno-pantallas.test.ts` (botones, punto medio, fin de fila) corren con
+  `npm test`.
+
+No se tomó de Biela (no aplica o es de otra escala): las cuatro paletas por equipo, la isla
+con la gota y los avisos al momento, las transiciones entre secciones con SSGOI, las
+ventanas que nacen del botón, la órbita de «Actualizando…», las fotos que entran desde un
+desenfoque y el orden por columnas (las tablas del corresponsal son cortas o van por día).
+
+## Estilo del taller (6 oct 2026, lo que sigue vale salvo lo que cambió arriba)
 
 El dueño pidió "mudar" a esta app el diseño nuevo de la app del taller
 (Multidiagnósticos AS). Se tomó el sistema visual; la lógica, las rutas y los textos no
@@ -151,10 +226,12 @@ Nada de botones hechos a mano en las pantallas.
 - Sin gradient-text, sin glassmorphism decorativo, sin bordes laterales de color.
 
 ## Vidrio (capa flotante)
-El vidrio es para lo que FLOTA sobre el contenido, nunca para el contenido mismo:
-- La barra de abajo del celular (`.gbar`, con desenfoque y su lupa) es la única cápsula
-  de vidrio. La barra de arriba del celular es material translúcido de lado a lado
+El vidrio es para lo que FLOTA sobre el contenido, nunca para el contenido mismo (desde el
+9 nov 2026, como Biela):
+- La barra de abajo del celular (`.gbar`, vidrio vivo con borde de lente y su lupa), los
+  menús y popovers (`.vidrio-lente`), la tira de pestañas y los avisos del computador y la
+  × de cerrar. La barra de arriba del celular es material translúcido de lado a lado
   (`.barra-material`), no una cápsula.
-- Tarjetas, ventanas, menús, el chat del cruce y su barra de escribir son sólidos, porque
-  llevan cifras o se abren encima de texto.
+- Tarjetas, ventanas, el chat del cruce y su barra de escribir son sólidos, porque llevan
+  cifras.
 - Botones y controles: los de shadcn/ui (ver CLAUDE.md), sólidos, sin vidrio.

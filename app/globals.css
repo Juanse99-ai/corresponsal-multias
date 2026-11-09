@@ -304,6 +304,7 @@
   --riel: #1a1a1f;
   --riel-sombra: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
   --riel-on: #3a3a43;
+  --riel-sel: #3a3a43;
   --riel-on-sombra: 0 1px 3px rgba(0, 0, 0, 0.6), inset 0 0.5px 0 rgba(255, 255, 255, 0.12);
   --riel-on-tinta: #ffffff;
 

@@ -62,9 +62,10 @@
     taller: `bg-campo` (campos), `bg-blanco` (lo elegido, ventanas, menús),
     `bg-panel`, `bg-fila`/`border-fila-borde`, `bg-velo` (fondo de ventanas).
   - Ajustes propios ya hechos: botones en píldora con alto de 44 px y
-    `type="button"` por defecto; campos rellenos (gris sin borde, blancos con aro
-    azul al escribir) de 44 px con texto de 16 px (iOS no hace zoom); ventanas
-    sin filetes con `DialogHeader icono tono`; `Card` sin relleno propio (cada pantalla pone `p-5 sm:p-6` o usa
+    `type="button"` por defecto y `cargando` (ruedita, mismo color); campos
+    rellenos (gris con filete suave, blancos con aro azul al escribir) de 44 px
+    con texto de 16 px (iOS no hace zoom); ventanas sin filetes, título de 15 y
+    círculo de ícono solo si avisan de riesgo (`DialogHeader icono tono="warn|bad"`); `Card` sin relleno propio (cada pantalla pone `p-5 sm:p-6` o usa
     `CardHeader`/`CardContent`); variantes extra `success`/`info`/`danger` en
     `Badge` y `success`/`muted` en `Alert`.
   - Composiciones de la app hechas con shadcn: `ConfirmDialog` (AlertDialog),
@@ -73,12 +74,17 @@
     Calendar, fechas ISO, en español), `IconButton` (Button + Tooltip; `forma`
     gris dentro de tarjetas, blanco en la cabecera, suelto en barras),
     `TarjetaNavy` (Card), `Celdas`/`Celda`, `Contador`, `Baldosas` (ToggleGroup),
-    `Plegable` (Collapsible) y `CifraCabecera` (en `PageHeader`).
+    `Plegable`/`Cajon` (Collapsible), `Deslizar`, `Senal`, `FlechaFila` y
+    `CifraCabecera` (en `PageHeader`).
   - Cuál usar: tablas → `Table`; filas de listas → `Item` dentro de
     `ItemGroup variant="cajitas"` (cajitas en el computador, renglones en el
     celular); iniciales → `Avatar`; barras de avance → `Progress`; "no hay nada"
     → `Empty` (seco: sin ícono ni punto final); fechas → `DatePicker`; filtros
     → `DatePicker`/`NativeSelect` con `variante="filtro"` (pastilla de 36);
+    tarjeta o bloque de pantalla → `Cajon` (se recoge, recuerda lo recogido; con
+    `historial` arranca recogido); aviso dentro de un texto → `Senal`; fin de
+    fila → `FlechaFila`; cerrar el día → `Deslizar`; ícono de un tipo de plata
+    → su tono de `lib/tonos.ts`;
     2 a 5 opciones cortas → `ToggleGroup variant="segmentado"`; 3 o 4 opciones
     con ícono que mueven plata (tipo, medio) → `Baldosas`; cifras que se
     comparan → `Celdas`; número junto a un título → `Contador`; la cifra sobre
@@ -100,13 +106,37 @@
   `useMontado()` de `lib/use-montado.ts`. No uses `useEffect(() => setX(...), [])`
   para eso: el lint de React Hooks lo marca como error (`set-state-in-effect`).
 
+## Reglas de Biela (9 nov 2026, mandan sobre lo de abajo si chocan)
+El dueño pidió aplicar aquí las reglas actuales de la app del taller (Biela, repo
+`taller-automotriz-app`) con las funciones del corresponsal. Detalle en DESIGN.md,
+«Reglas de Biela». Lo que hay que cuidar en cada cambio:
+- **Letra**: cinco tamaños (`text-meta` 12,5, `text-body` 13,5, `text-title` 15,
+  `text-h1` 22, `text-display` 32) y dos pesos (400 y 500: `font-medium`, nunca
+  `font-semibold`/`font-bold`). La jerarquía la da el gris.
+- **Tiempos** con sus tokens (`--dur-fila` a `--dur-6`, `--dur-sale`); ningún ms a
+  mano. **Cortes** 600/960/1200 (`sm`, `lg`, `xl`; en JS, `lib/cortes.ts`).
+  **Capas** con `--z-*`; dentro de un componente, enteros de -1 a 9.
+- **Botones** y opciones de menú de una o dos palabras; el detalle va en el
+  título de lo que abren.
+- **Cajones que se recogen**: todo bloque de pantalla es un `Cajon`; los
+  historiales arrancan recogidos. Recogido queda el encabezado con su cifra.
+- **Cabeceras y barras sin repetir**: arriba el título y los controles; sin
+  pastillas de aviso ni cifras que ya están abajo. Cada dato se dice una vez.
+- **Íconos con su color** (`lib/tonos.ts`): verde entra, rojo sale, azul banco y
+  recaudo, ámbar préstamos, morado Sr. Luis. Las cifras siguen en tinta.
+- **Sin punto medio** en pantalla; avisos dentro de un texto con `Senal`.
+- **Fechas**: `formatDia` («19 oct») en listas y `formatCampo` (dd/mm/aaaa) en campos.
+- `test/diseno-base.test.ts` y `test/diseno-pantallas.test.ts` revisan letra,
+  pesos, tiempos, cortes, capas, botones, punto medio y fin de fila.
+
 ## Convenciones de diseño
 - Fuente única tipo iOS: SF Pro vía la pila del sistema de Apple (`--font-ios`,
   `-apple-system`). Sin Geist ni webfonts.
-- Estilo del taller (6 oct 2026, lo pidió el dueño: "mudar este diseño"). Dos
-  temas con `next-themes` (clase en `<html>`): **Azul** (claro) y **Noche**
-  (oscuro, negro total `#000`, tarjetas `#0e0e11`, sin sombras). Acento único
-  azul. En el computador la app va en un marco redondo (`.marco`) sobre el
+- Estilo del taller (6 oct 2026, lo pidió el dueño: "mudar este diseño"), con el
+  fondo Claro y la paleta Cobalto de Biela desde el 9 nov 2026. Dos temas con
+  `next-themes` (clase en `<html>`): **Claro** (lienzo `#f6f7f9`, tarjetas
+  blancas con filo fino, tinta neutra) y **Noche** (oscuro, negro total `#000`,
+  tarjetas `#0e0e11`, sin sombras). Acento único cobalto. En el computador la app va en un marco redondo (`.marco`) sobre el
   lienzo, con riel de íconos por grupo y panel de secciones
   (`components/shell/riel-panel.tsx`). En el celular, arriba el logo con la lupa
   y los avisos, y abajo la barra flotante (`components/shell/barra-abajo.tsx`):
@@ -114,25 +144,28 @@
   pantallas, la cuenta, el tema y cerrar sesión. La barra se encoge al bajar,
   saca la lupa al arrastrar el dedo y baja cuando el teclado está arriba (no
   con un campo enfocado solo: el autoFocus de Movimientos no la esconde).
-  Lo elegido (pestaña, ítem del menú) es pastilla blanca con sombra. Detalle en
+  Lo elegido en un riel (segmentado, pestaña) es pastilla blanca con sombra; en el
+  menú, pastilla gris; en el riel de grupos, círculo en tinta oscura (`--riel-sel`). Detalle en
   DESIGN.md. Los tokens `nav-*` (banda de marca del login, bienvenida y
   celebración) son iguales en ambos temas; las tarjetas navy usan `--navy`.
-- Verde/rojo solo para estado (cuadrado/descuadre), también en gráficos. Sin
-  morados/neón, sin emojis. Sin glows decorativos en tarjetas. Iconos:
+- Verde/rojo para estado (cuadrado/descuadre), también en gráficos; la única
+  excepción es el cuadro del ícono, que lleva el tono de su tipo de plata
+  (`lib/tonos.ts`). Sin neón, sin emojis. Sin glows decorativos en tarjetas. Iconos:
   `@phosphor-icons/react/dist/ssr`.
 - Que no parezca hecha con IA (se limpió a propósito, no reintroducir):
-  - Nada de degradados "aurora" ni halos de luz. Única excepción: el lienzo del
-    estilo del taller (`--lienzo`, degradado suave en Azul y un velo azul arriba
-    en Noche), detrás del marco.
+  - Nada de degradados "aurora" ni halos de luz. Única excepción: el velo azul
+    arriba del lienzo de Noche, detrás del marco.
   - Celular: barra superior de lado a lado con `.barra-material` y línea fina
-    abajo. Computador: la barra va dentro del marco, transparente. La barra de
-    abajo del celular es la única cápsula de vidrio flotante (como en el
-    taller); nada más lleva vidrio.
+    abajo. Computador: la barra va dentro del marco, transparente, con la tira
+    de pestañas y los avisos en cápsulas de vidrio. El vidrio con lente es solo
+    para lo que flota (barra de abajo, menús, popovers, la × de cerrar);
+    tarjetas, listas y ventanas son sólidas.
   - Etiquetas en oración normal, sin mayúsculas espaciadas (`uppercase tracking-*`).
     Las imágenes que se exportan (cuadre y reporte del Sr. Luis) sí conservan su
     formato de hoja de cálculo.
-  - Máximo un punto medio (`·`) por línea y nunca dentro de una etiqueta; datos
-    encadenados van con comas. Sin raya larga (`—`) como valor vacío.
+  - Sin punto medio (`·`) en pantalla (solo en el título de la pestaña del
+    navegador y en las imágenes que se exportan); datos encadenados van con
+    comas. Sin raya larga (`—`) como valor vacío.
   - Listas de cosas del mismo tipo en una sola tarjeta con separadores (como los
     ajustes de iOS), no una tarjeta por fila. En el computador, las filas de una
     `Table` dentro de una tarjeta se ven como cajitas separadas 6 px (CSS).
@@ -141,11 +174,12 @@
 - Animación con CSS y Framer Motion, solo con motivo: retroalimentación o cambio
   de estado (montos que cambian, check al cerrar el día). Sin GSAP ni efectos por
   letra. Una sola curva, la de iOS (`--ease-ios`; en framer, `TRANSICION` y
-  `CURVA_IOS` de `lib/movimiento.ts`), con 120, 220 o 420 ms. Rebote solo en la
-  lupa y la pastilla de la barra de abajo.
+  `CURVA_IOS` de `lib/movimiento.ts`), con los tokens `--dur-*` (120, 220 y 420
+  ms para trabajar; lo que sale, en `--dur-sale`). Rebote solo en la lupa y la
+  pastilla de la barra de abajo.
 - Entradas escalonadas: la de cada pantalla por bloques (`app/(app)/template.tsx`
-  + `.entra-bloques`, 45 ms entre bloques) y las barras de "Últimos cierres"
-  (`.barra-crece`, 40 ms entre barras); no agregues otras. (Las filas de las
+  + `.entra-bloques`, `--dur-paso` entre bloques) y las barras de "Últimos
+  cierres" (`.barra-crece`, `--dur-paso` entre barras); no agregues otras. (Las filas de las
   tablas del historial y las burbujas del cruce ya entraban de a poco, 20 ms.)
 - Todo se apaga con "reducir movimiento": `MotionConfig reducedMotion="user"`
   en el AppShell, el bloque `@media (prefers-reduced-motion)` de `globals.css`
