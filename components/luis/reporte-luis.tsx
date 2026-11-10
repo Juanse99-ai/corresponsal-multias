@@ -128,14 +128,13 @@ export function ReporteLuisButton({
             </div>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <Button onClick={descargar} disabled={busy} className="basis-full sm:flex-1 sm:basis-0">
+              <Button onClick={descargar} disabled={busy} className="flex-1">
                 <DownloadSimple size={17} weight="bold" />
-                {busy ? "Generando…" : "Descargar imagen"}
+                {busy ? "Generando…" : "Descargar"}
               </Button>
-              <Button variant="secondary" onClick={compartir} disabled={busy}>
-                <ShareNetwork size={17} />
-                Compartir
-              </Button>
+              <IconButton label="Compartir" onClick={compartir} disabled={busy}>
+                <ShareNetwork size={18} />
+              </IconButton>
               <IconButton label="Cerrar" onClick={() => setOpen(false)}>
                 <X size={18} />
               </IconButton>
@@ -153,7 +152,7 @@ export function ReporteLuisButton({
       ) : (
         <Button onClick={() => setOpen(true)}>
           <Export size={17} weight="bold" />
-          Reporte para el Sr. Luis
+          Reporte
         </Button>
       )}
       {modal}

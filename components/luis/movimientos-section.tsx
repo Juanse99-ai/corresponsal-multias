@@ -8,7 +8,6 @@ import { Plus, Trash, PencilSimple, ArrowDown, Receipt, WhatsappLogo, ClipboardT
 import { Card, CardHeader, CardTitle, CardDescription, CardAction, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { Empty, EmptyTitle } from "@/components/ui/empty";
@@ -90,7 +89,8 @@ export function MovimientosSection({
   fecha: string;
   items: MovimientoItem[];
   titulo: string;
-  subtitulo: string;
+  /** Opcional: la pantalla ya no lo muestra si no viene. */
+  subtitulo?: string;
   emptyText: string;
   tono: "consig" | "comp";
   agregar: (raw: unknown) => Promise<{ ok: boolean; error?: string }>;
@@ -311,8 +311,8 @@ export function MovimientosSection({
   return (
     <Card className="flex flex-col p-0">
       <CardHeader className="pb-0">
-        <CardTitle className="text-text">{titulo}</CardTitle>
-        <CardDescription>{subtitulo}</CardDescription>
+        <CardTitle className="text-text" icono={<Icon weight="bold" />}>{titulo}</CardTitle>
+        {subtitulo && <CardDescription>{subtitulo}</CardDescription>}
         <CardAction className="flex flex-col items-end gap-1">
           <AnimatedMoney value={total} className="text-title font-semibold text-text" />
           <Contador
@@ -332,8 +332,8 @@ export function MovimientosSection({
           <p className="flex items-start gap-1.5 text-meta font-semibold text-warn-fg">
             <Warning size={14} weight="fill" className="mt-px shrink-0" />
             {tono === "consig"
-              ? "El datáfono no pasa de $3.000.000 por consignación: si fue un monto grande, va partido en varias."
-              : "Las transferencias del Sr. Luis topan en $9.999.999: si mandó más, van en varias."}
+              ? "Tope del datáfono: $3.000.000. Pártela en varias."
+              : "Tope por transferencia: $9.999.999. Van en varias."}
           </p>
         )}
       </div>
@@ -346,7 +346,7 @@ export function MovimientosSection({
           <Input id={`hora-${tono}`} type="time" value={hora} onChange={(e) => setHora(e.target.value)} className="w-full min-w-0" />
         </div>
         <div className="flex min-w-[7rem] flex-1 flex-col gap-1.5">
-          <Label htmlFor={`nota-${tono}`}>Nota (opcional)</Label>
+          <Label htmlFor={`nota-${tono}`}>Nota</Label>
           <Input
             id={`nota-${tono}`}
             value={nota}
@@ -360,21 +360,15 @@ export function MovimientosSection({
 
       <ErrorNotice message={error} className="mt-3" />
 
-      <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
-        <Button variant="secondary" onClick={registrar} disabled={pending} className="w-full sm:w-auto">
+      <div className="mt-4 flex items-center gap-2">
+        <Button variant="secondary" onClick={registrar} disabled={pending} className="flex-1 sm:flex-none">
           <Plus size={16} weight="bold" />
           {pending ? "Guardando…" : "Agregar"}
         </Button>
         {!loteAbierto && (
-          <Button
-            variant="outline"
-            onClick={() => setLoteAbierto(true)}
-            disabled={pending}
-            className="w-full sm:w-auto"
-          >
-            <WhatsappLogo size={17} weight="fill" />
-            Pegar de WhatsApp
-          </Button>
+          <IconButton label="Pegar de WhatsApp" onClick={() => setLoteAbierto(true)} disabled={pending}>
+            <WhatsappLogo size={18} weight="fill" />
+          </IconButton>
         )}
       </div>
 
@@ -387,21 +381,15 @@ export function MovimientosSection({
             className="overflow-hidden"
           >
             <div className="mt-4 border-t border-linea-fila pt-4">
-              <p className="text-title font-semibold text-text">Chat de WhatsApp</p>
-              <div className="mt-2.5 flex gap-2">
-                <Button size="sm" variant="secondary" onClick={pegarDelPortapapeles}>
-                  <ClipboardText size={16} />
-                  Pegar
-                </Button>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button size="sm" variant="secondary" onClick={() => archivoRef.current?.click()}>
-                      <FileArrowUp size={16} />
-                      Subir
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Subir el chat exportado (.txt)</TooltipContent>
-                </Tooltip>
+              <div className="flex items-center gap-2">
+                <WhatsappLogo size={18} weight="fill" aria-hidden className="shrink-0 text-text-2" />
+                <p className="min-w-0 flex-1 text-title font-semibold text-text">Chat de WhatsApp</p>
+                <IconButton label="Pegar" size="icon-sm" onClick={pegarDelPortapapeles}>
+                  <ClipboardText size={17} />
+                </IconButton>
+                <IconButton label="Subir chat (.txt)" size="icon-sm" onClick={() => archivoRef.current?.click()}>
+                  <FileArrowUp size={17} />
+                </IconButton>
                 <input
                   ref={archivoRef}
                   type="file"
@@ -433,11 +421,10 @@ export function MovimientosSection({
 
               {soltoFotos && (
                 <Alert role="status" className="mt-2 block text-meta text-muted">
-                  Aquí va el texto del chat, no las fotos. Las fotos de los comprobantes van en{" "}
+                  Aquí va el texto. Las fotos van en{" "}
                   <a href="#comprobantes" onClick={() => setSoltoFotos(false)} className="font-medium text-accent-strong underline underline-offset-2">
-                    Comprobantes del día
+                    Comprobantes
                   </a>
-                  , al final de esta página.
                 </Alert>
               )}
 
@@ -470,6 +457,7 @@ export function MovimientosSection({
                           {seleccionados.length === 1 && seleccionados.length === lote.movimientos.length
                             ? "movimiento"
                             : "movimientos"}
+                          {diasSeleccionados > 1 && `, ${diasSeleccionados} días`}
                         </p>
                         <p className="tnum shrink-0 text-title font-semibold text-text">{formatCOP(totalSeleccion)}</p>
                       </div>
@@ -522,7 +510,7 @@ export function MovimientosSection({
                                           </ItemTitle>
                                           {(m.nota || repetidos.has(i) || lote.remitentes.length > 1) && (
                                             <ItemDescription className="line-clamp-none truncate leading-tight">
-                                              {repetidos.has(i) && <span className="font-medium text-text">Ya está registrada. </span>}
+                                              {repetidos.has(i) && <span className="font-medium text-text">Repetida. </span>}
                                               {lote.remitentes.length > 1 && m.de && (
                                                 <span className="text-faint">{m.de.split(" ")[0]}{m.nota ? ": " : ""}</span>
                                               )}
@@ -544,8 +532,8 @@ export function MovimientosSection({
                   {repetidos.size > 0 && (
                     <p className="mt-2 text-meta text-muted">
                       {repetidos.size === 1
-                        ? "1 ya estaba registrado en este día y quedó sin marcar."
-                        : `${repetidos.size} ya estaban registrados en este día y quedaron sin marcar.`}
+                        ? "1 ya registrado, sin marcar."
+                        : `${repetidos.size} ya registrados, sin marcar.`}
                     </p>
                   )}
                   {lote.ignoradas.length > 0 && (
@@ -557,8 +545,7 @@ export function MovimientosSection({
                           className="group/ign h-auto min-h-0 whitespace-normal p-0 text-left text-meta font-normal text-faint"
                         >
                           <CaretDown className="size-3 transition-transform group-data-[state=closed]/ign:-rotate-90" />
-                          {lote.ignoradas.length === 1 ? "Se ignoró 1 línea" : `Se ignoraron ${lote.ignoradas.length} líneas`} (fotos,
-                          números de cuenta, texto sin monto)
+                          {lote.ignoradas.length === 1 ? "1 línea ignorada" : `${lote.ignoradas.length} líneas ignoradas`}
                         </Button>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
@@ -586,8 +573,7 @@ export function MovimientosSection({
                     ? "Guardando…"
                     : seleccionados.length === 0
                       ? "Guardar"
-                      : `Guardar ${seleccionados.length} ${seleccionados.length === 1 ? "movimiento" : "movimientos"}` +
-                        (diasSeleccionados > 1 ? ` en ${diasSeleccionados} días` : "")}
+                      : `Guardar ${seleccionados.length}`}
                 </Button>
                 <IconButton
                   label="Cancelar"
@@ -631,7 +617,7 @@ export function MovimientosSection({
                       <MoneyInput value={eMonto} onValueChange={setEMonto} autoFocus aria-label="Monto" />
                       <Input type="time" value={eHora} onChange={(e) => setEHora(e.target.value)} aria-label="Hora" />
                     </div>
-                    <Input value={eNota} onChange={(e) => setENota(e.target.value)} placeholder="Nota (opcional)" aria-label="Nota" />
+                    <Input value={eNota} onChange={(e) => setENota(e.target.value)} placeholder="Nota" aria-label="Nota" />
                     <div className="flex items-center gap-2">
                       <Button size="sm" onClick={guardarEdicion} disabled={pending}>
                         <Check size={16} weight="bold" />

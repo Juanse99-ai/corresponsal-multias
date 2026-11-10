@@ -10,6 +10,7 @@ import { ReporteLuisButton } from "@/components/luis/reporte-luis";
 import { AnimatedMoney } from "@/components/ui/animated-number";
 import { Badge } from "@/components/ui/badge";
 import { DateNav } from "@/components/shell/date-nav";
+import { ArrowUpRight, ArrowDownLeft, CheckCircle } from "@phosphor-icons/react/dist/ssr";
 
 export const metadata: Metadata = { title: "Cuenta del Sr. Luis · Corresponsal" };
 
@@ -45,6 +46,13 @@ export default async function LuisPage({
             rotulo="Saldo acumulado del Sr. Luis"
             chip={
               <Badge variant={acumulado > 0 ? "info" : acumulado === 0 ? "success" : "secondary"}>
+                {acumulado > 0 ? (
+                  <ArrowUpRight weight="bold" />
+                ) : acumulado < 0 ? (
+                  <ArrowDownLeft weight="bold" />
+                ) : (
+                  <CheckCircle weight="fill" />
+                )}
                 {acumulado > 0 ? "A favor de Luis" : acumulado < 0 ? "A favor del punto" : "Igualado"}
               </Badge>
             }
@@ -74,9 +82,9 @@ export default async function LuisPage({
           fecha={fecha}
           soportes={soportes}
           contexto="luis"
-          titulo="Comprobantes del día"
-          texto="Sube las fotos de las transferencias"
-          detalleBorrado="Se borra la foto del comprobante. Los movimientos no cambian."
+          titulo="Comprobantes"
+          texto="Fotos de las transferencias"
+          detalleBorrado="Se borra la foto. Los movimientos no cambian."
         />
         <ComprobantesLector
           fecha={fecha}
