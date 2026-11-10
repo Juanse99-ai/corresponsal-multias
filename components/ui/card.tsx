@@ -30,13 +30,50 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
+/** Ícono en círculo gris de 32 junto al título de una tarjeta. */
+function CardIcono({ className, ...props }: React.ComponentProps<"span">) {
+  return (
+    <span
+      data-slot="card-icono"
+      aria-hidden
+      className={cn(
+        "grid size-8 shrink-0 place-items-center rounded-full bg-surface-2 text-text-2 [&_svg]:size-[17px]",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+/**
+ * Título de tarjeta. Con `icono`, el ícono va antes en un círculo gris (la
+ * app lleva un ícono por tarjeta: se reconoce sin leer).
+ */
+function CardTitle({
+  className,
+  icono,
+  children,
+  ...props
+}: React.ComponentProps<"div"> & { icono?: React.ReactNode }) {
   return (
     <div
       data-slot="card-title"
-      className={cn("text-lead font-medium tracking-[-0.3px]", className)}
+      className={cn(
+        "text-lead font-medium tracking-[-0.3px]",
+        icono && "flex min-w-0 items-center gap-2.5",
+        className
+      )}
       {...props}
-    />
+    >
+      {icono ? (
+        <>
+          <CardIcono>{icono}</CardIcono>
+          <span className="min-w-0 truncate">{children}</span>
+        </>
+      ) : (
+        children
+      )}
+    </div>
   )
 }
 
@@ -88,6 +125,7 @@ export {
   CardHeader,
   CardFooter,
   CardTitle,
+  CardIcono,
   CardAction,
   CardDescription,
   CardContent,
