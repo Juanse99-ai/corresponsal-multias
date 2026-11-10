@@ -39,7 +39,7 @@ export function ComprobantesLector({
   guardarLote }: {
   fecha: string;
   cantidadFotos: number;
-  leerFotos: (fecha: string) => Promise<{ ok: boolean; error?: string; items?: ComprobanteLeido[] }>;
+  leerFotos: (fecha: string) => Promise<{ ok: boolean; error?: string; items?: ComprobanteLeido[]; quitadas?: number }>;
   guardarLote: (raw: unknown) => Promise<{
     ok: boolean;
     error?: string;
@@ -84,7 +84,15 @@ export function ComprobantesLector({
     startTransition(async () => {
       const res = await leerFotos(fecha);
       if (res.ok && res.items) {
-        setItems(res.items);
+        const quitadas = res.quitadas ?? 0;
+        // Las que ya estaban registradas se borraron al leerlas.
+        if (quitadas > 0) {
+          toast.success(
+            quitadas === 1 ? "Se quitó 1 foto ya registrada." : `Se quitaron ${quitadas} fotos ya registradas.`,
+          );
+          router.refresh();
+        }
+        setItems(res.items.length > 0 ? res.items : null);
         setTocados(new Set());
       } else {
         setError(res.error ?? "No se pudieron leer las fotos.");

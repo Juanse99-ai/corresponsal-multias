@@ -271,11 +271,13 @@ const LECTURAS_EN_PARALELO = 3;
 /**
  * Lee las tirillas del día que todavía no se han leído y guarda el resultado
  * en el soporte, para no volver a pagar la misma imagen. No guarda ningún
- * movimiento: eso lo decide el usuario en la revisión.
+ * movimiento: eso lo decide el usuario en la revisión. Las fotos cuya
+ * consignación ya está registrada (mismo día, monto y hora) se borran apenas
+ * se leen y no vuelven en la lista (`quitadas`).
  */
 export async function leerComprobantesDelDia(
   fecha: string,
-): Promise<{ ok: boolean; error?: string; items?: ComprobanteLeido[] }> {
+): Promise<{ ok: boolean; error?: string; items?: ComprobanteLeido[]; quitadas?: number }> {
   await requireSession();
   if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return { ok: false, error: "Fecha inválida." };
   if (!lecturaDisponible()) {
@@ -357,7 +359,64 @@ export async function leerComprobantesDelDia(
     Array.from({ length: Math.min(LECTURAS_EN_PARALELO, soportes.length) }, trabajador),
   );
 
-  return { ok: true, items: salida };
+  // Las ya registradas se quitan. Misma clave que agregarLote (día, monto y
+  // hora HH:MM), y con cupo: si hay dos consignaciones iguales registradas,
+  // se quitan a lo sumo dos fotos con esa clave.
+  const clave = (f: string, monto: number, hora: string) => `${f}|${monto}|${hora.slice(0, 5)}`;
+  const leidas = salida.filter(
+    (c) => c.esComprobante && typeof c.monto === "number" && c.monto > 0 && !!c.hora,
+  );
+  const fechas = [...new Set(leidas.map((c) => c.fecha ?? fecha))];
+  const yaRegistradas = new Set<string>();
+  if (fechas.length > 0) {
+    const { data: existentes } = await sb
+      .from("corr_consignaciones_luis")
+      .select("fecha, monto, hora")
+      .in("fecha", fechas);
+    const cupo = new Map<string, number>();
+    for (const r of existentes ?? []) {
+      if (!r.hora) continue;
+      const k = clave(r.fecha, r.monto, r.hora);
+      cupo.set(k, (cupo.get(k) ?? 0) + 1);
+    }
+    // La misma tirilla fotografiada dos veces (mismo recibo) es una sola
+    // consignación: la copia también se quita, sin gastar cupo.
+    const recibosQuitados = new Set<string>();
+    for (const c of leidas) {
+      const k = clave(c.fecha ?? fecha, c.monto as number, c.hora as string);
+      const kr = c.recibo ? `${k}|${c.recibo}` : null;
+      if (kr && recibosQuitados.has(kr)) {
+        yaRegistradas.add(c.soporteId);
+        continue;
+      }
+      const n = cupo.get(k) ?? 0;
+      if (n > 0) {
+        cupo.set(k, n - 1);
+        yaRegistradas.add(c.soporteId);
+        if (kr) recibosQuitados.add(kr);
+      }
+    }
+  }
+
+  let quitadas = 0;
+  if (yaRegistradas.size > 0) {
+    const fotos = soportes.filter((s) => yaRegistradas.has(s.id));
+    await sb.storage.from(SOPORTES_BUCKET).remove(fotos.map((f) => f.path));
+    const { error } = await sb
+      .from("corr_soportes")
+      .delete()
+      .in("id", fotos.map((f) => f.id));
+    if (error) {
+      // Si no se pudieron borrar, se muestran como siempre (salen como repetidas al guardar).
+      console.error("Quitar fotos ya registradas:", error);
+      yaRegistradas.clear();
+    } else {
+      quitadas = fotos.length;
+      revalidatePath("/luis");
+    }
+  }
+
+  return { ok: true, items: salida.filter((c) => !yaRegistradas.has(c.soporteId)), quitadas };
 }
 
 // ===== Corregir (monto / hora / nota) sin borrar =====
