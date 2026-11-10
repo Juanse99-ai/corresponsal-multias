@@ -43,6 +43,7 @@ export function ComprobantesLector({
     error?: string;
     insertados?: number;
     repetidos?: number;
+    fotosBorradas?: number;
   }>;
 }) {
   const router = useNavegacion();
@@ -96,6 +97,7 @@ export function ComprobantesLector({
     startTransition(async () => {
       const res = await guardarLote({
         fecha,
+        soporteIds: seleccion.map((c) => c.soporteId),
         items: seleccion.map((c) => ({
           fecha: c.fecha ?? fecha,
           monto: c.monto as number,
@@ -106,13 +108,17 @@ export function ComprobantesLector({
       if (res.ok) {
         const n = res.insertados ?? seleccion.length;
         const rep = res.repetidos ?? 0;
+        const borradas = res.fotosBorradas ?? 0;
         setItems(null);
         toast.success(
-          n === 0
+          (n === 0
             ? "Todas ya estaban registradas."
             : `${n} ${n === 1 ? "consignación agregada" : "consignaciones agregadas"}` +
-                (rep > 0 ? `; ${rep} ya ${rep === 1 ? "estaba" : "estaban"}` : "") +
-                ".",
+              (rep > 0 ? `; ${rep} ya ${rep === 1 ? "estaba" : "estaban"}` : "") +
+              ".") +
+            (borradas > 0
+              ? ` Se ${borradas === 1 ? "quitó 1 foto leída" : `quitaron ${borradas} fotos leídas`}.`
+              : ""),
         );
         router.refresh();
       } else {

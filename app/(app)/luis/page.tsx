@@ -4,7 +4,7 @@ import { getConsignacionesLuis, getCompensacionesLuis, getSaldoLuisAcumulado, ge
 import { LuisManager } from "@/components/luis/luis-manager";
 import { SoportesSection } from "@/components/cuadre/soportes-section";
 import { ComprobantesLector } from "@/components/luis/comprobantes-lector";
-import { leerComprobantesDelDia, agregarConsignacionesLote } from "@/app/(app)/luis/actions";
+import { leerComprobantesDelDia, agregarConsignacionesDesdeFotos } from "@/app/(app)/luis/actions";
 import { PageHeader, CifraCabecera } from "@/components/shell/page-header";
 import { ReporteLuisButton } from "@/components/luis/reporte-luis";
 import { AnimatedMoney } from "@/components/ui/animated-number";
@@ -82,7 +82,7 @@ export default async function LuisPage({
           fecha={fecha}
           cantidadFotos={soportes.length}
           leerFotos={leerComprobantesDelDia}
-          guardarLote={agregarConsignacionesLote}
+          guardarLote={agregarConsignacionesDesdeFotos}
         />
       </div>
     </div>
