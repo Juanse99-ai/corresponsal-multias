@@ -1,8 +1,9 @@
 import { Fragment } from "react";
 import Link from "next/link";
-import { CheckCircle, WarningCircle, Info, CaretRight } from "@phosphor-icons/react/dist/ssr";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle, WarningCircle, Info, CaretRight, Eye, ShieldCheck } from "@phosphor-icons/react/dist/ssr";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Contador } from "@/components/ui/contador";
+import { Badge } from "@/components/ui/badge";
 import {
   ItemGroup,
   Item,
@@ -28,14 +29,18 @@ export function ListaHallazgos({ hallazgos }: { hallazgos: Hallazgo[] }) {
   // El único vacío que se celebra: todo revisado y en orden.
   if (hallazgos.length === 0) {
     return (
-      <Card className="p-5">
-        <p className="flex items-start gap-2 rounded-lg bg-ok-bg px-3 py-2.5 text-meta text-ok-fg">
-          <CheckCircle size={15} weight="fill" className="mt-px shrink-0" />
-          <span>
-            <span className="font-semibold">Sin hallazgos.</span> Ningún registro pasa del tope, no hay duplicados y
-            todos los días tienen su cuadre.
-          </span>
-        </p>
+      <Card>
+        <CardHeader className="items-center pb-5">
+          <CardTitle className="self-center text-text" icono={<ShieldCheck />}>
+            <h2>Sin hallazgos</h2>
+          </CardTitle>
+          <CardAction className="self-center">
+            <Badge variant="success">
+              <CheckCircle weight="fill" />
+              Cuadra
+            </Badge>
+          </CardAction>
+        </CardHeader>
       </Card>
     );
   }
@@ -44,16 +49,21 @@ export function ListaHallazgos({ hallazgos }: { hallazgos: Hallazgo[] }) {
     <Card>
       {[
         { titulo: "Revisar", items: graves, grave: true },
-        { titulo: "Vale la pena mirar", items: avisos, grave: false },
+        { titulo: "Mirar", items: avisos, grave: false },
       ]
         .filter((g) => g.items.length > 0)
         .map((grupo) => (
           <Fragment key={grupo.titulo}>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-meta font-semibold tracking-normal text-faint">
+            <CardHeader className="items-center pb-2">
+              <CardTitle
+                className="self-center text-text"
+                icono={grupo.grave ? <WarningCircle /> : <Eye />}
+              >
                 <h2>{grupo.titulo}</h2>
-                <Contador n={grupo.items.length} tono={grupo.grave ? "peligro" : "aviso"} />
               </CardTitle>
+              <CardAction className="self-center">
+                <Contador n={grupo.items.length} tono={grupo.grave ? "peligro" : "aviso"} />
+              </CardAction>
             </CardHeader>
             <CardContent className="not-last:pb-2">
               <ItemGroup variant="cajitas" className="max-lg:divide-y max-lg:divide-linea-fila">

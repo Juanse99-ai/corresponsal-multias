@@ -125,13 +125,13 @@ export function HistorialTable({ cuadres, isAdmin }: { cuadres: CuadreRow[]; isA
           <Celda rotulo="Descuadres">
             {totales.descuadres > 0 ? <Badge variant="danger">{totales.descuadres}</Badge> : totales.descuadres}
           </Celda>
-          <Celda rotulo="Tirilla total">{formatCOP(totales.tirilla)}</Celda>
+          <Celda rotulo="Tirilla">{formatCOP(totales.tirilla)}</Celda>
         </Celdas>
       </div>
 
       {filtrados.length === 0 ? (
         <Empty fila className="px-5 pb-5">
-          <EmptyTitle>No hay cierres en este rango</EmptyTitle>
+          <EmptyTitle>Sin cierres en este rango</EmptyTitle>
         </Empty>
       ) : (
         <>

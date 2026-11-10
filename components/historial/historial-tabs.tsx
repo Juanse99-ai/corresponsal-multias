@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Calculator, Wallet } from "@phosphor-icons/react/dist/ssr";
+import { Calculator, ChartLineUp, Wallet } from "@phosphor-icons/react/dist/ssr";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AreaTendencia } from "@/components/ui/area-chart";
 import { HistorialTable } from "./historial-table";
 import { LuisHistorialTable } from "./luis-historial-table";
@@ -15,12 +15,12 @@ type Tab = "cierres" | "luis";
 /** Tarjeta de tendencia sobre cada tabla del historial. */
 function TendenciaCard({
   titulo,
-  subtitulo,
+  icono,
   datos,
   nombre,
 }: {
   titulo: string;
-  subtitulo: string;
+  icono: React.ReactNode;
   datos: { fecha: string; valor: number }[];
   nombre: string;
 }) {
@@ -28,8 +28,9 @@ function TendenciaCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-text">{titulo}</CardTitle>
-        <CardDescription>{subtitulo}</CardDescription>
+        <CardTitle className="text-text" icono={icono}>
+          {titulo}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <AreaTendencia datos={datos} nombre={nombre} />
@@ -75,8 +76,8 @@ export function HistorialTabs({ cuadres, luis }: { cuadres: CuadreRow[]; luis: L
       {tab === "cierres" ? (
         <>
           <TendenciaCard
-            titulo="Movimiento del punto"
-            subtitulo="Total de la tirilla por día (últimos 60 cierres)"
+            titulo="Tirilla por día"
+            icono={<ChartLineUp />}
             datos={datosTirilla}
             nombre="en tirilla"
           />
@@ -85,8 +86,8 @@ export function HistorialTabs({ cuadres, luis }: { cuadres: CuadreRow[]; luis: L
       ) : (
         <>
           <TendenciaCard
-            titulo="Cuenta del Sr. Luis"
-            subtitulo="Saldo acumulado a su favor, día a día"
+            titulo="Acumulado del Sr. Luis"
+            icono={<Wallet />}
             datos={datosLuis}
             nombre="a favor de Luis"
           />

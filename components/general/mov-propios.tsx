@@ -3,7 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import { useNavegacion } from "@/lib/use-navegacion";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Trash, Paperclip, ArrowsLeftRight, ArrowUp, ArrowSquareOut } from "@phosphor-icons/react/dist/ssr";
+import { Plus, Trash, Paperclip, ArrowsLeftRight, ArrowUp, ArrowSquareOut, UserSwitch } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -87,8 +87,8 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-text">
-          <h2>Mis compensaciones / retiros</h2>
+        <CardTitle className="text-text" icono={<UserSwitch />}>
+          <h2>Mis movimientos</h2>
         </CardTitle>
       </CardHeader>
 
@@ -123,7 +123,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="mov-nota">Nota (opcional)</Label>
+          <Label htmlFor="mov-nota">Nota</Label>
           <Input id="mov-nota" value={nota} onChange={(e) => setNota(e.target.value)} placeholder="Referencia…" onKeyDown={(e) => esEnter(e) && !pending && registrar()} />
         </div>
 
@@ -137,7 +137,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
         >
         <label>
           <Paperclip className="shrink-0" />
-          <span className="min-w-0 truncate">{file ? file.name : "Adjuntar anexo (foto o PDF)"}</span>
+          <span className="min-w-0 truncate">{file ? file.name : "Anexo"}</span>
           <input
             ref={inputRef}
             type="file"
@@ -152,7 +152,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
 
         <Button variant="secondary" onClick={registrar} disabled={pending} className="w-full sm:w-auto sm:self-start">
           <Plus size={16} weight="bold" />
-          {pending ? "Guardando…" : "Registrar movimiento"}
+          {pending ? "Guardando…" : "Agregar"}
         </Button>
       </div>
 
@@ -181,14 +181,14 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
                   </ItemContent>
                   <ItemActions className="shrink-0 gap-1.5">
                     {m.url && (
-                      <IconButton asChild label={m.soporte_nombre ?? "Anexo"} className="lg:size-[38px]">
+                      <IconButton asChild label={m.soporte_nombre ? `Abrir ${m.soporte_nombre}` : "Abrir anexo"} className="lg:size-[38px]">
                         <a href={m.url} target="_blank" rel="noopener noreferrer">
                           <ArrowSquareOut size={17} />
                         </a>
                       </IconButton>
                     )}
                     <IconButton
-                      label="Borrar"
+                      label="Borrar movimiento"
                       onClick={() => setPorBorrar({ id: m.id, monto: m.monto })}
                       disabled={pending}
                       peligro
@@ -206,7 +206,7 @@ export function MovPropios({ movimientos }: { movimientos: MovPropioConUrl[] }) 
       </CardContent>
       <ConfirmDialog
         open={!!porBorrar}
-        titulo="¿Borrar este movimiento propio?"
+        titulo="¿Borrar este movimiento?"
         monto={porBorrar?.monto ?? null}
         detalle="Queda registrado en la bitácora."
         onConfirmar={() => porBorrar && borrar(porBorrar.id)}

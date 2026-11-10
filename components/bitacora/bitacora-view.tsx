@@ -15,11 +15,14 @@ import {
   HandCoins,
   Paperclip,
   Vault,
-  X,
+  ListBullets,
+  SquaresFour,
+  User,
+  UsersThree,
+  FunnelX,
 } from "@phosphor-icons/react/dist/ssr";
 import type { Icon } from "@phosphor-icons/react";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Celdas, Celda } from "@/components/ui/celdas";
@@ -285,7 +288,7 @@ export function BitacoraView({ entries }: { entries: AuditEntry[] }) {
               <InputGroupInput
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Buscar por nombre, persona, monto…"
+                placeholder="Buscar…"
                 aria-label="Buscar en la bitácora"
               />
             </InputGroup>
@@ -303,14 +306,26 @@ export function BitacoraView({ entries }: { entries: AuditEntry[] }) {
             onValueChange={(v) => v && setAccion(v as "todas" | AccionTipo)}
             aria-label="Acción"
           >
-            <ToggleGroupItem value="todas">Todas</ToggleGroupItem>
-            <ToggleGroupItem value="INSERT">Registró</ToggleGroupItem>
-            <ToggleGroupItem value="UPDATE">Editó</ToggleGroupItem>
-            <ToggleGroupItem value="DELETE">Borró</ToggleGroupItem>
+            <ToggleGroupItem value="todas">
+              <ListBullets />
+              Todas
+            </ToggleGroupItem>
+            <ToggleGroupItem value="INSERT">
+              <Plus />
+              Registró
+            </ToggleGroupItem>
+            <ToggleGroupItem value="UPDATE">
+              <PencilSimple />
+              Editó
+            </ToggleGroupItem>
+            <ToggleGroupItem value="DELETE">
+              <Trash />
+              Borró
+            </ToggleGroupItem>
           </ToggleGroup>
 
           <div role="group" aria-label="Módulo" className="flex flex-wrap gap-2">
-            <Chip active={modulo === "todos"} onClick={() => setModulo("todos")}>
+            <Chip active={modulo === "todos"} onClick={() => setModulo("todos")} icon={SquaresFour}>
               Todos
             </Chip>
             {MODULOS.map((m) => (
@@ -324,21 +339,20 @@ export function BitacoraView({ entries }: { entries: AuditEntry[] }) {
             <div className="flex flex-wrap items-center gap-2">
               {actores.length > 1 && (
                 <div role="group" aria-label="Quién" className="flex flex-wrap gap-2">
-                  <Chip active={actor === "todos"} onClick={() => setActor("todos")}>
+                  <Chip active={actor === "todos"} onClick={() => setActor("todos")} icon={UsersThree}>
                     Todos
                   </Chip>
                   {actores.map((a) => (
-                    <Chip key={a} active={actor === a} onClick={() => setActor(a)}>
+                    <Chip key={a} active={actor === a} onClick={() => setActor(a)} icon={User}>
                       {a.split(/\s+/)[0]}
                     </Chip>
                   ))}
                 </div>
               )}
               {hayFiltro && (
-                <Button size="sm" variant="ghost" onClick={limpiar} className="ml-auto">
-                  <X size={16} />
-                  Limpiar
-                </Button>
+                <IconButton label="Limpiar filtros" forma="suelto" onClick={limpiar} className="ml-auto">
+                  <FunnelX size={18} />
+                </IconButton>
               )}
             </div>
           )}
@@ -347,7 +361,7 @@ export function BitacoraView({ entries }: { entries: AuditEntry[] }) {
         {/* Lista por día como línea de tiempo, del más nuevo al más viejo. */}
         {filtrados.length === 0 ? (
           <Empty fila className="px-5 pt-4 pb-5">
-            <EmptyTitle>Ningún registro con estos filtros</EmptyTitle>
+            <EmptyTitle>Nada con estos filtros</EmptyTitle>
           </Empty>
         ) : (
           <div className="flex flex-col gap-4 px-5 pt-5 pb-4">
@@ -440,7 +454,7 @@ function Fila({
         <CollapsibleContent className="plegable-cuerpo col-start-3 overflow-hidden">
           <div className="pb-2">
             {cambios.length === 0 ? (
-              <p className="text-meta text-faint">Sin detalle adicional</p>
+              <p className="text-meta text-faint">Sin detalle</p>
             ) : (
               <div className="flex flex-col">
                 {cambios.map((c) => (
