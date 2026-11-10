@@ -3,7 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import { useNavegacion } from "@/lib/use-navegacion";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash, FilePdf, Receipt, ArrowSquareOut } from "@phosphor-icons/react/dist/ssr";
+import { Trash, FilePdf, Paperclip, UploadSimple, ArrowSquareOut } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { IconButton } from "@/components/ui/icon-button";
 import { Progress } from "@/components/ui/progress";
@@ -45,7 +45,7 @@ export function SoportesSection({
   contexto = "cuadre",
   titulo = "Soportes del día",
   texto = "Sube la tirilla del datáfono",
-  detalleBorrado = "Sin la tirilla adjunta no podrás cerrar el día.",
+  detalleBorrado = "Sin tirilla no podrás cerrar el día.",
   className }: {
   fecha: string;
   soportes: SoporteConUrl[];
@@ -138,8 +138,8 @@ export function SoportesSection({
   return (
     <Card className={cn("mt-5", className)}>
       <CardHeader className="items-center">
-        <CardTitle className="self-center text-text">
-          <h3>{titulo}</h3>
+        <CardTitle role="heading" aria-level={3} icono={<Paperclip weight="bold" />} className="self-center text-text">
+          {titulo}
         </CardTitle>
         {soportes.length > 0 && (
           <CardAction className="self-center">
@@ -191,23 +191,21 @@ export function SoportesSection({
           {subiendo ? (
             <Spinner size={19} weight="bold" className="size-[19px]" />
           ) : (
-            <Receipt size={19} weight="fill" />
+            <UploadSimple size={19} weight="bold" />
           )}
         </div>
         <p className="text-body font-medium text-text">
           {progreso ? `Subiendo ${progreso.hechos} de ${progreso.total}…` : texto}
         </p>
-        <p className="text-meta text-faint">
-          {progreso
-            ? "No cierres esta pantalla."
-            : "Toca para escoger o arrastra las fotos aquí. Puedes subir varias a la vez."}
-        </p>
         {progreso && (
-          <Progress
-            value={Math.round((progreso.hechos / progreso.total) * 100)}
-            aria-label="Avance de la subida"
-            className="mt-1.5 w-40"
-          />
+          <>
+            <p className="text-meta text-faint">No cierres esta pantalla.</p>
+            <Progress
+              value={Math.round((progreso.hechos / progreso.total) * 100)}
+              aria-label="Avance de la subida"
+              className="mt-1.5 w-40"
+            />
+          </>
         )}
       </label>
 

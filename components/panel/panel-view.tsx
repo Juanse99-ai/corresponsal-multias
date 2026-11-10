@@ -4,8 +4,23 @@ import { useId, useRef, type CSSProperties } from "react";
 import Link from "next/link";
 import { useInView, useReducedMotion } from "framer-motion";
 import { Bar, Cell, ComposedChart, LabelList, Line, XAxis, YAxis } from "recharts";
-import { CaretRight, CaretDown, CaretUp, CheckCircle, Warning, Plus, ArrowRight } from "@phosphor-icons/react/dist/ssr";
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  CaretRight,
+  CaretDown,
+  CaretUp,
+  CheckCircle,
+  Warning,
+  Plus,
+  ArrowRight,
+  Wallet,
+  HandCoins,
+  ChartBar,
+  CalendarCheck,
+  CircleDashed,
+  Receipt,
+  ClockCounterClockwise,
+} from "@phosphor-icons/react/dist/ssr";
+import { Card, CardAction, CardContent, CardHeader, CardIcono, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, type ChartConfig } from "@/components/ui/chart";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
@@ -72,9 +87,15 @@ export function PanelView({ data }: { data: PanelData }) {
           <div className="flex items-center justify-between gap-3">
             <NavyRotulo>Cuadre de hoy</NavyRotulo>
             {!data.cuadreHoy ? (
-              <Badge variant="secondary">Sin abrir</Badge>
+              <Badge variant="secondary">
+                <CircleDashed weight="bold" />
+                Pendiente
+              </Badge>
             ) : sinTirilla ? (
-              <Badge variant="secondary">Sin tirilla</Badge>
+              <Badge variant="secondary">
+                <Receipt weight="fill" />
+                Pendiente
+              </Badge>
             ) : (
               <Badge variant={descuadreHoy ? "danger" : "success"}>
                 {descuadreHoy ? <Warning size={11} weight="fill" /> : <CheckCircle size={11} weight="fill" />}
@@ -93,21 +114,21 @@ export function PanelView({ data }: { data: PanelData }) {
           )}
           <p className={cn("text-body text-white/70", data.cuadreHoy && !sinTirilla ? "mt-1" : "mt-3")}>
             {!data.cuadreHoy
-              ? "Ábrelo cuando tengas la tirilla."
+              ? "Sin abrir"
               : sinTirilla
-                ? "Escribe el total de la tirilla para ver si el día cuadra."
+                ? "Falta la tirilla"
                 : descuadreHoy
                   ? data.cuadreHoy.saldo_final > 0
-                    ? `Faltan ${formatCOP(data.cuadreHoy.saldo_final)} por registrar.`
-                    : `Sobran ${formatCOP(Math.abs(data.cuadreHoy.saldo_final))} sin justificar.`
+                    ? `Faltan ${formatCOP(data.cuadreHoy.saldo_final)} por registrar`
+                    : `Sobran ${formatCOP(Math.abs(data.cuadreHoy.saldo_final))} sin justificar`
                   : data.cuadreHoy.estado === "cerrado"
-                    ? "Día cerrado y cuadrado."
-                    : "Todo cuadra. Puedes cerrar el día."}
+                    ? "Día cerrado"
+                    : "Listo para cerrar"}
           </p>
           <div className="mt-auto pt-5">
             <Button asChild className="w-full">
               <Link href="/cuadre">
-                {data.cuadreHoy ? "Ir al cuadre" : "Abrir el cuadre"}
+                {data.cuadreHoy ? "Ir al cuadre" : "Abrir cuadre"}
                 <ArrowRight weight="bold" />
               </Link>
             </Button>
@@ -117,7 +138,7 @@ export function PanelView({ data }: { data: PanelData }) {
         <Link href="/luis" className="group block rounded-3xl">
           <Card className={TARJETA_LINK}>
             <CardHeader className="items-center">
-              <CardTitle>Sr. Luis</CardTitle>
+              <CardTitle icono={<Wallet weight="fill" />}>Sr. Luis</CardTitle>
               <CardAction className="self-center">
                 <Chevron />
               </CardAction>
@@ -145,7 +166,7 @@ export function PanelView({ data }: { data: PanelData }) {
         <Link href="/prestamos" className="group block rounded-3xl lg:order-last">
           <Card className={TARJETA_LINK}>
             <CardHeader className="items-center">
-              <CardTitle>Préstamos</CardTitle>
+              <CardTitle icono={<HandCoins weight="fill" />}>Préstamos</CardTitle>
               <CardAction className="self-center">
                 <Chevron />
               </CardAction>
@@ -160,7 +181,7 @@ export function PanelView({ data }: { data: PanelData }) {
                   />
                   {pendientes.length === 0 ? (
                     <Empty fila className="mt-2">
-                      <EmptyTitle>Nadie le debe al fondo</EmptyTitle>
+                      <EmptyTitle>Sin deudas</EmptyTitle>
                     </Empty>
                   ) : (
                     <ItemGroup variant="cajitas" className="mt-4">
@@ -186,7 +207,7 @@ export function PanelView({ data }: { data: PanelData }) {
                     <Plus weight="bold" />
                   </ItemMedia>
                   <ItemContent>
-                    <ItemTitle className="text-body font-semibold">Registrar un préstamo</ItemTitle>
+                    <ItemTitle className="text-body font-semibold">Registrar</ItemTitle>
                   </ItemContent>
                 </Item>
               )}
@@ -254,7 +275,7 @@ function DistribucionCard({
   return (
     <Card className="h-full">
       <CardHeader className="items-center">
-        <CardTitle>Distribución del día</CardTitle>
+        <CardTitle icono={<ChartBar weight="fill" />}>Distribución del día</CardTitle>
         {total > 0 && (
           <CardAction className="self-center">
             <span className="tnum text-meta text-faint">Tirilla {formatCompactCOP(tirilla)}</span>
@@ -264,7 +285,7 @@ function DistribucionCard({
       <CardContent>
         {total === 0 ? (
           <Empty fila>
-            <EmptyTitle>Abre el cuadre de hoy para ver la distribución</EmptyTitle>
+            <EmptyTitle>Sin cuadre hoy</EmptyTitle>
           </Empty>
         ) : (
           <>
@@ -322,7 +343,7 @@ function DistribucionCard({
                   Ayer
                 </span>
               ) : (
-                <span>Ayer no hubo cuadre para comparar</span>
+                <span>Ayer sin cuadre</span>
               )}
             </div>
           </>
@@ -379,10 +400,15 @@ function CierresCard({ recientes, stats }: { recientes: Reciente[]; stats: Panel
     <Card className="p-5 sm:p-6">
       <div className="flex items-stretch gap-4 sm:gap-6">
         <div className="flex min-w-0 shrink-0 flex-col sm:w-48">
-          <p className="text-lead font-medium tracking-[-0.3px] text-text">Últimos cierres</p>
-          <p className="mt-1 text-meta text-muted">
+          <div className="flex items-center gap-2.5">
+            <CardIcono>
+              <CalendarCheck weight="fill" />
+            </CardIcono>
+            <p className="min-w-0 truncate text-lead font-medium tracking-[-0.3px] text-text">Últimos cierres</p>
+          </div>
+          <p className="mt-2 text-meta text-muted">
             {recientes.length === 0
-              ? "Todavía no hay cierres"
+              ? "Sin cierres"
               : `${stats.cuadrados} de ${recientes.length} ${recientes.length === 1 ? "cuadró" : "cuadraron"}`}
           </p>
           {stats.descuadres > 0 && (
@@ -392,8 +418,12 @@ function CierresCard({ recientes, stats }: { recientes: Reciente[]; stats: Panel
             </p>
           )}
           <div className="mt-auto pt-4">
+            {/* El botón negro de la referencia ("Check now"): ícono y una palabra. */}
             <Button asChild size="sm">
-              <Link href="/historial">Ver historial</Link>
+              <Link href="/historial">
+                <ClockCounterClockwise weight="bold" />
+                Historial
+              </Link>
             </Button>
           </div>
         </div>

@@ -150,6 +150,14 @@
     `Table` dentro de una tarjeta se ven como cajitas separadas 6 px (CSS).
   - Textos concretos y en "tú": sin frases motivacionales, eslóganes ni datos de
     relleno; "del Sr. Luis" con artículo.
+  - Muchos íconos y pocas palabras (lo pidió el dueño, 10 nov 2026): cada
+    tarjeta lleva ícono (`CardTitle icono={...}`, o `CardIcono` si el título
+    es a mano; no en `TarjetaNavy`). Lo secundario (editar, borrar, exportar,
+    pegar, traer, refrescar, ir a otra pantalla) es `IconButton` con su
+    `label` como tooltip; la acción principal es ícono + 1 o 2 palabras
+    ("Registrar", "Cerrar día"). Sin subtítulos que expliquen lo obvio; rótulos
+    de 1 o 2 palabras; chips con ícono + 1 palabra. Las ventanas de confirmar
+    conservan su texto corto (evitan errores con plata).
 - Animación con CSS y Framer Motion, solo con motivo: retroalimentación o cambio
   de estado (montos que cambian, check al cerrar el día). Sin GSAP ni efectos por
   letra. Una sola curva, la de iOS (`--ease-ios`; en framer, `TRANSICION` y

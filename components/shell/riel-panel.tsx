@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useCambiarTema } from "@/lib/tema";
-import { Moon, SidebarSimple, SignOut, Sun } from "@phosphor-icons/react/dist/ssr";
+import { Bell, Moon, SidebarSimple, SignOut, Sun } from "@phosphor-icons/react/dist/ssr";
 import { Logo } from "@/components/brand";
 import { IconButton } from "@/components/ui/icon-button";
 import { Button } from "@/components/ui/button";
@@ -141,9 +141,12 @@ export function RielPanel({
                 </Item>
                 <ItemSeparator className="bg-line" />
                 <Item size="sm" className="rounded-none border-0">
+                  <ItemMedia>
+                    <Bell size={17} />
+                  </ItemMedia>
                   <ItemContent className="gap-0.5">
                     <ItemTitle className="text-title font-medium text-text">Avisos</ItemTitle>
-                    <ItemDescription className="text-meta text-faint">Recordatorio para cerrar el día</ItemDescription>
+                    <ItemDescription className="text-meta text-faint">Cierre del día</ItemDescription>
                   </ItemContent>
                   <ItemActions>
                     <ActivarAvisos sobre="claro" />

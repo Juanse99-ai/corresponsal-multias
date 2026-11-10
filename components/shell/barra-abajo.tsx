@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, SignOut } from "@phosphor-icons/react/dist/ssr";
+import { Bell, Plus, SignOut } from "@phosphor-icons/react/dist/ssr";
 import { Button } from "@/components/ui/button";
 import { Item, ItemActions, ItemContent, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
@@ -410,9 +410,12 @@ export function BarraAbajo({
             <ThemeToggle sobre="claro" />
           </div>
           <div className="flex min-h-12 items-center gap-3 px-2 pb-2">
+            <span aria-hidden className="grid size-11 shrink-0 place-items-center text-muted">
+              <Bell size={21} />
+            </span>
             <span className="flex min-w-0 flex-1 flex-col gap-0.5">
               <span className="text-body font-medium text-text">Avisos</span>
-              <span className="text-meta text-faint">Recordatorio para cerrar el día</span>
+              <span className="text-meta text-faint">Cierre del día</span>
             </span>
             <ActivarAvisos sobre="claro" />
           </div>
