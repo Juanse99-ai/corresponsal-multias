@@ -9,7 +9,7 @@ import {
   resumenPorPersona,
   sumMontos,
 } from "@/lib/queries";
-import { hoyISO, formatFechaLarga } from "@/lib/format";
+import { hoyISO, addDiasISO, formatFechaLarga } from "@/lib/format";
 import { saludoHora, mensajePersonal } from "@/lib/saludos";
 import { PanelView, type PanelData } from "@/components/panel/panel-view";
 
@@ -29,12 +29,16 @@ export default async function PanelPage() {
     }).format(new Date()),
   );
 
-  const [cuadreHoy, consignacionesHoy, saldoLuisAcumulado, recientes, deudas] = await Promise.all([
+  const ayer = addDiasISO(hoy, -1);
+  const [cuadreHoy, consignacionesHoy, saldoLuisAcumulado, recientes, deudas, cuadreAyer, consignacionesAyer] = await Promise.all([
     getCuadre(hoy),
     getConsignacionesLuis(hoy),
     getSaldoLuisAcumulado(hoy, true),
     listCuadres(undefined, undefined, 14),
     isAdmin ? getDeudasSaldos() : Promise.resolve([]),
+    // Ayer, para la línea de comparación de la distribución.
+    getCuadre(ayer),
+    getConsignacionesLuis(ayer),
   ]);
 
   const srLuisHoy = sumMontos(consignacionesHoy);
@@ -42,16 +46,19 @@ export default async function PanelPage() {
   const personas = resumenPorPersona(deudas);
   const totalPendiente = personas.reduce((s, p) => s + p.saldo, 0);
 
-  const distribucion = cuadreHoy
-    ? [
-        { label: "Sr. Luis", value: srLuisHoy },
-        { label: "Nequis", value: cuadreHoy.nequis },
-        { label: "Bancolombia", value: cuadreHoy.bancolombia },
-        { label: "Préstamos", value: cuadreHoy.prestamos_consignaciones },
-        { label: "Compensado", value: cuadreHoy.compensado },
-        { label: "Retiros", value: cuadreHoy.ret_real },
-      ]
-    : [];
+  const repartir = (c: typeof cuadreHoy, srLuis: number) =>
+    c
+      ? [
+          { label: "Sr. Luis", value: srLuis },
+          { label: "Nequis", value: c.nequis },
+          { label: "Bancolombia", value: c.bancolombia },
+          { label: "Préstamos", value: c.prestamos_consignaciones },
+          { label: "Compensado", value: c.compensado },
+          { label: "Retiros", value: c.ret_real },
+        ]
+      : [];
+  const distribucion = repartir(cuadreHoy, srLuisHoy);
+  const distribucionAyer = repartir(cuadreAyer, sumMontos(consignacionesAyer));
 
   const data: PanelData = {
     nombre: profile.nombre,
@@ -61,6 +68,7 @@ export default async function PanelPage() {
     cuadreHoy: cuadreHoy ? { estado: cuadreHoy.estado, saldo_final: cuadreHoy.saldo_final } : null,
     tirillaHoy: cuadreHoy ? cuadreHoy.total_tirilla : 0,
     distribucion,
+    distribucionAyer,
     srLuisHoy,
     consignacionesHoyCount: consignacionesHoy.length,
     saldoLuisAcumulado,

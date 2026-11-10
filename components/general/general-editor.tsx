@@ -3,10 +3,10 @@
 import { useMemo, useState, useTransition } from "react";
 import { useNavegacion } from "@/lib/use-navegacion";
 import { toast } from "sonner";
-import { FloppyDisk, ArrowClockwise } from "@phosphor-icons/react/dist/ssr";
+import { FloppyDisk, ArrowClockwise, Scales } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { IconButton } from "@/components/ui/icon-button";
 import { Label } from "@/components/ui/label";
 import { MoneyInput } from "@/components/ui/money-input";
 import { Textarea } from "@/components/ui/textarea";
@@ -60,7 +60,7 @@ export function GeneralEditor({
     startTransition(async () => {
       const res = await guardarGeneral({ fecha, ...vals, nota: nota.trim() || null });
       if (res.ok) {
-        toast.success("Control general guardado.");
+        toast.success("Guardado.");
         router.refresh();
       } else {
         toast.error(res.error ?? "No se pudo guardar.");
@@ -72,7 +72,7 @@ export function GeneralEditor({
     <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
       <Card>
         <CardHeader>
-          <CardTitle className="text-text">
+          <CardTitle className="text-text" icono={<Scales />}>
             <h2>Balance del día</h2>
           </CardTitle>
         </CardHeader>
@@ -83,22 +83,17 @@ export function GeneralEditor({
             id="saldo_luis"
             accion={
               vals.saldo_luis !== saldoLuisSugerido && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    {/* Terciaria pegada al campo: en la fila del rótulo, sin
-                        agrandarla (toque de 44 con el ::after). */}
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => set("saldo_luis")(saldoLuisSugerido)}
-                      className="-my-2 h-7 gap-1 px-2 text-meta after:absolute after:inset-x-0 after:-inset-y-2"
-                    >
-                      <ArrowClockwise size={14} />
-                      Usar <span className="tnum">{formatCOP(saldoLuisSugerido)}</span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Usar el saldo de la cuenta del Sr. Luis</TooltipContent>
-                </Tooltip>
+                // Terciaria pegada al campo: en la fila del rótulo, sin
+                // agrandarla (toque de 44 con el ::after de icon-inline).
+                <IconButton
+                  label={`Usar ${formatCOP(saldoLuisSugerido)} del Sr. Luis`}
+                  forma="suelto"
+                  size="icon-inline"
+                  onClick={() => set("saldo_luis")(saldoLuisSugerido)}
+                  className="-my-2"
+                >
+                  <ArrowClockwise size={15} weight="bold" />
+                </IconButton>
               )
             }
           >
@@ -127,7 +122,7 @@ export function GeneralEditor({
         </div>
 
         <div className="mt-3.5 flex flex-col gap-1.5">
-          <Label htmlFor="nota_g">Nota (opcional)</Label>
+          <Label htmlFor="nota_g">Nota</Label>
           <Textarea
             id="nota_g"
             value={nota}
@@ -170,7 +165,7 @@ function Campo({
 }: {
   label: string;
   id: string;
-  /** Acción terciaria a la derecha del rótulo ("Usar $X"). */
+  /** Acción terciaria a la derecha del rótulo (usar el saldo sugerido). */
   accion?: React.ReactNode;
   children: React.ReactNode;
 }) {

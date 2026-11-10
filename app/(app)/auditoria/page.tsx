@@ -24,10 +24,7 @@ export default async function AuditoriaPage() {
 
   return (
     <div>
-      <PageHeader
-        title="Auditoría"
-        subtitle={`Revisiones de la cuenta del Sr. Luis en los últimos ${DIAS_ATRAS} días`}
-      />
+      <PageHeader title="Auditoría" subtitle={`Últimos ${DIAS_ATRAS} días`} />
       <div className="flex flex-col gap-5">
         <ListaHallazgos hallazgos={hallazgos} />
         <CruceChat montosDelDia={montosDelDia} />

@@ -13,17 +13,18 @@ import {
   Lock,
   LockOpen,
   ArrowClockwise,
+  ArrowsDownUp,
+  CashRegister,
   Receipt,
 } from "@phosphor-icons/react/dist/ssr";
-import { Card } from "@/components/ui/card";
+import { Card, CardIcono } from "@/components/ui/card";
+import { IconButton } from "@/components/ui/icon-button";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
 import { MoneyInput } from "@/components/ui/money-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Contador } from "@/components/ui/contador";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Item,
   ItemActions,
@@ -230,13 +231,13 @@ export function CuadreEditor({
     const estadoFinal = nuevoEstado ?? estado;
     if (estadoFinal === "cerrado") {
       if (soportesCount === 0) {
-        toast.error("Adjunta la tirilla del datáfono (abajo) antes de cerrar el día.");
+        toast.error("Falta adjuntar la tirilla del datáfono.");
         return;
       }
       if (descuadre || !cajaCuadra) {
         // Exige explicación escrita (queda para Juan) y confirmación antes de cerrar descuadrado.
         if (!nota.trim()) {
-          toast.error("El día no cuadra. Escribe en la nota por qué, antes de cerrarlo.");
+          toast.error("No cuadra: escribe el motivo en la nota.");
           return;
         }
         setConfirmarCierre(true);
@@ -276,8 +277,28 @@ export function CuadreEditor({
       {/* ====== Columna de captura ====== */}
       <Card className="p-5">
         <div className="mb-[18px] flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-          <h2 className="min-w-0 truncate text-lead font-semibold tracking-[-0.3px] text-text">Movimientos del día</h2>
+          <div className="flex min-w-0 items-center gap-2.5">
+            <CardIcono>
+              <ArrowsDownUp weight="bold" />
+            </CardIcono>
+            <h2 className="min-w-0 truncate text-lead font-semibold tracking-[-0.3px] text-text">Movimientos del día</h2>
+          </div>
           <div className="flex shrink-0 items-center gap-2">
+            {(movCount > 0 || prestamosCount > 0) && (
+              <IconButton
+                size="icon-sm"
+                label={`Traer totales del día (${[
+                  movCount > 0 ? `${movCount} movimiento${movCount === 1 ? "" : "s"}` : null,
+                  prestamosCount > 0 ? `${prestamosCount} préstamo${prestamosCount === 1 ? "" : "s"}` : null,
+                ]
+                  .filter(Boolean)
+                  .join(" y ")})`}
+                onClick={traerDeMovimientos}
+                disabled={locked}
+              >
+                <ArrowClockwise size={18} weight="bold" />
+              </IconButton>
+            )}
             <Badge variant={estado === "cerrado" ? "success" : "secondary"}>
               {estado === "cerrado" ? <Lock size={12} weight="fill" /> : <LockOpen size={12} />}
               {estado === "cerrado" ? "Cerrado" : "Abierto"}
@@ -306,7 +327,7 @@ export function CuadreEditor({
         {locked && (
           <Alert variant="muted" className="mb-4">
             <Lock weight="fill" />
-            <AlertTitle className="line-clamp-none font-normal">Día cerrado. Solo Juan puede reabrirlo para editar.</AlertTitle>
+            <AlertTitle className="line-clamp-none font-normal">Día cerrado. Solo Juan lo reabre.</AlertTitle>
           </Alert>
         )}
 
@@ -339,26 +360,6 @@ export function CuadreEditor({
           </Link>
         </Item>
 
-        {(movCount > 0 || prestamosCount > 0) && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="secondary" onClick={traerDeMovimientos} className="mt-4 w-full">
-                <ArrowClockwise size={16} weight="bold" />
-                Traer totales del día
-                <Contador n={movCount + prestamosCount} />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              {[
-                movCount > 0 ? `${movCount} movimiento${movCount === 1 ? "" : "s"}` : null,
-                prestamosCount > 0 ? `${prestamosCount} préstamo${prestamosCount === 1 ? "" : "s"}` : null,
-              ]
-                .filter(Boolean)
-                .join(" y ")}
-            </TooltipContent>
-          </Tooltip>
-        )}
-
         {/* Desglose electrónico (lo que pasó por Bancolombia) */}
         <div className="mt-4 grid grid-cols-1 gap-x-4 gap-y-3.5 sm:grid-cols-2">
           <Campo label="Nequis" id="nequis_e">
@@ -383,7 +384,12 @@ export function CuadreEditor({
 
         {/* Arqueo de caja física: una sección de la misma tarjeta. */}
         <section className="mt-6">
-          <h3 className="text-title font-semibold text-text">Arqueo de caja</h3>
+          <h3 className="flex items-center gap-2.5 text-title font-semibold text-text">
+            <CardIcono>
+              <CashRegister weight="fill" />
+            </CardIcono>
+            Arqueo de caja
+          </h3>
           <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-3.5 sm:grid-cols-2">
             <Campo label="Fondo en caja" id="fondo_caja">
               <MoneyInput id="fondo_caja" value={vals.fondo_caja} onValueChange={set("fondo_caja")} />
@@ -393,10 +399,10 @@ export function CuadreEditor({
             </Campo>
           </div>
           <div className="mt-3 flex flex-col text-body">
-            <FilaArqueo rotulo="Efectivo que entró (consignaciones)" valor={consignacionesCash} />
+            <FilaArqueo rotulo="Efectivo que entró" valor={consignacionesCash} />
             <FilaArqueo rotulo="− Retiros" valor={vals.ret_real} />
             <FilaArqueo rotulo="− Préstamos en efectivo" valor={prestamosEfectivoDia} />
-            <FilaArqueo rotulo="− Compensado (al banco)" valor={vals.compensado} />
+            <FilaArqueo rotulo="− Compensado" valor={vals.compensado} />
             <FilaArqueo rotulo="Esperado en caja" valor={esperadoCaja} fuerte />
           </div>
 
@@ -414,8 +420,8 @@ export function CuadreEditor({
               {cajaCuadra
                 ? "Caja cuadrada"
                 : diferenciaCaja > 0
-                  ? "Sobra efectivo en caja"
-                  : "Falta efectivo en caja"}
+                  ? "Sobra efectivo"
+                  : "Falta efectivo"}
             </p>
             {!cajaCuadra && (
               <p className="tnum mt-1.5 text-h1 leading-none font-semibold tracking-[-0.3px] lg:text-kpi lg:tracking-[-0.6px]">
@@ -423,11 +429,6 @@ export function CuadreEditor({
                 {formatCOP(diferenciaCaja)}
               </p>
             )}
-            <p className="mt-1.5 text-meta">
-              {cajaCuadra
-                ? "Lo contado coincide con lo esperado."
-                : "Revisa el efectivo contado o los movimientos."}
-            </p>
           </div>
         </section>
 
@@ -438,12 +439,8 @@ export function CuadreEditor({
             value={nota}
             onChange={(e) => setNota(e.target.value)}
             rows={2}
-            placeholder="Observación del día…"
-            aria-describedby="nota-ayuda"
+            placeholder="Si no cuadra, ¿por qué?"
           />
-          <p id="nota-ayuda" className="text-meta text-faint">
-            Si el día no cuadra, explica aquí por qué antes de cerrarlo.
-          </p>
         </div>
         </fieldset>
       </Card>
@@ -461,7 +458,7 @@ export function CuadreEditor({
               ) : (
                 <CheckCircle size={12} weight="fill" />
               )}
-              {sinEmpezar ? "Sin tirilla" : descuadre ? "Descuadre" : "Cuadrado"}
+              {sinEmpezar ? "Pendiente" : descuadre ? "Descuadre" : "Cuadrado"}
             </Badge>
           </div>
           {!sinEmpezar && (
@@ -473,14 +470,14 @@ export function CuadreEditor({
           )}
           <p className="mt-2.5 text-body leading-relaxed text-white/70">
             {sinEmpezar
-              ? "Escribe el total de la tirilla para ver si el día cuadra."
+              ? "Falta la tirilla"
               : descuadre
                 ? saldo > 0
-                  ? `Faltan ${formatCOP(saldo)} por registrar para que la tirilla cuadre.`
-                  : `Sobran ${formatCOP(Math.abs(saldo))} sin justificar. Revisa los movimientos del día.`
+                  ? `Faltan ${formatCOP(saldo)} por registrar`
+                  : `Sobran ${formatCOP(Math.abs(saldo))} sin justificar`
                 : estado === "cerrado"
-                  ? "Día cerrado y cuadrado."
-                  : "Todo cuadra. Puedes cerrar el día."}
+                  ? "Día cerrado"
+                  : "Listo para cerrar"}
           </p>
 
           <NavyRotulo className="mt-5 mb-1.5">Cómo cuadra</NavyRotulo>
@@ -498,25 +495,25 @@ export function CuadreEditor({
             {locked ? (
               <p className="flex items-center gap-2 text-body text-white/70">
                 <Lock size={16} weight="fill" className="shrink-0" />
-                Día cerrado. Solo Juan puede reabrirlo.
+                Solo Juan lo reabre
               </p>
             ) : estado !== "cerrado" ? (
               // Un solo botón: guarda y cierra de una. Antes eran selector + guardar
               // + cerrar, y si se quedaba un paso el día no llegaba a la base.
               <Button onClick={() => onGuardar("cerrado")} disabled={pending} className="w-full">
                 <Lock size={18} weight="fill" />
-                {pending ? "Cerrando…" : "Cerrar el día"}
+                {pending ? "Cerrando…" : "Cerrar día"}
               </Button>
             ) : (
               // Solo Juan llega aquí con el día cerrado: corrige o lo reabre.
               <>
                 <Button onClick={() => onGuardar("cerrado")} disabled={pending} className="w-full">
                   <FloppyDisk size={18} weight="fill" />
-                  {pending ? "Guardando…" : "Guardar cambios"}
+                  {pending ? "Guardando…" : "Guardar"}
                 </Button>
                 <Button variant="sobre-oscuro" onClick={() => onGuardar("abierto")} disabled={pending} className="w-full">
                   <LockOpen size={16} />
-                  Reabrir el día
+                  Reabrir
                 </Button>
               </>
             )}

@@ -3,7 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import { useNavegacion } from "@/lib/use-navegacion";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trash, FilePdf, Receipt, ArrowSquareOut } from "@phosphor-icons/react/dist/ssr";
+import { Trash, FilePdf, Paperclip, UploadSimple, ArrowSquareOut } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { IconButton } from "@/components/ui/icon-button";
 import { Progress } from "@/components/ui/progress";
@@ -45,7 +45,7 @@ export function SoportesSection({
   contexto = "cuadre",
   titulo = "Soportes del día",
   texto = "Sube la tirilla del datáfono",
-  detalleBorrado = "Sin la tirilla adjunta no podrás cerrar el día.",
+  detalleBorrado = "Sin tirilla no podrás cerrar el día.",
   className }: {
   fecha: string;
   soportes: SoporteConUrl[];
@@ -138,8 +138,8 @@ export function SoportesSection({
   return (
     <Card className={cn("mt-5", className)}>
       <CardHeader className="items-center">
-        <CardTitle className="self-center text-text">
-          <h3>{titulo}</h3>
+        <CardTitle role="heading" aria-level={3} icono={<Paperclip weight="bold" />} className="self-center text-text">
+          {titulo}
         </CardTitle>
         {soportes.length > 0 && (
           <CardAction className="self-center">
@@ -159,7 +159,7 @@ export function SoportesSection({
           if (e.dataTransfer.files) subir(e.dataTransfer.files);
         }}
         // Zona de soltar como un campo relleno grande, sin borde punteado en
-        // reposo; al arrastrar fotos encima se marca con el borde y el tinte azul.
+        // reposo; al arrastrar fotos encima se marca con el borde y el tinte gris.
         className={cn(
           "flex cursor-pointer flex-col items-center gap-1.5 rounded-2xl border-2 border-transparent px-4 py-6 text-center transition-colors duration-[var(--dur-1)] has-focus-visible:border-accent",
           drag
@@ -191,23 +191,21 @@ export function SoportesSection({
           {subiendo ? (
             <Spinner size={19} weight="bold" className="size-[19px]" />
           ) : (
-            <Receipt size={19} weight="fill" />
+            <UploadSimple size={19} weight="bold" />
           )}
         </div>
         <p className="text-body font-medium text-text">
           {progreso ? `Subiendo ${progreso.hechos} de ${progreso.total}…` : texto}
         </p>
-        <p className="text-meta text-faint">
-          {progreso
-            ? "No cierres esta pantalla."
-            : "Toca para escoger o arrastra las fotos aquí. Puedes subir varias a la vez."}
-        </p>
         {progreso && (
-          <Progress
-            value={Math.round((progreso.hechos / progreso.total) * 100)}
-            aria-label="Avance de la subida"
-            className="mt-1.5 w-40"
-          />
+          <>
+            <p className="text-meta text-faint">No cierres esta pantalla.</p>
+            <Progress
+              value={Math.round((progreso.hechos / progreso.total) * 100)}
+              aria-label="Avance de la subida"
+              className="mt-1.5 w-40"
+            />
+          </>
         )}
       </label>
 
@@ -246,7 +244,7 @@ export function SoportesSection({
                   </a>
                   </ItemMedia>
 
-                  <ItemFooter className="pointer-events-none absolute inset-x-0 bottom-0 gap-1 bg-gradient-to-t from-[oklch(0.22_0.03_258/0.7)] to-transparent px-2 py-1.5">
+                  <ItemFooter className="pointer-events-none absolute inset-x-0 bottom-0 gap-1 bg-gradient-to-t from-[oklch(0.2_0.005_70/0.7)] to-transparent px-2 py-1.5">
                     <span className="truncate text-label text-white/80">{pesoArchivo(s.tamano)}</span>
                     <ArrowSquareOut size={12} className="text-white/70" />
                   </ItemFooter>
@@ -259,7 +257,7 @@ export function SoportesSection({
                     label="Borrar soporte"
                     size="icon-sm"
                     onClick={() => setPorBorrar(s.id)}
-                    className="absolute right-1.5 top-1.5 bg-[oklch(0.22_0.03_258/0.62)] text-[oklch(0.97_0.01_260/0.9)] opacity-0 backdrop-blur-sm hover:bg-[oklch(0.22_0.03_258/0.75)] hover:text-[oklch(0.8_0.14_25)] group-hover/item:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100"
+                    className="absolute right-1.5 top-1.5 bg-[oklch(0.2_0.005_70/0.62)] text-[oklch(0.97_0.003_70/0.9)] opacity-0 backdrop-blur-sm hover:bg-[oklch(0.2_0.005_70/0.75)] hover:text-[oklch(0.8_0.14_25)] group-hover/item:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100"
                   >
                     <Trash size={16} />
                   </IconButton>

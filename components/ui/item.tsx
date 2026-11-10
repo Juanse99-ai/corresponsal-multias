@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator"
 
 /**
  * Lista de filas. `variant="cajitas"`: en el computador cada fila es una
- * cajita (blanca en Azul) separada 6 px; en el celular, renglones a sangre
+ * cajita (blanca en Claro) separada 6 px; en el celular, renglones a sangre
  * separados por una línea (globals.css). Una lista por tarjeta, no una
  * tarjeta por fila.
  */

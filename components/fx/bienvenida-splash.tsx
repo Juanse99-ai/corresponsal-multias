@@ -110,7 +110,7 @@ function Splash({ nombre }: { nombre: string }) {
           <div
             className="absolute inset-0"
             style={{
-              backgroundColor: "oklch(0.16 0.02 265 / 0.82)",
+              backgroundColor: "oklch(0.17 0.004 70 / 0.82)",
               backdropFilter: "blur(14px)",
               WebkitBackdropFilter: "blur(14px)",
             }}

@@ -1,10 +1,43 @@
 # DESIGN.md — Corresponsal · Multidiagnósticos AS
 
 Registro: **product** (app de operación interna). Escena que fija el tema: Ivana operando
-todo el día desde un PC en un local iluminado, leyendo cifras de plata → **tema Azul**
-(claro) por defecto; **Noche** para quien la prefiera.
+todo el día desde un PC en un local iluminado, leyendo cifras de plata → **tema Claro**
+por defecto; **Noche** para quien la prefiera.
+
+## Estilo piedra (10 nov 2026)
+
+El dueño mandó una referencia (app de tareas en grises cálidos) y pidió cambiar toda la
+interfaz a ese estilo, "más limpia y que no se vea hecha con IA". Se cambió la piel; la
+estructura del estilo del taller (marco, riel, panel, hojas, gestos) sigue igual:
+
+- **Paleta piedra**: página `#ecebe8`, tarjetas `#f5f4f2` con filo blanco y sombra cálida
+  muy suave, campos `#eae8e4`, tinta `#1c1b19`. Sin azul de marca: el botón principal,
+  los aros, la casilla marcada y el riel elegido son negros (`--accent-fill #1f1e1c`). En
+  Noche, negro total con tarjetas `#121211` y lo que se aprieta en blanco hueso con letra
+  negra (`--accent-ink`). El tema claro se llama **Claro** (antes Azul).
+- **Tarjeta oscura** (`TarjetaNavy`, el nombre quedó): carbón `#1f1e1c` con el botón
+  blanco hueso, como el "Check now" de la referencia.
+- **Barra de abajo**: cápsula clara solo con íconos (Panel, Cuadre, Sr. Luis, Tú), la
+  pantalla abierta en un círculo blanco con sombra; aparte, a la derecha, el botón negro +
+  de 58 px que abre Movimientos (registrar). Se encoge y baja con la barra.
+- **Cabecera del celular**: del color de la página, sin línea; lupa y avisos en círculos
+  blancos (`IconButton forma="blanco"`).
+- **Títulos de tarjeta** en peso medio, no seminegrita.
+- **Gráficas del Panel** (como la referencia):
+  - *Últimos cierres*: cuadrícula de cuadritos (6 filas, una columna por día, máximo 22
+    px; 32 en el computador). Llenos en carbón si cuadró, en rojo si no; vacíos en piedra.
+    A la izquierda, cuántos cuadraron y el botón negro "Ver historial"; arriba, la
+    pastilla blanca con la tirilla del último día frente al promedio de los anteriores.
+    Cada columna abre el cuadre de su día. Crecen con `.barra-crece`.
+  - *Distribución del día*: barras rayadas (`--raya-*`) con el % encima; la mayor en
+    carbón rayado. La línea naranja (`--naranja`) con puntos es el reparto de ayer.
+- Los tonos de las gráficas son tokens (`--torta-*`, `--raya-*`, `--naranja`) leídos como
+  `var(--color-...)`: Tailwind borra del CSS las variables que solo aparecen en TSX.
 
 ## Estilo del taller (6 oct 2026)
+
+> Historia: la estructura de abajo sigue vigente; los colores (azul, Azul) los reemplazó
+> el estilo piedra de arriba.
 
 El dueño pidió "mudar" a esta app el diseño nuevo de la app del taller
 (Multidiagnósticos AS). Se tomó el sistema visual; la lógica, las rutas y los textos no
@@ -92,9 +125,9 @@ taller lo tiene en Configuración y esta app no tiene esa pantalla) y el medidor
 - **Hora de la bitácora**: "04:50 p. m." no cabe en la columna de 52 px de la línea de
   tiempo; va en dos renglones en vez de ensanchar la columna.
 
-## Paleta (del logo: azul + rojo + blanco)
+## Paleta (estilo piedra; ver arriba)
 
-Tokens en `app/globals.css`, con valores para Azul (`:root`) y Noche (`.dark`).
+Tokens en `app/globals.css`, con valores para Claro (`:root`) y Noche (`.dark`).
 
 | Rol | Token | Uso |
 |---|---|---|
@@ -106,35 +139,37 @@ Tokens en `app/globals.css`, con valores para Azul (`:root`) y Noche (`.dark`).
 | Filas | `--fila` / `--fila-borde` / `--linea-fila` | cajitas y renglones de las listas |
 | Borde | `--line` / `--line-strong` | bordes sólidos suaves |
 | Texto | `--text`, `--text-2`, `--muted`, `--faint` | cuerpo, rótulos, ayudas |
-| Acento | `--accent` (texto) / `--accent-fill` (relleno) | botones, links, activo |
+| Acento | `--accent` (texto) / `--accent-fill` (relleno) / `--accent-ink` | negro: botones, links, activo |
 | Estados | `--ok-*`, `--bad-*`, `--warn-*`, `--info-*` | pares de fondo y letra |
 | Éxito | `--success` verde | cuadrado / a favor (rellenos y gráficas) |
 | Peligro | `--danger` **rojo del logo** | descuadre / negativos |
-| Navy | `--navy` | la tarjeta de la cifra que se guarda |
-| Marca | `--nav-*` **azul marino** | banda del login, bienvenida y celebración |
+| Navy | `--navy` (carbón) | la tarjeta de la cifra que se guarda |
+| Marca | `--nav-*` **carbón** | banda del login, bienvenida y celebración |
+| Gráficas | `--torta-*`, `--raya-*`, `--naranja` | rampa piedra, barras rayadas, línea de ayer |
 
-Estrategia de color: **restrained-committed** — neutros + azul como acento, rojo solo
-para estado negativo, verde solo para "cuadrado".
+Estrategia de color: **restrained** — neutros cálidos + negro para lo que se aprieta,
+rojo solo para estado negativo, verde solo para "cuadrado", naranja solo para la línea de
+comparación.
 
-Contraste (revisado al cerrar el estilo del taller): todos los textos pasan AA (4,5:1)
-sobre la tarjeta y sobre la mesa en los dos temas; el más justo es `--faint` sobre el
-marco de Azul (4,56:1). `--inerte` (2:1) es solo para chevrons decorativos y controles
-apagados, nunca para texto que haya que leer.
+Contraste (revisado con el estilo piedra): los textos pasan AA (4,5:1) sobre la tarjeta y
+sobre la página en los dos temas; el más justo es `--faint` sobre la página de Claro
+(4,7:1). `--inerte` es solo para chevrons decorativos y controles apagados, nunca para
+texto que haya que leer.
 
 ## Componentes
 Todos los componentes de interfaz salen de **shadcn/ui** (`components/ui`),
-pintados con esta paleta: primario = azul del logo, destructivo = rojo, bordes y
-fondos de los neutros entintados. Botón principal sólido azul (uno a la vista por
+pintados con esta paleta: primario = negro, destructivo = rojo, bordes y
+fondos de los neutros entintados. Botón principal sólido negro (uno a la vista por
 pantalla); Cancelar y lo secundario, gris relleno o de contorno; los de solo ícono,
 círculos (`IconButton forma`: gris en tarjetas, blanco en la cabecera, suelto en barras).
 Nada de botones hechos a mano en las pantallas.
 
 ## Reglas
-- En Azul, neutros entintados al azul; en Noche, negro de verdad (lo pidió el dueño).
-- Sombras suaves tintadas al azul (no negro duro); en Noche no hay sombras.
+- En Claro, neutros cálidos (piedra); en Noche, negro de verdad (lo pidió el dueño).
+- Sombras suaves tintadas al café (no negro duro); en Noche no hay sombras.
 - Tipografía única del sistema Apple (SF Pro vía `--font-ios`); cifras con clase `.tnum`
   (misma fuente con `tabular-nums`). Sin webfonts.
-- Sin grano. El único halo es el velo azul del lienzo en Noche.
+- Sin grano ni halos.
 - Marca: cuadro azul con pulso (diagnóstico) blanco y pico rojo — guiño al logo.
 - Motion: CSS y Framer Motion (sin GSAP). Una sola curva, la del cajón de iOS
   (`--ease-ios`, `lib/movimiento.ts`), con 120 ms (color, foco), 220 ms (entrar o salir,

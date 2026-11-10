@@ -12,7 +12,7 @@ export interface ChoiceChipProps extends Omit<React.ComponentProps<typeof Toggle
 
 /**
  * Ficha para elegir (filtros, personas, motivos), sobre el <Toggle> de shadcn.
- * La elegida se ve elegida pero nunca como el botón azul lleno. El estado lo
+ * La elegida se ve elegida pero nunca como el botón negro lleno. El estado lo
  * lleva el padre: `selected` + onClick. `tono` tiñe la elegida (ok, aviso,
  * peligro) cuando la opción es un estado.
  */

@@ -178,7 +178,7 @@ export function CuadreExport({
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <Button onClick={descargar} disabled={busy} className="basis-full sm:flex-1 sm:basis-0">
                 <DownloadSimple size={17} weight="bold" />
-                {busy ? "Generando…" : "Descargar imagen"}
+                {busy ? "Generando…" : "Descargar"}
               </Button>
               <Button variant="secondary" onClick={compartir} disabled={busy}>
                 <ShareNetwork size={17} />
@@ -195,7 +195,7 @@ export function CuadreExport({
 
   return (
     <>
-      <IconButton label="Descargar o compartir el cuadre" size="icon-sm" onClick={() => setOpen(true)}>
+      <IconButton label="Exportar cuadre" size="icon-sm" onClick={() => setOpen(true)}>
         <Export size={18} weight="bold" />
       </IconButton>
       {modal}

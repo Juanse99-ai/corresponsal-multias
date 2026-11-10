@@ -209,6 +209,42 @@ export async function agregarConsignacionesLote(raw: unknown) {
   return agregarLote("corr_consignaciones_luis", raw);
 }
 
+const desdeFotosSchema = z.object({
+  soporteIds: z.array(z.string().uuid()).min(1).max(500),
+});
+
+/**
+ * Guarda las consignaciones leídas de las fotos y, si entran (o ya estaban),
+ * borra esas fotos: ya cumplieron su función y no deben quedar para leerse
+ * otra vez. Las que el usuario no marcó se quedan.
+ */
+export async function agregarConsignacionesDesdeFotos(raw: unknown): Promise<ResultadoLote & { fotosBorradas?: number }> {
+  const ids = desdeFotosSchema.safeParse(raw);
+  if (!ids.success) return { ok: false, error: "No se sabe de qué fotos salieron." };
+
+  const res = await agregarLote("corr_consignaciones_luis", raw);
+  if (!res.ok) return res;
+
+  const sb = await createClient();
+  const { data: fotos } = await sb
+    .from("corr_soportes")
+    .select("id, path")
+    .in("id", ids.data.soporteIds)
+    .eq("contexto", "luis");
+  if (!fotos || fotos.length === 0) return { ...res, fotosBorradas: 0 };
+
+  await sb.storage.from(SOPORTES_BUCKET).remove(fotos.map((f) => f.path));
+  const { error } = await sb
+    .from("corr_soportes")
+    .delete()
+    .in("id", fotos.map((f) => f.id));
+  // Las consignaciones ya entraron: si falla el borrado no se echa atrás.
+  if (error) console.error("Borrar fotos leídas:", error);
+
+  revalidatePath("/luis");
+  return { ...res, fotosBorradas: error ? 0 : fotos.length };
+}
+
 export async function agregarCompensacionesLote(raw: unknown) {
   return agregarLote("corr_compensaciones_luis", raw);
 }

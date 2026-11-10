@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition, type ChangeEvent, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ClipboardText, FileArrowUp, Check, CheckCircle, Warning, ArrowsLeftRight } from "@phosphor-icons/react/dist/ssr";
-import { Card } from "@/components/ui/card";
+import { ClipboardText, FileArrowUp, Check, CheckCircle, Warning, ArrowsLeftRight, ChatsCircle, Copy } from "@phosphor-icons/react/dist/ssr";
+import { Card, CardIcono } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,7 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { MessageGroup, Message, MessageContent, MessageFooter } from "@/components/ui/message";
 import { Bubble, BubbleContent } from "@/components/ui/bubble";
-import { Empty, EmptyTitle, EmptyDescription } from "@/components/ui/empty";
+import { Empty, EmptyTitle } from "@/components/ui/empty";
 import { ErrorNotice } from "@/components/ui/error-notice";
 import { cn } from "@/lib/utils";
 import { formatCOP, formatFechaCorta, formatHora, hoyISO } from "@/lib/format";
@@ -95,7 +95,7 @@ export function CruceChat({
       setTexto(await f.text());
       setRegistrados(null);
     } catch {
-      setError("No se pudo leer ese archivo. Exporta el chat sin archivos (queda un .txt).");
+      setError("No se pudo leer. Exporta el chat sin archivos (.txt).");
     }
   }
 
@@ -122,7 +122,12 @@ export function CruceChat({
     <Card className="flex flex-col overflow-hidden">
       {/* Cabecera: título y, como fila de filtros, de quién son los pedidos y el día. */}
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2.5 px-5 pt-5 pb-4 sm:px-6">
-        <h2 className="text-lead font-semibold tracking-[-0.3px] text-text">Cruce con el grupo</h2>
+        <div className="flex min-w-0 items-center gap-2.5">
+          <CardIcono>
+            <ChatsCircle />
+          </CardIcono>
+          <h2 className="truncate text-lead font-semibold tracking-[-0.3px] text-text">Cruce con el grupo</h2>
+        </div>
         <div className="flex flex-wrap items-center gap-2">
           {remitentes.length > 1 && (
             <NativeSelect
@@ -157,7 +162,7 @@ export function CruceChat({
        <div className="px-3 pt-3 pb-4 sm:px-5">
         {lectura.movimientos.length === 0 ? (
           <Empty className="min-h-[13rem] py-6">
-            <EmptyTitle>Pega o sube el chat del grupo para ver los pedidos del Sr. Luis</EmptyTitle>
+            <EmptyTitle>Pega o sube el chat del grupo</EmptyTitle>
           </Empty>
         ) : (
           <>
@@ -170,8 +175,7 @@ export function CruceChat({
 
             {pedidos.length === 0 ? (
               <Empty compacto>
-                <EmptyTitle>El chat no trae pedidos del {formatFechaCorta(fecha)}</EmptyTitle>
-                <EmptyDescription>Cambia la fecha</EmptyDescription>
+                <EmptyTitle>Sin pedidos el {formatFechaCorta(fecha)}</EmptyTitle>
               </Empty>
             ) : (
               <MessageGroup role="list" className="gap-1.5">
@@ -230,19 +234,18 @@ export function CruceChat({
                   {cruce.faltantes.length === 0 && cruce.sobrantes.length === 0 ? (
                     <p className="mt-3 flex items-start gap-2 rounded-lg bg-ok-bg px-3 py-2.5 text-meta text-ok-fg">
                       <CheckCircle size={15} weight="fill" className="mt-px shrink-0" />
-                      El día cuadra: cada pedido tiene su registro.
+                      El día cuadra
                     </p>
                   ) : (
                     <div className="mt-3 flex flex-col gap-1.5 text-meta">
                       {cruce.faltantes.length > 0 && (
                         <p className="text-text">
                           {cruce.faltantes.length} {cruce.faltantes.length === 1 ? "pedido" : "pedidos"} sin registro
-                          <span className="text-muted"> (marcados en rojo)</span>
                         </p>
                       )}
                       {cruce.sobrantes.length > 0 && (
                         <p className="text-text">
-                          Registrado sin pedido en el grupo:{" "}
+                          Sin pedido:{" "}
                           <span className="tnum">{cruce.sobrantes.map((v) => formatCOP(v)).join(", ")}</span>
                         </p>
                       )}
@@ -253,8 +256,7 @@ export function CruceChat({
                     <p className="mt-2 flex items-start gap-1.5 text-meta text-muted">
                       <Warning size={14} weight="fill" className="mt-px shrink-0 text-warn-fg" />
                       {cruce.posiblesRepetidos.length}{" "}
-                      {cruce.posiblesRepetidos.length === 1 ? "mensaje repetido" : "mensajes repetidos"}{" "}
-                      sin contar
+                      {cruce.posiblesRepetidos.length === 1 ? "repetido" : "repetidos"} sin contar
                     </p>
                   )}
                 </motion.div>
@@ -266,7 +268,7 @@ export function CruceChat({
       </ScrollArea>
 
       {/* Compositor abajo, como la barra de escribir de un chat: íconos en
-          círculo gris, el campo relleno y Cruzar en azul. */}
+          círculo gris, el campo relleno y Cruzar en negro. */}
       <div className="flex flex-col gap-2 px-3 py-3 sm:px-4">
         <ErrorNotice message={error} />
         <div className="flex items-end gap-2">
@@ -285,7 +287,7 @@ export function CruceChat({
             /* Alto de línea = alto del campo: se ve una sola línea completa, nunca media. */
             style={{ lineHeight: "2.75rem" }}
             aria-label="Chat del grupo"
-            placeholder="Pega aquí el chat del grupo…"
+            placeholder="Pega el chat…"
             /* text-base: con menos de 16px iOS hace zoom al enfocar. */
             className="field-sizing-fixed h-11 min-h-0 min-w-0 flex-1 resize-none overflow-y-auto rounded-full px-4 py-0"
           />
@@ -340,6 +342,7 @@ function Marca({ estado }: { estado: "ok" | "falta" | "repetido" }) {
     );
   return (
     <Badge variant="secondary" className="mb-1">
+      <Copy weight="bold" />
       Repetido
     </Badge>
   );

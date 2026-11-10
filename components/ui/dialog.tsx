@@ -97,7 +97,7 @@ function DialogContent({
   )
 }
 
-/** Color del círculo del ícono: lo que pasa (azul), bien, cuidado o mal. */
+/** Color del círculo del ícono: lo que pasa (gris), bien, cuidado o mal. */
 const TONO_ICONO = {
   info: "bg-accent-soft-2 text-accent",
   ok: "bg-ok-bg text-ok-fg",

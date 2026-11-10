@@ -25,7 +25,7 @@ export function AuthLayout({
         </div>
       </section>
 
-      {/* Celular: banda de marca arriba (en el PC hace ese papel el panel azul). */}
+      {/* Celular: banda de marca arriba (en el PC hace ese papel el panel carbón). */}
       <header
         className={
           "flex flex-col items-center gap-3.5 rounded-b-[2rem] bg-nav-bg px-6 pb-6 text-center lg:hidden " +

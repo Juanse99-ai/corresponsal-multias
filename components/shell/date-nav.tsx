@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { CaretLeft, CaretRight } from "@phosphor-icons/react/dist/ssr";
-import { Button } from "@/components/ui/button";
+import { CalendarCheck, CaretLeft, CaretRight } from "@phosphor-icons/react/dist/ssr";
 import { IconButton } from "@/components/ui/icon-button";
 import { addDiasISO, hoyISO, formatFechaCorta } from "@/lib/format";
 
 /**
  * Navegación de días (guía 8.2): ‹ y › sueltos de 44 con la fecha entre ellos,
- * sin caja ("Hoy" o "lun 5 oct"). Fuera de hoy sale "Hoy" en gris para volver.
+ * sin caja ("Hoy" o "lun 5 oct"). Fuera de hoy sale un calendario gris para volver.
  * El día siguiente a hoy no existe: su flecha queda apagada. Usa ?fecha=.
  */
 export function DateNav({ fecha, base }: { fecha: string; base: string }) {
@@ -43,11 +42,11 @@ export function DateNav({ fecha, base }: { fecha: string; base: string }) {
         </IconButton>
       )}
       {!esHoy && (
-        <Button variant="secondary" size="sm" asChild className="ml-2">
+        <IconButton label="Ir a hoy" forma="blanco" asChild className="ml-1.5">
           <Link href={base} prefetch={false}>
-            Hoy
+            <CalendarCheck size={19} />
           </Link>
-        </Button>
+        </IconButton>
       )}
     </nav>
   );

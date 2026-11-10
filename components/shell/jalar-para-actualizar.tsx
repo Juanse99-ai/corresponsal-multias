@@ -17,7 +17,7 @@ const NO_JALA = "input,textarea,select,[contenteditable=true],.gbar,[data-slot=s
  * Jalar para actualizar (guía 8.22), solo en el celular: arriba del todo, sin
  * ventanas abiertas y fuera de campos y de la barra, jalar hacia abajo baja un
  * círculo con la flecha de recargar (la mitad de lo que baja el dedo, girando).
- * Al pasar 70 px se pone azul y, al soltar, vibra, gira mientras vuelve a leer
+ * Al pasar 70 px se pone negro y, al soltar, vibra, gira mientras vuelve a leer
  * los datos con router.refresh() (mínimo 650 ms) y sube. Un jalón corto no hace
  * nada. El rebote del navegador está apagado en globals.css
  * (overscroll-behavior), si no chocaría con este.
@@ -117,7 +117,7 @@ export function JalarParaActualizar() {
       <div
         ref={circulo}
         aria-hidden
-        className="pointer-events-none fixed left-1/2 z-30 grid size-10 place-items-center rounded-full bg-blanco text-muted opacity-0 shadow-[0_4px_14px_rgba(15,23,42,0.18)] data-[listo]:bg-accent-fill data-[listo]:text-white lg:hidden"
+        className="pointer-events-none fixed left-1/2 z-30 grid size-10 place-items-center rounded-full bg-blanco text-muted opacity-0 shadow-[var(--sombra-md)] data-[listo]:bg-accent-fill data-[listo]:text-accent-ink lg:hidden"
         style={{ top: "calc(env(safe-area-inset-top, 0px) + 56px)", transform: `translate(-50%, ${ARRIBA}px)` }}
       >
         <ArrowClockwise size={20} weight="bold" className={cn(cargando && "animate-spin")} />

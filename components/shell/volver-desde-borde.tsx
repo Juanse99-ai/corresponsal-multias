@@ -13,7 +13,7 @@ const ESCONDIDO = -44; // px: el círculo fuera de la pantalla
  * Volver deslizando desde el borde (guía 8.22). Solo en el iPhone con la app
  * instalada, donde no hay gesto de atrás: deslizar desde los primeros 22 px de
  * la izquierda hace history.back() al pasar 70 px. Sale una flecha en un
- * círculo de 40 px que se pone azul al alcanzar; se cancela si el dedo se va
+ * círculo de 40 px que se pone negro al alcanzar; se cancela si el dedo se va
  * más de 40 px en vertical. Con una ventana abierta no arranca.
  */
 export function VolverDesdeBorde() {
@@ -81,7 +81,7 @@ export function VolverDesdeBorde() {
     <div
       ref={circulo}
       aria-hidden
-      className="pointer-events-none fixed left-0 z-30 grid size-10 place-items-center rounded-full bg-blanco text-muted opacity-0 shadow-[0_4px_14px_rgba(15,23,42,0.18)] data-[listo]:bg-accent-fill data-[listo]:text-white lg:hidden"
+      className="pointer-events-none fixed left-0 z-30 grid size-10 place-items-center rounded-full bg-blanco text-muted opacity-0 shadow-[var(--sombra-md)] data-[listo]:bg-accent-fill data-[listo]:text-accent-ink lg:hidden"
       style={{ transform: `translateX(${ESCONDIDO}px)` }}
     >
       <ArrowLeft size={20} weight="bold" />

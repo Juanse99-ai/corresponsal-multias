@@ -49,8 +49,7 @@ export function LuisManager({
           fecha={fecha}
           items={compensaciones}
           titulo="Cupo que dio"
-          subtitulo="Lo que el Sr. Luis presta en el día"
-          emptyText="Sin cupo registrado aún"
+          emptyText="Sin cupo"
           tono="comp"
           agregar={agregarCompensacion}
           agregarLote={agregarCompensacionesLote}
@@ -61,8 +60,7 @@ export function LuisManager({
           fecha={fecha}
           items={consignaciones}
           titulo="Consignaciones"
-          subtitulo="Lo que se consignó con su cupo"
-          emptyText="Sin consignaciones aún"
+          emptyText="Sin consignaciones"
           tono="consig"
           agregar={agregarConsignacion}
           agregarLote={agregarConsignacionesLote}

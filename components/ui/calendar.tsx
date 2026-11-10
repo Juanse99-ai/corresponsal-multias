@@ -113,7 +113,7 @@ function Calendar({
         range_middle: cn("rounded-none", defaultClassNames.range_middle),
         range_end: cn("rounded-r-md bg-surface-2", defaultClassNames.range_end),
         today: cn(
-          // Hoy: aro azul fino; el elegido va relleno de azul.
+          // Hoy: aro negro fino; el elegido va relleno de negro.
           "rounded-full text-accent ring-1 ring-accent ring-inset data-[selected=true]:ring-0",
           defaultClassNames.today
         ),

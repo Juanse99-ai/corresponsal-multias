@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useNavegacion } from "@/lib/use-navegacion";
 import { motion } from "framer-motion";
-import { DownloadSimple, Trash } from "@phosphor-icons/react/dist/ssr";
+import { ClockCounterClockwise, DownloadSimple, Trash } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardAction, CardHeader, CardTitle } from "@/components/ui/card";
 import { IconButton } from "@/components/ui/icon-button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -62,7 +62,7 @@ export function GeneralTable({ entries }: { entries: GeneralRow[] }) {
     return (
       <Card>
         <Empty>
-          <EmptyTitle>Aún no hay días registrados en el control general</EmptyTitle>
+          <EmptyTitle>Aún no hay días registrados</EmptyTitle>
         </Empty>
       </Card>
     );
@@ -71,7 +71,7 @@ export function GeneralTable({ entries }: { entries: GeneralRow[] }) {
   return (
     <Card>
       <CardHeader className="items-center">
-        <CardTitle className="text-text">
+        <CardTitle className="text-text" icono={<ClockCounterClockwise />}>
           <h2>Historial</h2>
         </CardTitle>
         <CardAction className="self-center">
@@ -176,7 +176,7 @@ export function GeneralTable({ entries }: { entries: GeneralRow[] }) {
       </Table>
       <ConfirmDialog
         open={!!porBorrar}
-        titulo="¿Borrar este día del control general?"
+        titulo="¿Borrar este día?"
         onConfirmar={() => porBorrar && borrar(porBorrar)}
         onCancelar={() => setPorBorrar(null)}
       />

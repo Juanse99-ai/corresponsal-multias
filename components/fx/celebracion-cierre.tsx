@@ -55,7 +55,7 @@ export function CelebracionCierre({ play, fecha, cuadrado }: { play: number; fec
           <div
             className="absolute inset-0"
             style={{
-              backgroundColor: "oklch(0.16 0.02 265 / 0.82)",
+              backgroundColor: "oklch(0.17 0.004 70 / 0.82)",
               backdropFilter: "blur(14px)",
               WebkitBackdropFilter: "blur(14px)",
             }}
@@ -82,7 +82,7 @@ export function CelebracionCierre({ play, fecha, cuadrado }: { play: number; fec
                 </svg>
               </span>
             ) : (
-              <span className="flex h-24 w-24 items-center justify-center rounded-full bg-[oklch(0.4_0.08_265/0.4)] text-nav-text/90">
+              <span className="flex h-24 w-24 items-center justify-center rounded-full bg-[oklch(0.4_0.006_70/0.4)] text-nav-text/90">
                 <LockSimple size={38} weight="fill" />
               </span>
             )}

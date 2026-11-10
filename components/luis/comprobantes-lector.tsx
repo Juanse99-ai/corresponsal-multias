@@ -4,10 +4,12 @@ import { Fragment, useMemo, useState, useTransition } from "react";
 import { useNavegacion } from "@/lib/use-navegacion";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
-import { Scan, Warning, Check, X } from "@phosphor-icons/react/dist/ssr";
+import { Scan, Warning, Check, X, Images } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardHeader, CardTitle, CardAction, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
+import { Spinner } from "@/components/ui/spinner";
+import { Contador } from "@/components/ui/contador";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ItemGroup,
@@ -43,6 +45,7 @@ export function ComprobantesLector({
     error?: string;
     insertados?: number;
     repetidos?: number;
+    fotosBorradas?: number;
   }>;
 }) {
   const router = useNavegacion();
@@ -96,6 +99,7 @@ export function ComprobantesLector({
     startTransition(async () => {
       const res = await guardarLote({
         fecha,
+        soporteIds: seleccion.map((c) => c.soporteId),
         items: seleccion.map((c) => ({
           fecha: c.fecha ?? fecha,
           monto: c.monto as number,
@@ -106,13 +110,17 @@ export function ComprobantesLector({
       if (res.ok) {
         const n = res.insertados ?? seleccion.length;
         const rep = res.repetidos ?? 0;
+        const borradas = res.fotosBorradas ?? 0;
         setItems(null);
         toast.success(
-          n === 0
+          (n === 0
             ? "Todas ya estaban registradas."
             : `${n} ${n === 1 ? "consignación agregada" : "consignaciones agregadas"}` +
-                (rep > 0 ? `; ${rep} ya ${rep === 1 ? "estaba" : "estaban"}` : "") +
-                ".",
+              (rep > 0 ? `; ${rep} ya ${rep === 1 ? "estaba" : "estaban"}` : "") +
+              ".") +
+            (borradas > 0
+              ? ` Se ${borradas === 1 ? "quitó 1 foto leída" : `quitaron ${borradas} fotos leídas`}.`
+              : ""),
         );
         router.refresh();
       } else {
@@ -126,13 +134,18 @@ export function ComprobantesLector({
   return (
     <Card className="mt-5 p-0">
       <CardHeader className="gap-3 pb-0">
-        <CardTitle className="min-w-0 self-center text-text">Llenar consignaciones desde las fotos</CardTitle>
+        <CardTitle className="min-w-0 self-center text-text" icono={<Images weight="bold" />}>
+          Llenar desde fotos <Contador n={cantidadFotos} aria-hidden className="ml-1 align-middle" />
+        </CardTitle>
         {!items && (
           <CardAction className="self-center">
-            <Button variant="outline" size="sm" onClick={leer} disabled={pending} className="shrink-0">
-              <Scan size={16} weight="bold" />
-              {pending ? "Leyendo…" : `Leer ${cantidadFotos} ${cantidadFotos === 1 ? "foto" : "fotos"}`}
-            </Button>
+            <IconButton
+              label={pending ? "Leyendo…" : `Leer ${cantidadFotos} ${cantidadFotos === 1 ? "foto" : "fotos"}`}
+              onClick={leer}
+              disabled={pending}
+            >
+              {pending ? <Spinner className="size-[18px]" aria-hidden /> : <Scan size={18} weight="bold" />}
+            </IconButton>
           </CardAction>
         )}
       </CardHeader>
@@ -200,7 +213,7 @@ export function ComprobantesLector({
                               <ItemDescription className="line-clamp-none truncate leading-tight">
                                 {!utilizable && (
                                   <span className="text-bad-fg">
-                                    {c.error ?? "No es una tirilla legible"} ·{" "}
+                                    {c.error ?? "Ilegible"} ·{" "}
                                   </span>
                                 )}
                                 {utilizable && !c.seguro && (
@@ -228,14 +241,13 @@ export function ComprobantesLector({
               {dudosos > 0 && (
                 <p className="mt-2 text-meta text-muted">
                   {dudosos === 1
-                    ? "1 quedó dudosa y no viene marcada: compárala con la foto antes de incluirla."
-                    : `${dudosos} quedaron dudosas y no vienen marcadas: compáralas con la foto antes de incluirlas.`}
+                    ? "1 dudosa: compárala con la foto."
+                    : `${dudosos} dudosas: compáralas con la foto.`}
                 </p>
               )}
               {fallidos > 0 && (
                 <p className="mt-1 text-meta text-muted">
-                  {fallidos === 1 ? "1 foto no se pudo leer" : `${fallidos} fotos no se pudieron leer`}.
-                  Esas tocan a mano.
+                  {fallidos === 1 ? "1 sin leer: va a mano." : `${fallidos} sin leer: van a mano.`}
                 </p>
               )}
 
@@ -250,7 +262,7 @@ export function ComprobantesLector({
                     ? "Guardando…"
                     : seleccion.length === 0
                       ? "Guardar"
-                      : `Guardar ${seleccion.length} ${seleccion.length === 1 ? "consignación" : "consignaciones"}`}
+                      : `Guardar ${seleccion.length}`}
                 </Button>
                 <IconButton label="Cancelar" onClick={() => setItems(null)} disabled={pending}>
                   <X size={17} />

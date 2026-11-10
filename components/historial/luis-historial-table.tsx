@@ -82,7 +82,7 @@ export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
       {/* El acumulado vigente en una celda, sin recuadro tintado. */}
       <div className="px-5 pt-4 pb-3">
         <Celdas className="grid-cols-1">
-          <Celda rotulo="Saldo acumulado a favor de Luis" grande>
+          <Celda rotulo="Acumulado a favor" grande>
             {formatCOP(acumuladoActual)}
           </Celda>
         </Celdas>
@@ -90,7 +90,7 @@ export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
 
       {filtrados.length === 0 ? (
         <Empty fila className="px-5 pb-5">
-          <EmptyTitle>No hay movimientos de Luis en este rango</EmptyTitle>
+          <EmptyTitle>Sin movimientos en este rango</EmptyTitle>
         </Empty>
       ) : (
         <>
@@ -146,7 +146,7 @@ export function LuisHistorialTable({ dias }: { dias: LuisHistDia[] }) {
                 transition={{ ...TRANSICION, delay: Math.min(i * 0.02, 0.3) }}
                 onClick={() => router.push(`/luis?fecha=${d.fecha}`)}
                 className="cursor-pointer"
-                title="Ver el día y abrir el reporte" aria-label="Ver el día y abrir el reporte"
+                title="Ver el día" aria-label="Ver el día"
               >
                 <TableCell className="font-medium text-text">{formatFecha(d.fecha)}</TableCell>
                 <TableCell className="tnum text-right text-muted">{formatCOP(d.consignaciones)}</TableCell>

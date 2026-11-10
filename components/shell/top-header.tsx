@@ -51,8 +51,8 @@ export function buildAvisos(resumen: HeaderResumen): Aviso[] {
     out.push({
       id: "cuadre",
       tone: resumen.tarde ? "danger" : "warn",
-      title: resumen.tarde ? "Falta cerrar el día" : "Cuadre de hoy sin abrir",
-      detail: resumen.tarde ? "Ya es tarde y el cuadre sigue sin abrir." : "Ábrelo cuando tengas la tirilla.",
+      title: resumen.tarde ? "Falta cerrar el día" : "Cuadre sin abrir",
+      detail: resumen.tarde ? "Cuadre sin abrir" : "",
       href: "/cuadre",
     });
   } else if (c.total_tirilla === 0) {
@@ -61,7 +61,7 @@ export function buildAvisos(resumen: HeaderResumen): Aviso[] {
       id: "cuadre",
       tone: "info",
       title: "Falta la tirilla de hoy",
-      detail: "Escribe el total de la tirilla para ver si el día cuadra.",
+      detail: "",
       href: "/cuadre",
     });
   } else if (Math.round(c.saldo_final) !== 0) {
@@ -70,7 +70,7 @@ export function buildAvisos(resumen: HeaderResumen): Aviso[] {
       id: "cuadre",
       tone: "danger",
       title: "Descuadre de hoy",
-      detail: `${sobra ? "Sobran" : "Faltan"} ${formatCOP(Math.abs(c.saldo_final))} por justificar.`,
+      detail: `${sobra ? "Sobran" : "Faltan"} ${formatCOP(Math.abs(c.saldo_final))}`,
       href: "/cuadre",
     });
   } else if (c.estado !== "cerrado" && resumen.tarde) {
@@ -78,7 +78,7 @@ export function buildAvisos(resumen: HeaderResumen): Aviso[] {
       id: "cerrar",
       tone: "warn",
       title: "Recuerda cerrar el día",
-      detail: "Ya cuadra; ciérralo para dejarlo en firme.",
+      detail: "Ya cuadra",
       href: "/cuadre",
     });
   }
@@ -87,7 +87,7 @@ export function buildAvisos(resumen: HeaderResumen): Aviso[] {
       id: "prestamos",
       tone: "info",
       title: `${resumen.prestamosCount} préstamo${resumen.prestamosCount === 1 ? "" : "s"} pendiente${resumen.prestamosCount === 1 ? "" : "s"}`,
-      detail: `Le deben ${formatCOP(resumen.prestamosTotal)} al fondo.`,
+      detail: `Le deben ${formatCOP(resumen.prestamosTotal)}`,
       href: "/prestamos",
     });
   }
@@ -147,18 +147,18 @@ export function TopHeader({
     // por debajo al hacer scroll. Computador: dentro del marco, transparente y
     // sin línea (globals.css); el menú, la marca y el buscador están en el riel
     // y el panel de la izquierda.
-    <header className="barra-material barra-arriba sticky top-0 z-20 border-b border-line/80 lg:static lg:border-b-0" style={{ paddingTop: "env(safe-area-inset-top)" }}>
+    <header className="barra-material barra-arriba sticky top-0 z-20 lg:static" style={{ paddingTop: "env(safe-area-inset-top)" }}>
       <div className="relative mx-auto flex h-14 max-w-[1240px] items-center justify-between gap-3 px-1.5 sm:px-4 lg:h-12 lg:max-w-none lg:px-2">
       <div className="flex min-w-0 items-center gap-1.5 sm:gap-3">
         {/* Sin botón de menú: abajo está la barra. El logo lleva al Panel. */}
-        <Link href="/panel" aria-label="Inicio" className="ml-2 flex items-center gap-2 rounded-xl shadow-[0_1px_2px_rgba(20,16,50,0.08),0_4px_10px_-6px_rgba(20,16,50,0.3)] sm:ml-0 lg:hidden">
+        <Link href="/panel" aria-label="Inicio" className="ml-2 flex items-center gap-2 rounded-xl shadow-[0_1px_2px_rgba(48,40,32,0.08),0_4px_10px_-6px_rgba(48,40,32,0.3)] sm:ml-0 lg:hidden">
           <Logo size={40} className="rounded-xl" />
           <span className="hidden text-sm font-semibold tracking-tight text-text sm:block">Barrio Centro Sabanalarga 18</span>
         </Link>
         {/* Computador: las pestañas en el lugar del título, como en Biela. */}
         <TiraPestanas isAdmin={isAdmin} />
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2 pr-2.5 sm:pr-0">
         <div className="contents lg:hidden">
           <HeaderSearch personas={isAdmin ? resumen.personas : []} />
         </div>
@@ -218,7 +218,7 @@ export function HeaderSearch({ personas, enPanel = false }: { personas: string[]
       {/* Celular: lupa de 44x44. El buscador completo se abre encima del encabezado. */}
       {!enPanel && (
       <IconButton
-        forma="suelto"
+        forma="blanco"
         label="Buscar día o persona"
         onClick={() => {
           setMovil(true);
@@ -243,7 +243,7 @@ export function HeaderSearch({ personas, enPanel = false }: { personas: string[]
       <InputGroup
         className={cn(
           enPanel
-            ? "h-10 rounded-full bg-blanco shadow-[0_1px_2px_rgba(20,16,50,0.06)] hover:bg-blanco"
+            ? "h-10 rounded-full bg-blanco shadow-[0_1px_2px_rgba(48,40,32,0.06)] hover:bg-blanco"
             : "rounded-full sm:h-10 sm:w-[240px]",
           movil && "bg-blanco hover:bg-blanco sm:bg-campo sm:hover:bg-campo-hover",
         )}
@@ -283,7 +283,7 @@ export function HeaderSearch({ personas, enPanel = false }: { personas: string[]
         className="w-[min(20rem,80vw)] overflow-hidden p-0"
       >
             {!hayResultados ? (
-              <p className="px-4 py-3 text-meta text-faint">Escribe una fecha (17/06) o el nombre de una persona.</p>
+              <p className="px-4 py-3 text-meta text-faint">Fecha (17/06) o nombre</p>
             ) : (
               <ItemGroup className="py-1">
                 {fechaISO && (
@@ -293,7 +293,7 @@ export function HeaderSearch({ personas, enPanel = false }: { personas: string[]
                         <CalendarBlank size={16} className="text-accent" />
                       </ItemMedia>
                       <ItemContent>
-                        <ItemTitle className="text-body font-normal text-text">Ver el día {formatFecha(fechaISO)}</ItemTitle>
+                        <ItemTitle className="text-body font-normal text-text">{formatFecha(fechaISO)}</ItemTitle>
                       </ItemContent>
                       <ItemActions>
                         <ArrowRight size={14} className="text-inerte" />
@@ -311,7 +311,7 @@ export function HeaderSearch({ personas, enPanel = false }: { personas: string[]
                         <ItemTitle className="text-body font-normal text-text">{p}</ItemTitle>
                       </ItemContent>
                       <ItemActions>
-                        <span className="text-meta text-faint">Préstamos</span>
+                        <ArrowRight size={14} className="text-inerte" />
                       </ItemActions>
                     </Button>
                   </Item>
@@ -329,7 +329,7 @@ export function HeaderSearch({ personas, enPanel = false }: { personas: string[]
 const filaResultado =
   "h-auto min-h-11 w-full flex-nowrap justify-start rounded-none border-0 text-left font-normal hover:bg-fill active:scale-100";
 
-// Círculo de 32 en el par de su estado: rojo urgente, ámbar "ojo", azul informa.
+// Círculo de 32 en el par de su estado: rojo urgente, ámbar "ojo", gris informa.
 const TONE: Record<Tone, { wrap: string; icon: typeof Warning }> = {
   danger: { wrap: "bg-bad-bg text-bad-fg", icon: Warning },
   warn: { wrap: "bg-warn-bg text-warn-fg", icon: Warning },
@@ -343,14 +343,14 @@ export function HeaderAvisos({ avisos, urgentes }: { avisos: Aviso[]; urgentes: 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-      <IconButton forma="suelto" label={avisos.length ? `Avisos (${avisos.length})` : "Avisos"}>
+      <IconButton forma="blanco" label={avisos.length ? `Avisos (${avisos.length})` : "Avisos"}>
         <span className="relative inline-flex">
           <Bell size={18} weight={avisos.length ? "fill" : "regular"} />
           {avisos.length > 0 && (
             <span
               aria-hidden
               className={cn(
-                "absolute -right-1 -top-0.5 h-2 w-2 rounded-full ring-2 ring-bg",
+                "absolute -right-1 -top-0.5 h-2 w-2 rounded-full ring-2 ring-blanco",
                 urgentes ? "bg-danger" : "bg-accent",
               )}
             />
@@ -361,7 +361,10 @@ export function HeaderAvisos({ avisos, urgentes }: { avisos: Aviso[]; urgentes: 
 
       <PopoverContent align="end" sideOffset={10} className="w-[min(22rem,84vw)] overflow-hidden p-0">
             <div className="flex items-center justify-between gap-3 px-4 pt-3.5 pb-1.5">
-              <p className="text-title font-semibold text-text">Avisos</p>
+              <p className="flex items-center gap-2 text-title font-semibold text-text">
+                <Bell size={17} weight="fill" className="text-muted" />
+                Avisos
+              </p>
               <Contador n={avisos.length} />
             </div>
             {avisos.length === 0 ? (
@@ -380,7 +383,7 @@ export function HeaderAvisos({ avisos, urgentes }: { avisos: Aviso[]; urgentes: 
                         </ItemMedia>
                         <ItemContent className="min-w-0 gap-0">
                           <ItemTitle className="text-body font-medium text-text">{a.title}</ItemTitle>
-                          <ItemDescription className="text-meta text-faint">{a.detail}</ItemDescription>
+                          {a.detail && <ItemDescription className="tnum text-meta text-faint">{a.detail}</ItemDescription>}
                         </ItemContent>
                         <ItemActions className="mt-1 self-start">
                           <ArrowRight size={14} className="shrink-0 text-inerte" />

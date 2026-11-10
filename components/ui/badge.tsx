@@ -38,6 +38,8 @@ const PUNTO = {
   warn: "bg-warn-fg",
   info: "bg-accent",
   gris: "bg-faint",
+  /** El gris piedra de las barras de "Últimos cierres" (lo normal). */
+  piedra: "bg-torta-4",
 } as const
 
 function Badge({

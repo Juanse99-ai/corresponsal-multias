@@ -23,7 +23,7 @@ export interface ConfirmDialogProps {
   confirmar?: string;
   /** "bad" (por defecto) borra: círculo y botón rojos. "warn" no borra nada
    *  pero conviene mirar (cerrar un día descuadrado): círculo ámbar y la
-   *  acción en azul. */
+   *  acción en negro. */
   tono?: "bad" | "warn";
   onConfirmar: () => void;
   onCancelar: () => void;

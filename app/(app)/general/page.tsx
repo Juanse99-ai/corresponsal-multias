@@ -72,7 +72,7 @@ export default async function GeneralPage({
           soportes={soportes}
           contexto="general"
           titulo="Soportes del día"
-          texto="Sube un soporte (foto o PDF)"
+          texto="Foto o PDF"
           detalleBorrado="No se puede deshacer."
           className="mt-0"
         />
