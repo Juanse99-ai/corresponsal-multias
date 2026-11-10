@@ -16,6 +16,9 @@ import {
   Lock,
   Check,
   X,
+  ArrowsDownUp,
+  ListBullets,
+  Calculator,
 } from "@phosphor-icons/react/dist/ssr";
 import type { Icon } from "@phosphor-icons/react";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -159,8 +162,8 @@ export function MovimientosManager({
       <div className="flex flex-col gap-5">
         <Card>
           <CardHeader>
-            <CardTitle className="text-text">
-              <h2>Registrar movimiento</h2>
+            <CardTitle className="text-text" icono={<ArrowsDownUp />}>
+              <h2>Nuevo movimiento</h2>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -168,7 +171,7 @@ export function MovimientosManager({
           {bloqueado && (
             <Alert variant="muted" className="mb-4">
               <Lock weight="fill" />
-              <AlertTitle className="line-clamp-none font-normal">Día cerrado. Solo Juan puede reabrirlo para editar.</AlertTitle>
+              <AlertTitle className="line-clamp-none font-normal">Día cerrado. Solo Juan lo reabre.</AlertTitle>
             </Alert>
           )}
 
@@ -191,7 +194,6 @@ export function MovimientosManager({
                   aria-label={Ti.label}
                   icono={<Ti.icon />}
                   nombre={Ti.corto}
-                  detalle={t.startsWith("consignacion") ? "Consignación" : undefined}
                 />
               );
             })}
@@ -204,13 +206,13 @@ export function MovimientosManager({
             </div>
             {tipo === "recaudo" && (
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="mov-convenio">Código de convenio</Label>
+                <Label htmlFor="mov-convenio">Convenio</Label>
                 <Input id="mov-convenio" value={convenio} onChange={(e) => setConvenio(e.target.value)} placeholder="Ej. 12345" inputMode="numeric" onKeyDown={(e) => esEnter(e) && !pending && !bloqueado && registrar()} />
               </div>
             )}
             <div className="flex flex-col gap-1.5">
-              <Label htmlFor="mov-cliente">{tipo === "recaudo" ? "Referencia o cliente" : "Cliente (opcional)"}</Label>
-              <Input id="mov-cliente" value={cliente} onChange={(e) => setCliente(e.target.value)} placeholder="Nombre o referencia" onKeyDown={(e) => esEnter(e) && !pending && !bloqueado && registrar()} />
+              <Label htmlFor="mov-cliente">{tipo === "recaudo" ? "Referencia" : "Cliente"}</Label>
+              <Input id="mov-cliente" value={cliente} onChange={(e) => setCliente(e.target.value)} placeholder={tipo === "recaudo" ? "Nombre o referencia" : "Opcional"} onKeyDown={(e) => esEnter(e) && !pending && !bloqueado && registrar()} />
             </div>
           </div>
           </fieldset>
@@ -219,14 +221,14 @@ export function MovimientosManager({
 
           <Button onClick={registrar} disabled={pending || bloqueado} className="mt-5 w-full sm:w-auto">
             <Plus size={18} weight="bold" />
-            {pending ? "Registrando…" : `Registrar ${tipo === "retiro" ? "retiro" : tipo === "recaudo" ? "recaudo" : "consignación"}`}
+            {pending ? "Registrando…" : "Registrar"}
           </Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="items-center">
-            <CardTitle className="text-text">
+            <CardTitle className="text-text" icono={<ListBullets />}>
               <h3>Registrados</h3>
             </CardTitle>
             <CardAction className="self-center">
@@ -237,7 +239,7 @@ export function MovimientosManager({
 
           {movimientos.length === 0 ? (
             <Empty fila>
-              <EmptyTitle>Aún no hay movimientos registrados</EmptyTitle>
+              <EmptyTitle>Sin movimientos</EmptyTitle>
             </Empty>
           ) : (
             <ItemGroup variant="cajitas" className="max-lg:divide-y max-lg:divide-linea-fila">
@@ -281,16 +283,16 @@ export function MovimientosManager({
                             <Input
                               value={eCliente}
                               onChange={(e) => setECliente(e.target.value)}
-                              placeholder={eTipo === "recaudo" ? "Referencia o cliente" : "Cliente (opcional)"}
-                              aria-label={eTipo === "recaudo" ? "Referencia o cliente" : "Cliente"}
+                              placeholder={eTipo === "recaudo" ? "Referencia" : "Cliente"}
+                              aria-label={eTipo === "recaudo" ? "Referencia" : "Cliente"}
                             />
                           </div>
                           {eTipo === "recaudo" && (
                             <Input
                               value={eConvenio}
                               onChange={(e) => setEConvenio(e.target.value)}
-                              placeholder="Código de convenio"
-                              aria-label="Código de convenio"
+                              placeholder="Convenio"
+                              aria-label="Convenio"
                               inputMode="numeric"
                             />
                           )}
@@ -351,10 +353,17 @@ export function MovimientosManager({
       {/* Totales por canal */}
       <div className="flex flex-col gap-4 lg:sticky lg:top-8">
         <Card>
-          <CardHeader>
-            <CardTitle className="text-text">
-              <h3>Totales del día</h3>
+          <CardHeader className="items-center">
+            <CardTitle className="text-text" icono={<Calculator />}>
+              <h3>Totales</h3>
             </CardTitle>
+            <CardAction className="self-center">
+              <IconButton label="Ir al cuadre" asChild>
+                <Link href="/cuadre">
+                  <ArrowRight size={17} weight="bold" />
+                </Link>
+              </IconButton>
+            </CardAction>
           </CardHeader>
           <CardContent>
             <Celdas dos>
@@ -364,12 +373,6 @@ export function MovimientosManager({
                 </Celda>
               ))}
             </Celdas>
-            <Button variant="outline" asChild className="mt-4 w-full">
-              <Link href="/cuadre">
-                Cuadre del día
-                <ArrowRight weight="bold" />
-              </Link>
-            </Button>
           </CardContent>
         </Card>
       </div>

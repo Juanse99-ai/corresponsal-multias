@@ -13,15 +13,18 @@ import {
   X,
   Eraser,
   Coins,
+  CheckCircle,
+  HandCoins,
+  UsersThree,
 } from "@phosphor-icons/react/dist/ssr";
 import { toast } from "sonner";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { DatePicker } from "@/components/ui/date-picker";
-import { Empty, EmptyDescription, EmptyTitle } from "@/components/ui/empty";
+import { Empty, EmptyTitle } from "@/components/ui/empty";
 import { Contador } from "@/components/ui/contador";
 import { Plegable } from "@/components/ui/plegable";
 import {
@@ -88,22 +91,23 @@ export function PrestamosManager({
       <div className="min-w-0">
         <Card>
           <CardHeader className="items-center">
-            <CardTitle className="flex items-center gap-2 text-text">
-              <h2>Quién debe</h2>
-              <Contador n={deben.length} />
+            <CardTitle className="text-text" icono={<UsersThree />}>
+              <h2 className="inline">Quién debe</h2> <Contador n={deben.length} className="ml-1 align-middle" />
             </CardTitle>
             {deben.length > 0 && (
-              <p className="tnum text-meta text-faint">
-                {deben.length === 1 ? "1 persona debe" : `${deben.length} personas deben`} {formatCOP(totalPendiente)}
-              </p>
+              <CardAction className="self-center">
+                <p className="tnum text-body font-semibold text-text">
+                  <span className="sr-only">Deben en total </span>
+                  {formatCOP(totalPendiente)}
+                </p>
+              </CardAction>
             )}
           </CardHeader>
 
           {deben.length === 0 ? (
             <CardContent>
               <Empty fila>
-                <EmptyTitle>Nadie tiene préstamos pendientes</EmptyTitle>
-                <EmptyDescription>Regístralo en Nuevo préstamo</EmptyDescription>
+                <EmptyTitle>Nadie debe</EmptyTitle>
               </Empty>
             </CardContent>
           ) : (
@@ -128,7 +132,7 @@ export function PrestamosManager({
             <div className="border-t border-linea-fila px-5 py-1.5">
               <Plegable
                 variante="fila"
-                titulo={`${alDia.length === 1 ? "Persona" : "Personas"} al día`}
+                titulo="Al día"
                 contador={alDia.length}
               >
                 <div className="flex flex-col pb-2 lg:gap-1.5">
@@ -171,8 +175,8 @@ function AddDeudaForm() {
     if (!personaFinal) return setMsg("Indica la persona.");
     if (monto <= 0) return setMsg("Ingresa un monto.");
     if (concepto === "Otro" && !conceptoOtro.trim()) return setMsg("Especifica el concepto.");
-    if (!descripcion.trim()) return setMsg("Escribe el motivo (para qué fue el préstamo).");
-    if (!medio) return setMsg("Indica cómo se lo diste: efectivo, transferencia o solo registro.");
+    if (!descripcion.trim()) return setMsg("Escribe el motivo.");
+    if (!medio) return setMsg("Elige el medio.");
     setMsg(null);
     startTransition(async () => {
       const res = await crearDeuda({
@@ -200,7 +204,9 @@ function AddDeudaForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-text">Nuevo préstamo</CardTitle>
+        <CardTitle className="text-text" icono={<HandCoins />}>
+          Nuevo préstamo
+        </CardTitle>
       </CardHeader>
 
       <CardContent className="flex flex-col gap-3.5">
@@ -217,7 +223,7 @@ function AddDeudaForm() {
             <Input
               value={otro}
               onChange={(e) => setOtro(e.target.value)}
-              placeholder="Nombre de la persona"
+              placeholder="Nombre"
               aria-label="Nombre de la persona"
               className="mt-1"
             />
@@ -237,8 +243,8 @@ function AddDeudaForm() {
             <Input
               value={conceptoOtro}
               onChange={(e) => setConceptoOtro(e.target.value)}
-              placeholder="Especifica el concepto"
-              aria-label="Especifica el concepto"
+              placeholder="Concepto"
+              aria-label="Concepto"
               className="mt-1"
             />
           )}
@@ -250,14 +256,14 @@ function AddDeudaForm() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label id="grp-medio">¿Cómo se lo diste?</Label>
+          <Label id="grp-medio">Medio</Label>
           <MedioPicker medio={medio} onChange={setMedio} labelledBy="grp-medio" />
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto]">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="deuda-desc">Motivo</Label>
-            <Input id="deuda-desc" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Para qué fue el préstamo" onKeyDown={(e) => esEnter(e) && !pending && registrar()} />
+            <Input id="deuda-desc" value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Para qué fue" onKeyDown={(e) => esEnter(e) && !pending && registrar()} />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="deuda-fecha">Fecha</Label>
@@ -269,7 +275,7 @@ function AddDeudaForm() {
 
         <Button onClick={registrar} disabled={pending} className="mt-1.5">
           <Plus size={18} weight="bold" />
-          {pending ? "Registrando…" : "Registrar préstamo"}
+          {pending ? "Registrando…" : "Prestar"}
         </Button>
       </CardContent>
     </Card>
@@ -319,14 +325,18 @@ function PersonaCard({
           <span className="min-w-0 flex-1">
             <span className="flex min-w-0 items-center gap-2">
               <span className="truncate text-title font-semibold text-text">{grupo.persona}</span>
-              {alDia && <Badge variant="success">Al día</Badge>}
+              {alDia && (
+                <Badge variant="success">
+                  <CheckCircle weight="bold" />
+                  Al día
+                </Badge>
+              )}
             </span>
             {!open && (
               <span className="mt-0.5 block truncate text-meta text-muted">
                 {alDia ? (
                   <>
                     {grupo.deudas.length} préstamo{grupo.deudas.length === 1 ? "" : "s"}
-                    <span className="hidden sm:inline">, todo pagado</span>
                   </>
                 ) : (
                   <>
@@ -392,7 +402,7 @@ function OrigenPicker({
   const clave = claveNombre(value);
   return (
     <div className="flex flex-col gap-1.5">
-      <Label htmlFor={id}>¿De dónde sale la plata?</Label>
+      <Label htmlFor={id}>Origen</Label>
       {sugeridos.length > 0 && (
         <div role="group" aria-label="Orígenes usados antes" className="flex flex-wrap gap-1.5">
           {sugeridos.slice(0, 8).map((o) => {
@@ -410,7 +420,7 @@ function OrigenPicker({
         value={value}
         maxLength={40}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={sugeridos.length > 0 ? "U otro origen" : "Ej: taller, perfumes, sueldo"}
+        placeholder={sugeridos.length > 0 ? "Otro" : "Taller, sueldo…"}
         onKeyDown={(e) => esEnter(e) && onEnter?.()}
       />
     </div>
@@ -425,6 +435,12 @@ function AbonoItem({ abono, origenes }: { abono: AbonoRow; origenes: string[] })
   const [editando, setEditando] = useState(false);
   const [valor, setValor] = useState(abono.origen ?? "");
   const [err, setErr] = useState<string | null>(null);
+
+  function abrirEditor() {
+    setValor(abono.origen ?? "");
+    setErr(null);
+    setEditando((v) => !v);
+  }
 
   function guardar(nuevo: string) {
     setErr(null);
@@ -443,20 +459,22 @@ function AbonoItem({ abono, origenes }: { abono: AbonoRow; origenes: string[] })
     <Item role="listitem" size="sm" className="gap-0 rounded-none px-0 py-2">
       <div className="flex basis-full items-center gap-2 text-meta">
         <span className="shrink-0 text-faint">{formatFecha(abono.fecha)}</span>
-        <Button
-          size="sm"
-          variant={abono.origen ? "secondary" : "ghost"}
-          aria-expanded={editando}
-          onClick={() => {
-            setValor(abono.origen ?? "");
-            setErr(null);
-            setEditando((v) => !v);
-          }}
-          className="min-w-0 max-w-[60%]"
-        >
-          <Tag size={15} className="shrink-0" />
-          <span className="truncate">{abono.origen ?? "Poner origen"}</span>
-        </Button>
+        {abono.origen ? (
+          <Button
+            size="sm"
+            variant="secondary"
+            aria-expanded={editando}
+            onClick={abrirEditor}
+            className="min-w-0 max-w-[60%]"
+          >
+            <Tag size={15} className="shrink-0" />
+            <span className="truncate">{abono.origen}</span>
+          </Button>
+        ) : (
+          <IconButton label="Poner origen" size="icon-sm" forma="suelto" aria-expanded={editando} onClick={abrirEditor}>
+            <Tag size={16} />
+          </IconButton>
+        )}
         <span className="tnum ml-auto shrink-0 text-body font-semibold text-ok-fg">+{formatCOP(abono.monto)}</span>
       </div>
 
@@ -482,10 +500,9 @@ function AbonoItem({ abono, origenes }: { abono: AbonoRow; origenes: string[] })
                   {pending ? "Guardando…" : "Guardar"}
                 </Button>
                 {abono.origen && (
-                  <Button size="sm" variant="secondary" onClick={() => guardar("")} disabled={pending}>
+                  <IconButton label="Quitar origen" size="icon-sm" onClick={() => guardar("")} disabled={pending}>
                     <Eraser size={16} />
-                    Quitar origen
-                  </Button>
+                  </IconButton>
                 )}
                 <IconButton label="Cancelar" size="icon-sm" onClick={() => setEditando(false)} className="ml-auto">
                   <X size={17} />
@@ -576,11 +593,16 @@ function DeudaRow({
           <ItemContent className="min-w-0 gap-1">
             <ItemTitle className="flex-wrap gap-1.5 font-normal">
               {deuda.concepto && <Badge variant="secondary">{deuda.concepto}</Badge>}
-              {saldada && <Badge variant="success">Pagado</Badge>}
+              {saldada && (
+                <Badge variant="success">
+                  <CheckCircle weight="bold" />
+                  Pagado
+                </Badge>
+              )}
               <span className="text-meta text-faint">{formatFecha(deuda.fecha)}</span>
             </ItemTitle>
             <ItemDescription className="line-clamp-1 text-body text-muted">
-              {deuda.descripcion || "Sin motivo anotado"}
+              {deuda.descripcion || "Sin motivo"}
             </ItemDescription>
           </ItemContent>
           <ItemActions className="block shrink-0 text-right">
@@ -700,7 +722,7 @@ function DeudaRow({
         detalle={
           confirmando === "reabrir"
             ? "El préstamo vuelve a quedar pendiente."
-            : `De ${deuda.persona}. Se elimina junto con todos sus abonos y no se puede deshacer.`
+            : `De ${deuda.persona}, con todos sus abonos. No se puede deshacer.`
         }
         confirmar={confirmando === "reabrir" ? "Sí, deshacer" : "Sí, borrar"}
         onConfirmar={confirmando === "reabrir" ? reabrir : borrar}

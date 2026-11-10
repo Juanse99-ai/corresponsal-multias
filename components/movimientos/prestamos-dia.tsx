@@ -15,8 +15,9 @@ import {
   ArrowCounterClockwise,
   X,
   DotsThree,
+  ListChecks,
 } from "@phosphor-icons/react/dist/ssr";
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardAction, CardContent, CardHeader, CardIcono, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { Empty, EmptyTitle } from "@/components/ui/empty";
@@ -94,8 +95,8 @@ export function PrestamosDia({
     const personaFinal = persona === "Otro" ? otro.trim() : persona;
     if (!personaFinal) return setError("Elige a quién es el préstamo.");
     if (monto <= 0) return setError("Ingresa un monto mayor a cero.");
-    if (!concepto.trim()) return setError("Escribe para qué fue el préstamo (motivo).");
-    if (!medio) return setError("Indica cómo se lo diste: efectivo, transferencia o solo registro.");
+    if (!concepto.trim()) return setError("Escribe el motivo.");
+    if (!medio) return setError("Elige el medio.");
     setError(null);
     startTransition(async () => {
       const res = await registrarPrestamoDia({
@@ -171,7 +172,7 @@ export function PrestamosDia({
     const personaFinal = ePersona === "Otro" ? eOtro.trim() : ePersona;
     if (!personaFinal) return setError("Elige a quién es el préstamo.");
     if (eMonto <= 0) return setError("Ingresa un monto mayor a cero.");
-    if (!eConcepto.trim()) return setError("Escribe para qué fue el préstamo (motivo).");
+    if (!eConcepto.trim()) return setError("Escribe el motivo.");
     setError(null);
     startTransition(async () => {
       const res = await editarDeuda({
@@ -194,8 +195,8 @@ export function PrestamosDia({
       <div className="flex flex-col gap-5">
         <Card>
           <CardHeader>
-            <CardTitle className="text-text">
-              <h2>Registrar préstamo</h2>
+            <CardTitle className="text-text" icono={<HandCoins />}>
+              <h2>Nuevo préstamo</h2>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -203,13 +204,13 @@ export function PrestamosDia({
           {bloqueado && (
             <Alert variant="muted" className="mb-4">
               <Lock weight="fill" />
-              <AlertTitle className="line-clamp-none font-normal">Día cerrado. Solo Juan puede reabrirlo.</AlertTitle>
+              <AlertTitle className="line-clamp-none font-normal">Día cerrado. Solo Juan lo reabre.</AlertTitle>
             </Alert>
           )}
 
           <div className="grid gap-x-4 gap-y-3.5 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5 sm:col-span-2">
-              <Label id="grp-persona-dia">A quién</Label>
+              <Label id="grp-persona-dia">Persona</Label>
               <div role="group" aria-labelledby="grp-persona-dia" className="flex flex-wrap gap-2">
                 {[...PERSONAS_PRESET, "Otro"].map((p) => (
                   <ChoiceChip key={p} selected={persona === p} onClick={() => setPersona(p)}>
@@ -221,7 +222,7 @@ export function PrestamosDia({
                 <Input
                   value={otro}
                   onChange={(e) => setOtro(e.target.value)}
-                  placeholder="Nombre de la persona"
+                  placeholder="Nombre"
                   aria-label="Nombre de la persona"
                   className="mt-1"
                   onKeyDown={(e) => esEnter(e) && !pending && !bloqueado && registrar()}
@@ -234,7 +235,7 @@ export function PrestamosDia({
                 id="pr-concepto"
                 value={concepto}
                 onChange={(e) => setConcepto(e.target.value)}
-                placeholder="Préstamo personal, adelanto…"
+                placeholder="Adelanto, gasto…"
                 onKeyDown={(e) => esEnter(e) && !pending && !bloqueado && registrar()}
               />
             </div>
@@ -243,7 +244,7 @@ export function PrestamosDia({
               <MoneyInput id="pr-monto" size="lg" value={monto} onValueChange={setMonto} onEnter={() => !pending && !bloqueado && registrar()} />
             </div>
             <div className="flex flex-col gap-1.5 sm:col-span-2">
-              <Label id="grp-devuelto">¿Ya lo devolvió?</Label>
+              <Label id="grp-devuelto">Estado</Label>
               <ToggleGroup
                 type="single"
                 variant="segmentado"
@@ -264,7 +265,7 @@ export function PrestamosDia({
           </div>
 
           <div className="mt-3.5 flex flex-col gap-1.5">
-            <Label id="grp-medio-dia">¿Cómo se lo diste?</Label>
+            <Label id="grp-medio-dia">Medio</Label>
             <MedioPicker medio={medio} onChange={setMedio} labelledBy="grp-medio-dia" efectivoPrimero />
           </div>
 
@@ -272,15 +273,15 @@ export function PrestamosDia({
 
           <Button variant="secondary" onClick={registrar} disabled={pending || bloqueado} className="mt-5 w-full sm:w-auto">
             <Plus size={18} weight="bold" />
-            {pending ? "Registrando…" : "Registrar préstamo"}
+            {pending ? "Registrando…" : "Prestar"}
           </Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="items-center">
-            <CardTitle className="text-text">
-              <h3>Préstamos del día</h3>
+            <CardTitle className="text-text" icono={<ListChecks />}>
+              <h3>Préstamos</h3>
             </CardTitle>
             <CardAction className="self-center">
               <Contador n={prestamos.length} />
@@ -290,7 +291,7 @@ export function PrestamosDia({
 
           {prestamos.length === 0 ? (
             <Empty fila>
-              <EmptyTitle>Aún no hay préstamos registrados</EmptyTitle>
+              <EmptyTitle>Sin préstamos</EmptyTitle>
             </Empty>
           ) : (
             <ItemGroup variant="cajitas" className="max-lg:divide-y max-lg:divide-linea-fila">
@@ -316,7 +317,7 @@ export function PrestamosDia({
                       {editId === d.id ? (
                         // Edición en línea dentro de la misma cajita.
                         <Item className="flex-col items-stretch gap-2.5 px-0 py-3">
-                          <div role="group" aria-label="A quién" className="flex flex-wrap gap-1.5">
+                          <div role="group" aria-label="Persona" className="flex flex-wrap gap-1.5">
                             {[...PERSONAS_PRESET, "Otro"].map((p) => (
                               <ChoiceChip key={p} selected={ePersona === p} onClick={() => setEPersona(p)}>
                                 {p}
@@ -324,10 +325,10 @@ export function PrestamosDia({
                             ))}
                           </div>
                           {ePersona === "Otro" && (
-                            <Input value={eOtro} onChange={(e) => setEOtro(e.target.value)} placeholder="Nombre de la persona" aria-label="Nombre de la persona" />
+                            <Input value={eOtro} onChange={(e) => setEOtro(e.target.value)} placeholder="Nombre" aria-label="Nombre de la persona" />
                           )}
                           <div className="grid gap-2 sm:grid-cols-2">
-                            <Input value={eConcepto} onChange={(e) => setEConcepto(e.target.value)} placeholder="Concepto" aria-label="Concepto" />
+                            <Input value={eConcepto} onChange={(e) => setEConcepto(e.target.value)} placeholder="Motivo" aria-label="Motivo" />
                             <MoneyInput value={eMonto} onValueChange={setEMonto} aria-label="Monto" />
                           </div>
                           <div className="flex items-center gap-2">
@@ -348,7 +349,12 @@ export function PrestamosDia({
                           <ItemContent className="min-w-0 gap-0.5">
                             <ItemTitle className="w-full min-w-0 gap-2">
                               <span className="tnum">{formatCOP(d.monto)}</span>
-                              {saldado && <Badge variant="success">Devuelto</Badge>}
+                              {saldado && (
+                                <Badge variant="success">
+                                  <CheckCircle weight="bold" />
+                                  Devuelto
+                                </Badge>
+                              )}
                             </ItemTitle>
                             <ItemDescription className="truncate text-nowrap text-faint">
                               {[d.persona, d.concepto].filter(Boolean).join(", ")} · {formatHoraISO(d.created_at)}
@@ -429,10 +435,15 @@ export function PrestamosDia({
       {/* Total pendiente */}
       <div className="flex flex-col gap-4 lg:sticky lg:top-8">
         <Card className="p-5">
-          <p className="text-meta font-medium text-faint">Pendiente del día</p>
+          <div className="flex items-center gap-2.5">
+            <CardIcono>
+              <Clock />
+            </CardIcono>
+            <p className="text-meta font-medium text-faint">Pendiente del día</p>
+          </div>
           <AnimatedMoney
             value={pendiente}
-            className="mt-1 block text-kpi leading-none font-semibold tracking-[-0.6px] text-text"
+            className="mt-3 block text-kpi leading-none font-semibold tracking-[-0.6px] text-text"
           />
           <Celdas dos className="mt-4">
             <Celda rotulo="Prestado">{formatCOP(prestado)}</Celda>

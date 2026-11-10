@@ -30,7 +30,7 @@ export default async function MovimientosPage({
 
   return (
     <div>
-      <PageHeader title="Movimientos del día" subtitle={formatFechaLarga(fecha)}>
+      <PageHeader title="Movimientos" subtitle={formatFechaLarga(fecha)}>
         <DateNav fecha={fecha} base="/movimientos" />
       </PageHeader>
       {/* La key reinicia cada parte al cambiar de día; entre hermanas no se repite. */}

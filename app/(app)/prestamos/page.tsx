@@ -19,7 +19,6 @@ export default async function PrestamosPage() {
     <div>
       <PageHeader
         title="Préstamos"
-        subtitle="Saldos del fondo del corresponsal"
         cifras={
           isAdmin ? (
             <CifraCabecera rotulo="Total pendiente">
