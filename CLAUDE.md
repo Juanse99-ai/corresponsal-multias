@@ -56,14 +56,15 @@
     `text-muted-foreground` → `text-muted`, `bg-accent`/`text-accent-foreground`
     (hover suave) → `bg-surface-2`/`text-text`, `text-white` → `text-nav-text`,
     íconos de lucide → Phosphor. En esta app `muted` es texto gris y `accent` es
-    el azul de marca para texto y aros; el relleno azul es `primary`
-    (`--accent-fill`). El resto de tokens de shadcn (`background`, `input`,
+    el negro (blanco hueso en Noche) para texto y aros; el relleno negro es
+    `primary` (`--accent-fill`, con `text-accent-ink` encima: nunca
+    `text-white`, porque en Noche el relleno es claro). El resto de tokens de shadcn (`background`, `input`,
     `ring`...) ya apuntan a la paleta en `globals.css`. Capas del estilo del
     taller: `bg-campo` (campos), `bg-blanco` (lo elegido, ventanas, menús),
     `bg-panel`, `bg-fila`/`border-fila-borde`, `bg-velo` (fondo de ventanas).
   - Ajustes propios ya hechos: botones en píldora con alto de 44 px y
     `type="button"` por defecto; campos rellenos (gris sin borde, blancos con aro
-    azul al escribir) de 44 px con texto de 16 px (iOS no hace zoom); ventanas
+    negro al escribir) de 44 px con texto de 16 px (iOS no hace zoom); ventanas
     sin filetes con `DialogHeader icono tono`; `Card` sin relleno propio (cada pantalla pone `p-5 sm:p-6` o usa
     `CardHeader`/`CardContent`); variantes extra `success`/`info`/`danger` en
     `Badge` y `success`/`muted` en `Alert`.
@@ -103,29 +104,40 @@
 ## Convenciones de diseño
 - Fuente única tipo iOS: SF Pro vía la pila del sistema de Apple (`--font-ios`,
   `-apple-system`). Sin Geist ni webfonts.
-- Estilo del taller (6 oct 2026, lo pidió el dueño: "mudar este diseño"). Dos
-  temas con `next-themes` (clase en `<html>`): **Azul** (claro) y **Noche**
-  (oscuro, negro total `#000`, tarjetas `#0e0e11`, sin sombras). Acento único
-  azul. En el computador la app va en un marco redondo (`.marco`) sobre el
+- Estilo piedra (10 nov 2026, lo pidió el dueño con una referencia: "cambiar
+  toda la interfaz a ese estilo, más limpia"). Sobre la estructura del estilo
+  del taller (6 oct 2026). Dos temas con `next-themes` (clase en `<html>`):
+  **Claro** (grises cálidos: página `#ecebe8`, tarjetas `#f5f4f2` con filo
+  blanco) y **Noche** (negro total `#000`, tarjetas `#121211`, sin sombras).
+  Sin azul de marca: lo que se aprieta es negro (`--accent-fill`; blanco hueso
+  en Noche). En el computador la app va en un marco redondo (`.marco`) sobre el
   lienzo, con riel de íconos por grupo y panel de secciones
   (`components/shell/riel-panel.tsx`). En el celular, arriba el logo con la lupa
-  y los avisos, y abajo la barra flotante (`components/shell/barra-abajo.tsx`):
-  Panel, Cuadre, Movimientos, Sr. Luis y Tú; Tú abre una hoja con el resto de
+  y los avisos en círculos blancos, y abajo la barra flotante
+  (`components/shell/barra-abajo.tsx`): cápsula solo con íconos (Panel, Cuadre,
+  Sr. Luis y Tú, la abierta en un círculo blanco) y aparte el botón negro +
+  que abre Movimientos; Tú abre una hoja con el resto de
   pantallas, la cuenta, el tema y cerrar sesión. La barra se encoge al bajar,
   saca la lupa al arrastrar el dedo y baja cuando el teclado está arriba (no
   con un campo enfocado solo: el autoFocus de Movimientos no la esconde).
   Lo elegido (pestaña, ítem del menú) es pastilla blanca con sombra. Detalle en
   DESIGN.md. Los tokens `nav-*` (banda de marca del login, bienvenida y
   celebración) son iguales en ambos temas; las tarjetas navy usan `--navy`.
-- Verde/rojo solo para estado (cuadrado/descuadre), también en gráficos. Sin
-  morados/neón, sin emojis. Sin glows decorativos en tarjetas. Iconos:
+- Verde/rojo solo para estado (cuadrado/descuadre), también en gráficos; lo
+  normal va en gris o carbón y solo la excepción lleva color. Gráficas del
+  Panel como la referencia: cuadrícula de cuadritos en "Últimos cierres"
+  (columna por día, carbón si cuadró, rojo si no) y barras rayadas con el %
+  encima y una línea naranja (`--naranja`, ayer) en la distribución. Los tonos
+  de gráficas van como tokens en `globals.css` y se leen como
+  `var(--color-...)` (con `--color-...` en `@theme inline`): un `var(--x)` que
+  solo aparece en TSX lo borra Tailwind del CSS. Sin morados/neón, sin emojis. Sin glows decorativos en tarjetas. Iconos:
   `@phosphor-icons/react/dist/ssr`.
 - Que no parezca hecha con IA (se limpió a propósito, no reintroducir):
   - Nada de degradados "aurora" ni halos de luz. Única excepción: el lienzo del
-    estilo del taller (`--lienzo`, degradado suave en Azul y un velo azul arriba
-    en Noche), detrás del marco.
-  - Celular: barra superior de lado a lado con `.barra-material` y línea fina
-    abajo. Computador: la barra va dentro del marco, transparente. La barra de
+    estilo (`--lienzo`, degradado piedra suave en Claro, negro en Noche),
+    detrás del marco.
+  - Celular: barra superior de lado a lado con `.barra-material` del color de
+    la página, sin línea. Computador: la barra va dentro del marco, transparente. La barra de
     abajo del celular es la única cápsula de vidrio flotante (como en el
     taller); nada más lleva vidrio.
   - Etiquetas en oración normal, sin mayúsculas espaciadas (`uppercase tracking-*`).

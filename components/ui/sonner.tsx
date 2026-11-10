@@ -6,7 +6,7 @@ import { Toaster as Sonner, type ToasterProps } from "sonner"
 import { Spinner } from "@/components/ui/spinner"
 
 // Avisos en pastilla oscura del taller (en los dos temas), con un punto de
-// color a la izquierda que dice el resultado antes de leer: verde quedó, azul
+// color a la izquierda que dice el resultado antes de leer: verde quedó, gris
 // aviso, rojo no quedó, ámbar ojo. El error lleva además su filo rojo
 // (globals.css, .aviso). Arriba a la derecha en el computador; abajo, cerca
 // del pulgar y encima de la barra, en el celular. Las llamadas a toast.*() no
@@ -48,7 +48,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       className="toaster group"
       icons={{
         success: <Punto color="#22c55e" />,
-        info: <Punto color="#5b8cff" />,
+        info: <Punto color="#d6d2cd" />,
         warning: <Punto color="#f5a524" />,
         error: <Punto color="#f05252" />,
         loading: <Spinner className="size-4 text-white" aria-hidden />,

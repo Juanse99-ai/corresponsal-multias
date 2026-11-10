@@ -266,7 +266,7 @@ export function CruceChat({
       </ScrollArea>
 
       {/* Compositor abajo, como la barra de escribir de un chat: íconos en
-          círculo gris, el campo relleno y Cruzar en azul. */}
+          círculo gris, el campo relleno y Cruzar en negro. */}
       <div className="flex flex-col gap-2 px-3 py-3 sm:px-4">
         <ErrorNotice message={error} />
         <div className="flex items-end gap-2">

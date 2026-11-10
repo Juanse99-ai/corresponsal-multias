@@ -45,7 +45,7 @@ function AvatarFallback({
     <AvatarPrimitive.Fallback
       data-slot="avatar-fallback"
       className={cn(
-        // Iniciales en azul tenue, 13,5/600 (11 en el chico).
+        // Iniciales en gris tenue, 13,5/600 (11 en el chico).
         "flex size-full items-center justify-center rounded-full bg-accent-soft text-body font-semibold text-accent group-data-[size=sm]/avatar:text-label",
         className
       )}

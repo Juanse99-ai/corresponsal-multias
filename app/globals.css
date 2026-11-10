@@ -6,70 +6,73 @@
 
 /* ============================================================
    App Corresponsal - Multidiagnosticos AS
-   Estilo del taller (6 oct 2026, «quiero mudar este diseño»): dos temas,
-   Azul (de día, el claro) y Noche (negro total, el oscuro), con el azul del
-   logo de acento. La app va en un marco redondeado sobre un lienzo; dentro,
-   tarjetas tenues y lo elegido en pastilla blanca. Fuente: la del sistema
-   Apple, como siempre.
+   Estilo piedra (10 nov 2026, el dueño pidió una interfaz más limpia): dos
+   temas, Claro (grises cálidos) y Noche (negro total), con el negro (o el
+   blanco hueso en Noche) para lo que se aprieta. La app va en un marco
+   redondeado sobre un lienzo; dentro, tarjetas tenues con filo blanco y lo
+   elegido en pastilla blanca. Fuente: la del sistema Apple, como siempre.
    ============================================================ */
 
-/* ---------- Azul (tema claro) ---------- */
+/* ---------- Claro (tema de día) ----------
+   Grises cálidos, como papel: la página un gris piedra, las tarjetas un tono
+   más claro con un filo blanco arriba, y el negro para lo que se aprieta. Sin
+   azul de marca: el color queda solo para los estados (verde/rojo/ámbar). */
 :root {
   /* Lienzo, marco y capas del estilo */
-  --lienzo: linear-gradient(160deg, #eef2f8 0%, #dfe6f1 100%);
-  --marco: linear-gradient(180deg, #e8edf6 0%, #dfe5f0 100%);
-  --marco-sombra: 0 30px 60px -30px rgba(15, 35, 80, 0.32), 0 0 0 1px rgba(255, 255, 255, 0.6) inset;
-  --panel: rgba(255, 255, 255, 0.62);
-  --blanco: #ffffff;
-  --fila: #ffffff;
-  --fila-borde: #e5eaf2;
-  --fila-hover: #f9fbfe;
-  --tarjeta-borde: rgba(255, 255, 255, 0.85);
-  --tarjeta-sombra: 0 1px 2px rgba(15, 35, 80, 0.05), 0 12px 32px -20px rgba(15, 35, 80, 0.25);
-  --pastilla-sombra: 0 1px 2px rgba(20, 16, 50, 0.08), 0 2px 6px -2px rgba(20, 16, 50, 0.12);
-  --primario-sombra: 0 1px 2px rgba(20, 50, 160, 0.25), 0 6px 16px -6px rgba(29, 78, 216, 0.5);
-  --campo: #eef2f7;
-  --campo-hover: #e6ebf2;
-  --velo: rgba(15, 30, 70, 0.26);
+  --lienzo: linear-gradient(160deg, #e2dfdb 0%, #d6d2cd 100%);
+  --marco: #ecebe8;
+  --marco-sombra: 0 30px 60px -30px rgba(48, 40, 32, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.7) inset;
+  --panel: #f5f4f2;
+  --blanco: #fdfcfb;
+  --fila: #fbfaf8;
+  --fila-borde: #e7e4e0;
+  --fila-hover: #f7f6f3;
+  --tarjeta-borde: rgba(255, 255, 255, 0.95);
+  --tarjeta-sombra: 0 1px 2px rgba(48, 40, 32, 0.04), 0 10px 28px -18px rgba(48, 40, 32, 0.22);
+  --pastilla-sombra: 0 1px 2px rgba(48, 40, 32, 0.08), 0 3px 8px -2px rgba(48, 40, 32, 0.12);
+  --primario-sombra: 0 1px 2px rgba(0, 0, 0, 0.18), 0 6px 14px -6px rgba(0, 0, 0, 0.32);
+  --campo: #eae8e4;
+  --campo-hover: #e4e1dd;
+  --velo: rgba(32, 28, 24, 0.24);
   /* El velo de las ventanas desenfoca el fondo, como una hoja de iOS. */
-  --velo-blur: blur(14px) saturate(1.15);
-  --menu-hover: rgba(255, 255, 255, 0.55);
+  --velo-blur: blur(14px) saturate(1.1);
+  --menu-hover: rgba(255, 255, 255, 0.6);
   /* El ítem elegido de un menú: pastilla blanca. */
-  --menu-activo: #ffffff;
+  --menu-activo: #fdfcfb;
 
   /* Superficies */
-  --bg: #e7ecf4;
-  --bg-soft: #f1f4f9;
-  --surface: #f7f9fc;
-  --surface-2: #edf1f6;
-  --elevated: #e3e8f0;
-  --line: #e0e6ee;
-  --line-strong: #d3dbe6;
+  --bg: #ecebe8;
+  --bg-soft: #f2f1ee;
+  --surface: #f5f4f2;
+  --surface-2: #ebe9e5;
+  --elevated: #e3e0dc;
+  --line: #e4e1dd;
+  --line-strong: #d6d2cd;
   /* Entre renglones de una lista sin cajitas y bajo la cabecera de una tabla. */
-  --linea-fila: #e5eaf2;
-  --linea-cabecera: #dbe2ec;
+  --linea-fila: #e7e4e0;
+  --linea-cabecera: #dcd8d3;
   /* Contorno de un botón y de un campo de filtro (3:1 sobre la mesa). */
-  --borde-boton: #78859a;
-  --borde-campo: #d3dae3;
+  --borde-boton: #8a847d;
+  --borde-campo: #d6d2cd;
 
   /* Tinta en cinco pesos: dato, secundario, rótulo, metadato y lo que no se
-     pulsa. --faint baja a #57677d: #6b7a90 daba 3,68:1 sobre la mesa y no
-     pasaba AA. --inerte nunca es texto. */
-  --text: #0f172a;
-  --text-2: #334155;
-  --muted: #475569;
-  --faint: #57677d;
-  --inerte: #94a3b8;
-  --vacio: #b0bac6;
+     pulsa. --faint da 4,7:1 sobre la página y 5,1:1 sobre la tarjeta.
+     --inerte nunca es texto. */
+  --text: #1c1b19;
+  --text-2: #3a3733;
+  --muted: #5c5853;
+  --faint: #6b665f;
+  --inerte: #a8a29b;
+  --vacio: #bdb7b0;
 
-  /* Azul del logo: --accent para texto y aros, --accent-fill para rellenos. */
-  --accent: #1d4ed8;
-  --accent-strong: #1e40af;
-  --accent-fill: #1d4ed8;
+  /* Negro: --accent para texto y aros, --accent-fill para rellenos. */
+  --accent: #1c1b19;
+  --accent-strong: #000000;
+  --accent-fill: #1f1e1c;
   --accent-ink: #ffffff;
-  --accent-soft: #e6edfc;
+  --accent-soft: #e6e3df;
   /* Círculo del ícono de las ventanas. */
-  --accent-soft-2: #dbeafe;
+  --accent-soft-2: #dfdbd6;
 
   /* Verde semantico (cuadrado) */
   --success: oklch(0.585 0.13 155);
@@ -82,67 +85,85 @@
   /* Estados de plata en pares fondo/letra. La LETRA de un estado sobre su
      fondo suave va con el par (text-ok-fg sobre bg-ok-bg); --success y
      --danger quedan para rellenos, puntos y gráficas (text-success sobre
-     bg-success-soft da 3,3:1 y no pasa AA). */
-  --ok-bg: #dcfce7;
+     bg-success-soft da 3,3:1 y no pasa AA). "Info" es neutro: no es un
+     estado de plata. */
+  --ok-bg: #dcf5e3;
   --ok-fg: #166534;
-  --bad-bg: #fee2e2;
+  --bad-bg: #fbe1df;
   --bad-fg: #b91c1c;
-  --warn-bg: #fef3c7;
-  --warn-fg: #92400e;
-  --info-bg: #dbeafe;
-  --info-fg: #1e40af;
+  --warn-bg: #f8edcf;
+  --warn-fg: #8a3f0c;
+  --info-bg: #e6e3df;
+  --info-fg: #3a3733;
   --ok-fill: #15803d;
   --danger-fill: #dc2626;
 
-  /* Navy: la única cifra por pantalla sobre la que se aprieta un botón. */
-  --navy: #0d1b35;
+  /* Tarjeta oscura: la única cifra por pantalla sobre la que se aprieta un
+     botón (el nombre "navy" quedó del estilo anterior). */
+  --navy: #1f1e1c;
   --navy-filo: 0 0 0 0 transparent;
 
-  /* Rellenos grises de iOS: Cancelar, botón apagado, agarradera. */
-  --fill: rgba(120, 120, 128, 0.12);
-  --fill-2: rgba(120, 120, 128, 0.16);
+  /* Rellenos grises: Cancelar, botón apagado, agarradera. */
+  --fill: rgba(120, 112, 104, 0.12);
+  --fill-2: rgba(120, 112, 104, 0.17);
 
-  /* Segmentados y pestañas en riel (opción A, la eligió el dueño): el riel
-     hundido y más oscuro que la página, la elegida en pastilla blanca. */
-  --riel: #dde3ee;
-  --riel-sombra: inset 0 1px 2px rgba(20, 16, 50, 0.09), inset 0 0 0 1px rgba(20, 16, 50, 0.04);
-  --riel-on: #ffffff;
-  --riel-on-sombra: 0 1px 3px rgba(20, 16, 50, 0.16), 0 0 0 0.5px rgba(20, 16, 50, 0.1);
+  /* Segmentados y pestañas en riel: el riel hundido y más oscuro que la
+     página, la elegida en pastilla blanca. */
+  --riel: #e3e0dc;
+  --riel-sombra: inset 0 1px 2px rgba(48, 40, 32, 0.08), inset 0 0 0 1px rgba(48, 40, 32, 0.03);
+  --riel-on: #fdfcfb;
+  --riel-on-sombra: 0 1px 3px rgba(48, 40, 32, 0.14), 0 0 0 0.5px rgba(48, 40, 32, 0.08);
   --riel-on-tinta: var(--text);
   --riel-tinta: var(--text-2);
 
   /* Sombras: solo para lo que flota, se abre o tapa. */
-  --sombra-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 1px rgba(15, 23, 42, 0.03);
-  --sombra: 0 2px 6px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
-  --sombra-md: 0 6px 18px rgba(15, 23, 42, 0.1), 0 2px 6px rgba(15, 23, 42, 0.05);
-  --sombra-lg: 0 18px 40px rgba(15, 23, 42, 0.16), 0 4px 12px rgba(15, 23, 42, 0.06);
-  --sombra-ventana: 0 30px 80px -20px rgba(15, 35, 80, 0.35);
+  --sombra-sm: 0 1px 2px rgba(48, 40, 32, 0.06), 0 1px 1px rgba(48, 40, 32, 0.03);
+  --sombra: 0 2px 6px rgba(48, 40, 32, 0.08), 0 1px 2px rgba(48, 40, 32, 0.04);
+  --sombra-md: 0 6px 18px rgba(48, 40, 32, 0.1), 0 2px 6px rgba(48, 40, 32, 0.05);
+  --sombra-lg: 0 18px 40px rgba(48, 40, 32, 0.16), 0 4px 12px rgba(48, 40, 32, 0.06);
+  --sombra-ventana: 0 30px 80px -20px rgba(48, 40, 32, 0.35);
 
-  /* Barra de abajo del celular (vidrio claro) y su lupa. */
-  --gbar-fondo: rgba(255, 255, 255, 0.8);
-  --gbar-sombra: inset 0 1px 0 rgba(255, 255, 255, 0.9), inset 0 0 0 0.5px rgba(255, 255, 255, 0.7),
-    0 0 0 0.5px rgba(15, 35, 80, 0.1), 0 12px 32px -12px rgba(15, 35, 80, 0.4);
-  --gbar-pastilla: rgba(15, 23, 42, 0.08);
-  --gbar-tinta: var(--text-2);
-  --gbar-tinta-on: var(--accent);
+  /* Barra de abajo del celular: cápsula clara, la pantalla abierta en un
+     círculo blanco, y el botón de agregar aparte, negro. */
+  --gbar-fondo: rgba(247, 246, 244, 0.86);
+  --gbar-sombra: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 0 0 0.5px rgba(48, 40, 32, 0.08),
+    0 12px 30px -12px rgba(48, 40, 32, 0.35);
+  --gbar-pastilla: #fdfcfb;
+  --gbar-pastilla-sombra: 0 1px 2px rgba(48, 40, 32, 0.1), 0 4px 10px -3px rgba(48, 40, 32, 0.18);
+  --gbar-tinta: #8f8981;
+  --gbar-tinta-on: var(--text);
   --gbar-globo-filo: rgba(255, 255, 255, 0.95);
   --lupa-fondo: rgba(255, 255, 255, 0.55);
   --lupa-sombra: inset 0 1.5px 1px rgba(255, 255, 255, 0.95), inset 0 -1px 1px rgba(255, 255, 255, 0.5),
-    inset 0 0 0 0.5px rgba(255, 255, 255, 0.8), 0 10px 26px -6px rgba(15, 35, 80, 0.35), 0 0 0 0.5px rgba(15, 35, 80, 0.12);
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.8), 0 10px 26px -6px rgba(48, 40, 32, 0.3), 0 0 0 0.5px rgba(48, 40, 32, 0.1);
 
   /* Avisos en pastilla: oscura en los dos temas. */
-  --aviso-fondo: #16181d;
-  --aviso-sombra: 0 14px 34px -12px rgba(10, 14, 30, 0.55), 0 2px 6px rgba(10, 14, 30, 0.16);
+  --aviso-fondo: #1f1e1c;
+  --aviso-sombra: 0 14px 34px -12px rgba(20, 16, 12, 0.5), 0 2px 6px rgba(20, 16, 12, 0.14);
 
-  /* Azul marino del menú del celular y de la banda del login */
-  --nav-bg: oklch(0.268 0.058 260);
-  --nav-bg-2: oklch(0.305 0.052 260);
-  --nav-text: oklch(0.975 0.01 260);
-  --nav-muted: oklch(0.74 0.035 260);
-  --nav-faint: oklch(0.62 0.04 260);
-  --nav-line: oklch(0.42 0.045 260);
-  --nav-active: oklch(0.355 0.06 262);
-  --nav-accent: oklch(0.74 0.135 258);
+  /* Banda del login, bienvenida y celebración: carbón, igual en los dos temas. */
+  --nav-bg: #1f1e1c;
+  --nav-bg-2: #2a2826;
+  --nav-text: #fdfcfb;
+  --nav-muted: #b3ada6;
+  --nav-faint: #8f8981;
+  --nav-line: #3a3733;
+  --nav-active: #33312e;
+  --nav-accent: #f5f4f2;
+
+  /* Torta del Panel: rampa del carbón al piedra. */
+  --torta-1: #2a2826;
+  --torta-2: #5c5853;
+  --torta-3: #8a847d;
+  --torta-4: #b3ada6;
+  --torta-5: #cfcac4;
+  --torta-6: #ded9d4;
+  /* Barras rayadas de la distribución y la línea de ayer. */
+  --raya-claro: #e2deda;
+  --raya-claro-2: #d3cec8;
+  --raya-oscuro: #2a2826;
+  --raya-oscuro-2: #45423e;
+  --naranja: #e2702a;
 
   --radius: 0.9rem;
   /* Fuente única tipo iOS: SF Pro vía la pila del sistema de Apple. */
@@ -171,53 +192,54 @@
 }
 
 /* ---------- Noche (tema oscuro): negro de verdad ----------
-   El marco y las tarjetas apenas más claros que el negro, sin sombras (el
-   borde fino separa) y el azul de la marca de acento. */
+   El marco y las tarjetas apenas más claros que el negro, grises neutros,
+   sin sombras (el borde fino separa). Lo que se aprieta va en blanco hueso
+   con letra negra: el mismo papel del negro en Claro. */
 .dark {
-  --lienzo: radial-gradient(1100px 520px at 18% -14%, rgba(37, 99, 235, 0.14), transparent 70%), #000;
-  --marco: #08080a;
+  --lienzo: #000;
+  --marco: #0a0a09;
   --marco-sombra: 0 0 0 1px rgba(255, 255, 255, 0.07) inset;
-  --panel: #0e0e11;
-  --blanco: #17171b;
-  --fila: #141418;
-  --fila-borde: rgba(255, 255, 255, 0.07);
-  --fila-hover: #1a1a1f;
+  --panel: #121211;
+  --blanco: #1c1b1a;
+  --fila: #171615;
+  --fila-borde: rgba(255, 255, 255, 0.06);
+  --fila-hover: #1d1c1b;
   --tarjeta-borde: rgba(255, 255, 255, 0.07);
   /* "Sin sombra" escrito como sombra vacía: Tailwind la encadena con otras. */
   --tarjeta-sombra: 0 0 #0000;
   --pastilla-sombra: 0 1px 2px rgba(0, 0, 0, 0.5);
-  --primario-sombra: 0 6px 18px -8px rgba(37, 99, 235, 0.75);
-  --campo: #1a1a1f;
-  --campo-hover: #202026;
+  --primario-sombra: 0 6px 16px -8px rgba(0, 0, 0, 0.8);
+  --campo: #1d1c1b;
+  --campo-hover: #242321;
   --velo: rgba(0, 0, 0, 0.6);
   --menu-hover: rgba(255, 255, 255, 0.05);
-  --menu-activo: #1c1c22;
+  --menu-activo: #24231f;
 
   --bg: #000000;
-  --bg-soft: #0b0b0e;
-  --surface: #0e0e11;
-  --surface-2: #1c1c21;
-  --elevated: #232329;
-  --line: #232329;
-  --line-strong: #2e2e36;
-  --linea-fila: #1e1e24;
-  --linea-cabecera: #2a2a31;
-  --borde-boton: #5a5a63;
-  --borde-campo: #2e2e36;
+  --bg-soft: #0c0c0b;
+  --surface: #121211;
+  --surface-2: #1e1d1c;
+  --elevated: #262523;
+  --line: #242321;
+  --line-strong: #302f2c;
+  --linea-fila: #201f1d;
+  --linea-cabecera: #2c2b28;
+  --borde-boton: #5f5b56;
+  --borde-campo: #302f2c;
 
-  --text: #f2f2f5;
-  --text-2: #c9c9d1;
-  --muted: #a2a2ad;
-  --faint: #8e8e99;
-  --inerte: #6f6f78;
-  --vacio: #5a5a62;
+  --text: #f3f2f0;
+  --text-2: #cdc9c4;
+  --muted: #a8a39d;
+  --faint: #948f88;
+  --inerte: #6f6b66;
+  --vacio: #57534f;
 
-  --accent: #5b8cff;
-  --accent-strong: #7aa2ff;
-  --accent-fill: #2563eb;
-  --accent-ink: #ffffff;
-  --accent-soft: rgba(59, 110, 246, 0.16);
-  --accent-soft-2: rgba(59, 110, 246, 0.26);
+  --accent: #f3f2f0;
+  --accent-strong: #ffffff;
+  --accent-fill: #f3f2f0;
+  --accent-ink: #141312;
+  --accent-soft: rgba(255, 255, 255, 0.08);
+  --accent-soft-2: rgba(255, 255, 255, 0.12);
 
   --success: oklch(0.74 0.135 155);
   --success-soft: oklch(0.34 0.06 160);
@@ -226,28 +248,27 @@
   --danger-soft: oklch(0.36 0.085 25);
 
   /* Pares en Noche: fondo translúcido y letra clara (el par claro/claro de
-     Azul es ilegible sobre negro). */
+     Claro es ilegible sobre negro). */
   --ok-bg: rgba(74, 222, 128, 0.16);
   --ok-fg: #4ade80;
   --bad-bg: rgba(252, 165, 165, 0.16);
   --bad-fg: #fca5a5;
   --warn-bg: rgba(251, 191, 36, 0.16);
   --warn-fg: #fbbf24;
-  --info-bg: rgba(96, 165, 250, 0.16);
-  --info-fg: #93c5fd;
+  --info-bg: rgba(255, 255, 255, 0.08);
+  --info-fg: #d6d2cd;
 
-  /* El navy se perdía contra el negro: sube un tono y lleva filo azul. */
-  --navy: #0f1a33;
-  --navy-filo: inset 0 0 0 1px rgba(76, 141, 255, 0.3);
+  /* La tarjeta oscura se perdía contra el negro: sube un tono y lleva filo. */
+  --navy: #1e1d1c;
+  --navy-filo: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 
-  --fill: rgba(120, 120, 128, 0.24);
-  --fill-2: rgba(120, 120, 128, 0.32);
+  --fill: rgba(128, 122, 116, 0.24);
+  --fill-2: rgba(128, 122, 116, 0.32);
 
-  /* Opción A en Noche: la elegida SUBE a gris claro con letra blanca (antes
-     quedaba más oscura que el riel y no se veía). */
-  --riel: #1a1a1f;
+  /* En Noche la elegida SUBE a gris claro con letra blanca. */
+  --riel: #1b1a19;
   --riel-sombra: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
-  --riel-on: #3a3a43;
+  --riel-on: #393734;
   --riel-on-sombra: 0 1px 3px rgba(0, 0, 0, 0.6), inset 0 0.5px 0 rgba(255, 255, 255, 0.12);
   --riel-on-tinta: #ffffff;
 
@@ -257,22 +278,34 @@
   --sombra-lg: 0 24px 60px rgba(0, 0, 0, 0.65);
   --sombra-ventana: 0 30px 80px -20px rgba(0, 0, 0, 0.7);
 
-  --gbar-fondo: rgba(40, 40, 44, 0.8);
-  --gbar-sombra: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 0 0 0.5px rgba(255, 255, 255, 0.1),
+  --gbar-fondo: rgba(34, 33, 31, 0.86);
+  --gbar-sombra: inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 0 0 0.5px rgba(255, 255, 255, 0.08),
     0 14px 36px -10px rgba(0, 0, 0, 0.85);
-  --gbar-pastilla: rgba(0, 0, 0, 0.45);
-  --gbar-tinta: rgba(255, 255, 255, 0.86);
+  --gbar-pastilla: #3a3835;
+  --gbar-pastilla-sombra: inset 0 0.5px 0 rgba(255, 255, 255, 0.14), 0 2px 6px rgba(0, 0, 0, 0.5);
+  --gbar-tinta: rgba(255, 255, 255, 0.5);
   --gbar-tinta-on: #ffffff;
-  --gbar-globo-filo: #2c2c30;
-  --lupa-fondo: rgba(70, 70, 78, 0.42);
+  --gbar-globo-filo: #22211f;
+  --lupa-fondo: rgba(70, 68, 64, 0.42);
   --lupa-sombra: inset 0 1.5px 1px rgba(255, 255, 255, 0.55), inset 0 -1px 1px rgba(255, 255, 255, 0.18),
     inset 0 0 0 0.5px rgba(255, 255, 255, 0.3), 0 10px 26px -6px rgba(0, 0, 0, 0.7);
 
-  --aviso-fondo: #202026;
+  --aviso-fondo: #22211f;
   --aviso-sombra: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 14px 34px -12px rgba(0, 0, 0, 0.7);
 
-  /* Los tokens nav-* (menú del celular + banda del login) NO se redefinen
-     aquí: el menú usa el mismo azul marino en los dos temas. */
+  --torta-1: #f3f2f0;
+  --torta-2: #c9c4be;
+  --torta-3: #9a948d;
+  --torta-4: #726d67;
+  --torta-5: #55514c;
+  --torta-6: #403d39;
+  --raya-claro: #2a2927;
+  --raya-claro-2: #353330;
+  --raya-oscuro: #e7e4e0;
+  --raya-oscuro-2: #cbc6c0;
+  --naranja: #f0863f;
+
+  /* Los tokens nav-* NO se redefinen aquí: son iguales en los dos temas. */
 
   color-scheme: dark;
 }
@@ -311,6 +344,18 @@
   --color-velo: var(--velo);
   --color-menu-activo: var(--menu-activo);
   --color-navy: var(--navy);
+  --color-marco: var(--marco);
+  --color-torta-1: var(--torta-1);
+  --color-torta-2: var(--torta-2);
+  --color-torta-3: var(--torta-3);
+  --color-torta-4: var(--torta-4);
+  --color-torta-5: var(--torta-5);
+  --color-torta-6: var(--torta-6);
+  --color-raya-claro: var(--raya-claro);
+  --color-raya-claro-2: var(--raya-claro-2);
+  --color-raya-oscuro: var(--raya-oscuro);
+  --color-raya-oscuro-2: var(--raya-oscuro-2);
+  --color-naranja: var(--naranja);
   --color-riel: var(--riel);
   --color-riel-on: var(--riel-on);
   --color-riel-tinta: var(--riel-tinta);
@@ -433,8 +478,7 @@ html {
 }
 
 body {
-  /* El lienzo del estilo: degradado suave en Azul, negro con un velo azul
-     arriba en Noche. Fijo, para que no se corra al bajar. */
+  /* El lienzo del estilo: degradado piedra suave en Claro, negro en Noche. Fijo, para que no se corra al bajar. */
   background: var(--lienzo);
   background-attachment: fixed;
   color: var(--text);
@@ -460,12 +504,12 @@ body {
 ::-webkit-scrollbar { width: 11px; height: 11px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: oklch(0.74 0.02 258 / 0.55);
+  background: oklch(0.74 0.01 70 / 0.55);
   border-radius: 999px;
   border: 3px solid transparent;
   background-clip: content-box;
 }
-::-webkit-scrollbar-thumb:hover { background: oklch(0.66 0.03 258 / 0.7); background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: oklch(0.66 0.012 70 / 0.7); background-clip: content-box; }
 
 ::selection { background: var(--accent-soft); color: var(--accent-strong); }
 
@@ -494,13 +538,13 @@ input[type="number"] { -moz-appearance: textfield; }
    brillos ni sombra. Solo para lo que flota sobre el contenido (barra superior y
    compositor del chat). Las tarjetas con cifras siguen sólidas. */
 .barra-material {
-  background: color-mix(in oklch, var(--surface) 80%, transparent);
+  background: color-mix(in oklch, var(--bg) 82%, transparent);
   -webkit-backdrop-filter: blur(20px) saturate(1.8);
   backdrop-filter: blur(20px) saturate(1.8);
 }
 /* Sin backdrop-filter (navegadores viejos) el material sería ilegible: se vuelve sólido. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .barra-material { background: var(--surface); }
+  .barra-material { background: var(--bg); }
 }
 
 
@@ -560,7 +604,7 @@ input[type="number"] { -moz-appearance: textfield; }
 .entra-bloques > :has([data-slot="skeleton"]) > * { animation: none; }
 
 /* Tablas dentro de una tarjeta, en el computador: cada fila es una cajita
-   (blanca en Azul) separada 6 px de la siguiente, sin filete corrido. */
+   (blanca en Claro) separada 6 px de la siguiente, sin filete corrido. */
 @media (min-width: 1024px) {
   [data-slot="card"] > [data-slot="table-container"] { padding: 0 12px 12px; }
   [data-slot="card"] [data-slot="table"] { border-collapse: separate; border-spacing: 0 6px; }
@@ -749,34 +793,35 @@ input[type="number"] { -moz-appearance: textfield; }
 [data-sonner-toast] { pointer-events: auto; }
 
 /* Aviso de versión nueva (components/shell/nueva-version.tsx): la misma
-   pastilla, arriba al centro, con Actualizar en azul. */
+   pastilla, arriba al centro, con Actualizar en blanco hueso. */
 [data-sonner-toast].version-nueva { padding: 8px 8px 8px 14px; gap: 12px; font-size: 13.5px; }
 [data-sonner-toast].version-nueva [data-button] {
   height: 32px;
   margin-left: auto;
   padding: 0 14px;
   border: 0;
-  background: #2563eb;
+  background: #f3f2f0;
+  color: #141312;
 }
 
 /* ===== Barra de abajo del celular (components/shell/barra-abajo.tsx) ======
-   Cápsula de vidrio como la barra de WhatsApp en iOS 26: ícono de 26 con su
-   nombre debajo, la pantalla abierta sobre una pastilla que viaja, globo rojo
-   con los pendientes y "Tú" al final con las iniciales. Solo en el celular y
-   la tableta; en el computador manda el riel. */
-.gbar { display: none; }
+   Cápsula clara solo con íconos de 24: la pantalla abierta sobre un círculo
+   blanco que viaja, globo rojo con los pendientes y "Tú" al final con las
+   iniciales. A su derecha, aparte, el botón negro + (Movimientos). Solo en el
+   celular y la tableta; en el computador manda el riel. */
+.gbar, .gbar-fab { display: none; }
 @media (max-width: 1023px) {
   .gbar {
     position: fixed;
     left: var(--gbar-lado);
-    right: var(--gbar-lado);
+    right: calc(var(--gbar-lado) + var(--gbar-h) + 10px);
     bottom: var(--gbar-abajo);
     z-index: 45;
     display: grid;
     grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr));
     align-items: center;
     height: var(--gbar-h);
-    max-width: 560px;
+    max-width: 420px;
     margin: 0 auto;
     padding: 0 7px;
     border-radius: 999px;
@@ -805,12 +850,13 @@ input[type="number"] { -moz-appearance: textfield; }
   .gbar.gbar--abajo { transform: translateY(calc(100% + 30px)); opacity: 0; pointer-events: none; }
   .gbar__pil {
     position: absolute;
-    top: 4.5px;
-    bottom: 4.5px;
-    width: min(calc((100% - 14px) / var(--n, 5) - 4px), 86px);
-    transform: translateX(-50%);
+    top: 50%;
+    width: 46px;
+    height: 46px;
+    transform: translate(-50%, -50%);
     border-radius: 999px;
     background: var(--gbar-pastilla);
+    box-shadow: var(--gbar-pastilla-sombra);
     pointer-events: none;
     transition: left 380ms var(--ease-rebote-suave), opacity 160ms;
   }
@@ -823,7 +869,7 @@ input[type="number"] { -moz-appearance: textfield; }
     align-items: center;
     justify-content: center;
     gap: 2px;
-    height: 52px;
+    height: 48px;
     min-width: 0;
     width: auto;
     padding: 0;
@@ -837,8 +883,8 @@ input[type="number"] { -moz-appearance: textfield; }
   .gbar__b { -webkit-user-drag: none; }
   .gbar__b:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
   .gbar__b[data-sobre] { color: var(--gbar-tinta-on); }
-  .gbar__ic { position: relative; display: grid; place-items: center; height: 27px; }
-  .gbar__ic > svg { width: 26px; height: 26px; }
+  .gbar__ic { position: relative; display: grid; place-items: center; height: 26px; }
+  .gbar__ic > svg { width: 23px; height: 23px; }
   /* La letra del sistema, como la barra de WhatsApp. El nombre puede pasar
      unos px de su columna ("Movimientos" a 390 px): los vecinos son cortos. */
   .gbar__t {
@@ -853,16 +899,35 @@ input[type="number"] { -moz-appearance: textfield; }
   .gbar__av {
     display: grid;
     place-items: center;
-    width: 26px;
-    height: 26px;
+    width: 27px;
+    height: 27px;
     border-radius: 50%;
     background: var(--accent-fill);
-    color: #fff;
-    font-size: 11px;
+    color: var(--accent-ink);
+    font-size: 10.5px;
     font-weight: 700;
     letter-spacing: 0.2px;
-    box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.9);
   }
+  /* El botón negro de agregar: un círculo del alto de la barra, a su derecha.
+     Se encoge y baja con ella. */
+  .gbar-fab {
+    position: fixed;
+    right: var(--gbar-lado);
+    bottom: var(--gbar-abajo);
+    z-index: 45;
+    display: grid;
+    place-items: center;
+    width: var(--gbar-h);
+    height: var(--gbar-h);
+    padding: 0;
+    border-radius: 999px;
+    box-shadow: var(--primario-sombra), 0 12px 26px -12px rgba(0, 0, 0, 0.45);
+    transition: transform 380ms var(--ease-ios), opacity var(--dur-2), background-color var(--dur-1);
+  }
+  .gbar-fab > svg { width: 24px; height: 24px; }
+  .gbar-fab:active { transform: scale(0.94); }
+  .gbar-fab.gbar--chica { transform: scale(var(--gbar-chica)); }
+  .gbar-fab.gbar--abajo { transform: translateY(calc(100% + 30px)); opacity: 0; pointer-events: none; }
   .gbar__globo {
     position: absolute;
     top: -5px;
@@ -999,9 +1064,9 @@ input[type="number"] { -moz-appearance: textfield; }
   --ease-rebote: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-rebote-suave: cubic-bezier(0.34, 1.4, 0.64, 1);
 
-  /* Barra de abajo del celular: 61 de alto, 21 a cada lado, metida en la
+  /* Barra de abajo del celular: 58 de alto, 21 a cada lado, metida en la
      zona de la rayita del iPhone. --gbar-sitio es lo que la página deja libre. */
-  --gbar-h: 61px;
+  --gbar-h: 58px;
   --gbar-lado: 21px;
   --gbar-abajo: max(14px, calc(env(safe-area-inset-bottom, 0px) - 12px));
   --gbar-sitio: calc(var(--gbar-h) + var(--gbar-abajo) + 12px);

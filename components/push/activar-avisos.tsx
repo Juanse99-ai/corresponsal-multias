@@ -35,7 +35,7 @@ async function estadoInicial(): Promise<State> {
 }
 
 /** Botón para activar/desactivar las notificaciones push (recordatorios). */
-/** `sobre="claro"`: fuera del menú azul marino (ajustes del riel en el computador). */
+/** `sobre="claro"`: fuera del menú carbón (ajustes del riel en el computador). */
 export function ActivarAvisos({ sobre = "menu" }: { sobre?: "menu" | "claro" }) {
   const claro = sobre === "claro";
   const tenue = claro ? "text-faint" : "text-nav-faint";

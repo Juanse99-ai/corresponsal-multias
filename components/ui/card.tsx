@@ -7,7 +7,7 @@ function Card({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="card"
       className={cn(
         // Tarjeta tenue del estilo del taller: 24 px de esquina, borde de luz y
-        // sombra suave en Azul; en Noche, solo el borde fino. Relleno de 20 en
+        // sombra suave en Claro; en Noche, solo el borde fino. Relleno de 20 en
         // todos los anchos; nunca una tarjeta dentro de otra.
         "rounded-3xl border border-[var(--tarjeta-borde)] bg-card text-card-foreground shadow-[var(--tarjeta-sombra)]",
         className
@@ -34,7 +34,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-title"
-      className={cn("text-lead font-semibold tracking-[-0.3px]", className)}
+      className={cn("text-lead font-medium tracking-[-0.3px]", className)}
       {...props}
     />
   )

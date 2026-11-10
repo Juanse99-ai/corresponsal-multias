@@ -23,7 +23,7 @@ import type { HeaderResumen } from "@/lib/queries";
 
 const ROL: Record<Rol, string> = { admin: "Administrador", operador: "Operador" };
 
-// Botón redondo del riel (40 px); el grupo elegido es un círculo azul.
+// Botón redondo del riel (40 px); el grupo elegido es un círculo negro.
 const rielBtn = "size-10 rounded-full text-muted hover:bg-[var(--menu-hover)] hover:text-text";
 const rielOn = "bg-primary text-primary-foreground shadow-[var(--primario-sombra)] hover:bg-primary hover:text-primary-foreground";
 
@@ -78,7 +78,7 @@ export function RielPanel({
   return (
     <aside className="riel sticky top-6 hidden h-[calc(100dvh-48px)] shrink-0 gap-2.5 lg:flex" aria-label="Menú">
       <div className="flex w-[50px] flex-none flex-col items-center gap-1.5 pt-1 pb-1.5">
-        <Link href="/panel" aria-label="Inicio" className="mb-3.5 rounded-xl shadow-[0_1px_2px_rgba(20,16,50,0.08),0_6px_14px_-8px_rgba(20,16,50,0.35)]">
+        <Link href="/panel" aria-label="Inicio" className="mb-3.5 rounded-xl shadow-[0_1px_2px_rgba(48,40,32,0.08),0_6px_14px_-8px_rgba(48,40,32,0.35)]">
           <Logo size={40} className="rounded-xl" />
         </Link>
 
@@ -103,7 +103,7 @@ export function RielPanel({
               >
                 <Icono size={19} weight={on ? "fill" : "regular"} />
                 {punto && (
-                  <span aria-hidden className="absolute top-[7px] right-[7px] size-2 rounded-full bg-danger ring-2 ring-[#e8edf6] dark:ring-[#08080a]" />
+                  <span aria-hidden className="absolute top-[7px] right-[7px] size-2 rounded-full bg-danger ring-2 ring-marco" />
                 )}
               </IconButton>
             );
@@ -113,7 +113,7 @@ export function RielPanel({
         <div className="mt-auto flex flex-col items-center gap-2">
           <IconButton
             forma="suelto"
-            label={noche ? "Tema Azul" : "Tema Noche"}
+            label={noche ? "Tema Claro" : "Tema Noche"}
             tooltipSide="right"
             className={rielBtn}
             onClick={() => cambiarTema(noche ? "light" : "dark")}

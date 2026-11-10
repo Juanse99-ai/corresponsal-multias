@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { SignOut } from "@phosphor-icons/react/dist/ssr";
+import { Plus, SignOut } from "@phosphor-icons/react/dist/ssr";
 import { Button } from "@/components/ui/button";
 import { Item, ItemActions, ItemContent, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
@@ -20,9 +20,10 @@ import type { HeaderResumen } from "@/lib/queries";
 
 const ROL: Record<Rol, string> = { admin: "Administrador", operador: "Operador" };
 
-/** Las pantallas sueltas en la barra (la opción A que eligió el dueño); el
- *  resto vive en la hoja de Tú. */
-const EN_BARRA = ["/panel", "/cuadre", "/movimientos", "/luis"];
+/** Las pantallas sueltas en la cápsula; Movimientos es el botón negro de
+ *  agregar, aparte, y el resto vive en la hoja de Tú. */
+const EN_BARRA = ["/panel", "/cuadre", "/luis"];
+const AGREGAR = "/movimientos";
 
 const esCampo = (el: EventTarget | Element | null) =>
   el instanceof Element &&
@@ -36,10 +37,11 @@ type Lente = { l: number; w: number; bw: number; i: number; fase: "entra" | "mue
 type Gesto = { x0: number; i: number; arrastrando: boolean; ux: number; ut: number; moviendo: boolean; iPintado: number };
 
 /**
- * Barra de abajo del celular (estilo WhatsApp en iOS 26, guía 8.20): cápsula
- * de vidrio con Panel, Cuadre, Movimientos y Sr. Luis, y "Tú" al final, que
- * sube una hoja con lo demás (Préstamos, Administración), quién entró, el
- * tema, los avisos y cerrar sesión. El globo rojo cuenta lo pendiente.
+ * Barra de abajo del celular: cápsula clara solo con íconos (Panel, Cuadre,
+ * Sr. Luis y "Tú", que sube una hoja con lo demás: Préstamos, Administración,
+ * quién entró, el tema, los avisos y cerrar sesión), la pantalla abierta en un
+ * círculo blanco, y aparte el botón negro + que abre Movimientos para
+ * registrar. El globo rojo cuenta lo pendiente.
  * - Se encoge al bajar por la pantalla y vuelve al subir.
  * - Al apoyar el dedo sale una lupa de vidrio que se puede correr por la
  *   barra (vibra al cambiar de botón); al soltar se abre ese botón.
@@ -72,7 +74,8 @@ export function BarraAbajo({
 
   const items = NAV.filter((i) => !i.adminOnly || isAdmin);
   const enBarra = EN_BARRA.map((href) => items.find((i) => i.href === href)).filter((i): i is NavItem => !!i);
-  const enHoja = items.filter((i) => !enBarra.includes(i));
+  const agregar = items.find((i) => i.href === AGREGAR);
+  const enHoja = items.filter((i) => !enBarra.includes(i) && i !== agregar);
   const principales = enHoja.filter((i) => i.grupo === "main");
   const admin = enHoja.filter((i) => i.grupo === "admin");
 
@@ -250,7 +253,6 @@ export function BarraAbajo({
             <span className="gbar__av">{iniciales(profile.nombre)}</span>
             <Globo n={enHoja.reduce((t, it) => t + pendientes(it.href), 0)} />
           </span>
-          <span className="gbar__t">Tú</span>
         </>
       );
     }
@@ -259,10 +261,9 @@ export function BarraAbajo({
     return (
       <>
         <span className="gbar__ic">
-          <Icono weight={elegida === i ? "bold" : "regular"} />
+          <Icono weight={elegida === i ? "fill" : "regular"} />
           <Globo n={pendientes(item.href)} />
         </span>
-        <span className="gbar__t">{item.corto ?? item.label}</span>
       </>
     );
   };
@@ -357,6 +358,23 @@ export function BarraAbajo({
         )}
       </nav>
 
+      {/* El botón de agregar: Movimientos, donde se registra todo lo del día. */}
+      {agregar && (
+        <Button
+          asChild
+          className={cn("gbar-fab", escribiendo && "gbar--abajo", chica && !abierta && !tocando && "gbar--chica")}
+        >
+          <Link
+            href={agregar.href}
+            aria-label="Registrar movimiento"
+            aria-current={isActive(pathname, agregar.href) ? "page" : undefined}
+            onClick={() => setAbierta(false)}
+          >
+            <Plus weight="bold" />
+          </Link>
+        </Button>
+      )}
+
       <Sheet open={abierta} onOpenChange={setAbierta}>
         <SheetContent
           side="barra"
@@ -382,7 +400,7 @@ export function BarraAbajo({
           )}
 
           <div className="mt-2 flex items-center gap-3 border-t border-line px-2 pt-3 pb-2.5">
-            <span className="grid size-11 shrink-0 place-items-center rounded-full bg-accent-fill text-body font-semibold text-white">
+            <span className="grid size-11 shrink-0 place-items-center rounded-full bg-accent-fill text-body font-semibold text-accent-ink">
               {iniciales(profile.nombre)}
             </span>
             <span className="flex min-w-0 flex-1 flex-col gap-0.5">

@@ -7,9 +7,9 @@ import { useMontado } from "@/lib/use-montado";
 import { useCambiarTema } from "@/lib/tema";
 
 /**
- * Interruptor de tema: Azul (de día, sol) o Noche (negro, luna). <Switch> de
+ * Interruptor de tema: Claro (de día, sol) o Noche (negro, luna). <Switch> de
  * shadcn con sol y luna a los lados. `sobre="claro"` para usarlo fuera del
- * menú azul marino.
+ * menú carbón.
  */
 export function ThemeToggle({ sobre = "menu" }: { sobre?: "menu" | "claro" }) {
   const icono = sobre === "menu" ? "size-5 text-nav-muted" : "size-5 text-muted";

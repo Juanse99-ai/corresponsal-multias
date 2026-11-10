@@ -14,8 +14,8 @@ function Checkbox({
       data-slot="checkbox"
       className={cn(
         // Casilla del taller: 22 px, esquina 8, blanca con borde de campo; al
-        // marcarla se llena del azul de relleno. El toque llega a 44 con el ::after.
-        "peer relative size-[22px] shrink-0 rounded-lg border-[1.5px] border-borde-boton bg-blanco transition-colors duration-[var(--dur-1)] outline-none after:absolute after:-inset-[11px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent focus-visible:outline-solid disabled:cursor-not-allowed disabled:border-line disabled:bg-bg-soft aria-invalid:border-destructive data-[state=checked]:border-accent-fill data-[state=checked]:bg-accent-fill data-[state=checked]:text-white",
+        // marcarla se llena del negro de relleno. El toque llega a 44 con el ::after.
+        "peer relative size-[22px] shrink-0 rounded-lg border-[1.5px] border-borde-boton bg-blanco transition-colors duration-[var(--dur-1)] outline-none after:absolute after:-inset-[11px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent focus-visible:outline-solid disabled:cursor-not-allowed disabled:border-line disabled:bg-bg-soft aria-invalid:border-destructive data-[state=checked]:border-accent-fill data-[state=checked]:bg-accent-fill data-[state=checked]:text-accent-ink",
         className
       )}
       {...props}

@@ -1,13 +1,13 @@
 "use client";
 
-import { useRef, useState, type CSSProperties } from "react";
+import { useId, useRef, type CSSProperties } from "react";
 import Link from "next/link";
-import { useNavegacion } from "@/lib/use-navegacion";
 import { useInView, useReducedMotion } from "framer-motion";
-import { Bar, BarChart, Cell, Pie, PieChart, Rectangle, XAxis, type BarShapeProps } from "recharts";
-import { CaretRight, CheckCircle, Warning, Plus, ArrowRight } from "@phosphor-icons/react/dist/ssr";
+import { Bar, Cell, ComposedChart, LabelList, Line, XAxis, YAxis } from "recharts";
+import { CaretRight, CaretDown, CaretUp, CheckCircle, Warning, Plus, ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip, type ChartConfig } from "@/components/ui/chart";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Celdas, Celda } from "@/components/ui/celdas";
@@ -37,6 +37,8 @@ export interface PanelData {
   cuadreHoy: { estado: string; saldo_final: number } | null;
   tirillaHoy: number;
   distribucion: { label: string; value: number }[];
+  /** El mismo reparto del día anterior (vacío si ayer no hubo cuadre). */
+  distribucionAyer: { label: string; value: number }[];
   srLuisHoy: number;
   consignacionesHoyCount: number;
   saldoLuisAcumulado: number;
@@ -192,209 +194,281 @@ export function PanelView({ data }: { data: PanelData }) {
           </Card>
         </Link>
 
-        <DistribucionCard distribucion={data.distribucion} tirilla={data.tirillaHoy} />
+        <DistribucionCard distribucion={data.distribucion} distribucionAyer={data.distribucionAyer} tirilla={data.tirillaHoy} />
       </div>
 
-      <Card>
-        <CardHeader className="items-center">
-          <CardTitle>Últimos cierres</CardTitle>
-          {data.recientes.length > 0 && (
-            <CardAction className="flex flex-wrap items-center justify-end gap-1.5 self-center">
-              <Badge punto="ok">
-                {data.stats.cuadrados} {data.stats.cuadrados === 1 ? "cuadrado" : "cuadrados"}
-              </Badge>
-              <Badge punto="bad">{data.stats.descuadres} con descuadre</Badge>
-            </CardAction>
-          )}
-        </CardHeader>
-        <CardContent>
-          {data.recientes.length === 0 ? (
-            <Empty fila>
-              <EmptyTitle>Todavía no hay cierres registrados</EmptyTitle>
-            </Empty>
-          ) : (
-            <RecientesChart recientes={data.recientes} />
-          )}
-        </CardContent>
-      </Card>
+      <CierresCard recientes={data.recientes} stats={data.stats} />
       </div>
     </div>
   );
 }
 
-function DistribucionCard({ distribucion, tirilla }: { distribucion: { label: string; value: number }[]; tirilla: number }) {
-  const reducir = useReducedMotion();
-  // Rampa de un solo tono (el azul de la casa): la torta muestra composición, no
-  // estado. El rojo y el verde quedan solo para cuadrado y descuadre.
-  const SEG: Record<string, string> = {
-    "Sr. Luis": "oklch(0.4 0.19 258)",
-    Nequis: "oklch(0.62 0.14 258)",
-    Bancolombia: "oklch(0.72 0.1 258)",
-    "Préstamos": "oklch(0.8 0.06 258)",
-    Compensado: "oklch(0.62 0.04 258)",
-    Retiros: "oklch(0.5 0.03 258)",
-  };
-  const activos = distribucion.filter((s) => s.value > 0);
-  const total = activos.reduce((a, b) => a + b.value, 0);
+/** Lo que va en una barra: el nombre corto bajo la barra. */
+const CORTO: Record<string, string> = {
+  "Sr. Luis": "Sr. Luis",
+  Nequis: "Nequis",
+  Bancolombia: "Bancol.",
+  "Préstamos": "Prést.",
+  Compensado: "Comp.",
+  Retiros: "Retiros",
+};
 
-  const colorDe = (label: string) => SEG[label] ?? "oklch(0.6 0.05 258)";
-  // Torta de shadcn (ChartContainer + recharts PieChart). Sin montos, un aro gris.
-  const porcion = total > 0
-    ? activos.map((s) => ({ label: s.label, value: s.value, fill: colorDe(s.label) }))
-    : [{ label: "vacío", value: 1, fill: "var(--surface-2)" }];
-  const legend: { label: string; pct: string; color: string }[] = total > 0
-    ? activos.map((s) => ({ label: s.label, pct: `${Math.round((s.value / total) * 100)}%`, color: colorDe(s.label) }))
-    : distribucion.slice(0, 5).map((s) => ({ label: s.label, pct: "0%", color: "var(--line)" }));
-  const configTorta = Object.fromEntries(
-    activos.map((s) => [s.label, { label: s.label, color: colorDe(s.label) }]),
-  ) satisfies ChartConfig;
+const pct = (v: number, total: number) => (total > 0 ? Math.round((v / total) * 100) : 0);
+
+/**
+ * Distribución del día como en la referencia: barras rayadas con el porcentaje
+ * encima, la más grande en carbón, y una línea naranja con el reparto de ayer
+ * para comparar. Es composición, no estado: sin verde ni rojo.
+ */
+function DistribucionCard({
+  distribucion,
+  distribucionAyer,
+  tirilla,
+}: {
+  distribucion: { label: string; value: number }[];
+  distribucionAyer: { label: string; value: number }[];
+  tirilla: number;
+}) {
+  const reducir = useReducedMotion();
+  const id = useId().replace(/:/g, "");
+  const total = distribucion.reduce((a, b) => a + Math.max(0, b.value), 0);
+  const totalAyer = distribucionAyer.reduce((a, b) => a + Math.max(0, b.value), 0);
+  const ayerDe = (label: string) => distribucionAyer.find((d) => d.label === label)?.value ?? 0;
+  const filas = distribucion
+    .filter((s) => s.value > 0 || ayerDe(s.label) > 0)
+    .map((s) => ({
+      label: s.label,
+      corto: CORTO[s.label] ?? s.label,
+      valor: Math.max(0, s.value),
+      hoy: pct(Math.max(0, s.value), total),
+      ayer: totalAyer > 0 ? pct(ayerDe(s.label), totalAyer) : null,
+    }));
+  const mayor = filas.reduce((m, f) => Math.max(m, f.hoy), 0);
+  const tope = Math.max(mayor, ...filas.map((f) => f.ayer ?? 0), 10);
+  const hayAyer = totalAyer > 0;
+  const config = {
+    hoy: { label: "Hoy", color: "var(--color-raya-claro)" },
+    ayer: { label: "Ayer", color: "var(--color-naranja)" },
+  } satisfies ChartConfig;
 
   return (
     <Card className="h-full">
-      <CardHeader>
+      <CardHeader className="items-center">
         <CardTitle>Distribución del día</CardTitle>
+        {total > 0 && (
+          <CardAction className="self-center">
+            <span className="tnum text-meta text-faint">Tirilla {formatCompactCOP(tirilla)}</span>
+          </CardAction>
+        )}
       </CardHeader>
       <CardContent>
-      {distribucion.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 py-4 text-center">
-          <div className="size-24 rounded-full border-[11px] border-surface-2" />
-          <p className="text-body text-muted">Abre el cuadre de hoy para ver la distribución</p>
-        </div>
-      ) : (
-        <div className="flex items-center gap-4 sm:gap-5">
-          <div className="relative h-32 w-32 shrink-0">
-            <ChartContainer config={configTorta} className="aspect-square h-full w-full">
-              <PieChart>
-                {total > 0 && (
-                  <ChartTooltip
-                    cursor={false}
-                    content={<ChartTooltipContent hideLabel nameKey="label" formatter={(v, n) => `${n}: ${formatCOP(Number(v))}`} />}
-                  />
-                )}
-                <Pie
-                  data={porcion}
-                  dataKey="value"
-                  nameKey="label"
-                  innerRadius={46}
-                  outerRadius={64}
-                  strokeWidth={0}
-                  isAnimationActive={!reducir}
-                />
-              </PieChart>
-            </ChartContainer>
-            <div className="pointer-events-none absolute inset-[18px] flex flex-col items-center justify-center rounded-full">
-              <span className="text-label text-muted">Tirilla</span>
-              <span className="tnum text-title font-semibold text-text">{formatCompactCOP(tirilla)}</span>
+        {total === 0 ? (
+          <Empty fila>
+            <EmptyTitle>Abre el cuadre de hoy para ver la distribución</EmptyTitle>
+          </Empty>
+        ) : (
+          <>
+            <div className="rounded-2xl bg-surface-2/70 px-2 pt-3 pb-1">
+              <ChartContainer config={config} className="aspect-auto h-44 w-full">
+                <ComposedChart data={filas} margin={{ top: 22, right: 10, bottom: 0, left: 10 }} barCategoryGap="22%">
+                  <defs>
+                    <pattern id={`${id}-claro`} width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                      <rect width="7" height="7" fill="var(--color-raya-claro)" />
+                      <rect width="2.6" height="7" fill="var(--color-raya-claro-2)" />
+                    </pattern>
+                    <pattern id={`${id}-oscuro`} width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                      <rect width="7" height="7" fill="var(--color-raya-oscuro)" />
+                      <rect width="2.6" height="7" fill="var(--color-raya-oscuro-2)" />
+                    </pattern>
+                  </defs>
+                  <XAxis dataKey="corto" tickLine={false} axisLine={false} tickMargin={6} interval={0} />
+                  <YAxis hide domain={[0, tope * 1.18]} />
+                  <ChartTooltip cursor={false} content={<TooltipDistribucion />} />
+                  <Bar dataKey="hoy" radius={[9, 9, 4, 4]} isAnimationActive={!reducir}>
+                    {filas.map((f) => (
+                      <Cell key={f.label} fill={`url(#${id}-${f.hoy === mayor ? "oscuro" : "claro"})`} />
+                    ))}
+                    <LabelList
+                      dataKey="hoy"
+                      position="top"
+                      offset={7}
+                      formatter={(v: unknown) => `${v}%`}
+                      className="tnum fill-text text-meta font-medium"
+                    />
+                  </Bar>
+                  {hayAyer && (
+                    <Line
+                      dataKey="ayer"
+                      type="linear"
+                      stroke="var(--color-naranja)"
+                      strokeWidth={2}
+                      dot={{ r: 4.5, fill: "var(--color-naranja)", strokeWidth: 0 }}
+                      activeDot={{ r: 5.5, fill: "var(--color-naranja)", strokeWidth: 0 }}
+                      connectNulls
+                      isAnimationActive={!reducir}
+                    />
+                  )}
+                </ComposedChart>
+              </ChartContainer>
             </div>
-          </div>
-          <div className="flex min-w-0 flex-1 flex-col gap-2">
-            {legend.map((l) => (
-              <div key={l.label} className="flex items-center gap-2 text-meta">
-                <span className="size-2.5 shrink-0 rounded-[3px]" style={{ background: l.color }} />
-                <span className="min-w-0 flex-1 truncate text-muted">{l.label}</span>
-                <span className="tnum shrink-0 font-semibold text-text">{l.pct}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+            <div className="mt-3 flex items-center gap-4 text-meta text-muted">
+              <span className="flex items-center gap-1.5">
+                <span aria-hidden className="size-2.5 rounded-[3px] bg-raya-oscuro" />
+                Hoy
+              </span>
+              {hayAyer ? (
+                <span className="flex items-center gap-1.5">
+                  <span aria-hidden className="h-0.5 w-3.5 rounded-full bg-naranja" />
+                  Ayer
+                </span>
+              ) : (
+                <span>Ayer no hubo cuadre para comparar</span>
+              )}
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );
 }
 
-const chartConfig = {
-  cuadrado: { label: "Cuadrado", color: "var(--success)" },
-  descuadre: { label: "Descuadre", color: "var(--danger)" },
-} satisfies ChartConfig;
-
-/** Globo oscuro del gráfico: fecha corta y total de la tirilla, con el punto de su estado. */
-function TooltipCierre({ active, payload }: { active?: boolean; payload?: { payload?: Reciente }[] }) {
-  const r = payload?.[0]?.payload;
-  if (!active || !r) return null;
-  const descuadre = Math.round(r.saldo_final) !== 0;
+/** Globo oscuro de la distribución: el concepto, lo de hoy en plata y el % de ayer. */
+function TooltipDistribucion({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: { payload?: { label: string; valor: number; hoy: number; ayer: number | null } }[];
+}) {
+  const f = payload?.[0]?.payload;
+  if (!active || !f) return null;
   return (
     <div className="globo-grafica min-w-[132px] rounded-lg px-[11px] py-2 text-meta text-white">
-      <p className="text-white/82">{formatFechaCorta(r.fecha)}</p>
-      <p className="mt-0.5 flex items-center gap-1.5">
-        <span aria-hidden className={cn("size-2 rounded-full", descuadre ? "bg-danger" : "bg-success")} />
-        <span className="tnum font-semibold">{formatCOP(r.total_tirilla)}</span>
+      <p className="text-white/82">{f.label}</p>
+      <p className="tnum mt-0.5 font-semibold">
+        {formatCOP(f.valor)}, {f.hoy}%
       </p>
+      {f.ayer !== null && <p className="tnum text-white/82">Ayer {f.ayer}%</p>}
     </div>
   );
 }
 
-/** Guía punteada del globo: 1 px al 40 % del texto, por el centro de la barra
- *  (la barra la tapa de su techo para abajo). */
-function GuiaPunteada({ x = 0, y = 0, width = 0, height = 0 }: { x?: number; y?: number; width?: number; height?: number }) {
-  const cx = Math.round(x + width / 2) + 0.5;
-  return (
-    <line
-      x1={cx}
-      x2={cx}
-      y1={y}
-      y2={y + height}
-      stroke="color-mix(in oklch, var(--text) 40%, transparent)"
-      strokeWidth={1}
-      strokeDasharray="3 3"
-      pointerEvents="none"
-    />
-  );
-}
+/** Filas de cuadritos de la cuadrícula de cierres. */
+const FILAS = 6;
 
-function RecientesChart({ recientes }: { recientes: Reciente[] }) {
-  const router = useNavegacion();
+/**
+ * Últimos cierres en cuadritos, como la tarjeta de rendimiento de la
+ * referencia: cada columna es un día (el más viejo a la izquierda), con tantos
+ * cuadritos llenos como la tirilla de ese día frente a la mayor. Lleno en
+ * carbón si cuadró, en rojo si no. Encima, la tirilla del último día frente
+ * al promedio de los anteriores. Cada columna abre el cuadre de su día.
+ */
+function CierresCard({ recientes, stats }: { recientes: Reciente[]; stats: PanelData["stats"] }) {
   const orden = [...recientes].reverse(); // antiguo -> reciente
-  // La barra bajo el mouse: las demás bajan a .45 para leerla sola.
-  const [activa, setActiva] = useState<number | null>(null);
-  // Crecen al entrar la tarjeta en pantalla (en el celular está muy abajo).
   const caja = useRef<HTMLDivElement>(null);
   const vista = useInView(caja, { once: true, amount: 0.4 });
+  const max = orden.reduce((m, r) => Math.max(m, r.total_tirilla), 0);
+  const alto = (t: number) => (max > 0 ? Math.min(FILAS, Math.max(1, Math.round((t / max) * FILAS))) : 1);
+
+  const ultimo = orden[orden.length - 1];
+  const previos = orden.slice(0, -1);
+  const promedio = previos.length ? previos.reduce((s, r) => s + r.total_tirilla, 0) / previos.length : 0;
+  const cambio = ultimo && promedio > 0 ? ((ultimo.total_tirilla - promedio) / promedio) * 100 : null;
 
   return (
-    <div ref={caja}>
-      <ChartContainer config={chartConfig} className="aspect-auto h-36 w-full lg:h-44">
-        <BarChart
-          data={orden}
-          margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-          barCategoryGap={4}
-          onMouseMove={(e) => setActiva(e.isTooltipActive && e.activeTooltipIndex != null ? Number(e.activeTooltipIndex) : null)}
-          onMouseLeave={() => setActiva(null)}
-        >
-          <XAxis dataKey="fecha" hide />
-          <ChartTooltip content={<TooltipCierre />} cursor={<GuiaPunteada />} />
-          <Bar
-            dataKey="total_tirilla"
-            radius={[4, 4, 0, 0]}
-            // Alto mínimo visible aunque la tirilla sea pequeña.
-            minPointSize={9}
-            // Crecen con CSS (.barra-crece), escalonadas: recharts no lo hace.
-            isAnimationActive={false}
-            shape={(p: BarShapeProps) => (
-              <Rectangle
-                {...p}
-                className={vista ? "barra-crece" : "barra-espera"}
-                style={{ "--m": p.index, opacity: activa !== null && p.index !== activa ? 0.45 : 1 } as CSSProperties}
-              />
-            )}
-            className="cursor-pointer"
-            onClick={(d: { payload?: Reciente }) => {
-              if (d.payload) router.push(`/cuadre?fecha=${d.payload.fecha}`);
-            }}
+    <Card className="p-5 sm:p-6">
+      <div className="flex items-stretch gap-4 sm:gap-6">
+        <div className="flex min-w-0 shrink-0 flex-col sm:w-48">
+          <p className="text-lead font-medium tracking-[-0.3px] text-text">Últimos cierres</p>
+          <p className="mt-1 text-meta text-muted">
+            {recientes.length === 0
+              ? "Todavía no hay cierres"
+              : `${stats.cuadrados} de ${recientes.length} ${recientes.length === 1 ? "cuadró" : "cuadraron"}`}
+          </p>
+          {stats.descuadres > 0 && (
+            <p className="mt-0.5 flex items-center gap-1.5 text-meta text-muted">
+              <span aria-hidden className="size-2 rounded-[2px] bg-danger" />
+              {stats.descuadres} con descuadre
+            </p>
+          )}
+          <div className="mt-auto pt-4">
+            <Button asChild size="sm">
+              <Link href="/historial">Ver historial</Link>
+            </Button>
+          </div>
+        </div>
+
+        {orden.length > 0 && (
+          // Cuadritos de 22 px como máximo (32 en el computador): la cuadrícula
+          // no se estira a todo el ancho, se queda a la derecha.
+          <div
+            ref={caja}
+            className="relative ml-auto max-w-[calc(var(--cols)*25px)] min-w-0 flex-1 pt-8 lg:max-w-[calc(var(--cols)*35px)]"
+            style={{ "--cols": orden.length } as CSSProperties}
           >
-            {orden.map((r) => (
-              <Cell
-                key={r.fecha}
-                fill={Math.round(r.saldo_final) !== 0 ? "var(--color-descuadre)" : "var(--color-cuadrado)"}
-              />
-            ))}
-          </Bar>
-        </BarChart>
-      </ChartContainer>
-      <div className="mt-2 flex justify-between text-meta text-faint">
-        <span>{formatFechaCorta(orden[0].fecha)}</span>
-        <span>{formatFechaCorta(orden[orden.length - 1].fecha)}</span>
+            {cambio !== null && (
+              <span
+                className="tnum absolute top-0 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-blanco px-2.5 py-1 text-meta font-semibold text-text shadow-pastilla"
+                title="Tirilla del último día frente al promedio de los anteriores"
+              >
+                {cambio >= 0 ? <CaretUp size={11} weight="fill" /> : <CaretDown size={11} weight="fill" />}
+                {cambio >= 0 ? "+" : "−"}
+                {Math.abs(cambio).toFixed(1).replace(".", ",")}%
+              </span>
+            )}
+            <div
+              className="grid h-full items-end gap-[3px]"
+              style={{ gridTemplateColumns: `repeat(${orden.length}, minmax(0, 1fr))` }}
+            >
+              {orden.map((r, i) => {
+                const h = alto(r.total_tirilla);
+                const descuadre = Math.round(r.saldo_final) !== 0;
+                return (
+                  <Tooltip key={r.fecha}>
+                    <TooltipTrigger asChild>
+                      <Link
+                        href={`/cuadre?fecha=${r.fecha}`}
+                        aria-label={`${formatFechaCorta(r.fecha)}: ${formatCOP(r.total_tirilla)}${descuadre ? ", con descuadre" : ""}`}
+                        className="group/col flex flex-col gap-[3px] rounded-[4px] outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        {Array.from({ length: FILAS - h }, (_, k) => (
+                          <span
+                            key={k}
+                            aria-hidden
+                            className={cn(
+                              "aspect-square w-full rounded-[3px]",
+                              k === FILAS - h - 1 ? "bg-line-strong" : "bg-elevated",
+                            )}
+                          />
+                        ))}
+                        <span
+                          aria-hidden
+                          className={cn("flex flex-col gap-[3px]", vista ? "barra-crece" : "barra-espera")}
+                          style={{ "--m": i } as CSSProperties}
+                        >
+                          {Array.from({ length: h }, (_, k) => (
+                            <span
+                              key={k}
+                              className={cn(
+                                "aspect-square w-full rounded-[3px] transition-opacity group-hover/col:opacity-80",
+                                descuadre ? "bg-danger" : "bg-text",
+                              )}
+                            />
+                          ))}
+                        </span>
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {formatFechaCorta(r.fecha)}: {formatCOP(r.total_tirilla)}
+                      {descuadre ? ", descuadre" : ""}
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
-    </div>
+    </Card>
   );
 }

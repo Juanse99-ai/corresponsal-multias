@@ -12,13 +12,13 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        // La acción principal: una sola pastilla azul a la vista.
+        // La acción principal: una sola pastilla negra a la vista (blanco hueso en Noche).
         default: "bg-primary text-primary-foreground shadow-primario hover:bg-primary/90 dark:border-white/20",
         // Solo para destruir, dentro de la confirmación.
-        destructive: "bg-danger-fill text-accent-ink hover:bg-danger-fill/90 dark:border-white/20",
+        destructive: "bg-danger-fill text-nav-text hover:bg-danger-fill/90 dark:border-white/20",
         // Acción secundaria de la página.
         outline:
-          "border-borde-boton bg-surface text-text shadow-[0_1px_2px_rgba(15,23,42,0.05)] hover:bg-bg-soft dark:shadow-[0_1px_2px_rgba(0,0,0,0.3)] disabled:border-line disabled:bg-surface disabled:text-faint",
+          "border-line-strong bg-blanco text-text shadow-chica hover:bg-bg-soft dark:border-borde-boton dark:shadow-[0_1px_2px_rgba(0,0,0,0.3)] disabled:border-line disabled:bg-surface disabled:text-faint",
         // Gris relleno: Cancelar y los secundarios del pie de una ventana.
         secondary: "bg-surface-2 text-text hover:bg-elevated",
         // Terciaria en línea ("Deshacer"). Nunca en el pie de una ventana.

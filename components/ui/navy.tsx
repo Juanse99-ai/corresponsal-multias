@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
  * Tarjeta navy (guía 8.6): la única cifra de la pantalla sobre la que se
  * aprieta un botón. Es un `Card` con fondo navy; lo de adentro va con los
  * colores de Noche (clase "dark"), así los chips de estado, el segmentado y
- * los botones se ven bien sobre el azul oscuro. En Noche lleva su filo.
+ * los botones se ven bien sobre el carbón. En Noche lleva su filo.
  */
 function TarjetaNavy({ className, children, ...props }: React.ComponentProps<"div">) {
   return (

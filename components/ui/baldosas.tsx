@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 /**
  * Baldosas: una de 3 o 4 opciones con ícono que deciden dónde cae la plata
  * (tipo de movimiento, medio de pago). Rejilla de columnas iguales; la elegida
- * lleva borde azul, fondo azul tenue y un aro. Sobre el ToggleGroup de Radix:
+ * lleva borde negro, fondo gris tenue y un aro. Sobre el ToggleGroup de Radix:
  * las flechas del teclado recorren las opciones y el grupo es una sola parada
  * del Tab. Siempre queda una elegida (tocar la elegida no la suelta).
  */

@@ -4,7 +4,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 import { Progress as ProgressPrimitive } from "radix-ui"
 
-/** Barra de avance de 6 px: pista gris y lleno azul (o verde si ya está al día). */
+/** Barra de avance de 6 px: pista gris y lleno negro (o verde si ya está al día). */
 function Progress({
   className,
   value,

@@ -159,7 +159,7 @@ export function SoportesSection({
           if (e.dataTransfer.files) subir(e.dataTransfer.files);
         }}
         // Zona de soltar como un campo relleno grande, sin borde punteado en
-        // reposo; al arrastrar fotos encima se marca con el borde y el tinte azul.
+        // reposo; al arrastrar fotos encima se marca con el borde y el tinte gris.
         className={cn(
           "flex cursor-pointer flex-col items-center gap-1.5 rounded-2xl border-2 border-transparent px-4 py-6 text-center transition-colors duration-[var(--dur-1)] has-focus-visible:border-accent",
           drag
@@ -246,7 +246,7 @@ export function SoportesSection({
                   </a>
                   </ItemMedia>
 
-                  <ItemFooter className="pointer-events-none absolute inset-x-0 bottom-0 gap-1 bg-gradient-to-t from-[oklch(0.22_0.03_258/0.7)] to-transparent px-2 py-1.5">
+                  <ItemFooter className="pointer-events-none absolute inset-x-0 bottom-0 gap-1 bg-gradient-to-t from-[oklch(0.2_0.005_70/0.7)] to-transparent px-2 py-1.5">
                     <span className="truncate text-label text-white/80">{pesoArchivo(s.tamano)}</span>
                     <ArrowSquareOut size={12} className="text-white/70" />
                   </ItemFooter>
@@ -259,7 +259,7 @@ export function SoportesSection({
                     label="Borrar soporte"
                     size="icon-sm"
                     onClick={() => setPorBorrar(s.id)}
-                    className="absolute right-1.5 top-1.5 bg-[oklch(0.22_0.03_258/0.62)] text-[oklch(0.97_0.01_260/0.9)] opacity-0 backdrop-blur-sm hover:bg-[oklch(0.22_0.03_258/0.75)] hover:text-[oklch(0.8_0.14_25)] group-hover/item:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100"
+                    className="absolute right-1.5 top-1.5 bg-[oklch(0.2_0.005_70/0.62)] text-[oklch(0.97_0.003_70/0.9)] opacity-0 backdrop-blur-sm hover:bg-[oklch(0.2_0.005_70/0.75)] hover:text-[oklch(0.8_0.14_25)] group-hover/item:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100"
                   >
                     <Trash size={16} />
                   </IconButton>
