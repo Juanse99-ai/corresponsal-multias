@@ -116,3 +116,59 @@ test("una foto todavía sin descargar no se manda vacía", async () => {
     srv.cerrar();
   }
 });
+
+// Caso real del 11 nov 2026: Vercel quedó con una versión sin /api/agente y la
+// app mandó la foto a la pantalla de entrar. El puente seguía la redirección,
+// reintentaba tres veces y solo decía "500".
+async function servidorQueResponde(status: number, cabeceras: Record<string, string> = {}, cuerpo = "") {
+  let llamadas = 0;
+  const srv = createServer((req, res) => {
+    llamadas++;
+    req.resume();
+    req.on("end", () => {
+      res.writeHead(status, cabeceras);
+      res.end(cuerpo);
+    });
+  });
+  await new Promise<void>((r) => srv.listen(0, r));
+  const { port } = srv.address() as { port: number };
+  return {
+    url: `http://127.0.0.1:${port}/api/agente/comprobante`,
+    llamadas: () => llamadas,
+    cerrar: () => srv.close(),
+  };
+}
+
+async function mandarFoto(url: string) {
+  const dir = await mkdtemp(join(tmpdir(), "puente-"));
+  const ruta = join(dir, "tirilla.jpg");
+  await writeFile(ruta, Buffer.from([0xff, 0xd8, 0xff, 0xe0]));
+  const { ganchos, registro } = montar({ grupo: GRUPO, dueno: DUENO, url, token: "secreto" });
+  await ganchos.get("message_received")!(
+    { from: "x", content: "", media: [{ path: ruta, contentType: "image/jpeg" }], messageId: "C1" },
+    { conversationId: GRUPO, senderId: DUENO },
+  );
+  return registro;
+}
+
+test("si la app manda a la pantalla de entrar, lo dice claro y no reintenta", async () => {
+  const srv = await servidorQueResponde(307, { location: "/login?next=%2Fapi%2Fagente%2Fcomprobante" });
+  try {
+    const registro = await mandarFoto(srv.url);
+    assert.equal(srv.llamadas(), 1);
+    assert.ok(registro.some((m) => m.includes("no tiene la entrada del agente")), registro.join("\n"));
+  } finally {
+    srv.cerrar();
+  }
+});
+
+test("con la clave equivocada lo dice claro y no reintenta", async () => {
+  const srv = await servidorQueResponde(401, { "content-type": "application/json" }, '{"ok":false,"error":"No autorizado"}');
+  try {
+    const registro = await mandarFoto(srv.url);
+    assert.equal(srv.llamadas(), 1);
+    assert.ok(registro.some((m) => m.includes("AGENTE_TOKEN")), registro.join("\n"));
+  } finally {
+    srv.cerrar();
+  }
+});
