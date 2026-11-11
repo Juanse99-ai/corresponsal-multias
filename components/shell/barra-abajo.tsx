@@ -27,7 +27,8 @@ import { buildAvisos } from "@/components/shell/top-header";
 import { iniciales } from "@/components/shell/riel-panel";
 import { EVENTO_BUSCAR, decidirChica, esArrastre, indiceEnBarra } from "@/lib/barra";
 import { useInstalar } from "@/lib/instalar";
-import { mapaRefraccion, refraccionDisponible } from "@/lib/vidrio";
+import { aplicarVidrio, leerVidrio, mapaRefraccion, refraccionDisponible } from "@/lib/vidrio";
+import { ControlVidrio } from "@/components/shell/control-vidrio";
 import { cn } from "@/lib/utils";
 import type { Rol } from "@/lib/cuadre";
 import type { HeaderResumen } from "@/lib/queries";
@@ -171,6 +172,9 @@ export function BarraAbajo({
   }, []);
 
   useEffect(() => () => clearTimeout(relojLente.current), []);
+
+  // La transparencia que eligió quien usa este teléfono (hoja Tú).
+  useEffect(() => aplicarVidrio(leerVidrio()), []);
 
   // Refracción del borde: solo en Chromium (los demás no dibujan un filtro
   // SVG sobre el fondo). El mapa sigue el ancho real de la cápsula.
@@ -530,6 +534,10 @@ function HojaTu({
       </div>
 
       {sueltos.length > 0 && <FilasHoja items={sueltos} pathname={pathname} pendientes={pendientes} onIr={onIr} />}
+
+      <div className="border-t border-line pt-1">
+        <ControlVidrio />
+      </div>
 
       <div className="flex min-h-12 items-center gap-3 border-t border-line px-2 py-1.5">
         <span aria-hidden className="grid size-11 shrink-0 place-items-center text-muted">

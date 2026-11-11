@@ -31,3 +31,48 @@ export function refraccionDisponible(): boolean {
   const ua = (navigator as Navigator & { userAgentData?: { brands?: { brand: string }[] } }).userAgentData;
   return !!ua?.brands?.some((b) => b.brand === "Chromium");
 }
+
+// ===== Transparencia del vidrio (la elige cada quien en la hoja Tú) =====
+// De 0 (casi sólido) a 100 (casi sin vidrio). Cambia --vidrio-t en <html>:
+// globals.css saca de ahí el blanco del vidrio y cuánto desenfoca. Se guarda
+// en este teléfono (localStorage); no viaja a otros.
+
+const CLAVE_VIDRIO = "corr-vidrio";
+/** La transparencia de fábrica: da el blanco .55 y el desenfoque de 8 px del taller. */
+export const VIDRIO_INICIAL = 45;
+const oyentesVidrio = new Set<() => void>();
+
+const acotar = (n: number) => Math.min(100, Math.max(0, Math.round(n)));
+
+export function leerVidrio(): number {
+  try {
+    const v = localStorage.getItem(CLAVE_VIDRIO);
+    const n = Number(v);
+    return v === null || !Number.isFinite(n) ? VIDRIO_INICIAL : acotar(n);
+  } catch {
+    return VIDRIO_INICIAL;
+  }
+}
+
+/** Pone el valor en <html> (sin guardarlo). */
+export function aplicarVidrio(valor: number) {
+  document.documentElement.style.setProperty("--vidrio-t", String(acotar(valor) / 100));
+}
+
+/** Lo aplica, lo guarda en este teléfono y avisa a quien lo muestre. */
+export function guardarVidrio(valor: number) {
+  aplicarVidrio(valor);
+  try {
+    localStorage.setItem(CLAVE_VIDRIO, String(acotar(valor)));
+  } catch {
+    /* sin localStorage vale solo mientras esté abierta */
+  }
+  oyentesVidrio.forEach((f) => f());
+}
+
+export function suscribirVidrio(f: () => void) {
+  oyentesVidrio.add(f);
+  return () => {
+    oyentesVidrio.delete(f);
+  };
+}

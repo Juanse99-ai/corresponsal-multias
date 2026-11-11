@@ -26,6 +26,10 @@ estructura del estilo del taller (marco, riel, panel, hojas, gestos) sigue igual
   el borde además refracta el fondo con aberración de color (`lib/vidrio.ts`). Una
   pastilla que se desliza (300 ms) con gota al llegar; globo rojo #ff3b30 de pendientes.
   Respaldo opaco con borde sin desenfoque, con reducir transparencia o más contraste.
+  **Transparencia ajustable** en la hoja Tú (slider de shadcn con forma de iOS, 0 a 100,
+  de fábrica 45): 0 casi sólido (blanco .92, 14 px de desenfoque), 100 casi sin vidrio
+  (blanco .10, 2 px). Con refracción el relleno baja al cuadrado y el desenfoque se apaga
+  desde 60, para que la lente se vea. Se guarda en cada teléfono.
 - **Cabecera del celular**: del color de la página, sin línea; el logo y los avisos en un
   círculo blanco (`IconButton forma="blanco"`). La lupa pasó al círculo de la barra.
 - **Títulos de tarjeta** en peso medio, no seminegrita.
