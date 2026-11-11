@@ -5,6 +5,7 @@ vive con prefijo `corr_` y su propio RLS. **No tocar las tablas del taller.**
 
 ## Migraciones
 - `migrations/0001_corresponsal_init.sql` — esquema completo, RLS, funciones de rol.
+- `migrations/0007_luis_en_vivo.sql` — consignaciones, compensaciones y fotos en Supabase Realtime (aplicada el 11 nov 2026).
 
 (El endurecimiento de funciones quedó incluido al final del 0001 en esta copia.)
 

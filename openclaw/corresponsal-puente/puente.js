@@ -122,7 +122,11 @@ export const puente = {
           }
           const cuerpo = await res.json().catch(() => ({}));
           if (res.ok) {
-            log.info?.(`[corresponsal-puente] Foto ${mensajeId ?? ""}: ${cuerpo.resultado ?? "ok"}${cuerpo.motivo ? ` (${cuerpo.motivo})` : ""}`);
+            const seg = (ms) => (typeof ms === "number" ? `${(ms / 1000).toFixed(1)} s` : "-");
+            const tiempo = cuerpo.ms ? `, ${seg(cuerpo.ms.total)} en la app (lectura ${seg(cuerpo.ms.lectura)})` : "";
+            log.info?.(
+              `[corresponsal-puente] Foto ${mensajeId ?? ""}: ${cuerpo.resultado ?? "ok"}${cuerpo.motivo ? ` (${cuerpo.motivo})` : ""}${tiempo}`,
+            );
             return;
           }
           if (res.status === 401) {

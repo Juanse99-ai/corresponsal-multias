@@ -157,6 +157,17 @@
   `trabajos`, solo lectura), OT abiertas por estado y completadas sin pagar.
   Una tarea de OpenClaw de tipo comando corre `openclaw/corresponsal-puente/resumen.js`
   a las 7:00 Bogotá y manda lo que imprime al chat del dueño (sin IA).
+- **Cuenta del Sr. Luis en vivo** (11 nov 2026): `components/luis/luis-en-vivo.tsx`
+  escucha con Supabase Realtime los cambios del día en `corr_consignaciones_luis`,
+  `corr_compensaciones_luis` y `corr_soportes` (migración 0007, aplicada) y
+  refresca la pantalla con `useNavegacion().refresh()`; también al volver a la
+  app. Sin Realtime, revisa cada 20 s mientras se ve. Los DELETE no llegan con
+  filtro por fecha (limitación de Realtime): los borra quien está en la app.
+- **Velocidad del lector** (11 nov 2026): la entrada del agente lee la tirilla
+  en paralelo con guardar la foto y responde `ms: {total, lectura}` (el puente
+  lo escribe en su registro). `ESFUERZO_LECTURA` en Vercel (`low`, `medium`,
+  `high`...) baja el razonamiento del modelo del lector, lo que más pesa en el
+  tiempo; sin la variable queda el de fábrica. Comparar precisión antes de dejarlo.
 - Módulos por carpeta. Montos enteros (COP) y
   `lib/format.ts` para formato. Números con clase `.tnum` (misma fuente con
   `tabular-nums` para alinear columnas).

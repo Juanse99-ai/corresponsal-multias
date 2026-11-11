@@ -66,6 +66,7 @@ export async function POST(req: Request) {
 
   const sb = crearClienteAdmin();
   if (!sb) return NextResponse.json({ ok: false, error: "Entrada apagada" }, { status: 503 });
+  const inicio = Date.now();
 
   let form: FormData;
   try {
@@ -94,8 +95,22 @@ export async function POST(req: Request) {
     if (ya && ya.length > 0) return NextResponse.json({ ok: true, resultado: "ya_recibida" });
   }
 
-  // 1. La foto queda como soporte del día: si algo falla después, ahí está para cargarla a mano.
   const buffer = Buffer.from(await foto.arrayBuffer());
+
+  // La lectura es lo que más tarda: arranca ya, mientras la foto se guarda.
+  let msLectura: number | null = null;
+  const lectura: Promise<Comprobante | Error | null> = lecturaDisponible()
+    ? (() => {
+        const t = Date.now();
+        return leerComprobante(buffer, mime).then(
+          (r) => ((msLectura = Date.now() - t), r),
+          (e: unknown) => ((msLectura = Date.now() - t), e instanceof Error ? e : new Error(String(e))),
+        );
+      })()
+    : Promise.resolve(null);
+  const tiempos = () => ({ total: Date.now() - inicio, lectura: msLectura });
+
+  // 1. La foto queda como soporte del día: si algo falla después, ahí está para cargarla a mano.
   const ext = mime.split("/")[1].replace("jpeg", "jpg");
   const path = `luis/${dia}/${randomUUID()}.${ext}`;
   const { error: upErr } = await sb.storage.from(SOPORTES_BUCKET).upload(path, buffer, { contentType: mime, upsert: false });
@@ -120,33 +135,32 @@ export async function POST(req: Request) {
       url: `/luis?fecha=${dia}`,
       tag: `comprobante-${soporte!.id}`,
     });
-    return NextResponse.json({ ok: true, resultado: "revisar", motivo });
+    const ms = tiempos();
+    console.info(`Agente, comprobante: revisar (${motivo}), total ${ms.total} ms, lectura ${ms.lectura ?? "-"} ms`);
+    return NextResponse.json({ ok: true, resultado: "revisar", motivo, ms });
   }
 
-  // 2. Leer la tirilla.
-  if (!lecturaDisponible()) return aRevisar("La lectura de fotos no está activada", null);
-  let leido: Comprobante;
-  try {
-    leido = await leerComprobante(buffer, mime);
-  } catch (e) {
-    console.error("Agente, lectura de comprobante:", e);
+  // 2. Esperar la lectura (ya iba corriendo).
+  const resultado = await lectura;
+  if (resultado === null) return aRevisar("La lectura de fotos no está activada", null);
+  if (resultado instanceof Error) {
+    console.error("Agente, lectura de comprobante:", resultado);
     return aRevisar("No se pudo leer la foto", null);
   }
-  // Se guarda la lectura en el soporte: la revisión en la app no vuelve a pagarla.
-  await sb.from("corr_soportes").update({ datos: leido }).eq("id", soporte.id);
+  const leido = resultado;
 
-  // 3. Decidir (lib/comprobante-auto.ts).
+  // 3. Decidir (lib/comprobante-auto.ts). Guardar la lectura en el soporte (la
+  // revisión en la app no vuelve a pagarla) y consultar el día van a la vez.
   const fecha = fechaDeTirilla(leido.fecha, dia).fecha;
-  const { data: cuadre } = await sb.from("corr_cuadres").select("estado").eq("fecha", fecha).maybeSingle();
-  let yaRegistrada = false;
-  if (typeof leido.monto === "number" && leido.hora) {
-    const { data: iguales } = await sb
-      .from("corr_consignaciones_luis")
-      .select("hora")
-      .eq("fecha", fecha)
-      .eq("monto", leido.monto);
-    yaRegistrada = (iguales ?? []).some((r) => (r.hora ?? "").slice(0, 5) === leido.hora!.slice(0, 5));
-  }
+  const [, { data: cuadre }, { data: iguales }] = await Promise.all([
+    sb.from("corr_soportes").update({ datos: leido }).eq("id", soporte.id),
+    sb.from("corr_cuadres").select("estado").eq("fecha", fecha).maybeSingle(),
+    typeof leido.monto === "number" && leido.hora
+      ? sb.from("corr_consignaciones_luis").select("hora").eq("fecha", fecha).eq("monto", leido.monto)
+      : Promise.resolve({ data: [] as { hora: string | null }[] }),
+  ]);
+  const yaRegistrada =
+    !!leido.hora && (iguales ?? []).some((r) => (r.hora ?? "").slice(0, 5) === leido.hora!.slice(0, 5));
   const decision = decidirComprobante(leido, dia, { diaCerrado: cuadre?.estado === "cerrado", yaRegistrada });
   if (decision.accion === "revisar") return aRevisar(decision.motivo, leido);
 
@@ -156,8 +170,12 @@ export async function POST(req: Request) {
     console.error("Agente, guardar consignación:", insErr);
     return aRevisar("No se pudo guardar la consignación", leido);
   }
-  await sb.storage.from(SOPORTES_BUCKET).remove([path]);
-  await sb.from("corr_soportes").delete().eq("id", soporte.id);
+  await Promise.all([
+    sb.storage.from(SOPORTES_BUCKET).remove([path]),
+    sb.from("corr_soportes").delete().eq("id", soporte.id),
+  ]);
   refrescar();
-  return NextResponse.json({ ok: true, resultado: "guardado", consignacion: decision.fila });
+  const ms = tiempos();
+  console.info(`Agente, comprobante: guardado, total ${ms.total} ms, lectura ${ms.lectura ?? "-"} ms`);
+  return NextResponse.json({ ok: true, resultado: "guardado", consignacion: decision.fila, ms });
 }
