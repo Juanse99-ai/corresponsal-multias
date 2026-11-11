@@ -1,11 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, Backspace } from "@phosphor-icons/react/dist/ssr";
+import { ArrowLeft, ArrowRight, Backspace, CaretRight, LockKey } from "@phosphor-icons/react/dist/ssr";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Item, ItemActions, ItemContent, ItemGroup, ItemSeparator, ItemTitle } from "@/components/ui/item";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ErrorNotice } from "@/components/ui/error-notice";
@@ -69,33 +71,43 @@ export function CajaClave({ personas }: { personas: Persona[] }) {
     return <p className="text-body text-text-2">No hay personas activas</p>;
   }
 
+  // Una fila por persona (como el ingreso del personal en un punto de venta):
+  // nombre completo y, a la derecha, candado si ya tiene clave o "Crear clave".
   if (!persona) {
     return (
-      <div className="grid grid-cols-3 gap-2.5">
-        {personas.map((p) => (
-          <Button
-            key={p.id}
-            variant="ghost"
-            className="h-auto flex-col gap-2 rounded-3xl px-1 py-3.5 hover:bg-fill"
-            onClick={() => setPersona(p)}
-          >
-            <Avatar className="size-14">
-              <AvatarFallback
-                className={cn(
-                  "text-title font-semibold",
-                  p.tieneClave ? "bg-accent-fill text-accent-ink" : "bg-surface-2 text-muted",
-                )}
+      <ItemGroup className="rounded-3xl bg-blanco p-1.5">
+        {personas.map((p, i) => (
+          <Fragment key={p.id}>
+            {i > 0 && <ItemSeparator className="ml-[68px] mr-3 data-[orientation=horizontal]:w-auto" />}
+            <Item asChild className="flex-nowrap gap-3 rounded-2xl px-3 py-2.5 hover:bg-fill">
+              <Button
+                variant="ghost"
+                className="h-auto w-full justify-start text-left font-normal"
+                onClick={() => setPersona(p)}
               >
-                {iniciales(p.nombre)}
-              </AvatarFallback>
-            </Avatar>
-            <span className="flex w-full flex-col leading-tight">
-              <span className="truncate text-body font-medium text-text">{p.nombre.split(/\s+/)[0]}</span>
-              {!p.tieneClave && <span className="text-meta font-normal text-muted">Sin clave</span>}
-            </span>
-          </Button>
+                <Avatar className="size-11">
+                  <AvatarFallback className="bg-accent-fill text-body font-semibold text-accent-ink">
+                    {iniciales(p.nombre)}
+                  </AvatarFallback>
+                </Avatar>
+                <ItemContent className="min-w-0">
+                  <ItemTitle className="w-full truncate text-body font-medium text-text">{p.nombre}</ItemTitle>
+                </ItemContent>
+                <ItemActions className="gap-2 text-muted">
+                  {p.tieneClave ? (
+                    <LockKey size={18} aria-label="Con clave" />
+                  ) : (
+                    <Badge variant="secondary" className="bg-fill text-text-2">
+                      Crear clave
+                    </Badge>
+                  )}
+                  <CaretRight size={16} aria-hidden />
+                </ItemActions>
+              </Button>
+            </Item>
+          </Fragment>
         ))}
-      </div>
+      </ItemGroup>
     );
   }
 
