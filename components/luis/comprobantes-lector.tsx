@@ -23,7 +23,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { ErrorNotice } from "@/components/ui/error-notice";
-import { formatCOP, formatHora, horaBogotaHHMM } from "@/lib/format";
+import { formatCOP, formatFecha, formatHora, horaBogotaHHMM } from "@/lib/format";
 import type { ComprobanteLeido } from "@/app/(app)/luis/actions";
 
 /** Lo que se guarda como nota del movimiento: qué fue y para quién. */
@@ -233,6 +233,9 @@ export function ComprobantesLector({
                                       Revísala
                                     </span>
                                     {" · "}
+                                    {c.fechaRara && (
+                                      <>tirilla del {/^\d{4}-\d{2}-\d{2}$/.test(c.fechaRara) ? formatFecha(c.fechaRara) : c.fechaRara}, </>
+                                    )}
                                   </>
                                 )}
                                 {notaDe(c) ?? c.nombre ?? ""}

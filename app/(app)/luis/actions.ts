@@ -12,6 +12,7 @@ import {
   type Comprobante,
 } from "@/lib/leer-comprobante";
 import { formatFecha } from "@/lib/format";
+import { fechaDeTirilla, fechasCercanas } from "@/lib/fecha-tirilla";
 
 const CERRADO = "El día está cerrado. Solo Juan puede reabrirlo para editar.";
 
@@ -222,6 +223,20 @@ export async function agregarConsignacionesDesdeFotos(raw: unknown): Promise<Res
   const ids = desdeFotosSchema.safeParse(raw);
   if (!ids.success) return { ok: false, error: "No se sabe de qué fotos salieron." };
 
+  // Freno de fechas (lib/fecha-tirilla.ts): una tirilla se carga en el día
+  // abierto o a un día de diferencia. Una fecha más lejana es una lectura mala
+  // (el "2020" del 10 nov 2026) y no se guarda aunque llegue marcada.
+  const lote = loteSchema.safeParse(raw);
+  if (lote.success) {
+    const lejos = lote.data.items.find((it) => it.fecha && !fechasCercanas(it.fecha, lote.data.fecha));
+    if (lejos?.fecha) {
+      return {
+        ok: false,
+        error: `Una tirilla dice ${formatFecha(lejos.fecha)}, lejos del día que estás cargando. Revísala antes de guardar.`,
+      };
+    }
+  }
+
   const res = await agregarLote("corr_consignaciones_luis", raw);
   if (!res.ok) return res;
 
@@ -262,6 +277,8 @@ export interface ComprobanteLeido {
   recibo: string | null;
   seguro: boolean;
   esComprobante: boolean;
+  /** La fecha que se leyó en la tirilla cuando no se le creyó (ver lib/fecha-tirilla.ts). */
+  fechaRara: string | null;
   error?: string;
 }
 
@@ -298,18 +315,25 @@ export async function leerComprobantesDelDia(
 
   const salida: ComprobanteLeido[] = new Array(soportes.length);
 
-  const deDatos = (id: string, nombre: string | null, d: Comprobante): ComprobanteLeido => ({
-    soporteId: id,
-    nombre,
-    monto: d.monto,
-    fecha: d.fecha,
-    hora: d.hora,
-    transaccion: d.transaccion,
-    titular: d.titular,
-    destino: d.destino,
-    recibo: d.recibo,
-    seguro: d.seguro,
-    esComprobante: d.es_comprobante });
+  const deDatos = (id: string, nombre: string | null, d: Comprobante): ComprobanteLeido => {
+    // Una fecha leída lejos del día abierto no se cree: queda en el día y entra
+    // desmarcada para revisar.
+    const f = fechaDeTirilla(d.fecha, fecha);
+    return {
+      soporteId: id,
+      nombre,
+      monto: d.monto,
+      fecha: f.fecha,
+      hora: d.hora,
+      transaccion: d.transaccion,
+      titular: d.titular,
+      destino: d.destino,
+      recibo: d.recibo,
+      seguro: d.seguro && !f.rara,
+      esComprobante: d.es_comprobante,
+      fechaRara: f.rara,
+    };
+  };
 
   const cola = soportes.map((s, i) => ({ s, i }));
   async function trabajador() {
@@ -349,6 +373,7 @@ export async function leerComprobantesDelDia(
           recibo: null,
           seguro: false,
           esComprobante: false,
+          fechaRara: null,
           error: propio ? (e as Error).message : "No se pudo leer la foto.",
         };
       }
