@@ -202,5 +202,12 @@
   la pantalla) va en CSS (`globals.css`) porque corre antes de que cargue el
   JavaScript. Sale una vez por sesión, y la bienvenida de 2 veces al
   día espera a que termine (`lib/entrada.ts`).
+- Al entrar (11 nov 2026, el dueño eligió la alternativa B): el Panel entra
+  desde la derecha y empuja la pantalla de entrar, que se corre un tercio y se
+  oscurece (420 ms, View Transition: `lib/paso-entrar.ts` y
+  `html.paso-entrar::view-transition-*` en `globals.css`). La acción de entrar
+  devuelve `listo` en vez de redirigir; el formulario navega con
+  `router.replace` y el AppShell avisa con `pasoLlego()` cuando ya pintó. La
+  bienvenida y las cifras esperan al paso igual que a la entrada del logo.
 - Campos de fecha y hora nativos sin apariencia nativa (`globals.css`): con ella,
   iOS les suma relleno y un ancho mínimo, y se salen de su columna.

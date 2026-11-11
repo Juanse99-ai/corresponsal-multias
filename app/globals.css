@@ -745,6 +745,29 @@ input[type="number"] { -moz-appearance: textfield; }
   animation-timing-function: ease-in-out;
 }
 
+/* Paso de la pantalla de entrar a la app (lib/paso-entrar.ts, alternativa B):
+   el Panel entra desde la derecha y empuja la de entrar, que se corre un
+   tercio y se oscurece. 420 ms con la curva de iOS. Va después del fundido
+   del tema y le gana por la clase. */
+html.paso-entrar::view-transition-old(root),
+html.paso-entrar::view-transition-new(root) {
+  mix-blend-mode: normal;
+  animation-duration: 420ms;
+  animation-timing-function: var(--ease-ios);
+  animation-fill-mode: both;
+}
+html.paso-entrar::view-transition-old(root) { animation-name: paso-sale; }
+html.paso-entrar::view-transition-new(root) {
+  animation-name: paso-entra;
+  box-shadow: -12px 0 32px rgba(0, 0, 0, 0.14);
+}
+@keyframes paso-sale { to { transform: translateX(-30%); filter: brightness(0.72); } }
+@keyframes paso-entra { from { transform: translateX(100%); } }
+@media (prefers-reduced-motion: reduce) {
+  html.paso-entrar::view-transition-old(root),
+  html.paso-entrar::view-transition-new(root) { animation: none; }
+}
+
 /* Barras de las gráficas (panel-view.tsx, guía 8.23): cada una crece desde
    abajo al entrar, escalonadas 40 ms tras 260 ms de espera, en 560 ms con la
    curva de iOS. "backwards": al terminar no queda transform. Al pasar el mouse

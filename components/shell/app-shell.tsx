@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { MotionConfig } from "framer-motion";
 import type { Rol } from "@/lib/cuadre";
@@ -15,6 +16,7 @@ import { BienvenidaSplash } from "@/components/fx/bienvenida-splash";
 import { ContenidoPestanas, PestanasProvider } from "@/components/shell/pestanas";
 import { TRANSICION } from "@/lib/movimiento";
 import { useAtrasCierraVentanas } from "@/lib/use-atras-cierra-ventanas";
+import { pasoLlego } from "@/lib/paso-entrar";
 
 export function AppShell({
   profile,
@@ -29,6 +31,8 @@ export function AppShell({
   const isAdmin = profile.rol === "admin";
   // Atrás cierra la ventana u hoja de arriba antes de salirse de la pantalla.
   useAtrasCierraVentanas();
+  // Si se viene de la pantalla de entrar, la app ya pintó: arranca el paso.
+  useEffect(() => pasoLlego(), []);
   // Miga de pan sobre el título ("Principal › Cuadre diario"), en el computador.
   const seccion = seccionDe(pathname);
   const miga = seccion

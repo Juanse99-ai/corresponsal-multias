@@ -6,6 +6,8 @@ import { aCorreo } from "@/lib/clave";
 
 export interface LoginState {
   error: string | null;
+  /** Entró: el formulario navega a la app con el paso (lib/paso-entrar.ts). */
+  listo?: boolean;
 }
 
 export async function signInAction(_prev: LoginState, formData: FormData): Promise<LoginState> {
@@ -24,7 +26,7 @@ export async function signInAction(_prev: LoginState, formData: FormData): Promi
     return { error: "Usuario o contraseña incorrectos." };
   }
 
-  redirect("/panel");
+  return { error: null, listo: true };
 }
 
 export async function signOutAction(): Promise<void> {
