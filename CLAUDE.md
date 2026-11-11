@@ -139,6 +139,17 @@
   "Revísala, tirilla del ..." y `agregarConsignacionesDesdeFotos` rechaza el
   lote si aun así llega. El lote del chat de Luis (varios días) no lleva este
   freno: allí las fechas salen del encabezado de WhatsApp, no de una foto.
+- **Comprobantes automáticos del grupo** (opción A, 11 nov 2026, la eligió el
+  dueño): el plugin de OpenClaw `openclaw/corresponsal-puente` reenvía cada foto
+  que el dueño manda en el grupo de WhatsApp "Corresponsal" a
+  `app/api/agente/comprobante/route.ts` (sin sesión: `Authorization: Bearer
+  AGENTE_TOKEN`; usa la llave de servicio). La ruta guarda la foto como soporte
+  del día, la lee con `leerComprobante` y decide con `lib/comprobante-auto.ts`:
+  lo seguro (tirilla, monto, hora, fecha creíble, día abierto, sin una igual)
+  entra como consignación del Sr. Luis y la foto se borra; lo demás queda
+  pendiente en "Llenar desde fotos" con aviso push solo a los admin
+  (`lib/avisos.ts`). El plugin además impide que el agente procese o escriba
+  en el grupo (en el grupo hay clientes). Instalación en su README.
 - Módulos por carpeta. Montos enteros (COP) y
   `lib/format.ts` para formato. Números con clase `.tnum` (misma fuente con
   `tabular-nums` para alinear columnas).

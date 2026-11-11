@@ -4,8 +4,9 @@ import type { Database } from "@/lib/database.types";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/config";
 import { COOKIE_EQUIPO, COOKIE_USO, MINUTOS_BLOQUEO } from "@/lib/caja-cookie";
 
-// /api/cron se protege con su propio secreto (CRON_SECRET), no con sesión.
-const PUBLIC_PATHS = ["/login", "/caja", "/recuperar", "/auth", "/api/cron", "/sin-acceso"];
+// /api/cron se protege con su propio secreto (CRON_SECRET) y /api/agente con el
+// suyo (AGENTE_TOKEN), no con sesión.
+const PUBLIC_PATHS = ["/login", "/caja", "/recuperar", "/auth", "/api/cron", "/api/agente", "/sin-acceso"];
 
 /** Refresca la sesion y protege rutas. Se invoca desde proxy.ts. */
 export async function updateSession(request: NextRequest) {

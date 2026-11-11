@@ -114,6 +114,12 @@ export type Database = {
         Update: { id?: string; user_id?: string; endpoint?: string; p256dh?: string; auth_key?: string; created_at?: string };
         Relationships: [];
       };
+      corr_app_config: {
+        Row: { key: string; value: string };
+        Insert: { key: string; value: string };
+        Update: { key?: string; value?: string };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
