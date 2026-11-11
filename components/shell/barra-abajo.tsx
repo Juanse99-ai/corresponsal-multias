@@ -11,6 +11,8 @@ import {
   ChartLineUp,
   DeviceMobile,
   House,
+  Lock,
+  LockKey,
   MagnifyingGlass,
   SignOut,
   X,
@@ -29,6 +31,8 @@ import { EVENTO_BUSCAR, decidirChica, esArrastre, indiceEnBarra } from "@/lib/ba
 import { useInstalar } from "@/lib/instalar";
 import { aplicarVidrio, leerVidrio, mapaRefraccion, refraccionDisponible } from "@/lib/vidrio";
 import { ControlVidrio } from "@/components/shell/control-vidrio";
+import { VentanaClaveCaja } from "@/components/shell/clave-caja";
+import { bloquear } from "@/app/caja/actions";
 import { cn } from "@/lib/utils";
 import type { Rol } from "@/lib/cuadre";
 import type { HeaderResumen } from "@/lib/queries";
@@ -75,13 +79,17 @@ export function BarraAbajo({
   isAdmin,
   pathname,
   resumen,
+  equipo = false,
 }: {
   profile: { nombre: string; rol: Rol };
   isAdmin: boolean;
   pathname: string;
   resumen: HeaderResumen;
+  /** Equipo de caja autorizado: la hoja Tú ofrece Bloquear. */
+  equipo?: boolean;
 }) {
   const router = useRouter();
+  const [claveAbierta, setClaveAbierta] = useState(false);
   // La hoja abierta queda atada a la pantalla en que se abrió: al navegar por
   // fuera de la barra (avisos, buscador, un enlace) se cierra sola.
   const [hoja, setHoja] = useState<{ id: string; en: string } | null>(null);
@@ -497,10 +505,23 @@ export function BarraAbajo({
           {grupo && <FilasHoja items={grupo.items} pathname={pathname} pendientes={pendientes} onIr={cerrar} />}
 
           {abierta === "tu" && (
-            <HojaTu profile={profile} sueltos={sueltos} pathname={pathname} pendientes={pendientes} onIr={cerrar} />
+            <HojaTu
+              profile={profile}
+              sueltos={sueltos}
+              pathname={pathname}
+              pendientes={pendientes}
+              onIr={cerrar}
+              equipo={equipo}
+              onClave={() => {
+                cerrar();
+                setClaveAbierta(true);
+              }}
+            />
           )}
         </SheetContent>
       </Sheet>
+
+      <VentanaClaveCaja open={claveAbierta} onOpenChange={setClaveAbierta} />
     </>
   );
 }
@@ -512,12 +533,16 @@ function HojaTu({
   pathname,
   pendientes,
   onIr,
+  equipo,
+  onClave,
 }: {
   profile: { nombre: string; rol: Rol };
   sueltos: NavItem[];
   pathname: string;
   pendientes: (href: string) => number;
   onIr: () => void;
+  equipo: boolean;
+  onClave: () => void;
 }) {
   const { modo, instalar } = useInstalar();
   return (
@@ -565,6 +590,26 @@ function HojaTu({
             </Button>
           )}
         </div>
+      )}
+
+      <div className="flex min-h-12 items-center gap-3 border-t border-line px-2 py-1.5">
+        <span aria-hidden className="grid size-11 shrink-0 place-items-center text-muted">
+          <LockKey size={21} />
+        </span>
+        <span className="min-w-0 flex-1 text-body font-medium text-text">Clave de caja</span>
+        <Button size="sm" variant="secondary" onClick={onClave}>
+          Abrir
+        </Button>
+      </div>
+
+      {/* En la caja: bloquear deja la app en la pantalla de clave para el siguiente. */}
+      {equipo && (
+        <form action={bloquear} className="px-1 pt-1">
+          <Button type="submit" className="w-full">
+            <Lock weight="bold" />
+            Bloquear
+          </Button>
+        </form>
       )}
 
       <form action={signOutAction} className="px-1 pt-1">

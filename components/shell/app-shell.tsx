@@ -16,21 +16,27 @@ import { BienvenidaSplash } from "@/components/fx/bienvenida-splash";
 import { ContenidoPestanas, PestanasProvider } from "@/components/shell/pestanas";
 import { TRANSICION } from "@/lib/movimiento";
 import { useAtrasCierraVentanas } from "@/lib/use-atras-cierra-ventanas";
+import { useBloqueoInactivo } from "@/lib/use-bloqueo-inactivo";
 import { pasoLlego } from "@/lib/paso-entrar";
 
 export function AppShell({
   profile,
   resumen,
+  equipo = false,
   children,
 }: {
   profile: { nombre: string; rol: Rol; email: string };
   resumen: HeaderResumen;
+  /** Este navegador es un equipo de caja autorizado (cookie): se bloquea solo. */
+  equipo?: boolean;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
   const isAdmin = profile.rol === "admin";
   // Atrás cierra la ventana u hoja de arriba antes de salirse de la pantalla.
   useAtrasCierraVentanas();
+  // En la caja, la app se bloquea sola tras un rato sin uso.
+  useBloqueoInactivo(equipo);
   // Si se viene de la pantalla de entrar, la app ya pintó: arranca el paso.
   useEffect(() => pasoLlego(), []);
   // Miga de pan sobre el título ("Principal › Cuadre diario"), en el computador.
@@ -48,7 +54,7 @@ export function AppShell({
       <div className="marco min-h-[100dvh]">
         <BienvenidaSplash nombre={profile.nombre} />
 
-        <RielPanel profile={profile} isAdmin={isAdmin} pathname={pathname} resumen={resumen} />
+        <RielPanel profile={profile} isAdmin={isAdmin} pathname={pathname} resumen={resumen} equipo={equipo} />
 
         <div className="min-w-0 flex-1">
         <TopHeader resumen={resumen} isAdmin={isAdmin} />
@@ -59,7 +65,7 @@ export function AppShell({
         </div>
 
         {/* Celular: la barra de abajo reemplaza al menú de pantalla completa. */}
-        <BarraAbajo profile={profile} isAdmin={isAdmin} pathname={pathname} resumen={resumen} />
+        <BarraAbajo profile={profile} isAdmin={isAdmin} pathname={pathname} resumen={resumen} equipo={equipo} />
 
         <NuevaVersion />
         <JalarParaActualizar />
