@@ -5,7 +5,7 @@ const UMBRAL_VEL = 0.6; // px/ms
 const ARRANQUE_PX = 8;
 const AGARRE_PX = 44;
 // Sobre lo que se toca para otra cosa no arranca el arrastre.
-const NO_ARRASTRA = "input,textarea,select,button,a,label,[role=slider],[role=switch],[contenteditable=true],canvas";
+const NO_ARRASTRA = "input,textarea,select,button,a,label,[role=slider],[data-slot=slider],[role=switch],[contenteditable=true],canvas";
 const CABECERA = "[data-slot=dialog-header],[data-slot=alert-dialog-header],[data-slot=sheet-header]";
 
 /**

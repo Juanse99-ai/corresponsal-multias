@@ -126,8 +126,14 @@
   /* Barra de abajo del celular: cápsula de vidrio (Liquid Glass de iOS 26),
      la misma de la app del taller. --gbar-fondo-refracta es más transparente:
      donde el borde refracta (Chromium) el fondo tiene que verse. */
-  --gbar-fondo: rgba(255, 255, 255, 0.55);
-  --gbar-fondo-refracta: rgba(255, 255, 255, 0.24);
+  /* La transparencia la elige cada quien (hoja Tú, lib/vidrio.ts): --vidrio-t
+     va de 0 (casi sólido) a 1 (casi sin vidrio); de fábrica .45, que da el
+     blanco .55 y el desenfoque de 8 px del taller. */
+  --vidrio-t: 0.45;
+  --gbar-alfa: calc(0.92 - 0.82 * var(--vidrio-t));
+  --gbar-desenfoque: calc(2px + 12px * (1 - var(--vidrio-t)));
+  --gbar-fondo: rgba(255, 255, 255, var(--gbar-alfa));
+  --gbar-fondo-refracta: rgba(255, 255, 255, calc(var(--gbar-alfa) * var(--gbar-alfa) * 0.8));
   --gbar-sombra: inset 0 -1px 1px rgba(15, 35, 80, 0.08), 0 0 0 0.5px rgba(15, 35, 80, 0.14),
     0 12px 32px -12px rgba(15, 35, 80, 0.4), inset 1.5px 1.5px 1px -0.5px rgba(255, 255, 255, 0.85),
     inset -1.5px -1.5px 1px -0.5px rgba(255, 255, 255, 0.4), inset 0 0 10px rgba(255, 255, 255, 0.3);
@@ -288,8 +294,8 @@
   --sombra-lg: 0 24px 60px rgba(0, 0, 0, 0.65);
   --sombra-ventana: 0 30px 80px -20px rgba(0, 0, 0, 0.7);
 
-  --gbar-fondo: rgba(40, 40, 44, 0.55);
-  --gbar-fondo-refracta: rgba(40, 40, 44, 0.32);
+  --gbar-fondo: rgba(40, 40, 44, var(--gbar-alfa));
+  --gbar-fondo-refracta: rgba(40, 40, 44, calc(var(--gbar-alfa) * var(--gbar-alfa) * 1.06));
   --gbar-sombra: inset 0 -1px 1px rgba(0, 0, 0, 0.35), 0 0 0 0.5px rgba(255, 255, 255, 0.08),
     0 14px 36px -10px rgba(0, 0, 0, 0.85), inset 1.5px 1.5px 1px -0.5px rgba(255, 255, 255, 0.35),
     inset -1.5px -1.5px 1px -0.5px rgba(255, 255, 255, 0.14), inset 0 0 10px rgba(255, 255, 255, 0.08);
@@ -839,8 +845,8 @@ input[type="number"] { -moz-appearance: textfield; }
     border-radius: 999px;
     isolation: isolate;
     background: var(--gbar-fondo);
-    -webkit-backdrop-filter: blur(8px) saturate(1.8);
-    backdrop-filter: blur(8px) saturate(1.8);
+    -webkit-backdrop-filter: blur(var(--gbar-desenfoque)) saturate(1.8);
+    backdrop-filter: blur(var(--gbar-desenfoque)) saturate(1.8);
     box-shadow: var(--gbar-sombra);
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Roboto, system-ui, sans-serif;
     color: var(--gbar-tinta);
@@ -859,6 +865,8 @@ input[type="number"] { -moz-appearance: textfield; }
     z-index: 0;
     border-radius: inherit;
     background: var(--gbar-brillo);
+    /* Más transparente, menos brillo lechoso. */
+    opacity: min(1, calc(1.27 - 0.6 * var(--vidrio-t)));
     pointer-events: none;
   }
   /* Aro fino de 1 px, más claro arriba que abajo: solo el borde (máscara). */
@@ -1093,13 +1101,18 @@ input[type="number"] { -moz-appearance: textfield; }
 /* Refracción del borde (Chromium; lib/vidrio.ts): el fondo pasa por el filtro
    SVG que lo desvía cerca de la orilla, y el relleno es más transparente para
    que se vea. Safari y Firefox se quedan con el vidrio esmerilado. */
+/* Con poca transparencia también desenfoca (después de refractar): en 0
+   queda casi sólido; desde 60 % en adelante, vidrio limpio. */
+html.vidrio-refracta {
+  --gbar-desenfoque-refracta: max(0px, calc(14px * (0.6 - var(--vidrio-t))));
+}
 html.vidrio-refracta .gbar {
   background-color: var(--gbar-fondo-refracta);
-  backdrop-filter: url(#vidrio-gbar) saturate(1.7) brightness(1.04);
+  backdrop-filter: url(#vidrio-gbar) blur(var(--gbar-desenfoque-refracta)) saturate(1.7) brightness(1.04);
 }
 html.vidrio-refracta .gbar-buscar {
   background-color: var(--gbar-fondo-refracta);
-  backdrop-filter: url(#vidrio-gbar-buscar) saturate(1.7) brightness(1.04);
+  backdrop-filter: url(#vidrio-gbar-buscar) blur(var(--gbar-desenfoque-refracta)) saturate(1.7) brightness(1.04);
 }
 
 /* Respaldos: sin desenfoque, con "reducir transparencia" o con "más

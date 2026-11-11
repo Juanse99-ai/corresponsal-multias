@@ -132,7 +132,11 @@
   Movimientos no la esconde). En Chromium el borde refracta el fondo con un
   filtro SVG (`lib/vidrio.ts`, `backdrop-filter: url(#vidrio-gbar)`); Safari y
   Firefox quedan con el vidrio esmerilado. Sin desenfoque, con "reducir
-  transparencia" o "más contraste", la barra es opaca con borde.
+  transparencia" o "más contraste", la barra es opaca con borde. La
+  transparencia del vidrio la elige cada quien en la hoja Tú (slider de 0 a
+  100, de fábrica 45; `components/shell/control-vidrio.tsx`): cambia
+  `--vidrio-t` en `<html>` y de ahí salen el blanco, el desenfoque y el brillo
+  (`globals.css`); se guarda en ese teléfono (`localStorage`, `lib/vidrio.ts`).
   Lo elegido (pestaña, ítem del menú) es pastilla blanca con sombra. Detalle en
   DESIGN.md. Los tokens `nav-*` (banda de marca del login, bienvenida y
   celebración) son iguales en ambos temas; las tarjetas navy usan `--navy`.
