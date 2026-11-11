@@ -31,7 +31,8 @@ export function LoginForm() {
   // la pantalla de entrar.
   const entrando = pending || !!state.listo;
   const fase: FaseEntrar = state.listo ? "ok" : pending ? "espera" : "reposo";
-  const pasar = useCallback(() => entrarConPaso(() => router.replace("/panel")), [router]);
+  const destino = state.destino ?? "/panel";
+  const pasar = useCallback(() => entrarConPaso(() => router.replace(destino)), [router, destino]);
 
   // La pantalla de marca ocupa todo: el teclado se guarda al enviar. (Aquí el
   // toque ya quedó registrado, así que soltar el foco no lo pierde.)

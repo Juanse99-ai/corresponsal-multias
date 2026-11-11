@@ -1,6 +1,8 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { getSessionProfile } from "@/lib/auth";
+import { tieneClaveCaja } from "@/lib/caja-servidor";
 import { createClient } from "@/lib/supabase/server";
 import { errorClaveNueva } from "@/lib/clave";
 
@@ -32,5 +34,12 @@ export async function cambiarClaveAction(
     return { error: "No se pudo guardar la clave. Pide un enlace nuevo." };
   }
 
+  // Con la contraseña nueva, el administrador sigue adentro. Quien ya tiene
+  // clave de caja entra con ella; quien no, sigue y la crea (layout de la app).
+  const perfil = await getSessionProfile();
+  if (perfil && perfil.rol !== "admin" && (await tieneClaveCaja(perfil.id))) {
+    await supabase.auth.signOut({ scope: "local" });
+    redirect("/caja");
+  }
   redirect("/panel");
 }

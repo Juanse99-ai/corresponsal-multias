@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { crearClienteAdmin } from "@/lib/supabase/admin";
-import { requireAdmin, requireSession } from "@/lib/auth";
+import { primerNombre, requireAdmin, requireSession } from "@/lib/auth";
 import { equipoDeCookie } from "@/lib/caja-servidor";
 import { COOKIE_EQUIPO, COOKIE_USO } from "@/lib/caja-cookie";
 import {
@@ -16,7 +16,7 @@ import {
   tokenEquipo,
 } from "@/lib/caja";
 
-const SIN_SERVICIO = "La clave de caja no está configurada. Entra con tu correo.";
+const SIN_SERVICIO = "La clave de caja no está configurada.";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export interface Resultado {
@@ -84,6 +84,118 @@ export async function entrarConClave(userId: string, clave: string): Promise<Res
     maxAge: DURACION_EQUIPO_S,
   });
   return { ok: true };
+}
+
+/**
+ * Primera vez en la caja: la persona aún no tiene clave. Escribe UNA vez su
+ * contraseña de siempre (así nadie le crea la clave a otro) y crea su clave de
+ * 6 números; queda adentro y desde ahí entra solo con la clave. Solo desde un
+ * equipo autorizado y si esa persona de verdad no tiene clave.
+ */
+export async function crearPrimeraClave(userId: string, contrasena: string, nueva: string): Promise<Resultado> {
+  if (typeof userId !== "string" || !UUID.test(userId) || typeof contrasena !== "string" || !contrasena) {
+    return { ok: false, error: "Escribe tu contraseña." };
+  }
+  const errorClave = errorClaveNueva(String(nueva ?? ""));
+  if (errorClave) return { ok: false, error: errorClave };
+  const admin = crearClienteAdmin();
+  if (!admin) return { ok: false, error: SIN_SERVICIO };
+
+  const equipo = await equipoDeCookie(admin);
+  if (!equipo) return { ok: false, error: "Este equipo no está autorizado." };
+  const minEquipo = minutosRestantes(equipo.bloqueado_hasta);
+  if (minEquipo) return { ok: false, error: `Equipo bloqueado. Intenta en ${minEquipo} min.` };
+
+  const [{ data: perfil }, { data: yaTiene }, { data: usuario }] = await Promise.all([
+    admin.from("corr_profiles").select("activo").eq("id", userId).maybeSingle(),
+    admin.from("corr_claves").select("user_id").eq("user_id", userId).maybeSingle(),
+    admin.auth.admin.getUserById(userId),
+  ]);
+  if (!perfil || perfil.activo === false) return { ok: false, error: "Esa persona no tiene acceso." };
+  if (yaTiene) return { ok: false, error: "Ya tienes clave. Márcala para entrar." };
+  const email = usuario?.user?.email;
+  if (!email) return { ok: false, error: "No se pudo abrir la sesión." };
+
+  // La contraseña se revisa entrando de verdad: si es la buena, la sesión ya
+  // queda abierta en este navegador.
+  const supabase = await createClient();
+  const { error: errorEntrar } = await supabase.auth.signInWithPassword({ email, password: contrasena });
+  if (errorEntrar) {
+    // Cuenta como intento malo del equipo (las contraseñas también se prueban).
+    const intentos = equipo.intentos + 1;
+    const hasta = intentos >= 15 ? new Date(Date.now() + Math.min(60, 5 * 2 ** Math.min(intentos - 15, 4)) * 60_000) : null;
+    await admin
+      .from("corr_equipos")
+      .update({ intentos, bloqueado_hasta: hasta?.toISOString() ?? null })
+      .eq("id", equipo.id);
+    return { ok: false, error: "Contraseña incorrecta." };
+  }
+
+  const { data: r, error: errorClaveNuevaBase } = await admin.rpc("corr_caja_cambiar_clave", {
+    p_user: userId,
+    p_actual: "",
+    p_nueva: nueva,
+  });
+  const mensaje = r ? mensajeVerificacion(r as { ok?: boolean; motivo?: string; quedan?: number; hasta?: string | null }) : null;
+  if (errorClaveNuevaBase || !r || mensaje) {
+    await supabase.auth.signOut({ scope: "local" });
+    return { ok: false, error: mensaje ?? "No se pudo guardar la clave." };
+  }
+
+  (await cookies()).set(COOKIE_USO, String(Date.now()), {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: DURACION_EQUIPO_S,
+  });
+  return { ok: true };
+}
+
+/** Revisa una clave nueva antes de pedir que la repita (las obvias no sirven). */
+export async function revisarClaveNueva(clave: string): Promise<string | null> {
+  return errorClaveNueva(String(clave ?? ""));
+}
+
+/**
+ * Primera vez con correo: entró con su contraseña y, antes de seguir, crea su
+ * clave de caja (app/crear-clave). Desde ahí el correo ya no la deja entrar
+ * (app/login/actions.ts), así que este navegador queda autorizado como equipo
+ * para que pueda volver con la clave; el administrador lo puede quitar.
+ */
+export async function crearMiClave(nueva: string): Promise<Resultado> {
+  const perfil = await requireSession();
+  const errorClave = errorClaveNueva(String(nueva ?? ""));
+  if (errorClave) return { ok: false, error: errorClave };
+  const admin = crearClienteAdmin();
+  if (!admin) return { ok: false, error: SIN_SERVICIO };
+
+  const { data: yaTiene } = await admin.from("corr_claves").select("user_id").eq("user_id", perfil.id).maybeSingle();
+  if (yaTiene) return { ok: false, error: "Ya tienes clave." };
+  const { data: r, error } = await admin.rpc("corr_caja_cambiar_clave", { p_user: perfil.id, p_actual: "", p_nueva: nueva });
+  const mensaje = r ? mensajeVerificacion(r as { ok?: boolean; motivo?: string; quedan?: number; hasta?: string | null }) : null;
+  if (error || !r || mensaje) return { ok: false, error: mensaje ?? "No se pudo guardar la clave." };
+
+  if (!(await equipoDeCookie(admin))) {
+    const { token, hash } = tokenEquipo();
+    const nombre = `Equipo de ${primerNombre(perfil.nombre)}`.slice(0, 40);
+    const { error: errorEquipo } = await admin
+      .from("corr_equipos")
+      .insert({ token_hash: hash, nombre, autorizado_por: perfil.id });
+    if (!errorEquipo) await ponerCookie(COOKIE_EQUIPO, token);
+  }
+  await ponerCookie(COOKIE_USO, String(Date.now()));
+  return { ok: true };
+}
+
+async function ponerCookie(nombre: string, valor: string) {
+  (await cookies()).set(nombre, valor, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: DURACION_EQUIPO_S,
+  });
 }
 
 /**
