@@ -131,6 +131,14 @@
     `components/fx`, los indicadores de los gestos (el círculo de jalar y el del
     borde) y las imágenes que se exportan como PNG (fondo blanco a propósito).
     Enter en un `Input`: `onKeyDown={(e) => esEnter(e) && fn()}` (`lib/utils.ts`).
+- **Freno de fechas de las tirillas** (`lib/fecha-tirilla.ts`, 11 nov 2026): el
+  lector leyó "2020" en una tirilla y la consignación quedó en 2020; no salía en
+  ningún reporte pero el arrastre del Sr. Luis la restaba ($3.000.000 menos el
+  día 10). Una fecha leída a más de un día del día abierto (o que no existe) no
+  se cree: el comprobante queda en el día abierto, entra desmarcado con
+  "Revísala, tirilla del ..." y `agregarConsignacionesDesdeFotos` rechaza el
+  lote si aun así llega. El lote del chat de Luis (varios días) no lleva este
+  freno: allí las fechas salen del encabezado de WhatsApp, no de una foto.
 - Módulos por carpeta. Montos enteros (COP) y
   `lib/format.ts` para formato. Números con clase `.tnum` (misma fuente con
   `tabular-nums` para alinear columnas).
