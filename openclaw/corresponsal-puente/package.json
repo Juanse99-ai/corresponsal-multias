@@ -1,0 +1,17 @@
+{
+  "name": "corresponsal-puente",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Reenvía las fotos de comprobantes del grupo Corresponsal a la App Corresponsal y bloquea cualquier mensaje al grupo.",
+  "peerDependencies": {
+    "openclaw": ">=2026.11.3"
+  },
+  "openclaw": {
+    "extensions": ["./index.js"],
+    "compat": {
+      "pluginApi": ">=2026.11.3",
+      "minGatewayVersion": "2026.11.3"
+    }
+  }
+}

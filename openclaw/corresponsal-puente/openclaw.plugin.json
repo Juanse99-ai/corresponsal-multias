@@ -1,0 +1,21 @@
+{
+  "id": "corresponsal-puente",
+  "name": "Puente del corresponsal",
+  "description": "Reenvía las fotos de comprobantes del grupo Corresponsal a la App Corresponsal. El agente nunca procesa ni escribe en ese grupo.",
+  "categories": ["other"],
+  "activation": {
+    "onStartup": true
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["grupo", "dueno", "url", "token"],
+    "properties": {
+      "grupo": { "type": "string", "description": "ID del grupo de WhatsApp, por ejemplo 120363320161907130@g.us" },
+      "dueno": { "type": "string", "description": "Número del dueño con indicativo, por ejemplo +573003651525" },
+      "url": { "type": "string", "description": "Entrada de la app: https://.../api/agente/comprobante" },
+      "token": { "type": "string", "description": "El mismo AGENTE_TOKEN configurado en Vercel" },
+      "diagnostico": { "type": "boolean", "description": "Escribe en el registro lo que ve de cada mensaje del grupo (sin contenido)" }
+    }
+  }
+}

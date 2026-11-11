@@ -4,9 +4,12 @@ import type { Database } from "@/lib/database.types";
 import { SUPABASE_URL } from "@/lib/supabase/config";
 
 /**
- * Cliente con la llave de servicio (salta RLS). SOLO para la clave de caja
- * (app/caja/actions.ts): leer y escribir corr_claves y corr_equipos y abrir la
- * sesión de una persona sin su contraseña. Nunca se pasa al navegador.
+ * Cliente con la llave de servicio (salta RLS). SOLO para:
+ * - la clave de caja (app/caja/actions.ts): leer y escribir corr_claves y
+ *   corr_equipos y abrir la sesión de una persona sin su contraseña;
+ * - la entrada del agente (app/api/agente/comprobante/route.ts): guardar los
+ *   comprobantes que llegan del grupo de WhatsApp, sin sesión de nadie.
+ * Nunca se pasa al navegador.
  * Devuelve null si falta SUPABASE_SERVICE_ROLE_KEY (variable de Vercel, sin
  * NEXT_PUBLIC): la entrada con clave queda apagada y se entra con correo.
  */
