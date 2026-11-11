@@ -40,10 +40,13 @@
   con una clave"): en un equipo autorizado se entra en `/caja` tocando quién es
   y marcando su clave de 6 números (`components/auth/caja-clave.tsx`). La clave
   es de cada persona (no hay clave compartida: se perderían la bitácora, el
-  `created_by` y los roles). Reglas puras y probadas en `lib/caja.ts` (scrypt
-  con sal, claves obvias rechazadas, bloqueo tras 5 malas por persona y 15 por
-  equipo, de 5 min doblando hasta 60). Tablas `corr_claves` y `corr_equipos`
-  con RLS y SIN políticas: solo el servidor las toca con la llave de servicio
+  `created_by` y los roles). Verificar, cambiar (pide la actual) y contar
+  intentos van DENTRO de Postgres con las filas bloqueadas (`corr_caja_verificar`,
+  `corr_caja_cambiar_clave`, bcrypt; migraciones 0005 y 0006): 5 malas
+  bloquean 5 min doblando hasta 60, con 10 queda bloqueada hasta que el admin
+  la borre, y el equipo desde 15 malas. Claves obvias rechazadas en
+  `lib/caja.ts` (probado). Tablas `corr_claves` y `corr_equipos`
+  con RLS, SIN políticas y sin permisos para el navegador: solo el servidor las toca con la llave de servicio
   (`lib/supabase/admin.ts`, `SUPABASE_SERVICE_ROLE_KEY` en Vercel, nunca
   `NEXT_PUBLIC`); sin ella la clave queda apagada y se entra con correo. El
   equipo se autoriza con una cookie httpOnly de 400 días (`corr_equipo`, token
@@ -51,8 +54,10 @@
   la cookie está. Con la clave buena, `entrarConClave` pide un enlace de
   entrada sin enviar correo (`auth.admin.generateLink`) y lo usa en el acto
   (`verifyOtp`): la sesión queda como si hubiera entrado con correo. "Bloquear"
-  cierra la sesión solo en ese navegador (`signOut({ scope: "local" })`) y en
-  la caja se bloquea sola tras 10 min sin uso (`lib/use-bloqueo-inactivo.ts`).
+  cierra la sesión solo en ese navegador (`signOut({ scope: "local" })`). En
+  la caja la sesión no sobrevive a 10 min sin uso aunque se cierre la pestaña:
+  el proxy guarda la hora en `corr_caja_uso` y cierra la sesión al pasarse
+  (además del aviso en pantalla de `lib/use-bloqueo-inactivo.ts`).
   Ajustes en la ventana "Clave de caja" (hoja Tú y menú de la cuenta): cada
   quien pone su clave; el admin autoriza o quita equipos y borra claves.
 - Pestañas del computador como en Biela, **sin iframes**: todas las pantallas

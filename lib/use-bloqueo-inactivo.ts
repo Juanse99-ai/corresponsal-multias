@@ -2,14 +2,14 @@
 
 import { useEffect } from "react";
 import { bloquear } from "@/app/caja/actions";
-
-/** Minutos sin tocar la app antes de volver a la pantalla de clave. */
-export const MINUTOS_BLOQUEO = 10;
+import { MINUTOS_BLOQUEO } from "@/lib/caja-cookie";
 
 /**
  * En un equipo autorizado (caja), tras MINUTOS_BLOQUEO sin tocar nada la app se
  * bloquea y vuelve a la pantalla de clave. También al volver a la app después
  * de tenerla escondida ese tiempo (el reloj se para con el teléfono dormido).
+ * Es el aviso rápido en pantalla: quien de verdad cierra la sesión si se cerró
+ * la pestaña es el proxy (lib/supabase/middleware.ts, cookie corr_caja_uso).
  */
 export function useBloqueoInactivo(activo: boolean) {
   useEffect(() => {

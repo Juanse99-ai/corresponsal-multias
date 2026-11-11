@@ -29,6 +29,7 @@ import { formatFechaHora } from "@/lib/format";
 export function VentanaClaveCaja({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const [estado, setEstado] = useState<EstadoCaja | null>(null);
   const [pending, startTransition] = useTransition();
+  const [actual, setActual] = useState("");
   const [clave, setClave] = useState("");
   const [repite, setRepite] = useState("");
   const [nombreEquipo, setNombreEquipo] = useState("Caja");
@@ -58,7 +59,8 @@ export function VentanaClaveCaja({ open, onOpenChange }: { open: boolean; onOpen
       setError("Las dos claves no son iguales.");
       return;
     }
-    correr(() => guardarMiClave(clave), "Clave guardada.", () => {
+    correr(() => guardarMiClave(actual, clave), "Clave guardada.", () => {
+      setActual("");
       setClave("");
       setRepite("");
     });
@@ -92,6 +94,20 @@ export function VentanaClaveCaja({ open, onOpenChange }: { open: boolean; onOpen
                   {estado.tengoClave ? "Puesta" : "Sin clave"}
                 </Badge>
               </div>
+              {estado.tengoClave && (
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="clave-actual">Actual</Label>
+                  <Input
+                    id="clave-actual"
+                    type="password"
+                    inputMode="numeric"
+                    autoComplete="current-password"
+                    className="tnum tracking-[0.3em]"
+                    value={actual}
+                    onChange={(e) => setActual(soloNumeros(e.target.value))}
+                  />
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="clave-nueva">{estado.tengoClave ? "Nueva" : "Clave"}</Label>
@@ -119,7 +135,10 @@ export function VentanaClaveCaja({ open, onOpenChange }: { open: boolean; onOpen
                   />
                 </div>
               </div>
-              <Button onClick={guardar} disabled={pending || clave.length !== 6 || repite.length !== 6}>
+              <Button
+                onClick={guardar}
+                disabled={pending || clave.length !== 6 || repite.length !== 6 || (estado.tengoClave && actual.length !== 6)}
+              >
                 <LockKey weight="bold" />
                 Guardar clave
               </Button>
@@ -197,7 +216,9 @@ export function VentanaClaveCaja({ open, onOpenChange }: { open: boolean; onOpen
                             <ItemTitle className="truncate text-body font-medium">{p.nombre}</ItemTitle>
                           </ItemContent>
                           <ItemActions className="gap-2">
-                            {p.bloqueadaMin > 0 ? (
+                            {p.bloqueadaMin < 0 ? (
+                              <Badge variant="danger">Bloqueada</Badge>
+                            ) : p.bloqueadaMin > 0 ? (
                               <Badge variant="danger">Bloqueada {p.bloqueadaMin} min</Badge>
                             ) : (
                               <Badge variant={p.tieneClave ? "success" : "secondary"}>

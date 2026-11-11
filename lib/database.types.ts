@@ -118,7 +118,7 @@ export type Database = {
     Views: Record<string, never>;
     Functions: {
       corr_is_admin: { Args: Record<string, never>; Returns: boolean };
-      corr_caja_poner_clave: { Args: { p_user: string; p_clave: string }; Returns: undefined };
+      corr_caja_cambiar_clave: { Args: { p_user: string; p_actual: string; p_nueva: string }; Returns: Json };
       corr_caja_verificar: { Args: { p_equipo_hash: string; p_user: string; p_clave: string }; Returns: Json };
       corr_my_role: { Args: Record<string, never>; Returns: string };
       corr_cron_targets: { Args: { p_secret: string }; Returns: Json };

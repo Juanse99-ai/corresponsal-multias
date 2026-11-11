@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { crearClienteAdmin } from "@/lib/supabase/admin";
 import { requireAdmin, requireSession } from "@/lib/auth";
 import { equipoDeCookie } from "@/lib/caja-servidor";
-import { COOKIE_EQUIPO } from "@/lib/caja-cookie";
+import { COOKIE_EQUIPO, COOKIE_USO } from "@/lib/caja-cookie";
 import {
   DURACION_EQUIPO_S,
   errorClaveNueva,
@@ -75,6 +75,14 @@ export async function entrarConClave(userId: string, clave: string): Promise<Res
     return { ok: false, error: "No se pudo abrir la sesión." };
   }
 
+  // Desde ya cuenta el tiempo sin uso (el proxy cierra la sesión pasados 10 min).
+  (await cookies()).set(COOKIE_USO, String(Date.now()), {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: DURACION_EQUIPO_S,
+  });
   return { ok: true };
 }
 
@@ -99,6 +107,7 @@ export interface EstadoCaja {
   esAdmin: boolean;
   /** Solo para admin. */
   equipos?: { id: string; nombre: string; ultimoUso: string | null; actual: boolean }[];
+  /** bloqueadaMin: -1 si está bloqueada hasta que el admin la borre. */
   personas?: { id: string; nombre: string; tieneClave: boolean; bloqueadaMin: number }[];
 }
 
@@ -133,21 +142,31 @@ export async function estadoCaja(): Promise<EstadoCaja> {
       id: p.id,
       nombre: p.nombre || "Usuario",
       tieneClave: porId.has(p.id),
-      bloqueadaMin: minutosRestantes(porId.get(p.id)?.bloqueada_hasta),
+      bloqueadaMin:
+        porId.get(p.id)?.bloqueada_hasta === "infinity" ? -1 : minutosRestantes(porId.get(p.id)?.bloqueada_hasta),
     }));
   return estado;
 }
 
-/** Pone o cambia la clave de quien tiene la sesión. */
-export async function guardarMiClave(clave: string): Promise<Resultado> {
+/**
+ * Pone o cambia la clave de quien tiene la sesión. Si ya tiene una, pide la
+ * actual (en Postgres, y las malas cuentan para el bloqueo): quien encuentre
+ * abierta la sesión de otro no se la puede cambiar.
+ */
+export async function guardarMiClave(actual: string, nueva: string): Promise<Resultado> {
   const perfil = await requireSession();
-  const error = errorClaveNueva(String(clave ?? ""));
+  const error = errorClaveNueva(String(nueva ?? ""));
   if (error) return { ok: false, error };
   const admin = crearClienteAdmin();
   if (!admin) return { ok: false, error: SIN_SERVICIO };
-  const { error: e } = await admin.rpc("corr_caja_poner_clave", { p_user: perfil.id, p_clave: clave });
-  if (e) return { ok: false, error: "No se pudo guardar la clave." };
-  return { ok: true };
+  const { data: r, error: e } = await admin.rpc("corr_caja_cambiar_clave", {
+    p_user: perfil.id,
+    p_actual: String(actual ?? ""),
+    p_nueva: nueva,
+  });
+  if (e || !r) return { ok: false, error: "No se pudo guardar la clave." };
+  const mensaje = mensajeVerificacion(r as { ok?: boolean; motivo?: string; quedan?: number; hasta?: string | null });
+  return mensaje ? { ok: false, error: mensaje } : { ok: true };
 }
 
 /** Admin: borra la clave de alguien (la olvidó o quedó bloqueada); la vuelve a poner esa persona. */

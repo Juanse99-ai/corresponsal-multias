@@ -7,12 +7,16 @@
 // DENTRO de Postgres, con las filas bloqueadas mientras revisa
 // (supabase/migrations/0005_caja_clave_funciones.sql): así varios intentos al
 // mismo tiempo no se saltan el bloqueo. Tras 5 claves malas la persona queda
-// bloqueada 5 minutos, y se dobla con cada mala de más hasta 60; el equipo,
-// igual desde 15 malas sumando personas.
+// bloqueada 5 minutos, y se dobla con cada mala de más hasta 60; con 10 queda
+// bloqueada hasta que el administrador la borre. El equipo, desde 15 malas
+// sumando personas, de 5 a 60 minutos. Cambiar la clave pide la actual.
 
 import { createHash, randomBytes } from "node:crypto";
 
-export const LARGO_CLAVE = 6;
+// LARGO_CLAVE vive en caja-cookie.ts (sin node:crypto, sirve en el navegador);
+// aquí se repite el número para que las pruebas de Node no dependan del alias @/.
+const LARGO_CLAVE = 6;
+
 /** La cookie dura lo máximo que dejan los navegadores (400 días). */
 export const DURACION_EQUIPO_S = 400 * 24 * 60 * 60;
 
@@ -23,6 +27,10 @@ export function errorClaveNueva(clave: string): string | null {
   const sube = "01234567890123456";
   const baja = "98765432109876543";
   if (sube.includes(clave) || baja.includes(clave)) return "Muy fácil: números seguidos.";
+  // 121212, 123123, 112233: de las primeras que se prueban.
+  if (/^(\d\d)\1\1$/.test(clave) || /^(\d{3})\1$/.test(clave) || /^(\d)\1(\d)\2(\d)\3$/.test(clave)) {
+    return "Muy fácil: se repite un patrón.";
+  }
   return null;
 }
 
@@ -49,6 +57,13 @@ export function mensajeVerificacion(
       return "Esa persona no tiene clave.";
     case "bloqueada":
       return `Bloqueada. Intenta en ${min} min.`;
+    case "bloqueada_siempre":
+      return "Clave bloqueada. Pídele al administrador que la borre.";
+    case "actual_mala":
+      if (min) return `Clave actual mala. Bloqueada ${min} min.`;
+      return `Clave actual mala. ${r.quedan === 1 ? "Queda 1 intento" : `Quedan ${r.quedan ?? 0} intentos`}.`;
+    case "invalida":
+      return "La clave son 6 números.";
     case "mala":
       if (min) return `Clave mala. Bloqueada ${min} min.`;
       return `Clave mala. ${r.quedan === 1 ? "Queda 1 intento" : `Quedan ${r.quedan ?? 0} intentos`}.`;

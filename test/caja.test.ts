@@ -18,6 +18,11 @@ test("las claves obvias no sirven", () => {
   assert.match(errorClaveNueva("123456") ?? "", /seguidos/);
   assert.match(errorClaveNueva("654321") ?? "", /seguidos/);
   assert.match(errorClaveNueva("890123") ?? "", /seguidos/);
+  assert.match(errorClaveNueva("121212") ?? "", /patrón/);
+  assert.match(errorClaveNueva("123123") ?? "", /patrón/);
+  assert.match(errorClaveNueva("112233") ?? "", /patrón/);
+  assert.equal(errorClaveNueva("482913"), null);
+  assert.equal(errorClaveNueva("905174"), null);
 });
 
 test("minutos restantes de un bloqueo", () => {
@@ -42,6 +47,11 @@ test("lo que contesta la base, en palabras", () => {
     "Bloqueada. Intenta en 10 min.",
   );
   assert.equal(mensajeVerificacion({ ok: false, motivo: "equipo" }, ahora), "Este equipo no está autorizado.");
+  assert.match(mensajeVerificacion({ ok: false, motivo: "bloqueada_siempre" }, ahora) ?? "", /administrador/);
+  assert.equal(
+    mensajeVerificacion({ ok: false, motivo: "actual_mala", quedan: 2 }, ahora),
+    "Clave actual mala. Quedan 2 intentos.",
+  );
 });
 
 test("el token del equipo y su hash", () => {
