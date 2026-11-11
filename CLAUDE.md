@@ -198,9 +198,12 @@
   (`components/shell/jalar-para-actualizar.tsx`, por eso `html` lleva
   `overscroll-behavior: none`); volver desde el borde solo en el iPhone con la
   app instalada (`components/shell/volver-desde-borde.tsx`).
-- La entrada al abrir la app (`components/fx/entrada.tsx`, logo que da paso a
-  la pantalla) va en CSS (`globals.css`) porque corre antes de que cargue el
-  JavaScript. Sale una vez por sesión, y la bienvenida de 2 veces al
+- La entrada al abrir la app (`components/fx/entrada.tsx`) es la misma
+  pantalla de marca del login (11 nov 2026: el dueño veía la vieja porque la
+  sesión queda abierta y no pasaba por el login): fondo carbón, logo y nombre,
+  la línea de pulso cruza y termina en la llave, y la pantalla se recoge hacia
+  arriba. Va en CSS (`globals.css`, `.entrada`) porque corre antes de que
+  cargue el JavaScript; los flancos solo se ven en el computador. Sale una vez por sesión, y la bienvenida de 2 veces al
   día espera a que termine (`lib/entrada.ts`).
 - Al entrar (11 nov 2026, el dueño eligió la alternativa B): el Panel entra
   desde la derecha y empuja la pantalla de entrar, que se corre un tercio y se

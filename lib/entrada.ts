@@ -17,8 +17,8 @@ export function finDeEntrada(): Promise<void> {
   const logo = animaciones.length
     ? Promise.race([
         Promise.allSettled(animaciones.map((a) => a.finished)).then(() => undefined),
-        // Por si el navegador nunca avisa: la entrada dura poco más de un segundo.
-        new Promise<void>((listo) => setTimeout(listo, 2000)),
+        // Por si el navegador nunca avisa: la entrada dura un segundo y medio.
+        new Promise<void>((listo) => setTimeout(listo, 2500)),
       ])
     : Promise.resolve();
   return Promise.all([logo, finDelPaso()]).then(() => undefined);
