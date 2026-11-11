@@ -150,6 +150,13 @@
   pendiente en "Llenar desde fotos" con aviso push solo a los admin
   (`lib/avisos.ts`). El plugin además impide que el agente procese o escriba
   en el grupo (en el grupo hay clientes). Instalación en su README.
+- **Resumen de las 7** (11 nov 2026, lo pidió el dueño): `app/api/agente/resumen/route.ts`
+  (GET, solo lectura, misma `AGENTE_TOKEN`) devuelve en texto para WhatsApp lo
+  de `lib/resumen-diario.ts`: cuadre de ayer, consignaciones y saldo del Sr.
+  Luis, fotos pendientes de la última semana, préstamos y, del taller (tabla
+  `trabajos`, solo lectura), OT abiertas por estado y completadas sin pagar.
+  Una tarea de OpenClaw de tipo comando corre `openclaw/corresponsal-puente/resumen.js`
+  a las 7:00 Bogotá y manda lo que imprime al chat del dueño (sin IA).
 - Módulos por carpeta. Montos enteros (COP) y
   `lib/format.ts` para formato. Números con clase `.tnum` (misma fuente con
   `tabular-nums` para alinear columnas).

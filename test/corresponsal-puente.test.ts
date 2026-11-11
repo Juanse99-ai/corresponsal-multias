@@ -172,3 +172,28 @@ test("con la clave equivocada lo dice claro y no reintenta", async () => {
     srv.cerrar();
   }
 });
+
+// ---- resumen.js: el script de la tarea de las 7 a.m. ----
+import { configDelPuente, urlResumen } from "../openclaw/corresponsal-puente/resumen.js";
+
+test("el script del resumen encuentra la url y la clave del plugin", () => {
+  const json = JSON.stringify({
+    gateway: { auth: { token: "otra-clave" } },
+    plugins: { entries: { "corresponsal-puente": { config: { url: "https://x.app/api/agente/comprobante", token: "abc123" } } } },
+  });
+  assert.deepEqual(configDelPuente(json), { url: "https://x.app/api/agente/comprobante", token: "abc123" });
+
+  // JSON5 con comentario y coma final: no lo lee JSON.parse, sí la búsqueda a mano.
+  const json5 = `{
+    gateway: { auth: { token: "otra-clave" } }, // la del gateway no sirve
+    plugins: { entries: { "corresponsal-puente": { config: { grupo: "1@g.us", url: "https://x.app/api/agente/comprobante", token: "abc123", }, }, }, },
+  }`;
+  assert.deepEqual(configDelPuente(json5), { url: "https://x.app/api/agente/comprobante", token: "abc123" });
+
+  assert.equal(configDelPuente("{}"), null);
+});
+
+test("la url del resumen sale de la de comprobantes", () => {
+  assert.equal(urlResumen("https://x.app/api/agente/comprobante"), "https://x.app/api/agente/resumen");
+  assert.equal(urlResumen("https://x.app/api/agente/comprobante/"), "https://x.app/api/agente/resumen");
+});

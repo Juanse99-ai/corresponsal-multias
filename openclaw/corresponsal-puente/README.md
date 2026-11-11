@@ -84,6 +84,34 @@ remitente y el chat. Cuando todo funcione, apaga el diagnóstico:
 openclaw config set plugins.entries.corresponsal-puente.config.diagnostico false
 ```
 
+## Resumen de las 7
+
+Todos los días a las 7:00 a.m. (Bogotá) llega al chat del dueño un resumen:
+cuadre de ayer, consignaciones y saldo del Sr. Luis, fotos por revisar de la
+última semana, préstamos por cobrar y, del taller, carros abiertos por estado
+y OT completadas sin pagar.
+
+Es una tarea de OpenClaw de tipo comando: corre `resumen.js`, que pide el texto
+a `/api/agente/resumen` con la misma url y clave del plugin, y OpenClaw manda lo
+que imprime. No pasa por la IA ni gasta del plan de Claude.
+
+Crearla (una sola vez, después de copiar la carpeta actualizada):
+
+```bash
+openclaw automations create "0 7 * * *" --tz America/Bogota --exact --name "Resumen de las 7" --command-argv "[\"$(command -v node)\", \"$HOME/openclaw-plugins/corresponsal-puente/resumen.js\"]" --announce --channel whatsapp --to "+573003651525"
+```
+
+Probarla sin esperar a las 7 (usa el id que muestra `openclaw automations list`):
+
+```bash
+node ~/openclaw-plugins/corresponsal-puente/resumen.js
+openclaw automations run <id>
+```
+
+El primero imprime el resumen en la Terminal; el segundo lo manda al WhatsApp.
+Si `node` cambia de lugar (por ejemplo, otra versión con nvm), borra la tarea
+con `openclaw automations remove <id>` y créala de nuevo.
+
 ## Actualizarlo
 
 El plugin del Mac es una copia de esta carpeta. Para traer una versión nueva:
