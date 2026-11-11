@@ -72,6 +72,18 @@ export type Database = {
         Update: { id?: string; fecha?: string; tipo?: string; contexto?: string; path?: string; nombre?: string | null; mime?: string | null; tamano?: number | null; datos?: Json | null; created_by?: string | null; created_at?: string };
         Relationships: [];
       };
+      corr_claves: {
+        Row: { user_id: string; clave_hash: string; intentos: number; bloqueada_hasta: string | null; actualizada: string };
+        Insert: { user_id: string; clave_hash: string; intentos?: number; bloqueada_hasta?: string | null; actualizada?: string };
+        Update: { user_id?: string; clave_hash?: string; intentos?: number; bloqueada_hasta?: string | null; actualizada?: string };
+        Relationships: [];
+      };
+      corr_equipos: {
+        Row: { id: string; token_hash: string; nombre: string; autorizado_por: string | null; creado: string; ultimo_uso: string | null; intentos: number; bloqueado_hasta: string | null; activo: boolean };
+        Insert: { id?: string; token_hash: string; nombre: string; autorizado_por?: string | null; creado?: string; ultimo_uso?: string | null; intentos?: number; bloqueado_hasta?: string | null; activo?: boolean };
+        Update: { id?: string; token_hash?: string; nombre?: string; autorizado_por?: string | null; creado?: string; ultimo_uso?: string | null; intentos?: number; bloqueado_hasta?: string | null; activo?: boolean };
+        Relationships: [];
+      };
       corr_general: {
         Row: { id: string; fecha: string; saldo_luis: number; saldo_cristian: number; cupo_disponible: number; efectivo: number; nequis: number; monedas: number; deudas_terceros: number; nota: string | null; created_by: string | null; created_at: string; updated_at: string };
         Insert: { id?: string; fecha: string; saldo_luis?: number; saldo_cristian?: number; cupo_disponible?: number; efectivo?: number; nequis?: number; monedas?: number; deudas_terceros?: number; nota?: string | null; created_by?: string | null; created_at?: string; updated_at?: string };
@@ -106,6 +118,8 @@ export type Database = {
     Views: Record<string, never>;
     Functions: {
       corr_is_admin: { Args: Record<string, never>; Returns: boolean };
+      corr_caja_cambiar_clave: { Args: { p_user: string; p_actual: string; p_nueva: string }; Returns: Json };
+      corr_caja_verificar: { Args: { p_equipo_hash: string; p_user: string; p_clave: string }; Returns: Json };
       corr_my_role: { Args: Record<string, never>; Returns: string };
       corr_cron_targets: { Args: { p_secret: string }; Returns: Json };
       corr_cron_delete_sub: { Args: { p_secret: string; p_endpoint: string }; Returns: undefined };

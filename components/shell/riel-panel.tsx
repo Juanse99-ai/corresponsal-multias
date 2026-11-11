@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useCambiarTema } from "@/lib/tema";
-import { Bell, Moon, SidebarSimple, SignOut, Sun } from "@phosphor-icons/react/dist/ssr";
+import { Bell, Lock, LockKey, Moon, SidebarSimple, SignOut, Sun } from "@phosphor-icons/react/dist/ssr";
 import { Logo } from "@/components/brand";
 import { IconButton } from "@/components/ui/icon-button";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,8 @@ import { HeaderSearch, buildAvisos } from "@/components/shell/top-header";
 import { GRUPOS, NAV, isActive, type Grupo } from "@/components/shell/nav-items";
 import { useIr, usePathnameActivo } from "@/components/shell/pestanas";
 import { signOutAction } from "@/app/login/actions";
+import { bloquear } from "@/app/caja/actions";
+import { VentanaClaveCaja } from "@/components/shell/clave-caja";
 import { useMontado } from "@/lib/use-montado";
 import { cn } from "@/lib/utils";
 import type { Rol } from "@/lib/cuadre";
@@ -44,12 +46,17 @@ export function RielPanel({
   isAdmin,
   pathname: pathnamePrincipal,
   resumen,
+  equipo = false,
 }: {
   profile: { nombre: string; rol: Rol; email: string };
   isAdmin: boolean;
   pathname: string;
   resumen: HeaderResumen;
+  /** Equipo de caja autorizado: el menú de la cuenta ofrece Bloquear. */
+  equipo?: boolean;
 }) {
+  const [claveAbierta, setClaveAbierta] = useState(false);
+  const [cuentaAbierta, setCuentaAbierta] = useState(false);
   // Con otra pestaña adelante, el menú marca y mueve esa pestaña.
   const pathname = usePathnameActivo(pathnamePrincipal);
   const ir = useIr();
@@ -121,7 +128,7 @@ export function RielPanel({
             {noche ? <Sun size={19} /> : <Moon size={19} />}
           </IconButton>
 
-          <Popover>
+          <Popover open={cuentaAbierta} onOpenChange={setCuentaAbierta}>
             <PopoverTrigger asChild>
               <IconButton forma="suelto" label={`${profile.nombre}, ${ROL[profile.rol] ?? profile.rol}`} tooltipSide="right" className="size-10 rounded-full p-0 hover:bg-transparent">
                 <Avatar className="size-9">
@@ -153,6 +160,38 @@ export function RielPanel({
                   </ItemActions>
                 </Item>
                 <ItemSeparator className="bg-line" />
+                <Item size="sm" asChild className="w-full rounded-none border-0">
+                  <Button
+                    variant="ghost"
+                    className="h-11 justify-start rounded-none font-normal text-text hover:bg-fill active:scale-100"
+                    onClick={() => {
+                      setCuentaAbierta(false);
+                      setClaveAbierta(true);
+                    }}
+                  >
+                    <ItemMedia>
+                      <LockKey size={17} />
+                    </ItemMedia>
+                    <ItemContent>
+                      <ItemTitle className="text-title font-medium">Clave de caja</ItemTitle>
+                    </ItemContent>
+                  </Button>
+                </Item>
+                {equipo && (
+                  <form action={bloquear}>
+                    <Item size="sm" asChild className="w-full rounded-none border-0">
+                      <Button type="submit" variant="ghost" className="h-11 justify-start rounded-none font-normal text-text hover:bg-fill active:scale-100">
+                        <ItemMedia>
+                          <Lock size={17} />
+                        </ItemMedia>
+                        <ItemContent>
+                          <ItemTitle className="text-title font-medium">Bloquear</ItemTitle>
+                        </ItemContent>
+                      </Button>
+                    </Item>
+                  </form>
+                )}
+                <ItemSeparator className="bg-line" />
                 <form action={signOutAction}>
                   <Item size="sm" asChild className="w-full rounded-none border-0">
                     <Button type="submit" variant="ghost" className="h-11 justify-start rounded-none font-normal text-text hover:bg-fill active:scale-100">
@@ -168,6 +207,8 @@ export function RielPanel({
               </ItemGroup>
             </PopoverContent>
           </Popover>
+
+          <VentanaClaveCaja open={claveAbierta} onOpenChange={setClaveAbierta} />
 
           <IconButton
             forma="suelto"

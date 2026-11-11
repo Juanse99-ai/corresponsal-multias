@@ -36,6 +36,30 @@
 - Server Components + Server Actions. Lecturas en `lib/queries.ts`, acciones en
   `app/(app)/*/actions.ts`. Clientes Supabase en `lib/supabase/{client,server,middleware}.ts`.
 - Auth/roles en `lib/auth.ts`; protección de rutas en `proxy.ts` (antes middleware).
+- **Clave de caja** (11 nov 2026, lo pidió el dueño: "abrir la app como una caja
+  con una clave"): en un equipo autorizado se entra en `/caja` tocando quién es
+  y marcando su clave de 6 números (`components/auth/caja-clave.tsx`). La clave
+  es de cada persona (no hay clave compartida: se perderían la bitácora, el
+  `created_by` y los roles). Verificar, cambiar (pide la actual) y contar
+  intentos van DENTRO de Postgres con las filas bloqueadas (`corr_caja_verificar`,
+  `corr_caja_cambiar_clave`, bcrypt; migraciones 0005 y 0006): 5 malas
+  bloquean 5 min doblando hasta 60, con 10 queda bloqueada hasta que el admin
+  la borre, y el equipo desde 15 malas. Claves obvias rechazadas en
+  `lib/caja.ts` (probado). Tablas `corr_claves` y `corr_equipos`
+  con RLS, SIN políticas y sin permisos para el navegador: solo el servidor las toca con la llave de servicio
+  (`lib/supabase/admin.ts`, `SUPABASE_SERVICE_ROLE_KEY` en Vercel, nunca
+  `NEXT_PUBLIC`); sin ella la clave queda apagada y se entra con correo. El
+  equipo se autoriza con una cookie httpOnly de 400 días (`corr_equipo`, token
+  aleatorio con su sha256 en la base); el proxy manda a `/caja` sin sesión si
+  la cookie está. Con la clave buena, `entrarConClave` pide un enlace de
+  entrada sin enviar correo (`auth.admin.generateLink`) y lo usa en el acto
+  (`verifyOtp`): la sesión queda como si hubiera entrado con correo. "Bloquear"
+  cierra la sesión solo en ese navegador (`signOut({ scope: "local" })`). En
+  la caja la sesión no sobrevive a 10 min sin uso aunque se cierre la pestaña:
+  el proxy guarda la hora en `corr_caja_uso` y cierra la sesión al pasarse
+  (además del aviso en pantalla de `lib/use-bloqueo-inactivo.ts`).
+  Ajustes en la ventana "Clave de caja" (hoja Tú y menú de la cuenta): cada
+  quien pone su clave; el admin autoriza o quita equipos y borra claves.
 - Pestañas del computador como en Biela, **sin iframes**: todas las pantallas
   abiertas montadas en el mismo árbol (`components/shell/pestanas.tsx`), cada una
   pintada en el servidor por `cargarPantalla` (`app/(app)/pantallas.tsx`) con su
