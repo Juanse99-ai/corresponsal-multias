@@ -7,6 +7,10 @@ App Corresponsal, sin IA de por medio y sin escribir nunca en el grupo.
   `/api/agente/comprobante`. La app la lee con su lector de tirillas y decide
   (opción A): lo seguro queda como consignación del Sr. Luis; lo dudoso queda
   pendiente en "Llenar desde fotos" del día y avisa al celular del admin.
+- Cada foto que **el Sr. Luis** manda en el grupo (con `config.luis`) se envía
+  con su texto ("21.8 palos nuevo") a `/api/agente/compensacion`. La app lee
+  los pagos de la foto y los deja en "Por confirmar" de la Cuenta del Sr. Luis,
+  el día en que él la mandó y con el monto exacto.
 - **Ningún mensaje del grupo llega al agente** (`before_dispatch` lo reclama).
 - **Ningún envío hacia el grupo sale** (`message_sending` y
   `reply_payload_sending` lo cancelan). En el grupo hay clientes.
@@ -111,6 +115,33 @@ openclaw automations run <id>
 El primero imprime el resumen en la Terminal; el segundo lo manda al WhatsApp.
 Si `node` cambia de lugar (por ejemplo, otra versión con nvm), borra la tarea
 con `openclaw automations remove <id>` y créala de nuevo.
+
+## Compensaciones del Sr. Luis
+
+Las fotos de pagos que manda el Sr. Luis (app de Bancolombia, tirilla Redeban
+o recibo del cajero, con la referencia 68883) se leen solas. La app suma los
+pagos y la compara con los palos del texto (palos = millones).
+
+Para encenderlo, después de actualizar la carpeta (ver abajo):
+
+```bash
+openclaw config set plugins.entries.corresponsal-puente.config.luis "+59996813171"
+openclaw config set channels.whatsapp.groupAllowFrom '["+573003651525","+59996813171"]' --strict-json
+openclaw gateway restart
+```
+
+El segundo comando deja que OpenClaw vea los mensajes de Luis en el grupo. El
+agente igual no los procesa ni contesta: el plugin los reclama antes.
+
+Mientras `COMPENSACIONES_AUTO` no esté en `1` en Vercel, todas quedan en "Por
+confirmar" y llega un aviso al celular del admin. Cuando ya se vea que lee
+bien (una semana), se crea `COMPENSACIONES_AUTO=1` en Vercel y se vuelve a
+desplegar: desde ahí lo que cuadra con los palos y no tiene dudas se guarda
+solo, y lo demás sigue quedando por confirmar.
+
+Si una foto de Luis no llega, mira el registro con `diagnostico` encendido: la
+línea dice en qué terminan los dígitos del remitente. Si no termina en 3171,
+WhatsApp está mandando otro identificador y hay que ajustar `config.luis`.
 
 ## Actualizarlo
 

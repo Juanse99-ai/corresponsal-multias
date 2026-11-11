@@ -13,7 +13,7 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 
 /** Formatos que acepta la API de imágenes. */
 const MIMES = ["image/jpeg", "image/png", "image/gif", "image/webp"] as const;
-type MimeImagen = (typeof MIMES)[number];
+export type MimeImagen = (typeof MIMES)[number];
 
 export const comprobanteSchema = z.object({
   /** false si la foto no es una tirilla de transacción. */
@@ -58,7 +58,7 @@ Reglas que no puedes romper:
 - Si la transacción no dice que fue exitosa, pon seguro en false.
 - Un campo que no aparezca en la tirilla va en null; no lo inventes.`;
 
-function esMimeValido(m: string): m is MimeImagen {
+export function esMimeValido(m: string): m is MimeImagen {
   return (MIMES as readonly string[]).includes(m);
 }
 
@@ -73,7 +73,7 @@ export function lecturaDisponible(): boolean {
  * No se fija el modo de razonamiento a propósito: cada modelo trae el suyo
  * por defecto y así el cambio por variable no rompe nada.
  */
-function modelo(): string {
+export function modeloLectura(): string {
   return process.env.MODELO_LECTURA?.trim() || "claude-sonnet-5";
 }
 
@@ -86,7 +86,7 @@ type Esfuerzo = (typeof ESFUERZOS)[number];
  * sin tocar código. Sin la variable queda el de fábrica del modelo. Bajarlo
  * acelera la lectura; conviene comparar la precisión unos días antes de dejarlo.
  */
-function esfuerzo(): Esfuerzo | undefined {
+export function esfuerzoLectura(): Esfuerzo | undefined {
   const v = process.env.ESFUERZO_LECTURA?.trim().toLowerCase();
   return (ESFUERZOS as readonly string[]).includes(v ?? "") ? (v as Esfuerzo) : undefined;
 }
@@ -98,7 +98,7 @@ export async function leerComprobante(imagen: Buffer, mime: string): Promise<Com
 
   const client = new Anthropic();
   const res = await client.messages.parse({
-    model: modelo(),
+    model: modeloLectura(),
     max_tokens: 2000,
     system: INSTRUCCIONES,
     messages: [
@@ -115,7 +115,7 @@ export async function leerComprobante(imagen: Buffer, mime: string): Promise<Com
     ],
     output_config: {
       format: zodOutputFormat(comprobanteSchema),
-      ...(esfuerzo() ? { effort: esfuerzo() } : {}),
+      ...(esfuerzoLectura() ? { effort: esfuerzoLectura() } : {}),
     },
   });
 

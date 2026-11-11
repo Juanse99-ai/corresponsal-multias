@@ -150,6 +150,18 @@
   pendiente en "Llenar desde fotos" con aviso push solo a los admin
   (`lib/avisos.ts`). El plugin además impide que el agente procese o escriba
   en el grupo (en el grupo hay clientes). Instalación en su README.
+- **Compensaciones del Sr. Luis** (11 nov 2026, lo pidió el dueño): el puente
+  reenvía las fotos que manda Luis (`config.luis`) con su texto ("21.8 palos
+  nuevo"; palos = millones) a `app/api/agente/compensacion/route.ts`. Lee los
+  pagos de la foto (`lib/leer-compensacion.ts`: app Bancolombia, Redeban,
+  cajero; referencia 68883) y decide con `lib/compensacion.ts`. Reglas del
+  dueño: se registran el día en que Luis la manda (no el de la tirilla) y con
+  el monto exacto. La foto queda en `corr_soportes` con contexto `luis-comp`
+  y la lectura en `datos`; se confirma en "Por confirmar" de la Cuenta del Sr.
+  Luis (`components/luis/compensaciones-por-confirmar.tsx`,
+  `confirmarCompensacionFoto`). Sin `COMPENSACIONES_AUTO=1` en Vercel todo queda
+  por confirmar; con él, lo que cuadra con los palos y no tiene dudas se guarda
+  solo.
 - **Resumen de las 7** (11 nov 2026, lo pidió el dueño): `app/api/agente/resumen/route.ts`
   (GET, solo lectura, misma `AGENTE_TOKEN`) devuelve en texto para WhatsApp lo
   de `lib/resumen-diario.ts`: cuadre de ayer, consignaciones y saldo del Sr.

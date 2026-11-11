@@ -1,4 +1,4 @@
-import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { crearClienteAdmin } from "@/lib/supabase/admin";
@@ -7,6 +7,7 @@ import { leerComprobante, lecturaDisponible, type Comprobante } from "@/lib/leer
 import { decidirComprobante } from "@/lib/comprobante-auto";
 import { fechaDeTirilla } from "@/lib/fecha-tirilla";
 import { avisarAdmins } from "@/lib/avisos";
+import { tokenValido, diaBogota } from "@/lib/agente";
 import { formatCOP, hoyISO } from "@/lib/format";
 
 export const runtime = "nodejs";
@@ -35,24 +36,6 @@ export const maxDuration = 60;
 const MIMES = ["image/jpeg", "image/png", "image/webp", "image/gif"] as const;
 const MAX_BYTES = 10 * 1024 * 1024;
 
-function tokenValido(dado: string | null): boolean {
-  const esperado = process.env.AGENTE_TOKEN;
-  if (!esperado || !dado) return false;
-  // Comparar resúmenes del mismo largo: no se filtra por tiempo cuánto acertó.
-  const a = createHash("sha256").update(dado).digest();
-  const b = createHash("sha256").update(esperado).digest();
-  return timingSafeEqual(a, b);
-}
-
-function diaBogota(ms: number): string {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Bogota",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date(ms));
-}
-
 function refrescar() {
   revalidatePath("/luis");
   revalidatePath("/cuadre");
@@ -61,8 +44,7 @@ function refrescar() {
 }
 
 export async function POST(req: Request) {
-  const dado = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? null;
-  if (!tokenValido(dado)) return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
+  if (!tokenValido(req)) return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
 
   const sb = crearClienteAdmin();
   if (!sb) return NextResponse.json({ ok: false, error: "Entrada apagada" }, { status: 503 });

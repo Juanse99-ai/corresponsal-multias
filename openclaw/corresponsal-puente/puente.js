@@ -4,12 +4,15 @@
 // 1. Cada foto que el dueño manda en el grupo Corresponsal se reenvía a la App
 //    Corresponsal (/api/agente/comprobante). La app la lee y decide: lo seguro
 //    queda como consignación del Sr. Luis; lo dudoso, pendiente con aviso.
+//    Las fotos que manda el Sr. Luis (config.luis) van con su texto ("21.8
+//    palos") a /api/agente/compensacion: son compensaciones.
 // 2. Ningún mensaje de ese grupo llega al agente (before_dispatch lo reclama).
 // 3. Ningún envío hacia ese grupo sale (message_sending y reply_payload_sending
 //    lo cancelan). En el grupo hay clientes: el agente nunca habla ahí.
 //
 // Configuración en ~/.openclaw/openclaw.json, plugins.entries.corresponsal-puente.config:
-//   grupo, dueno, url, token, diagnostico (ver openclaw.plugin.json y README.md).
+//   grupo, dueno, luis, url, urlCompensacion, token, diagnostico
+//   (ver openclaw.plugin.json y README.md).
 import { readFile } from "node:fs/promises";
 
 const soloDigitos = (s) => String(s ?? "").replace(/\D/g, "");
@@ -37,6 +40,27 @@ function enMs(t) {
 
 const espera = (ms) => new Promise((r) => setTimeout(r, ms));
 
+/** El texto del mensaje sin las marcas de adjunto que pone OpenClaw ("<media:image>"). */
+export function textoDelMensaje(event) {
+  const t = event?.content ?? event?.body ?? event?.text ?? "";
+  return String(typeof t === "string" ? t : "")
+    .replace(/<media:[^>]*>/gi, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 300);
+}
+
+/** La entrada de compensaciones, al lado de la de comprobantes. */
+export function urlDeCompensacion(url) {
+  return String(url ?? "").replace(/\/comprobante\/?$/, "/compensacion");
+}
+
+/** El remitente es ese número: compara los últimos 10 dígitos (o todos, si tiene menos). */
+function esNumero(remitente, numero) {
+  if (!numero) return false;
+  return soloDigitos(remitente).endsWith(numero.slice(-10));
+}
+
 export const puente = {
   id: "corresponsal-puente",
   name: "Puente del corresponsal",
@@ -46,7 +70,9 @@ export const puente = {
     const log = api.logger ?? console;
     const grupo = String(cfg.grupo ?? "").trim();
     const dueno = soloDigitos(cfg.dueno);
+    const luis = soloDigitos(cfg.luis);
     const url = String(cfg.url ?? "").trim();
+    const urlComp = String(cfg.urlCompensacion ?? "").trim() || urlDeCompensacion(url);
     const token = String(cfg.token ?? "").trim();
     const diagnostico = cfg.diagnostico === true;
 
@@ -95,15 +121,17 @@ export const puente = {
       return;
     }
 
-    async function enviar(foto, tipo, mensajeId, enviado) {
+    async function enviar(foto, tipo, mensajeId, enviado, destino, texto) {
       const datos = await readFile(foto.path);
+      const que = destino === urlComp ? "Compensación" : "Foto";
       for (let intento = 1; intento <= 3; intento++) {
         try {
           const form = new FormData();
           form.append("foto", new Blob([datos], { type: tipo }), `comprobante.${tipo.split("/")[1]}`);
           if (mensajeId) form.append("mensajeId", mensajeId);
+          if (texto) form.append("texto", texto);
           if (enviado) form.append("enviado", String(enviado));
-          const res = await fetch(url, {
+          const res = await fetch(destino, {
             method: "POST",
             headers: { Authorization: `Bearer ${token}` },
             body: form,
@@ -125,7 +153,7 @@ export const puente = {
             const seg = (ms) => (typeof ms === "number" ? `${(ms / 1000).toFixed(1)} s` : "-");
             const tiempo = cuerpo.ms ? `, ${seg(cuerpo.ms.total)} en la app (lectura ${seg(cuerpo.ms.lectura)})` : "";
             log.info?.(
-              `[corresponsal-puente] Foto ${mensajeId ?? ""}: ${cuerpo.resultado ?? "ok"}${cuerpo.motivo ? ` (${cuerpo.motivo})` : ""}${tiempo}`,
+              `[corresponsal-puente] ${que} ${mensajeId ?? ""}: ${cuerpo.resultado ?? "ok"}${cuerpo.motivo ? ` (${cuerpo.motivo})` : ""}${tiempo}`,
             );
             return;
           }
@@ -171,7 +199,10 @@ export const puente = {
         );
       }
 
-      if (!soloDigitos(remitente).endsWith(dueno.slice(-10))) return;
+      const deLuis = esNumero(remitente, luis);
+      if (!deLuis && !esNumero(remitente, dueno)) return;
+      const destino = deLuis ? urlComp : url;
+      const texto = deLuis ? textoDelMensaje(event) : null;
       if (event?.mediaStagingPending) {
         log.warn?.("[corresponsal-puente] La foto todavía no se había descargado; no se reenvió. Súbela a mano si no aparece.");
         return;
@@ -185,13 +216,15 @@ export const puente = {
       for (const f of fotos) {
         const id = mensajeId ? (fotos.length > 1 ? `${mensajeId}-${f.i}` : mensajeId) : null;
         try {
-          await enviar(f.m, f.tipo, id, enviado);
+          await enviar(f.m, f.tipo, id, enviado, destino, texto);
         } catch (e) {
           log.error?.(`[corresponsal-puente] No se pudo leer la foto del disco: ${e?.message ?? e}`);
         }
       }
     });
 
-    log.info?.("[corresponsal-puente] Activo: bloqueo del grupo y reenvío de fotos.");
+    log.info?.(
+      `[corresponsal-puente] Activo: bloqueo del grupo y reenvío de fotos${luis ? " (y compensaciones del Sr. Luis)" : ""}.`,
+    );
   },
 };

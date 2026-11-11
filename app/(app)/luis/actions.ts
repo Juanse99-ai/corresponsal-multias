@@ -13,6 +13,7 @@ import {
 } from "@/lib/leer-comprobante";
 import { formatFecha } from "@/lib/format";
 import { fechaDeTirilla, fechasCercanas } from "@/lib/fecha-tirilla";
+import { CONTEXTO_COMPENSACION } from "@/lib/compensacion";
 
 const CERRADO = "El día está cerrado. Solo Juan puede reabrirlo para editar.";
 
@@ -489,4 +490,68 @@ export async function editarConsignacion(raw: unknown): Promise<{ ok: boolean; e
 
 export async function editarCompensacion(raw: unknown): Promise<{ ok: boolean; error?: string }> {
   return editarLuis("corr_compensaciones_luis", raw);
+}
+
+// ===== Compensaciones que llegaron solas por el grupo (app/api/agente/compensacion) =====
+const confirmarCompSchema = z.object({
+  soporteId: z.string().uuid(),
+  filas: z
+    .array(
+      z.object({
+        monto: z.number().int().positive(),
+        hora: horaSchema,
+        nota: z.string().max(200).nullable().optional(),
+      }),
+    )
+    .min(1)
+    .max(30),
+});
+
+/**
+ * Registra las compensaciones de una foto del Sr. Luis que quedó por confirmar.
+ * El día es el de la foto (el día en que Luis la mandó), nunca el del cliente.
+ * La foto se quita primero: si dos personas confirman a la vez, solo una
+ * registra. Si el registro falla, la foto vuelve a quedar pendiente.
+ */
+export async function confirmarCompensacionFoto(
+  raw: unknown,
+): Promise<{ ok: boolean; error?: string; insertados?: number }> {
+  const session = await requireSession();
+  const p = confirmarCompSchema.safeParse(raw);
+  if (!p.success) return { ok: false, error: "Revisa los montos." };
+
+  const sb = await createClient();
+  const { data: foto } = await sb
+    .from("corr_soportes")
+    .select("*")
+    .eq("id", p.data.soporteId)
+    .eq("contexto", CONTEXTO_COMPENSACION)
+    .maybeSingle();
+  if (!foto) return { ok: false, error: "Esa foto ya no está: alguien la registró o la quitó." };
+  if (await diaBloqueado(session.rol, foto.fecha)) return { ok: false, error: CERRADO };
+
+  const { data: tomada } = await sb.from("corr_soportes").delete().eq("id", foto.id).select("id");
+  if (!tomada || tomada.length === 0) return { ok: false, error: "Esa foto ya no está: alguien la registró o la quitó." };
+
+  const { error } = await sb.from("corr_compensaciones_luis").insert(
+    p.data.filas.map((f) => ({
+      fecha: foto.fecha,
+      monto: f.monto,
+      hora: f.hora ?? null,
+      nota: f.nota?.trim() || null,
+      created_by: session.id,
+    })),
+  );
+  if (error) {
+    // La foto vuelve a quedar pendiente para intentarlo otra vez.
+    await sb.from("corr_soportes").insert(foto);
+    return { ok: false, error: "No se pudo registrar la compensación." };
+  }
+  await sb.storage.from(SOPORTES_BUCKET).remove([foto.path]);
+
+  revalidatePath("/luis");
+  revalidatePath("/cuadre");
+  revalidatePath("/panel");
+  revalidatePath("/historial");
+  return { ok: true, insertados: p.data.filas.length };
 }
