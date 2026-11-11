@@ -77,6 +77,20 @@ function modelo(): string {
   return process.env.MODELO_LECTURA?.trim() || "claude-sonnet-5";
 }
 
+const ESFUERZOS = ["low", "medium", "high", "xhigh", "max"] as const;
+type Esfuerzo = (typeof ESFUERZOS)[number];
+
+/**
+ * Cuánto razona el modelo antes de contestar: lo que más pesa en el tiempo de
+ * cada foto. Se cambia desde Vercel con ESFUERZO_LECTURA (low, medium, high...)
+ * sin tocar código. Sin la variable queda el de fábrica del modelo. Bajarlo
+ * acelera la lectura; conviene comparar la precisión unos días antes de dejarlo.
+ */
+function esfuerzo(): Esfuerzo | undefined {
+  const v = process.env.ESFUERZO_LECTURA?.trim().toLowerCase();
+  return (ESFUERZOS as readonly string[]).includes(v ?? "") ? (v as Esfuerzo) : undefined;
+}
+
 export async function leerComprobante(imagen: Buffer, mime: string): Promise<Comprobante> {
   if (!esMimeValido(mime)) {
     throw new Error(`Formato no admitido para leer: ${mime || "desconocido"}`);
@@ -99,7 +113,10 @@ export async function leerComprobante(imagen: Buffer, mime: string): Promise<Com
         ],
       },
     ],
-    output_config: { format: zodOutputFormat(comprobanteSchema) },
+    output_config: {
+      format: zodOutputFormat(comprobanteSchema),
+      ...(esfuerzo() ? { effort: esfuerzo() } : {}),
+    },
   });
 
   const datos = res.parsed_output;

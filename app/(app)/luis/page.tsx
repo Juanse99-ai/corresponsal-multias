@@ -4,6 +4,7 @@ import { getConsignacionesLuis, getCompensacionesLuis, getSaldoLuisAcumulado, ge
 import { LuisManager } from "@/components/luis/luis-manager";
 import { SoportesSection } from "@/components/cuadre/soportes-section";
 import { ComprobantesLector } from "@/components/luis/comprobantes-lector";
+import { LuisEnVivo } from "@/components/luis/luis-en-vivo";
 import { leerComprobantesDelDia, agregarConsignacionesDesdeFotos } from "@/app/(app)/luis/actions";
 import { PageHeader, CifraCabecera } from "@/components/shell/page-header";
 import { ReporteLuisButton } from "@/components/luis/reporte-luis";
@@ -71,6 +72,7 @@ export default async function LuisPage({
           acumuladoAyer={acumuladoAyer}
         />
       </PageHeader>
+      <LuisEnVivo fecha={fecha} />
       <LuisManager
         fecha={fecha}
         acumuladoAyer={acumuladoAyer}
