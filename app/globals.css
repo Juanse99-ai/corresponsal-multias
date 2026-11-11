@@ -1291,8 +1291,6 @@ html.vidrio-refracta .gbar-buscar {
 
   /* Toque mínimo. */
   --tap: 44px;
-  /* Entrada al abrir la app: cuánto se queda el logo antes de dar paso. */
-  --entrada-pausa: 650ms;
   /* Error shake (receta 12) */
   --shake-distance: 6px;
   --shake-overshoot: 4px;
@@ -1326,27 +1324,80 @@ html.vidrio-refracta .gbar-buscar {
   to   { background-color: transparent; }
 }
 
-/* Entrada al abrir la app (components/fx/entrada.tsx): el logo aparece sobre el
-   fondo, se queda un momento y se abre paso a la pantalla. Termina oculta, así
-   que no se queda tapando toques. html.entrada-vista la apaga el resto de la sesión. */
+/* Entrada al abrir la app (components/fx/entrada.tsx, 11 nov 2026): la
+   pantalla de marca. Fondo carbón con el logo y el nombre; la línea de pulso
+   cruza de izquierda a derecha (flanco izquierdo, el latido y la llave, flanco
+   derecho, a ritmo parejo) y la pantalla se recoge hacia arriba, como la banda
+   del login. Termina oculta, así que no se queda tapando toques.
+   html.entrada-vista la apaga el resto de la sesión. */
 .entrada {
+  /* Celular: los flancos no se ven (el latido y la llave ocupan el ancho), así
+     que el pulso arranca de una. Computador: cada flanco tarda lo que tarda el
+     pulso en recorrer ese tramo, para que el ritmo sea parejo. */
+  --entrada-trazo: 120ms;   /* cuándo arranca la línea */
+  --entrada-flanco: 0ms;    /* lo que tarda cada flanco */
+  --entrada-sale: 900ms;    /* cuándo se recoge (el trazo termina a los 580) */
   position: fixed;
   inset: 0;
   z-index: 100;
-  display: grid;
-  place-items: center;
-  background: var(--bg);
-  animation: entrada-sale var(--duration-slow) var(--ease-smooth-out) var(--entrada-pausa) forwards;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  background: var(--nav-bg);
+  color: var(--nav-text);
+  overflow: hidden;
+  animation: entrada-sale var(--dur-3) var(--ease-ios) var(--entrada-sale) forwards;
 }
 .entrada-vista .entrada { display: none; }
-.entrada-logo {
-  animation:
-    entrada-logo var(--duration-slow) var(--ease-smooth-out) both,
-    entrada-logo-sale var(--duration-fast) var(--ease-smooth-out) var(--entrada-pausa) forwards;
+.entrada-fila { position: relative; display: flex; justify-content: center; width: 100%; }
+.entrada-pulso {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin-left: -260px;
+  overflow: visible;
 }
-@keyframes entrada-sale { to { opacity: 0; visibility: hidden; } }
-@keyframes entrada-logo { from { opacity: 0; transform: scale(0.92); } }
-@keyframes entrada-logo-sale { to { opacity: 0; transform: scale(1.1); } }
+.entrada-pulso path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: entrada-traza 460ms linear calc(var(--entrada-trazo) + var(--entrada-flanco)) forwards;
+}
+.entrada-flanco {
+  position: absolute;
+  top: 86.75px;
+  height: 2.5px;
+  border-radius: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+.entrada-flanco-izq {
+  left: 0;
+  right: calc(50% + 259px);
+  animation: entrada-flanco var(--entrada-flanco) linear var(--entrada-trazo) forwards;
+}
+.entrada-flanco-der {
+  left: calc(50% + 259px);
+  right: 0;
+  animation: entrada-flanco var(--entrada-flanco) linear
+    calc(var(--entrada-trazo) + var(--entrada-flanco) + 460ms) forwards;
+}
+@media (min-width: 1024px) {
+  .entrada { --entrada-flanco: 340ms; --entrada-sale: 1500ms; }
+}
+.entrada-logo,
+.entrada-nombre { animation: entrada-aparece var(--dur-2) var(--ease-ios) both; }
+@keyframes entrada-traza { to { stroke-dashoffset: 0; } }
+@keyframes entrada-flanco { to { transform: scaleX(1); } }
+@keyframes entrada-aparece { from { opacity: 0; } }
+@keyframes entrada-sale { to { clip-path: inset(0 0 100% 0); visibility: hidden; } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -1363,7 +1414,12 @@ html.vidrio-refracta .gbar-buscar {
   /* La barra de abajo: sin gota ni escalados, solo cambia el color. */
   .gbar__pil.gbar__pil--gota, .gbar__b[data-activo]:active ~ .gbar__pista .gbar__pil { transform: none; }
   .gbar__b:active > .gbar__ic, .gbar__b:active > .gbar__t { transform: none; }
-  /* La entrada sin zoom: el logo quieto y el fondo se desvanece. */
-  .entrada-logo { animation: none; }
-  .entrada { animation-duration: var(--duration-fast) !important; }
+  /* La entrada quieta: el pulso ya dibujado y la pantalla se desvanece. */
+  .entrada-logo, .entrada-nombre, .entrada-pulso path, .entrada-flanco { animation: none; }
+  .entrada-pulso path { stroke-dashoffset: 0; }
+  .entrada-flanco { transform: none; }
+  .entrada {
+    animation: entrada-funde var(--duration-fast) linear 650ms forwards !important;
+  }
+  @keyframes entrada-funde { to { opacity: 0; visibility: hidden; } }
 }
