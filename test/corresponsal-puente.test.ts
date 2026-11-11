@@ -6,10 +6,11 @@ import { createServer } from "node:http";
 import { mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { puente } from "../openclaw/corresponsal-puente/puente.js";
+import { puente, textoDelMensaje, urlDeCompensacion } from "../openclaw/corresponsal-puente/puente.js";
 
 const GRUPO = "120363320161907130@g.us";
 const DUENO = "+573003651525";
+const LUIS = "+599 9 681 3171";
 
 type Gancho = (event: unknown, ctx: unknown) => unknown;
 
@@ -30,13 +31,13 @@ function montar(config: Record<string, unknown>) {
 }
 
 async function servidorFalso() {
-  const recibidos: { auth: string | undefined; cuerpo: string }[] = [];
+  const recibidos: { auth: string | undefined; cuerpo: string; ruta: string | undefined }[] = [];
   const srv = createServer((req, res) => {
     let cuerpo = "";
     req.setEncoding("latin1");
     req.on("data", (c) => (cuerpo += c));
     req.on("end", () => {
-      recibidos.push({ auth: req.headers.authorization, cuerpo });
+      recibidos.push({ auth: req.headers.authorization, cuerpo, ruta: req.url });
       res.writeHead(200, { "content-type": "application/json" });
       res.end(JSON.stringify({ ok: true, resultado: "guardado" }));
     });
@@ -196,4 +197,61 @@ test("el script del resumen encuentra la url y la clave del plugin", () => {
 test("la url del resumen sale de la de comprobantes", () => {
   assert.equal(urlResumen("https://x.app/api/agente/comprobante"), "https://x.app/api/agente/resumen");
   assert.equal(urlResumen("https://x.app/api/agente/comprobante/"), "https://x.app/api/agente/resumen");
+});
+
+test("las fotos del Sr. Luis van con su texto a la entrada de compensaciones", async () => {
+  const srv = await servidorFalso();
+  try {
+    const dir = await mkdtemp(join(tmpdir(), "puente-"));
+    const ruta = join(dir, "pagos.jpg");
+    await writeFile(ruta, Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3]));
+    const { ganchos, registro } = montar({ grupo: GRUPO, dueno: DUENO, luis: LUIS, url: srv.url, token: "secreto" });
+    const recibido = ganchos.get("message_received")!;
+    const foto = [{ path: ruta, contentType: "image/jpeg", kind: "image" }];
+
+    await recibido(
+      { from: "x", content: "<media:image> 21.8 palos nuevo", media: foto, messageId: "L1", timestamp: 1762805567 },
+      { conversationId: GRUPO, senderId: "59996813171@s.whatsapp.net" },
+    );
+    // La del dueño sigue yendo a comprobantes, sin texto.
+    await recibido(
+      { from: "x", content: "ojo con esta", media: foto, messageId: "D1" },
+      { conversationId: GRUPO, senderId: DUENO },
+    );
+    assert.equal(srv.recibidos.length, 2);
+    assert.equal(srv.recibidos[0].ruta, "/api/agente/compensacion");
+    assert.match(srv.recibidos[0].cuerpo, /name="texto"\r\n\r\n21\.8 palos nuevo\r\n/);
+    assert.match(srv.recibidos[0].cuerpo, /name="mensajeId"\r\n\r\nL1/);
+    assert.equal(srv.recibidos[1].ruta, "/api/agente/comprobante");
+    assert.doesNotMatch(srv.recibidos[1].cuerpo, /name="texto"/);
+    assert.ok(registro.some((m) => m.includes("Compensación L1: guardado")));
+  } finally {
+    srv.cerrar();
+  }
+});
+
+test("sin config.luis, las fotos de Luis no se reenvían", async () => {
+  const srv = await servidorFalso();
+  try {
+    const dir = await mkdtemp(join(tmpdir(), "puente-"));
+    const ruta = join(dir, "pagos.jpg");
+    await writeFile(ruta, Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1]));
+    const { ganchos } = montar({ grupo: GRUPO, dueno: DUENO, url: srv.url, token: "secreto" });
+    await ganchos.get("message_received")!(
+      { from: "x", content: "3 palos", media: [{ path: ruta, contentType: "image/jpeg" }], messageId: "L2" },
+      { conversationId: GRUPO, senderId: "59996813171@s.whatsapp.net" },
+    );
+    assert.equal(srv.recibidos.length, 0);
+  } finally {
+    srv.cerrar();
+  }
+});
+
+test("el texto del mensaje sale limpio y la entrada de compensaciones al lado de la de comprobantes", () => {
+  assert.equal(textoDelMensaje({ content: "<media:image>\n 10 palos   nuevo" }), "10 palos nuevo");
+  assert.equal(textoDelMensaje({}), "");
+  assert.equal(
+    urlDeCompensacion("https://corresponsal-multias.vercel.app/api/agente/comprobante"),
+    "https://corresponsal-multias.vercel.app/api/agente/compensacion",
+  );
 });

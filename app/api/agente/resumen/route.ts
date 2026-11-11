@@ -80,7 +80,7 @@ export async function GET(req: Request) {
     sb
       .from("corr_soportes")
       .select("id", { count: "exact", head: true })
-      .eq("contexto", "luis")
+      .in("contexto", ["luis", "luis-comp"])
       .gte("fecha", diasAntes(hoy, DIAS_FOTOS)),
     sb.rpc("corr_deudas_saldos"),
     leerTaller(sb as unknown as SupabaseClient),

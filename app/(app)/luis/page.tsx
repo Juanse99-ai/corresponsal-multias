@@ -5,6 +5,8 @@ import { LuisManager } from "@/components/luis/luis-manager";
 import { SoportesSection } from "@/components/cuadre/soportes-section";
 import { ComprobantesLector } from "@/components/luis/comprobantes-lector";
 import { LuisEnVivo } from "@/components/luis/luis-en-vivo";
+import { CompensacionesPorConfirmar } from "@/components/luis/compensaciones-por-confirmar";
+import { CONTEXTO_COMPENSACION } from "@/lib/compensacion";
 import { leerComprobantesDelDia, agregarConsignacionesDesdeFotos } from "@/app/(app)/luis/actions";
 import { PageHeader, CifraCabecera } from "@/components/shell/page-header";
 import { ReporteLuisButton } from "@/components/luis/reporte-luis";
@@ -25,11 +27,13 @@ export default async function LuisPage({
   const sp = await searchParams;
   const fecha = sp.fecha && ISO.test(sp.fecha) ? sp.fecha : hoyISO();
 
-  const [consignaciones, compensaciones, acumuladoAyer, soportes] = await Promise.all([
+  const [consignaciones, compensaciones, acumuladoAyer, soportes, porConfirmar] = await Promise.all([
     getConsignacionesLuis(fecha),
     getCompensacionesLuis(fecha),
     getSaldoLuisAcumulado(fecha, false),
     getSoportes(fecha, "luis"),
+    // Compensaciones que Luis mandó al grupo y esperan confirmación (app/api/agente/compensacion).
+    getSoportes(fecha, CONTEXTO_COMPENSACION),
   ]);
 
   // El saldo acumulado (lo que el punto le debe al Sr. Luis): la cifra de la cabecera.
@@ -73,6 +77,7 @@ export default async function LuisPage({
         />
       </PageHeader>
       <LuisEnVivo fecha={fecha} />
+      <CompensacionesPorConfirmar fotos={porConfirmar} />
       <LuisManager
         fecha={fecha}
         acumuladoAyer={acumuladoAyer}

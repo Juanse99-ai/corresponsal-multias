@@ -13,7 +13,9 @@
     "properties": {
       "grupo": { "type": "string", "description": "ID del grupo de WhatsApp, por ejemplo 120363320161907130@g.us" },
       "dueno": { "type": "string", "description": "Número del dueño con indicativo, por ejemplo +573003651525" },
+      "luis": { "type": "string", "description": "Número del Sr. Luis con indicativo, por ejemplo +59996813171. Sus fotos van como compensaciones" },
       "url": { "type": "string", "description": "Entrada de la app: https://.../api/agente/comprobante" },
+      "urlCompensacion": { "type": "string", "description": "Entrada de compensaciones. Si falta, se usa la de url cambiando /comprobante por /compensacion" },
       "token": { "type": "string", "description": "El mismo AGENTE_TOKEN configurado en Vercel" },
       "diagnostico": { "type": "boolean", "description": "Escribe en el registro lo que ve de cada mensaje del grupo (sin contenido)" }
     }
