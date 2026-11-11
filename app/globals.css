@@ -768,6 +768,76 @@ html.paso-entrar::view-transition-new(root) {
   html.paso-entrar::view-transition-new(root) { animation: none; }
 }
 
+/* Pantalla de marca al entrar (components/fx/escena-entrar.tsx): mientras el
+   servidor contesta, la banda crece hasta llenar la pantalla, el logo baja al
+   centro y la línea de pulso del logo cruza de lado a lado; al entrar se traza
+   completa y termina en la llave. --escena-clip (la forma de la banda) y
+   --desde (dónde están el logo y el nombre en la banda) los pone el componente
+   al medir. Con la clave mala se recoge por donde vino. */
+.escena-entrar {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  background: var(--nav-bg);
+  color: var(--nav-text);
+  visibility: hidden;
+  pointer-events: none;
+  clip-path: var(--escena-clip, inset(0px 0px 100% 0px round 0px 0px 0px 0px));
+  transition: clip-path 420ms var(--ease-ios), visibility 0s 420ms;
+}
+.escena-entrar:not([data-fase="cerrada"]) {
+  visibility: visible;
+  pointer-events: auto;
+  clip-path: inset(0px 0px 0px 0px round 0px 0px 0px 0px);
+  transition: clip-path 420ms var(--ease-ios);
+}
+.escena-pieza {
+  transform: var(--desde, none);
+  transform-origin: 0 0;
+  transition: transform 420ms var(--ease-ios);
+}
+.escena-entrar:not([data-fase="cerrada"]) .escena-pieza { transform: none; }
+.escena-pulso {
+  position: absolute;
+  inset: 0 0 auto;
+  width: 100%;
+  height: 128px;
+  overflow: visible;
+}
+.escena-pulso path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* La línea tenue de fondo y el tramo que corre asoman cuando la banda ya casi
+   llenó la pantalla (300 ms). */
+.escena-pulso-base,
+.escena-pulso-corre { opacity: 0; transition: opacity 160ms var(--ease-ios); }
+.escena-entrar:not([data-fase="cerrada"]) .escena-pulso-base { opacity: 0.2; transition-delay: 300ms; }
+.escena-entrar[data-fase="abierta"] .escena-pulso-corre { opacity: 1; transition-delay: 300ms; }
+.escena-pulso-corre path { stroke-dasharray: 0.22 1; stroke-dashoffset: 0.22; }
+.escena-entrar:not([data-fase="cerrada"]) .escena-pulso-corre path {
+  animation: pulso-corre var(--pulso-dur, 1.4s) linear 300ms infinite;
+}
+@keyframes pulso-corre { to { stroke-dashoffset: -1; } }
+.escena-pulso-fin { opacity: 0; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.escena-entrar[data-fase="ok"] .escena-pulso-fin {
+  opacity: 1;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 520ms var(--ease-ios);
+}
+/* Con reducir movimiento no hay escena: queda el botón con "Entrando…". */
+@media (prefers-reduced-motion: reduce) {
+  .escena-entrar { display: none; }
+}
+
 /* Barras de las gráficas (panel-view.tsx, guía 8.23): cada una crece desde
    abajo al entrar, escalonadas 40 ms tras 260 ms de espera, en 560 ms con la
    curva de iOS. "backwards": al terminar no queda transform. Al pasar el mouse

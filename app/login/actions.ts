@@ -8,11 +8,15 @@ export interface LoginState {
   error: string | null;
   /** Entró: el formulario navega a la app con el paso (lib/paso-entrar.ts). */
   listo?: boolean;
+  /** Lo que se escribió en Usuario: con la clave mala no hay que repetirlo
+   *  (React vacía el formulario al terminar la acción). */
+  usuario?: string;
 }
 
 export async function signInAction(_prev: LoginState, formData: FormData): Promise<LoginState> {
   // Permite entrar con usuario (ej. "ivana") o con correo completo.
-  const email = aCorreo(String(formData.get("email") ?? ""));
+  const usuario = String(formData.get("email") ?? "");
+  const email = aCorreo(usuario);
   const password = String(formData.get("password") ?? "");
 
   if (!email || !password) {
@@ -23,7 +27,7 @@ export async function signInAction(_prev: LoginState, formData: FormData): Promi
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    return { error: "Usuario o contraseña incorrectos." };
+    return { error: "Usuario o contraseña incorrectos.", usuario };
   }
 
   return { error: null, listo: true };

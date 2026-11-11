@@ -1,9 +1,14 @@
 import { cn } from "@/lib/utils";
 
 /** Marca: el logo real de Multidiagnósticos AS en un recuadro. */
-export function Logo({ className, size = 36 }: { className?: string; size?: number }) {
+export function Logo({
+  className,
+  size = 36,
+  ...props
+}: { className?: string; size?: number } & Omit<React.ComponentProps<"span">, "children" | "style">) {
   return (
     <span
+      {...props}
       className={cn(
         "flex shrink-0 items-center justify-center overflow-hidden rounded-[0.65rem] bg-black ring-1 ring-white/10",
         className,
