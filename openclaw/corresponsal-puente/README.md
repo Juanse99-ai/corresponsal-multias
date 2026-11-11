@@ -122,16 +122,24 @@ Las fotos de pagos que manda el Sr. Luis (app de Bancolombia, tirilla Redeban
 o recibo del cajero, con la referencia 68883) se leen solas. La app suma los
 pagos y la compara con los palos del texto (palos = millones).
 
-Para encenderlo, después de actualizar la carpeta (ver abajo):
+Para encenderlo, primero actualiza la carpeta (ver "Actualizarlo") y reinicia
+el gateway, para que cargue las opciones nuevas del plugin. Si no, rechaza el
+número con "must not have additional properties: luis". Después:
 
 ```bash
-openclaw config set plugins.entries.corresponsal-puente.config.luis "+59996813171"
+openclaw gateway restart
+openclaw config set plugins.entries.corresponsal-puente.config.luis '"+59996813171"' --strict-json
 openclaw config set channels.whatsapp.groupAllowFrom '["+573003651525","+59996813171"]' --strict-json
 openclaw gateway restart
 ```
 
-El segundo comando deja que OpenClaw vea los mensajes de Luis en el grupo. El
-agente igual no los procesa ni contesta: el plugin los reclama antes.
+El número va entre comillas dobles y estas dentro de comillas simples, con
+`--strict-json`: sin eso OpenClaw lo toma como número y lo rechaza con "must be
+string". El tercer comando deja que OpenClaw vea los mensajes de Luis en el
+grupo. El agente igual no los procesa ni contesta: el plugin los reclama antes.
+
+Queda encendido cuando el registro dice "Activo: bloqueo del grupo y reenvío
+de fotos (y compensaciones del Sr. Luis)".
 
 Mientras `COMPENSACIONES_AUTO` no esté en `1` en Vercel, todas quedan en "Por
 confirmar" y llega un aviso al celular del admin. Cuando ya se vea que lee
