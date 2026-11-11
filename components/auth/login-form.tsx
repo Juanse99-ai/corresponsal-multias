@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signInAction, type LoginState } from "@/app/login/actions";
@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { ErrorNotice } from "@/components/ui/error-notice";
+import { EscenaEntrar, type FaseEntrar } from "@/components/fx/escena-entrar";
+import { reduced } from "@/components/fx/reduced";
 import { entrarConPaso } from "@/lib/paso-entrar";
 
 const initial: LoginState = { error: null };
@@ -21,13 +23,27 @@ const sinSoltarFoco = (e: React.MouseEvent) => e.preventDefault();
 export function LoginForm() {
   const [state, action, pending] = useActionState(signInAction, initial);
   const usuarioRef = useRef<HTMLInputElement>(null);
+  const claveRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  // Entró: sigue en "Entrando…" hasta que el Panel la empuja (lib/paso-entrar.ts).
-  // replace y no push: atrás no vuelve a la pantalla de entrar.
+  // Mientras el servidor contesta sale la pantalla de marca
+  // (components/fx/escena-entrar.tsx); cuando entró y terminó su trazo, el
+  // Panel la empuja (lib/paso-entrar.ts). replace y no push: atrás no vuelve a
+  // la pantalla de entrar.
   const entrando = pending || !!state.listo;
+  const fase: FaseEntrar = state.listo ? "ok" : pending ? "espera" : "reposo";
+  const pasar = useCallback(() => entrarConPaso(() => router.replace("/panel")), [router]);
+
+  // La pantalla de marca ocupa todo: el teclado se guarda al enviar. (Aquí el
+  // toque ya quedó registrado, así que soltar el foco no lo pierde.)
+  const alEnviar = () => {
+    if (!reduced() && document.activeElement instanceof HTMLElement) document.activeElement.blur();
+  };
+
+  // Clave mala en el PC: el foco vuelve a la contraseña para corregirla. En el
+  // celular no, que el teclado taparía el aviso.
   useEffect(() => {
-    if (state.listo) entrarConPaso(() => router.replace("/panel"));
-  }, [state, router]);
+    if (state.error && window.matchMedia("(min-width: 1024px)").matches) claveRef.current?.select();
+  }, [state]);
 
   // Solo en el PC: en el celular, enfocar al abrir saca el teclado y tapa la marca.
   useEffect(() => {
@@ -35,7 +51,8 @@ export function LoginForm() {
   }, []);
 
   return (
-    <form action={action} className="flex w-full flex-col">
+    <form action={action} onSubmit={alEnviar} className="flex w-full flex-col">
+      <EscenaEntrar fase={fase} alTerminar={pasar} />
       {/* Campos con el dibujo de la app: rellenos, con el rótulo encima.
           text-base (16px) en el campo: con menos, iOS hace zoom al enfocar. */}
       <div className="flex flex-col gap-3.5">
@@ -50,6 +67,7 @@ export function LoginForm() {
             autoCapitalize="none"
             autoCorrect="off"
             spellCheck={false}
+            defaultValue={state.usuario}
             required
           />
         </div>
@@ -66,6 +84,7 @@ export function LoginForm() {
             </Button>
           </div>
           <Input
+            ref={claveRef}
             id="password"
             name="password"
             type="password"
@@ -76,7 +95,8 @@ export function LoginForm() {
         </div>
       </div>
 
-      <ErrorNotice message={state.error} className="mt-3" />
+      {/* La sacudida espera a que la pantalla de marca se recoja (420 ms). */}
+      <ErrorNotice message={state.error} className="mt-3" demora={420} />
 
       <Button type="submit" size="lg" disabled={entrando} onMouseDown={sinSoltarFoco} className="mt-5 w-full">
         {entrando ? (

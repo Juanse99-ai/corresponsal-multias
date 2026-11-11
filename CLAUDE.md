@@ -209,5 +209,15 @@
   devuelve `listo` en vez de redirigir; el formulario navega con
   `router.replace` y el AppShell avisa con `pasoLlego()` cuando ya pintó. La
   bienvenida y las cifras esperan al paso igual que a la entrada del logo.
+  Mientras el servidor contesta sale la pantalla de marca (11 nov 2026, la
+  eligió el dueño; `components/fx/escena-entrar.tsx`, `.escena-entrar` en
+  `globals.css`): la banda crece hasta llenar la pantalla, el logo baja al
+  centro y la línea de pulso del logo cruza de lado a lado; al entrar se traza
+  completa y termina en la llave, y ese cuadro quieto es el que empuja el
+  Panel. La línea va en blanco hueso, no en el rojo del logo (rojo es
+  descuadre). El logo es un JPG: no se anima por partes. Al enviar se guarda
+  el teclado; con la clave mala la banda se recoge, el usuario escrito se
+  conserva y la sacudida del aviso espera (`ErrorNotice demora`). Con "reducir
+  movimiento" no hay escena: queda el botón con "Entrando…".
 - Campos de fecha y hora nativos sin apariencia nativa (`globals.css`): con ella,
   iOS les suma relleno y un ancho mínimo, y se salen de su columna.
