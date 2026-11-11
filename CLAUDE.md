@@ -42,7 +42,11 @@
   misma `page.tsx`; reglas en `lib/pestanas.ts`. Por eso las pantallas usan
   `useNavegacion()` (`lib/use-navegacion.ts`) y **no** `useRouter()` para
   refrescar después de guardar o ir a otra pantalla. Una pantalla nueva se suma
-  a `PAGINAS` y a `CARGAS`. Nada necesita meter la app en un iframe: no se
+  a `PAGINAS` (`app/(app)/paginas.ts`) y a `CARGAS`. El layout de la app
+  importa `paginas.ts` a propósito: así la lista de componentes de cliente de
+  cada ruta trae los de todas las pantallas. Sin eso, pintar una pantalla en
+  una pestaña desde otra ruta fallaba con "Could not find the module ... in the
+  React Client Manifest" cuando el servidor recién arrancaba. Nada necesita meter la app en un iframe: no se
   vuelve a permitir en las cabeceras (`frame-ancestors`).
 - UI: **shadcn/ui obligatorio** para todo componente de interfaz (botón, campo,
   tarjeta, diálogo, pestañas, casilla, selector, aviso, popover, gráfico...).
