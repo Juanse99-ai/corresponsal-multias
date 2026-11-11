@@ -107,11 +107,35 @@ export const puente = {
             method: "POST",
             headers: { Authorization: `Bearer ${token}` },
             body: form,
+            // La entrada nunca redirige. Si hay redirección es que la versión
+            // publicada no la tiene y la app manda a la pantalla de entrar
+            // (pasó el 11 nov 2026): seguirla terminaba en un 500 confuso.
+            redirect: "manual",
             signal: AbortSignal.timeout(90_000),
           });
+          if (res.status >= 300 && res.status < 400) {
+            log.error?.(
+              `[corresponsal-puente] La app publicada no tiene la entrada del agente (redirige a ${res.headers.get("location") ?? "otra página"}). ` +
+                "Revisa en Vercel que producción tenga la última versión de main. Sube esta foto a mano.",
+            );
+            return;
+          }
           const cuerpo = await res.json().catch(() => ({}));
           if (res.ok) {
             log.info?.(`[corresponsal-puente] Foto ${mensajeId ?? ""}: ${cuerpo.resultado ?? "ok"}${cuerpo.motivo ? ` (${cuerpo.motivo})` : ""}`);
+            return;
+          }
+          if (res.status === 401) {
+            log.error?.(
+              "[corresponsal-puente] La app no aceptó la clave: config.token del plugin no coincide con AGENTE_TOKEN de Vercel " +
+                "(o falta volver a desplegar después de cambiarla). Sube esta foto a mano.",
+            );
+            return;
+          }
+          if (res.status === 503) {
+            log.error?.(
+              "[corresponsal-puente] La entrada del agente está apagada: falta AGENTE_TOKEN o SUPABASE_SERVICE_ROLE_KEY en Vercel. Sube esta foto a mano.",
+            );
             return;
           }
           // 4xx no se arregla reintentando (token malo, foto rara).

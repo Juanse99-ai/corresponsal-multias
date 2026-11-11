@@ -84,6 +84,32 @@ remitente y el chat. Cuando todo funcione, apaga el diagnóstico:
 openclaw config set plugins.entries.corresponsal-puente.config.diagnostico false
 ```
 
+## Actualizarlo
+
+El plugin del Mac es una copia de esta carpeta. Para traer una versión nueva:
+
+```bash
+cd ~/openclaw-plugins && git clone --depth 1 https://github.com/Juanse99-ai/corresponsal-multias tmp
+cp tmp/openclaw/corresponsal-puente/*.js tmp/openclaw/corresponsal-puente/*.json tmp/openclaw/corresponsal-puente/README.md corresponsal-puente/ && rm -rf tmp
+openclaw plugins reload corresponsal-puente
+```
+
+La configuración (grupo, clave, url) no se toca: vive en `~/.openclaw/openclaw.json`.
+
+## Si algo falla
+
+El registro (`openclaw logs --follow | grep corresponsal-puente`) dice qué pasó:
+
+- "no tiene la entrada del agente": producción en Vercel quedó con una versión
+  vieja. En Deployments, al último de `main`, Redeploy (no el botón del aviso
+  de variables, que puede volver a publicar una versión anterior).
+- "no aceptó la clave": `config.token` no es igual a `AGENTE_TOKEN`. Ojo:
+  `openclaw config get ...token` muestra la clave tapada (`__OPENCLAW_REDACTED__`),
+  no la real; no la copies de ahí.
+- "está apagada": falta `AGENTE_TOKEN` o `SUPABASE_SERVICE_ROLE_KEY` en Vercel.
+
+En los tres casos la foto no se pierde en WhatsApp: súbela a mano en la app.
+
 ## Apagarlo
 
 ```bash
