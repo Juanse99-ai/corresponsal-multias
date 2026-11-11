@@ -67,7 +67,7 @@ function SheetContent({
         <SheetPrimitive.Content
           data-slot="sheet-content"
           className={cn(
-            "hoja-barra fixed inset-x-2.5 bottom-[var(--gbar-sitio)] z-50 mx-auto flex max-h-[calc(100dvh-var(--gbar-sitio)-40px)] max-w-[560px] flex-col overflow-y-auto overscroll-contain rounded-3xl bg-blanco px-2.5 pt-1 pb-3 text-text shadow-ventana outline-none",
+            "hoja-barra fixed inset-x-2.5 bottom-[var(--gbar-sitio)] z-50 mx-auto flex max-h-[calc(100dvh-var(--gbar-sitio)-40px)] max-w-[560px] flex-col overflow-y-auto overscroll-contain rounded-[28px] bg-blanco px-2.5 pt-1 pb-3 text-text shadow-ventana outline-none",
             className
           )}
           onTouchStart={(e) => {

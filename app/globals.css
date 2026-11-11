@@ -123,16 +123,26 @@
   --sombra-lg: 0 18px 40px rgba(48, 40, 32, 0.16), 0 4px 12px rgba(48, 40, 32, 0.06);
   --sombra-ventana: 0 30px 80px -20px rgba(48, 40, 32, 0.35);
 
-  /* Barra de abajo del celular: cápsula clara, la pantalla abierta en un
-     círculo blanco, y el botón de agregar aparte, negro. */
-  --gbar-fondo: rgba(247, 246, 244, 0.86);
-  --gbar-sombra: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 0 0 0.5px rgba(48, 40, 32, 0.08),
-    0 12px 30px -12px rgba(48, 40, 32, 0.35);
-  --gbar-pastilla: #fdfcfb;
-  --gbar-pastilla-sombra: 0 1px 2px rgba(48, 40, 32, 0.1), 0 4px 10px -3px rgba(48, 40, 32, 0.18);
-  --gbar-tinta: #8f8981;
-  --gbar-tinta-on: var(--text);
-  --gbar-globo-filo: rgba(255, 255, 255, 0.95);
+  /* Barra de abajo del celular: cápsula de vidrio (Liquid Glass de iOS 26),
+     la misma de la app del taller. --gbar-fondo-refracta es más transparente:
+     donde el borde refracta (Chromium) el fondo tiene que verse. */
+  --gbar-fondo: rgba(255, 255, 255, 0.55);
+  --gbar-fondo-refracta: rgba(255, 255, 255, 0.24);
+  --gbar-sombra: inset 0 -1px 1px rgba(15, 35, 80, 0.08), 0 0 0 0.5px rgba(15, 35, 80, 0.14),
+    0 12px 32px -12px rgba(15, 35, 80, 0.4), inset 1.5px 1.5px 1px -0.5px rgba(255, 255, 255, 0.85),
+    inset -1.5px -1.5px 1px -0.5px rgba(255, 255, 255, 0.4), inset 0 0 10px rgba(255, 255, 255, 0.3);
+  --gbar-brillo: linear-gradient(180deg, rgba(255, 255, 255, 0.55), transparent 48%),
+    radial-gradient(60% 90% at 14% 0%, rgba(255, 255, 255, 0.55), transparent 62%),
+    radial-gradient(50% 80% at 90% 100%, rgba(255, 255, 255, 0.28), transparent 62%);
+  --gbar-aro: linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0.3));
+  --gbar-pastilla: rgba(15, 23, 42, 0.08);
+  --gbar-pastilla-gota: rgba(255, 255, 255, 0.78);
+  --gbar-pastilla-brillo: linear-gradient(180deg, rgba(255, 255, 255, 0.3), transparent 60%);
+  --gbar-pastilla-sombra: inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.6), inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.25);
+  --gbar-tinta: #000000;
+  --gbar-tinta-on: var(--accent);
+  --gbar-globo: #ff3b30;
+  --gbar-globo-filo: rgba(255, 255, 255, 0.9);
   --lupa-fondo: rgba(255, 255, 255, 0.55);
   --lupa-sombra: inset 0 1.5px 1px rgba(255, 255, 255, 0.95), inset 0 -1px 1px rgba(255, 255, 255, 0.5),
     inset 0 0 0 0.5px rgba(255, 255, 255, 0.8), 0 10px 26px -6px rgba(48, 40, 32, 0.3), 0 0 0 0.5px rgba(48, 40, 32, 0.1);
@@ -278,14 +288,23 @@
   --sombra-lg: 0 24px 60px rgba(0, 0, 0, 0.65);
   --sombra-ventana: 0 30px 80px -20px rgba(0, 0, 0, 0.7);
 
-  --gbar-fondo: rgba(34, 33, 31, 0.86);
-  --gbar-sombra: inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 0 0 0.5px rgba(255, 255, 255, 0.08),
-    0 14px 36px -10px rgba(0, 0, 0, 0.85);
-  --gbar-pastilla: #3a3835;
-  --gbar-pastilla-sombra: inset 0 0.5px 0 rgba(255, 255, 255, 0.14), 0 2px 6px rgba(0, 0, 0, 0.5);
-  --gbar-tinta: rgba(255, 255, 255, 0.5);
+  --gbar-fondo: rgba(40, 40, 44, 0.55);
+  --gbar-fondo-refracta: rgba(40, 40, 44, 0.32);
+  --gbar-sombra: inset 0 -1px 1px rgba(0, 0, 0, 0.35), 0 0 0 0.5px rgba(255, 255, 255, 0.08),
+    0 14px 36px -10px rgba(0, 0, 0, 0.85), inset 1.5px 1.5px 1px -0.5px rgba(255, 255, 255, 0.35),
+    inset -1.5px -1.5px 1px -0.5px rgba(255, 255, 255, 0.14), inset 0 0 10px rgba(255, 255, 255, 0.08);
+  --gbar-brillo: linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 48%),
+    radial-gradient(60% 90% at 14% 0%, rgba(255, 255, 255, 0.2), transparent 62%),
+    radial-gradient(50% 80% at 90% 100%, rgba(255, 255, 255, 0.1), transparent 62%);
+  --gbar-aro: linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.22) 50%, rgba(255, 255, 255, 0.12));
+  --gbar-pastilla: rgba(0, 0, 0, 0.45);
+  --gbar-pastilla-gota: rgba(255, 255, 255, 0.2);
+  --gbar-pastilla-brillo: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 60%);
+  --gbar-pastilla-sombra: inset 1px 1px 1px -0.5px rgba(255, 255, 255, 0.2), inset -1px -1px 1px -0.5px rgba(255, 255, 255, 0.08);
+  --gbar-tinta: #ffffff;
   --gbar-tinta-on: #ffffff;
-  --gbar-globo-filo: #22211f;
+  --gbar-globo: #ff453a;
+  --gbar-globo-filo: #2c2c30;
   --lupa-fondo: rgba(70, 68, 64, 0.42);
   --lupa-sombra: inset 0 1.5px 1px rgba(255, 255, 255, 0.55), inset 0 -1px 1px rgba(255, 255, 255, 0.18),
     inset 0 0 0 0.5px rgba(255, 255, 255, 0.3), 0 10px 26px -6px rgba(0, 0, 0, 0.7);
@@ -805,62 +824,126 @@ input[type="number"] { -moz-appearance: textfield; }
 }
 
 /* ===== Barra de abajo del celular (components/shell/barra-abajo.tsx) ======
-   Cápsula clara solo con íconos de 24: la pantalla abierta sobre un círculo
-   blanco que viaja, globo rojo con los pendientes y "Tú" al final con las
-   iniciales. A su derecha, aparte, el botón negro + (Movimientos). Solo en el
-   celular y la tableta; en el computador manda el riel. */
-.gbar, .gbar-fab { display: none; }
+   La de la app del taller: cápsula flotante de vidrio (Liquid Glass de iOS
+   26 / WhatsApp) con hasta 5 botones de igual ancho, ícono de 26 y nombre de
+   10, y a su derecha el círculo de Buscar. Una sola pastilla se desliza al
+   botón activo. Solo en el celular y la tableta (hasta 1023 px, donde
+   empieza el riel del computador). */
+.gbar, .gbar-buscar { display: none; }
 @media (max-width: 1023px) {
-  .gbar {
+  .gbar, .gbar-buscar {
     position: fixed;
-    left: var(--gbar-lado);
-    right: calc(var(--gbar-lado) + var(--gbar-h) + 10px);
     bottom: var(--gbar-abajo);
     z-index: 45;
-    display: grid;
-    grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr));
-    align-items: center;
     height: var(--gbar-h);
-    max-width: 420px;
-    margin: 0 auto;
-    padding: 0 7px;
     border-radius: 999px;
+    isolation: isolate;
     background: var(--gbar-fondo);
-    -webkit-backdrop-filter: blur(22px) saturate(1.8);
-    backdrop-filter: blur(22px) saturate(1.8);
+    -webkit-backdrop-filter: blur(8px) saturate(1.8);
+    backdrop-filter: blur(8px) saturate(1.8);
     box-shadow: var(--gbar-sombra);
-    touch-action: none;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Roboto, system-ui, sans-serif;
+    color: var(--gbar-tinta);
     -webkit-user-select: none;
     user-select: none;
     -webkit-touch-callout: none;
-    transition: transform 380ms var(--ease-ios), opacity var(--dur-2);
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 320ms var(--ease-ios), opacity var(--dur-2);
   }
+  /* Brillo que baja desde arriba y dos reflejos: arriba a la izquierda y
+     abajo a la derecha. Debajo de los íconos. */
+  .gbar::before, .gbar-buscar::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    background: var(--gbar-brillo);
+    pointer-events: none;
+  }
+  /* Aro fino de 1 px, más claro arriba que abajo: solo el borde (máscara). */
+  .gbar::after, .gbar-buscar::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    padding: 1px;
+    border-radius: inherit;
+    background: var(--gbar-aro);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    pointer-events: none;
+  }
+  .gbar {
+    left: var(--gbar-lado);
+    right: calc(var(--gbar-lado) + var(--gbar-h) + var(--gbar-hueco));
+    display: grid;
+    grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr));
+    align-items: center;
+    padding: 0 7px;
+    touch-action: none;
+  }
+  .gbar-buscar {
+    right: var(--gbar-lado);
+    display: grid;
+    place-items: center;
+    width: var(--gbar-h);
+    min-width: 0;
+    padding: 0;
+    border: 0;
+  }
+  .gbar-buscar:hover { background: var(--gbar-fondo); color: var(--gbar-tinta); }
+  .gbar-buscar > svg { position: relative; z-index: 1; width: 25px; height: 25px; }
+  .gbar-buscar:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   /* Con la hoja de un grupo arriba, la barra queda sobre el velo y se puede
      tocar (Radix deja el resto de la página sin toques). */
   .gbar.gbar--arriba { z-index: 60; pointer-events: auto; }
-  /* Al bajar por la pantalla se encoge desde su centro (Instagram en iOS 26:
-     397 × 59 pasa a 332 × 49); al subir vuelve. Con el dedo encima crece un
-     poco, con rebote. */
-  .gbar.gbar--chica { transform: scale(var(--gbar-chica)); }
-  .gbar.gbar--toca {
-    transform: scale(var(--gbar-toca));
-    transition: transform 260ms var(--ease-rebote), opacity var(--dur-2);
-  }
+  /* Al bajar la página se encoge desde su centro y al subir vuelve; con el
+     dedo encima crece un poco, sin rebote. */
+  .gbar.gbar--chica, .gbar-buscar.gbar--chica { transform: scale(var(--gbar-chica)); }
+  .gbar.gbar--toca { transform: scale(var(--gbar-toca)); }
   /* Mientras se escribe baja: sobre el teclado taparía el campo. */
-  .gbar.gbar--abajo { transform: translateY(calc(100% + 30px)); opacity: 0; pointer-events: none; }
-  .gbar__pil {
-    position: absolute;
-    top: 50%;
-    width: 46px;
-    height: 46px;
-    transform: translate(-50%, -50%);
-    border-radius: 999px;
-    background: var(--gbar-pastilla);
-    box-shadow: var(--gbar-pastilla-sombra);
+  .gbar.gbar--abajo, .gbar-buscar.gbar--abajo {
+    transform: translateY(calc(100% + 30px));
+    opacity: 0;
     pointer-events: none;
-    transition: left 380ms var(--ease-rebote-suave), opacity 160ms;
   }
-  .gbar__pil--bajo { opacity: 0; }
+
+  /* La pastilla: una sola, que se desliza de columna en columna. */
+  .gbar__pista {
+    position: absolute;
+    z-index: 0;
+    top: 4.5px;
+    bottom: 4.5px;
+    left: 7px;
+    display: flex;
+    justify-content: center;
+    width: calc((100% - 14px) / var(--n, 5));
+    transform: translateX(calc(var(--i, 0) * 100%));
+    transition: transform 300ms var(--ease-ios);
+    pointer-events: none;
+  }
+  .gbar__pil {
+    width: min(calc(100% - 4px), 86px);
+    height: 100%;
+    border-radius: 999px;
+    background-color: var(--gbar-pastilla);
+    background-image: var(--gbar-pastilla-brillo);
+    box-shadow: var(--gbar-pastilla-sombra);
+    transition: transform 420ms var(--ease-ios), background-color 420ms var(--ease-ios), opacity 160ms;
+  }
+  /* Gota al llegar a otro botón: se aclara y se estira rápido, y se asienta
+     más despacio (la transición de arriba). */
+  .gbar__pil.gbar__pil--gota {
+    background-color: var(--gbar-pastilla-gota);
+    transform: scale(1.14, 0.94);
+    transition: transform 120ms var(--ease-ios), background-color 120ms var(--ease-ios);
+  }
+  .gbar__pista--oculta .gbar__pil { opacity: 0; }
+  /* Presionar el botón que ya está activo agranda la pastilla. */
+  .gbar__b[data-activo]:active ~ .gbar__pista .gbar__pil { transform: scale(1.08); }
+
   .gbar__b {
     position: relative;
     z-index: 1;
@@ -868,8 +951,8 @@ input[type="number"] { -moz-appearance: textfield; }
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
-    height: 48px;
+    gap: 3px;
+    height: 52px;
     min-width: 0;
     width: auto;
     padding: 0;
@@ -878,78 +961,66 @@ input[type="number"] { -moz-appearance: textfield; }
     background: transparent;
     box-shadow: none;
     color: var(--gbar-tinta);
+    font: inherit;
     transition: color var(--dur-1);
+    -webkit-user-drag: none;
   }
-  .gbar__b { -webkit-user-drag: none; }
+  .gbar__b:hover { background: transparent; color: var(--gbar-tinta); }
   .gbar__b:focus-visible { outline: 2px solid var(--accent); outline-offset: -3px; }
   .gbar__b[data-sobre] { color: var(--gbar-tinta-on); }
-  .gbar__ic { position: relative; display: grid; place-items: center; height: 26px; }
-  .gbar__ic > svg { width: 23px; height: 23px; }
-  /* La letra del sistema, como la barra de WhatsApp. El nombre puede pasar
-     unos px de su columna ("Movimientos" a 390 px): los vecinos son cortos. */
+  .gbar__b > .gbar__ic, .gbar__b > .gbar__t { transition: transform 120ms var(--ease-ios); }
+  .gbar__b:active > .gbar__ic, .gbar__b:active > .gbar__t { transform: scale(0.96); }
+  .gbar__ic { position: relative; display: grid; place-items: center; width: 26px; height: 26px; }
+  .gbar__ic > svg { width: 26px; height: 26px; }
+  /* El nombre puede pasar unos px de su columna ("Movimientos" a 390 px):
+     los vecinos son cortos. */
   .gbar__t {
-    max-width: calc(100% + 10px);
+    max-width: calc(100% + 14px);
     overflow: hidden;
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 1.1;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.15;
+    letter-spacing: 0;
     white-space: nowrap;
     text-overflow: ellipsis;
   }
+  /* "Tú": las iniciales en un círculo del color principal con aro blanco. */
   .gbar__av {
     display: grid;
     place-items: center;
-    width: 27px;
-    height: 27px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
     background: var(--accent-fill);
     color: var(--accent-ink);
-    font-size: 10.5px;
-    font-weight: 700;
-    letter-spacing: 0.2px;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+    box-shadow: 0 0 0 1.5px #ffffff;
   }
-  /* El botón negro de agregar: un círculo del alto de la barra, a su derecha.
-     Se encoge y baja con ella. */
-  .gbar-fab {
-    position: fixed;
-    right: var(--gbar-lado);
-    bottom: var(--gbar-abajo);
-    z-index: 45;
-    display: grid;
-    place-items: center;
-    width: var(--gbar-h);
-    height: var(--gbar-h);
-    padding: 0;
-    border-radius: 999px;
-    box-shadow: var(--primario-sombra), 0 12px 26px -12px rgba(0, 0, 0, 0.45);
-    transition: transform 380ms var(--ease-ios), opacity var(--dur-2), background-color var(--dur-1);
-  }
-  .gbar-fab > svg { width: 24px; height: 24px; }
-  .gbar-fab:active { transform: scale(0.94); }
-  .gbar-fab.gbar--chica { transform: scale(var(--gbar-chica)); }
-  .gbar-fab.gbar--abajo { transform: translateY(calc(100% + 30px)); opacity: 0; pointer-events: none; }
+  /* Globo de pendientes: blanco sobre rojo, con un aro del color de la barra
+     para despegarlo del ícono. */
   .gbar__globo {
     position: absolute;
     top: -5px;
     left: calc(50% + 4px);
-    display: grid;
-    place-items: center;
     min-width: 18px;
     height: 18px;
     padding: 0 5px;
     border-radius: 999px;
     background: var(--gbar-globo);
-    color: #fff;
-    font-size: 11px;
-    font-weight: 600;
-    line-height: 1;
+    color: #ffffff;
+    font-size: 12.5px;
+    font-weight: 500;
+    line-height: 18px;
+    text-align: center;
     font-variant-numeric: tabular-nums;
     box-shadow: 0 0 0 2px var(--gbar-globo-filo);
   }
-  /* La lupa de vidrio al apoyar el dedo: más alta que la barra, borde con
-     reflejo de color y brillo arriba; dentro, la fila agrandada 1,22. Entra
-     creciendo, se estira con la velocidad del dedo (--sx/--sy) y al soltar
-     se encoge con rebote hasta volverse la pastilla. */
+
+  /* La lupa de vidrio al arrastrar el dedo: 9 px más alta que la barra arriba
+     y abajo, aro de colores y, dentro, la fila agrandada 1,22. Entra con
+     rebote y al soltar se encoge hasta desaparecer. */
   .gbar__lente {
     position: absolute;
     z-index: 3;
@@ -959,8 +1030,8 @@ input[type="number"] { -moz-appearance: textfield; }
     overflow: hidden;
     border-radius: 999px;
     background: var(--lupa-fondo);
-    -webkit-backdrop-filter: blur(14px) saturate(1.6) brightness(1.06);
-    backdrop-filter: blur(14px) saturate(1.6) brightness(1.06);
+    -webkit-backdrop-filter: blur(8px) saturate(1.6) brightness(1.06);
+    backdrop-filter: blur(8px) saturate(1.6) brightness(1.06);
     box-shadow: var(--lupa-sombra);
     pointer-events: none;
     transform: scale(var(--sx, 1), var(--sy, 1));
@@ -1012,23 +1083,59 @@ input[type="number"] { -moz-appearance: textfield; }
     padding: 0 7px;
     transform: scale(1.22);
   }
-  /* La página deja sitio a la barra; lo que se trae a la vista queda encima. */
-  .contenido-app { padding-bottom: calc(var(--gbar-sitio) + 18px); }
-  html { scroll-padding-bottom: calc(var(--gbar-sitio) + 8px); }
+
+  /* La página deja sitio a la barra: alto + separación + 18. Lo que se trae
+     a la vista (un campo con foco) también queda encima. */
+  .contenido-app { padding-bottom: calc(var(--gbar-h) + var(--gbar-abajo) + 18px); }
+  html { scroll-padding-bottom: calc(var(--gbar-h) + var(--gbar-abajo) + 18px); }
 }
+
+/* Refracción del borde (Chromium; lib/vidrio.ts): el fondo pasa por el filtro
+   SVG que lo desvía cerca de la orilla, y el relleno es más transparente para
+   que se vea. Safari y Firefox se quedan con el vidrio esmerilado. */
+html.vidrio-refracta .gbar {
+  background-color: var(--gbar-fondo-refracta);
+  backdrop-filter: url(#vidrio-gbar) saturate(1.7) brightness(1.04);
+}
+html.vidrio-refracta .gbar-buscar {
+  background-color: var(--gbar-fondo-refracta);
+  backdrop-filter: url(#vidrio-gbar-buscar) saturate(1.7) brightness(1.04);
+}
+
+/* Respaldos: sin desenfoque, con "reducir transparencia" o con "más
+   contraste", la barra es opaca, sin brillo ni aro y con borde de 1 px, para
+   que siempre se lea. */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .gbar { background: var(--blanco); }
+  .gbar, .gbar-buscar { background: var(--surface); border: 1px solid var(--line-strong); }
+  .gbar::before, .gbar::after, .gbar-buscar::before, .gbar-buscar::after { display: none; }
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .gbar, .gbar-buscar, html.vidrio-refracta .gbar, html.vidrio-refracta .gbar-buscar {
+    background: var(--surface);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    border: 1px solid var(--line-strong);
+    box-shadow: var(--sombra-md);
+  }
+  .gbar::before, .gbar::after, .gbar-buscar::before, .gbar-buscar::after { display: none; }
+  .gbar__lente { background: var(--blanco); -webkit-backdrop-filter: none; backdrop-filter: none; }
 }
 
 /* La hoja de un grupo de la barra (components/ui/sheet.tsx, side="barra"):
    sube sobre la barra con las cuatro esquinas redondas. */
-.hoja-barra[data-state="open"] { animation: hoja-barra-entra 340ms var(--ease-ios); }
+.hoja-barra { transform-origin: 50% 100%; }
+/* Entra creciendo desde abajo (350 ms) y la opacidad llega antes (120 ms);
+   sale más rápido (200 ms). */
+.hoja-barra[data-state="open"] {
+  animation: hoja-barra-entra 350ms var(--ease-ios), hoja-barra-aparece 120ms linear;
+}
 .hoja-barra[data-state="closed"] { animation: hoja-barra-sale 200ms cubic-bezier(0.4, 0, 1, 1) forwards; }
 /* Cerrada arrastrándola (lib/use-arrastrar-hoja.ts): sigue hacia abajo desde
    donde la soltó el dedo, no vuelve a subir para irse. */
 .hoja-barra[data-arrastrada][data-state="closed"] { animation: hoja-barra-baja 260ms var(--ease-ios) forwards; }
 @keyframes hoja-barra-baja { to { opacity: 0; transform: translateY(100%); } }
-@keyframes hoja-barra-entra { from { opacity: 0; transform: translateY(24px) scale(0.98); } }
+@keyframes hoja-barra-entra { from { transform: translateY(28px) scale(0.94); } }
+@keyframes hoja-barra-aparece { from { opacity: 0; } }
 @keyframes hoja-barra-sale { to { opacity: 0; transform: translateY(24px) scale(0.98); } }
 
 /* ===== Tarjeta navy (la cifra con botón) ==================================
@@ -1064,15 +1171,17 @@ input[type="number"] { -moz-appearance: textfield; }
   --ease-rebote: cubic-bezier(0.34, 1.56, 0.64, 1);
   --ease-rebote-suave: cubic-bezier(0.34, 1.4, 0.64, 1);
 
-  /* Barra de abajo del celular: 58 de alto, 21 a cada lado, metida en la
-     zona de la rayita del iPhone. --gbar-sitio es lo que la página deja libre. */
-  --gbar-h: 58px;
-  --gbar-lado: 21px;
+  /* Barra de abajo del celular (la del taller): 61 de alto, metida en la
+     zona de la rayita del iPhone sin tocarla, y a los lados lo que deje una
+     columna de 640 centrada (21 como mínimo). A la derecha, el círculo de
+     Buscar de 61 separado 10. --gbar-sitio es lo que dejan las hojas. */
+  --gbar-h: 61px;
+  --gbar-lado: max(21px, calc((100vw - 640px) / 2));
+  --gbar-hueco: 10px;
   --gbar-abajo: max(14px, calc(env(safe-area-inset-bottom, 0px) - 12px));
   --gbar-sitio: calc(var(--gbar-h) + var(--gbar-abajo) + 12px);
   --gbar-chica: 0.835;
   --gbar-toca: 1.035;
-  --gbar-globo: #ff3b30;
 
   /* Toque mínimo. */
   --tap: 44px;
@@ -1145,6 +1254,9 @@ input[type="number"] { -moz-appearance: textfield; }
   .entra-bloques > * > *,
   .barra-crece { animation: none; }
   .barra-espera { transform: none; }
+  /* La barra de abajo: sin gota ni escalados, solo cambia el color. */
+  .gbar__pil.gbar__pil--gota, .gbar__b[data-activo]:active ~ .gbar__pista .gbar__pil { transform: none; }
+  .gbar__b:active > .gbar__ic, .gbar__b:active > .gbar__t { transform: none; }
   /* La entrada sin zoom: el logo quieto y el fondo se desvanece. */
   .entrada-logo { animation: none; }
   .entrada { animation-duration: var(--duration-fast) !important; }

@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import Link from "next/link";
 import {
   MagnifyingGlass,
@@ -30,6 +31,7 @@ import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { TiraPestanas, useIr } from "@/components/shell/pestanas";
 import { cn } from "@/lib/utils";
+import { EVENTO_BUSCAR } from "@/lib/barra";
 import { formatCOP, formatFecha, anioBogota } from "@/lib/format";
 import type { HeaderResumen } from "@/lib/queries";
 
@@ -188,6 +190,19 @@ export function HeaderSearch({ personas, enPanel = false }: { personas: string[]
 
   const hayResultados = !!fechaISO || personasMatch.length > 0;
 
+  // El círculo de Buscar de la barra de abajo lo abre. Se pinta en el acto
+  // (flushSync) para darle el foco dentro del mismo toque: si no, el iPhone
+  // no saca el teclado.
+  useEffect(() => {
+    if (enPanel) return;
+    const abrir = () => {
+      flushSync(() => setMovil(true));
+      inputRef.current?.focus();
+    };
+    window.addEventListener(EVENTO_BUSCAR, abrir);
+    return () => window.removeEventListener(EVENTO_BUSCAR, abrir);
+  }, [enPanel]);
+
   function cerrarMovil() {
     setMovil(false);
     setOpen(false);
@@ -215,20 +230,8 @@ export function HeaderSearch({ personas, enPanel = false }: { personas: string[]
 
   return (
     <>
-      {/* Celular: lupa de 44x44. El buscador completo se abre encima del encabezado. */}
-      {!enPanel && (
-      <IconButton
-        forma="blanco"
-        label="Buscar día o persona"
-        onClick={() => {
-          setMovil(true);
-          requestAnimationFrame(() => inputRef.current?.focus());
-        }}
-        className={cn("sm:hidden", movil && "invisible")}
-      >
-        <MagnifyingGlass size={18} />
-      </IconButton>
-      )}
+      {/* Celular: la lupa es el círculo de Buscar de la barra de abajo; el
+          buscador completo se abre encima del encabezado. */}
 
     <form
       onSubmit={onSubmit}

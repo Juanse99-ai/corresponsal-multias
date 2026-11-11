@@ -3,30 +3,7 @@
 import { requireSession } from "@/lib/auth";
 import { esRutaInterna } from "@/lib/pestanas";
 import { NAV, isActive } from "@/components/shell/nav-items";
-import PanelPage from "./panel/page";
-import CuadrePage from "./cuadre/page";
-import MovimientosPage from "./movimientos/page";
-import LuisPage from "./luis/page";
-import PrestamosPage from "./prestamos/page";
-import AuditoriaPage from "./auditoria/page";
-import GeneralPage from "./general/page";
-import HistorialPage from "./historial/page";
-import BitacoraPage from "./bitacora/page";
-
-type Pagina = (props: { searchParams: Promise<{ fecha?: string }> }) => Promise<React.ReactNode>;
-
-/** Las pantallas que se abren en una pestaña: las mismas page.tsx de cada ruta. */
-const PAGINAS: Record<string, Pagina> = {
-  "/panel": PanelPage,
-  "/cuadre": CuadrePage,
-  "/movimientos": MovimientosPage,
-  "/luis": LuisPage,
-  "/prestamos": PrestamosPage,
-  "/auditoria": AuditoriaPage,
-  "/general": GeneralPage,
-  "/historial": HistorialPage,
-  "/bitacora": BitacoraPage,
-};
+import { PAGINAS } from "./paginas";
 
 /**
  * Pinta en el servidor la pantalla de una pestaña del computador y la devuelve

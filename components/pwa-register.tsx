@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
+import { escucharInstalacion } from "@/lib/instalar";
 
 /** Registra el service worker para que la app sea instalable y cargue rápido. */
 export function PwaRegister() {
+  // El aviso de "instalar" de Chrome llega una vez al cargar: se guarda ya.
+  useEffect(() => escucharInstalacion(), []);
   useEffect(() => {
     if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
     const register = () => {
