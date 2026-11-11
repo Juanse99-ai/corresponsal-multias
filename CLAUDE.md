@@ -55,11 +55,20 @@
   entrada sin enviar correo (`auth.admin.generateLink`) y lo usa en el acto
   (`verifyOtp`): la sesión queda como si hubiera entrado con correo. "Bloquear"
   cierra la sesión solo en ese navegador (`signOut({ scope: "local" })`). En
-  la caja la sesión no sobrevive a 10 min sin uso aunque se cierre la pestaña:
+  la caja la sesión no sobrevive a 60 min sin uso (antes 10; el dueño pidió 60) aunque se cierre la pestaña:
   el proxy guarda la hora en `corr_caja_uso` y cierra la sesión al pasarse
   (además del aviso en pantalla de `lib/use-bloqueo-inactivo.ts`).
   Ajustes en la ventana "Clave de caja" (hoja Tú y menú de la cuenta): cada
   quien pone su clave; el admin autoriza o quita equipos y borra claves.
+  **Sin correo** (11 nov 2026, lo pidió el dueño): con correo entra el admin
+  siempre; los demás solo la primera vez. `signInAction` los deja pasar con
+  `destino: "/crear-clave"` si no tienen clave y los rechaza si ya la tienen;
+  el layout de la app manda a `/crear-clave` a quien no es admin y no tiene
+  clave (también tras recuperar la contraseña). Al crearla ahí
+  (`crearMiClave`), ese navegador queda autorizado como "Equipo de <nombre>"
+  para que pueda volver con la clave. En la caja, quien no tiene clave sale
+  "Sin clave" y la crea escribiendo una vez su contraseña
+  (`crearPrimeraClave`). En un equipo autorizado `/login` manda a `/caja`.
 - Pestañas del computador como en Biela, **sin iframes**: todas las pantallas
   abiertas montadas en el mismo árbol (`components/shell/pestanas.tsx`), cada una
   pintada en el servidor por `cargarPantalla` (`app/(app)/pantallas.tsx`) con su

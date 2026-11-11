@@ -1,23 +1,21 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { redirect } from "next/navigation";
 import { AuthLayout } from "@/components/auth/auth-layout";
 import { LoginForm } from "@/components/auth/login-form";
-import { Button } from "@/components/ui/button";
 import { tieneCookieEquipo } from "@/lib/caja-servidor";
 
 export const metadata: Metadata = { title: "Entrar · Corresponsal" };
 
+/**
+ * Entrar con correo: el administrador siempre; los demás solo la primera vez,
+ * para crear su clave de caja (después el correo ya no los deja entrar). En un
+ * equipo de caja no hace falta: allí se toca el nombre y, sin clave, se crea.
+ */
 export default async function LoginPage() {
-  // En un equipo de caja, volver a la clave sin escribir correo.
-  const equipo = await tieneCookieEquipo();
+  if (await tieneCookieEquipo()) redirect("/caja");
   return (
-    <AuthLayout titulo="Iniciar sesión" pie="Solo personal autorizado">
+    <AuthLayout titulo="Iniciar sesión" detalle="Solo la primera vez. Después, con tu clave de caja." pie="Solo personal autorizado">
       <LoginForm />
-      {equipo && (
-        <Button asChild variant="link" className="mt-3 w-full">
-          <Link href="/caja">Entrar con clave de caja</Link>
-        </Button>
-      )}
     </AuthLayout>
   );
 }
