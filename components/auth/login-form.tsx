@@ -2,12 +2,14 @@
 
 import { useActionState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { signInAction, type LoginState } from "@/app/login/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { ErrorNotice } from "@/components/ui/error-notice";
+import { entrarConPaso } from "@/lib/paso-entrar";
 
 const initial: LoginState = { error: null };
 
@@ -19,6 +21,13 @@ const sinSoltarFoco = (e: React.MouseEvent) => e.preventDefault();
 export function LoginForm() {
   const [state, action, pending] = useActionState(signInAction, initial);
   const usuarioRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+  // Entró: sigue en "Entrando…" hasta que el Panel la empuja (lib/paso-entrar.ts).
+  // replace y no push: atrás no vuelve a la pantalla de entrar.
+  const entrando = pending || !!state.listo;
+  useEffect(() => {
+    if (state.listo) entrarConPaso(() => router.replace("/panel"));
+  }, [state, router]);
 
   // Solo en el PC: en el celular, enfocar al abrir saca el teclado y tapa la marca.
   useEffect(() => {
@@ -69,8 +78,8 @@ export function LoginForm() {
 
       <ErrorNotice message={state.error} className="mt-3" />
 
-      <Button type="submit" size="lg" disabled={pending} onMouseDown={sinSoltarFoco} className="mt-5 w-full">
-        {pending ? (
+      <Button type="submit" size="lg" disabled={entrando} onMouseDown={sinSoltarFoco} className="mt-5 w-full">
+        {entrando ? (
           <>
             <Spinner className="size-[18px]" aria-hidden />
             Entrando…
