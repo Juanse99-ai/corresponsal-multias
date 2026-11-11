@@ -75,7 +75,7 @@ export async function entrarConClave(userId: string, clave: string): Promise<Res
     return { ok: false, error: "No se pudo abrir la sesión." };
   }
 
-  // Desde ya cuenta el tiempo sin uso (el proxy cierra la sesión pasados 10 min).
+  // Desde ya cuenta el tiempo sin uso (el proxy cierra la sesión pasados 60 min).
   (await cookies()).set(COOKIE_USO, String(Date.now()), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",

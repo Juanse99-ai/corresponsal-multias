@@ -55,7 +55,7 @@
   entrada sin enviar correo (`auth.admin.generateLink`) y lo usa en el acto
   (`verifyOtp`): la sesión queda como si hubiera entrado con correo. "Bloquear"
   cierra la sesión solo en ese navegador (`signOut({ scope: "local" })`). En
-  la caja la sesión no sobrevive a 10 min sin uso aunque se cierre la pestaña:
+  la caja la sesión no sobrevive a 60 min sin uso (antes 10; el dueño pidió 60) aunque se cierre la pestaña:
   el proxy guarda la hora en `corr_caja_uso` y cierra la sesión al pasarse
   (además del aviso en pantalla de `lib/use-bloqueo-inactivo.ts`).
   Ajustes en la ventana "Clave de caja" (hoja Tú y menú de la cuenta): cada

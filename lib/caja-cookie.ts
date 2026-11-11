@@ -6,6 +6,6 @@ export const COOKIE_EQUIPO = "corr_equipo";
 /** Cookie httpOnly con la hora del último uso en un equipo de caja. */
 export const COOKIE_USO = "corr_caja_uso";
 /** Minutos sin usar la app en la caja antes de volver a la pantalla de clave. */
-export const MINUTOS_BLOQUEO = 10;
+export const MINUTOS_BLOQUEO = 60;
 /** Números de la clave de caja. */
 export const LARGO_CLAVE = 6;
