@@ -17,11 +17,17 @@ estructura del estilo del taller (marco, riel, panel, hojas, gestos) sigue igual
   negra (`--accent-ink`). El tema claro se llama **Claro** (antes Azul).
 - **Tarjeta oscura** (`TarjetaNavy`, el nombre quedó): carbón `#1f1e1c` con el botón
   blanco hueso, como el "Check now" de la referencia.
-- **Barra de abajo**: cápsula clara solo con íconos (Panel, Cuadre, Sr. Luis, Tú), la
-  pantalla abierta en un círculo blanco con sombra; aparte, a la derecha, el botón negro +
-  de 58 px que abre Movimientos (registrar). Se encoge y baja con la barra.
-- **Cabecera del celular**: del color de la página, sin línea; lupa y avisos en círculos
-  blancos (`IconButton forma="blanco"`).
+- **Barra de abajo** (11 nov 2026, la misma de la app del taller): cápsula de vidrio Liquid
+  Glass de 61 px y círculo de Buscar de 61 a su derecha, separados 10, a 14 px del borde
+  (o metidos en la zona de la rayita) y con `max(21px, (100vw − 640px)/2)` a los lados.
+  Botones: Inicio, Movimientos (hoja), Cuadre, Reportes (hoja, admin) y Tú; ícono de 26
+  (regular, el activo en negrita) y nombre de 10 / 500 en la letra del sistema. Vidrio:
+  blanco .55 con blur(8) saturate(1.8), borde de lente, brillo y aro de 1 px; en Chromium
+  el borde además refracta el fondo con aberración de color (`lib/vidrio.ts`). Una
+  pastilla que se desliza (300 ms) con gota al llegar; globo rojo #ff3b30 de pendientes.
+  Respaldo opaco con borde sin desenfoque, con reducir transparencia o más contraste.
+- **Cabecera del celular**: del color de la página, sin línea; el logo y los avisos en un
+  círculo blanco (`IconButton forma="blanco"`). La lupa pasó al círculo de la barra.
 - **Títulos de tarjeta** en peso medio, no seminegrita.
 - **Gráficas del Panel** (como la referencia):
   - *Últimos cierres*: cuadrícula de cuadritos (6 filas, una columna por día, máximo 22

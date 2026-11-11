@@ -38,3 +38,6 @@ export function decidirChica({
   if (seguido <= -umbral) return { chica: false, acum: seguido };
   return { chica: null, acum: seguido };
 }
+
+/** Evento con el que el círculo de Buscar de la barra abre el buscador de la cabecera. */
+export const EVENTO_BUSCAR = "corr:buscar";

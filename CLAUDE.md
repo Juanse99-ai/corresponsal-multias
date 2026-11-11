@@ -112,14 +112,23 @@
   Sin azul de marca: lo que se aprieta es negro (`--accent-fill`; blanco hueso
   en Noche). En el computador la app va en un marco redondo (`.marco`) sobre el
   lienzo, con riel de íconos por grupo y panel de secciones
-  (`components/shell/riel-panel.tsx`). En el celular, arriba el logo con la lupa
-  y los avisos en círculos blancos, y abajo la barra flotante
-  (`components/shell/barra-abajo.tsx`): cápsula solo con íconos (Panel, Cuadre,
-  Sr. Luis y Tú, la abierta en un círculo blanco) y aparte el botón negro +
-  que abre Movimientos; Tú abre una hoja con el resto de
-  pantallas, la cuenta, el tema y cerrar sesión. La barra se encoge al bajar,
-  saca la lupa al arrastrar el dedo y baja cuando el teclado está arriba (no
-  con un campo enfocado solo: el autoFocus de Movimientos no la esconde).
+  (`components/shell/riel-panel.tsx`). En el celular (hasta 1023 px), arriba el
+  logo y los avisos, y abajo la barra de la app del taller
+  (`components/shell/barra-abajo.tsx`, 11 nov 2026): cápsula de vidrio Liquid
+  Glass de 61 px con Inicio, Movimientos (hoja: Movimientos, Sr. Luis,
+  Préstamos), Cuadre, Reportes (hoja: Historial, Control general, Auditoría,
+  Bitácora; solo admin) y Tú (cuenta, tema, avisos, instalar la app, cerrar
+  sesión), ícono de 26 y nombre de 10 en la letra del sistema; a la derecha el
+  círculo de Buscar (abre el buscador de la cabecera con `EVENTO_BUSCAR` de
+  `lib/barra.ts`). Una sola pastilla se desliza al botón activo (gota al
+  llegar). Un botón con una pantalla navega directo; con varias, sube una hoja
+  (`Sheet side="barra"`) que se cierra sola al navegar por fuera. La barra se
+  encoge al bajar, crece un poco con el dedo, saca la lupa al arrastrar y baja
+  cuando el teclado está arriba (no con un campo enfocado solo: el autoFocus de
+  Movimientos no la esconde). En Chromium el borde refracta el fondo con un
+  filtro SVG (`lib/vidrio.ts`, `backdrop-filter: url(#vidrio-gbar)`); Safari y
+  Firefox quedan con el vidrio esmerilado. Sin desenfoque, con "reducir
+  transparencia" o "más contraste", la barra es opaca con borde.
   Lo elegido (pestaña, ítem del menú) es pastilla blanca con sombra. Detalle en
   DESIGN.md. Los tokens `nav-*` (banda de marca del login, bienvenida y
   celebración) son iguales en ambos temas; las tarjetas navy usan `--navy`.
@@ -138,7 +147,7 @@
     detrás del marco.
   - Celular: barra superior de lado a lado con `.barra-material` del color de
     la página, sin línea. Computador: la barra va dentro del marco, transparente. La barra de
-    abajo del celular es la única cápsula de vidrio flotante (como en el
+    abajo del celular y su círculo de Buscar son lo único de vidrio (como en el
     taller); nada más lleva vidrio.
   - Etiquetas en oración normal, sin mayúsculas espaciadas (`uppercase tracking-*`).
     Las imágenes que se exportan (cuadre y reporte del Sr. Luis) sí conservan su
@@ -162,7 +171,8 @@
   de estado (montos que cambian, check al cerrar el día). Sin GSAP ni efectos por
   letra. Una sola curva, la de iOS (`--ease-ios`; en framer, `TRANSICION` y
   `CURVA_IOS` de `lib/movimiento.ts`), con 120, 220 o 420 ms. Rebote solo en la
-  lupa y la pastilla de la barra de abajo.
+  lupa de la barra de abajo; la pastilla hace la gota (se estira 120 ms y se
+  asienta).
 - Entradas escalonadas: la de cada pantalla por bloques (`app/(app)/template.tsx`
   + `.entra-bloques`, 45 ms entre bloques) y las barras de "Últimos cierres"
   (`.barra-crece`, 40 ms entre barras); no agregues otras. (Las filas de las
