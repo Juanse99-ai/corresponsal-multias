@@ -146,9 +146,26 @@ openclaw automations create "55 16 * * *" --tz America/Bogota --exact --name "Ci
 Probarlas sin esperar: `node ~/openclaw-plugins/corresponsal-puente/avisos.js`
 (la primera vez mira la última media hora) y `node .../cierre.js`.
 
-A las operadoras no se les escribe por WhatsApp (saldría desde el número del
-dueño): la app les manda una notificación cuando su foto queda registrada o
-por revisar. Para recibirla, cada una activa los avisos en la app (hoja Tú).
+### A las operadoras
+
+OpenClaw está vinculado al WhatsApp del dueño: lo que le llegue a una operadora
+sale desde ese número (por eso el mensaje empieza con *Corresponsal*). No tiene
+costo: es WhatsApp normal, no la API de pago, y estas tareas no usan IA.
+
+- Cuando una operadora manda una foto al grupo, el puente anota cómo quedó
+  (registrada, por revisar o no llegó) en `~/.openclaw/corresponsal-operadoras.jsonl`.
+- `operadoras.js +57...` (una tarea cada 5 minutos por operadora) le manda lo
+  suyo y vacía su parte de la bandeja.
+- El recordatorio de cierre también le puede llegar: es otra tarea de
+  `cierre.js` con su número.
+
+```bash
+openclaw automations create "*/5 7-21 * * *" --tz America/Bogota --exact --name "Avisos a la operadora" --command-argv "[\"$(command -v node)\", \"$HOME/openclaw-plugins/corresponsal-puente/operadoras.js\", \"+573005550142\"]" --announce --channel whatsapp --to "+573005550142"
+openclaw automations create "55 16 * * *" --tz America/Bogota --exact --name "Cierre a la operadora" --command-argv "[\"$(command -v node)\", \"$HOME/openclaw-plugins/corresponsal-puente/cierre.js\"]" --announce --channel whatsapp --to "+573005550142"
+```
+
+Además la app les manda una notificación (sin WhatsApp) si activan los avisos
+en la hoja Tú.
 
 ## Compensaciones del Sr. Luis
 
