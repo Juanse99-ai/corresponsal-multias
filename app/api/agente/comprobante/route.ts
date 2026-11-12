@@ -6,7 +6,7 @@ import { SOPORTES_BUCKET } from "@/lib/queries";
 import { leerComprobante, lecturaDisponible, type Comprobante } from "@/lib/leer-comprobante";
 import { decidirComprobante } from "@/lib/comprobante-auto";
 import { fechaDeTirilla } from "@/lib/fecha-tirilla";
-import { avisarAdmins } from "@/lib/avisos";
+import { avisarAdmins, avisarOperadoras } from "@/lib/avisos";
 import { tokenValido, diaBogota } from "@/lib/agente";
 import { formatCOP, hoyISO } from "@/lib/format";
 
@@ -66,6 +66,8 @@ export async function POST(req: Request) {
   }
 
   const mensajeId = String(form.get("mensajeId") ?? "").slice(0, 120) || null;
+  // La mandó una operadora (no el dueño): a ella le llega cómo quedó (12 nov 2026).
+  const deOperadora = form.get("quien") === "operadora";
   const enviadoMs = Number(form.get("enviado"));
   const dia = Number.isFinite(enviadoMs) && enviadoMs > 0 ? diaBogota(enviadoMs) : hoyISO();
   const nombre = mensajeId ? `WhatsApp ${mensajeId}` : "WhatsApp";
@@ -110,13 +112,16 @@ export async function POST(req: Request) {
 
   async function aRevisar(motivo: string, leido: Comprobante | null) {
     refrescar();
+    // El motivo queda en la foto para el aviso por WhatsApp (app/api/agente/avisos).
+    await sb!.from("corr_soportes").update({ datos: { ...(leido ?? {}), motivoRevision: motivo } }).eq("id", soporte!.id);
     const monto = leido?.monto ? `${formatCOP(leido.monto)} ` : "";
-    await avisarAdmins(sb!, {
+    const aviso = {
       title: "Comprobante por revisar",
       body: `${monto}${leido?.transaccion ?? ""}`.trim() + (monto || leido?.transaccion ? ". " : "") + motivo,
       url: `/luis?fecha=${dia}`,
       tag: `comprobante-${soporte!.id}`,
-    });
+    };
+    await Promise.all([avisarAdmins(sb!, aviso), deOperadora ? avisarOperadoras(sb!, aviso) : Promise.resolve(0)]);
     const ms = tiempos();
     console.info(`Agente, comprobante: revisar (${motivo}), total ${ms.total} ms, lectura ${ms.lectura ?? "-"} ms`);
     return NextResponse.json({ ok: true, resultado: "revisar", motivo, ms });
@@ -157,6 +162,14 @@ export async function POST(req: Request) {
     sb.from("corr_soportes").delete().eq("id", soporte.id),
   ]);
   refrescar();
+  if (deOperadora) {
+    await avisarOperadoras(sb, {
+      title: "Consignación registrada",
+      body: `${formatCOP(decision.fila.monto)}${decision.fila.hora ? ` de las ${decision.fila.hora.slice(0, 5)}` : ""}. No hay que subirla a mano.`,
+      url: `/luis?fecha=${decision.fila.fecha}`,
+      tag: `comprobante-${soporte.id}`,
+    });
+  }
   const ms = tiempos();
   console.info(`Agente, comprobante: guardado, total ${ms.total} ms, lectura ${ms.lectura ?? "-"} ms`);
   return NextResponse.json({ ok: true, resultado: "guardado", consignacion: decision.fila, ms });

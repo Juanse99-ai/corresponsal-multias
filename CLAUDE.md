@@ -189,6 +189,19 @@
   llegó antes de un cambio de regla no se queda pegado. La entrada también
   quita el encabezado de OpenClaw del texto (`textoDeLuis`), por si el puente
   del Mac no está actualizado.
+- **Avisos por WhatsApp** (12 nov 2026, lo pidió el dueño): dos tareas de
+  OpenClaw tipo comando, como el resumen, al chat del dueño consigo mismo
+  (OpenClaw está vinculado a su WhatsApp: lo que mande a otro chat sale desde
+  su número, por eso a las operadoras no se les escribe por ahí).
+  `openclaw/corresponsal-puente/avisos.js` cada 15 min pide a
+  `app/api/agente/avisos?desde=` las fotos que dejó el agente por revisar
+  (`created_by` vacío; el motivo de los comprobantes queda en
+  `datos.motivoRevision`); `cierre.js` a las 4:55 p. m. pide
+  `app/api/agente/cierre`. Texto en `lib/avisos-texto.ts` (`mensajeCierre` lo
+  comparte con el cron del navegador). Sin nada que decir responden vacío y
+  OpenClaw no manda nada. A las operadoras, notificación de la app
+  (`avisarOperadoras`) cuando su foto queda registrada o por revisar: el
+  puente manda `quien=operadora`.
 - **Resumen de las 7** (11 nov 2026, lo pidió el dueño): `app/api/agente/resumen/route.ts`
   (GET, solo lectura, misma `AGENTE_TOKEN`) devuelve en texto para WhatsApp lo
   de `lib/resumen-diario.ts`: cuadre de ayer, consignaciones y saldo del Sr.

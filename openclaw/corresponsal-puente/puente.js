@@ -135,7 +135,7 @@ export const puente = {
       return;
     }
 
-    async function enviar(foto, tipo, mensajeId, enviado, destino, texto) {
+    async function enviar(foto, tipo, mensajeId, enviado, destino, texto, quien) {
       const datos = await readFile(foto.path);
       const que = destino === urlComp ? "Compensación" : "Foto";
       for (let intento = 1; intento <= 3; intento++) {
@@ -144,6 +144,7 @@ export const puente = {
           form.append("foto", new Blob([datos], { type: tipo }), `comprobante.${tipo.split("/")[1]}`);
           if (mensajeId) form.append("mensajeId", mensajeId);
           if (texto) form.append("texto", texto);
+          if (quien) form.append("quien", quien);
           if (enviado) form.append("enviado", String(enviado));
           const res = await fetch(destino, {
             method: "POST",
@@ -214,7 +215,8 @@ export const puente = {
       }
 
       const deLuis = esNumero(remitente, luis);
-      const delPunto = esNumero(remitente, dueno) || operadoras.some((n) => esNumero(remitente, n));
+      const deOperadora = !esNumero(remitente, dueno) && operadoras.some((n) => esNumero(remitente, n));
+      const delPunto = esNumero(remitente, dueno) || deOperadora;
       if (!deLuis && !delPunto) return;
       const destino = deLuis ? urlComp : url;
       const texto = deLuis ? textoDelMensaje(event) : null;
@@ -231,7 +233,7 @@ export const puente = {
       for (const f of fotos) {
         const id = mensajeId ? (fotos.length > 1 ? `${mensajeId}-${f.i}` : mensajeId) : null;
         try {
-          await enviar(f.m, f.tipo, id, enviado, destino, texto);
+          await enviar(f.m, f.tipo, id, enviado, destino, texto, deLuis ? null : deOperadora ? "operadora" : "dueno");
         } catch (e) {
           log.error?.(`[corresponsal-puente] No se pudo leer la foto del disco: ${e?.message ?? e}`);
         }

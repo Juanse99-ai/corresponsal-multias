@@ -7,6 +7,8 @@ import { mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { puente, textoDelMensaje, urlDeCompensacion } from "../openclaw/corresponsal-puente/puente.js";
+import { leerEstado, urlAvisos } from "../openclaw/corresponsal-puente/avisos.js";
+import { urlCierre } from "../openclaw/corresponsal-puente/cierre.js";
 
 const GRUPO = "120363000000000000@g.us";
 const DUENO = "+573005550101";
@@ -94,6 +96,7 @@ test("la foto del dueño en el grupo se reenvía con el token; las demás no", a
     assert.equal(srv.recibidos.length, 1);
     assert.equal(srv.recibidos[0].auth, "Bearer secreto");
     assert.match(srv.recibidos[0].cuerpo, /name="mensajeId"\r\n\r\nB1/);
+    assert.match(srv.recibidos[0].cuerpo, /name="quien"\r\n\r\ndueno\r\n/);
     // Segundos convertidos a milisegundos.
     assert.match(srv.recibidos[0].cuerpo, /name="enviado"\r\n\r\n1762805567000/);
     assert.match(srv.recibidos[0].cuerpo, /Content-Type: image\/jpeg/i);
@@ -258,6 +261,8 @@ test("las fotos de una operadora van a comprobantes, como las del dueño", async
     assert.equal(srv.recibidos[0].ruta, "/api/agente/comprobante");
     assert.match(srv.recibidos[0].cuerpo, /name="mensajeId"\r\n\r\nO1/);
     assert.doesNotMatch(srv.recibidos[0].cuerpo, /name="texto"/);
+    // La app sabe que la mandó una operadora, para avisarle a ella.
+    assert.match(srv.recibidos[0].cuerpo, /name="quien"\r\n\r\noperadora\r\n/);
     assert.ok(registro.some((m) => m.includes("con 1 operadora.")));
   } finally {
     srv.cerrar();
@@ -293,4 +298,18 @@ test("el texto del mensaje sale limpio y la entrada de compensaciones al lado de
     urlDeCompensacion("https://corresponsal-multias.vercel.app/api/agente/comprobante"),
     "https://corresponsal-multias.vercel.app/api/agente/compensacion",
   );
+});
+
+test("los avisos y el cierre viven al lado de la entrada de comprobantes", () => {
+  const url = "https://x.app/api/agente/comprobante";
+  assert.equal(urlAvisos(url, null), "https://x.app/api/agente/avisos");
+  assert.equal(urlAvisos(url, "2026-11-12T15:00:00.000Z"), "https://x.app/api/agente/avisos?desde=2026-11-12T15%3A00%3A00.000Z");
+  assert.equal(urlCierre(url), "https://x.app/api/agente/cierre");
+});
+
+test("el estado de los avisos se lee sin romperse", () => {
+  assert.equal(leerEstado('{"hasta":"2026-11-12T15:00:00.000Z"}'), "2026-11-12T15:00:00.000Z");
+  assert.equal(leerEstado(""), null);
+  assert.equal(leerEstado("no es json"), null);
+  assert.equal(leerEstado('{"hasta":"ayer"}'), null);
 });
