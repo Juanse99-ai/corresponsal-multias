@@ -1,14 +1,5 @@
--- Clave de caja, ajustes de la revisión de seguridad:
--- 1. El bloqueo ya no se desborda: 2^(n-5) con n alto lanzaba "value out of
---    range" y deshacía la función, así que se podía probar sin límite.
--- 2. Tras 10 claves malas seguidas la clave queda bloqueada hasta que el
---    administrador la borre (antes: 60 min una y otra vez, unos 24 intentos
---    diarios para siempre).
--- 3. Cambiar la clave pide la actual (corr_caja_cambiar_clave): quien encuentre
---    abierta la sesión de otro no se la puede cambiar. Las claves malas al
---    cambiarla cuentan para el mismo bloqueo. Reemplaza a corr_caja_poner_clave,
---    que queda sin permiso de ejecución.
--- 4. search_path vacío: todo va con su esquema escrito.
+-- Rollback de 20261111053313_corr_caja_bloqueo_tope_60: las funciones sin el
+-- tope de 60 minutos en el bloqueo de la clave (como en 20261111052936).
 
 create or replace function public.corr_caja_verificar(p_equipo_hash text, p_user uuid, p_clave text)
 returns jsonb
@@ -54,7 +45,7 @@ begin
   ne := e.intentos + 1;
   hasta := case
     when n >= 10 then 'infinity'::timestamptz
-    when n >= 5 then ahora + make_interval(mins => least(60, 5 * power(2, least(n - 5, 4)))::integer)
+    when n >= 5 then ahora + make_interval(mins => (5 * power(2, least(n - 5, 4)))::integer)
   end;
   hasta_e := case
     when ne >= 15 then ahora + make_interval(mins => least(60, 5 * power(2, least(ne - 15, 4)))::integer)
@@ -68,7 +59,6 @@ begin
 end;
 $$;
 
--- Poner o cambiar la clave. Si ya tiene una, hay que dar la actual.
 create or replace function public.corr_caja_cambiar_clave(p_user uuid, p_actual text, p_nueva text)
 returns jsonb
 language plpgsql
@@ -97,7 +87,7 @@ begin
       n := c.intentos + 1;
       hasta := case
         when n >= 10 then 'infinity'::timestamptz
-        when n >= 5 then ahora + make_interval(mins => least(60, 5 * power(2, least(n - 5, 4)))::integer)
+        when n >= 5 then ahora + make_interval(mins => (5 * power(2, least(n - 5, 4)))::integer)
       end;
       update public.corr_claves set intentos = n, bloqueada_hasta = hasta where user_id = p_user;
       if n >= 10 then
@@ -116,11 +106,3 @@ begin
   return jsonb_build_object('ok', true);
 end;
 $$;
-
--- La de poner sin pedir la actual queda sin permiso para nadie (no se borra:
--- borrar pedía una confirmación aparte).
-revoke all on function public.corr_caja_poner_clave(uuid, text) from public, anon, authenticated, service_role;
-revoke all on function public.corr_caja_verificar(text, uuid, text) from public, anon, authenticated;
-revoke all on function public.corr_caja_cambiar_clave(uuid, text, text) from public, anon, authenticated;
-grant execute on function public.corr_caja_verificar(text, uuid, text) to service_role;
-grant execute on function public.corr_caja_cambiar_clave(uuid, text, text) to service_role;

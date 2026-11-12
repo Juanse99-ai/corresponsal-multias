@@ -5,7 +5,7 @@
 // administrador autorizó (cookie httpOnly con un token cuyo hash vive en
 // corr_equipos). Cifrarla (bcrypt), verificarla y contar los intentos se hace
 // DENTRO de Postgres, con las filas bloqueadas mientras revisa
-// (supabase/migrations/0005_caja_clave_funciones.sql): así varios intentos al
+// (supabase/migrations/20261111053313_corr_caja_bloqueo_tope_60.sql): así varios intentos al
 // mismo tiempo no se saltan el bloqueo. Tras 5 claves malas la persona queda
 // bloqueada 5 minutos, y se dobla con cada mala de más hasta 60; con 10 queda
 // bloqueada hasta que el administrador la borre. El equipo, desde 15 malas

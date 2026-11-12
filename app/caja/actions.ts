@@ -40,7 +40,7 @@ export async function entrarConClave(userId: string, clave: string): Promise<Res
   if (!token) return { ok: false, error: "Este equipo no está autorizado." };
 
   // Equipo, bloqueo, clave y cuenta de intentos: todo en una función de
-  // Postgres que bloquea las filas mientras revisa (0005_caja_clave_funciones.sql).
+  // Postgres que bloquea las filas mientras revisa (20261111053313_corr_caja_bloqueo_tope_60.sql).
   const { data: r, error: errorVerificar } = await admin.rpc("corr_caja_verificar", {
     p_equipo_hash: hashToken(token),
     p_user: userId,

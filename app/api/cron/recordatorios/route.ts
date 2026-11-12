@@ -1,5 +1,7 @@
+import "server-only";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { timingSafeEqual } from "node:crypto";
 import webpush from "web-push";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/config";
 
@@ -10,6 +12,13 @@ function fmtCOP(n: number) {
   return "$" + Math.round(Math.abs(n)).toLocaleString("es-CO");
 }
 
+// Compara sin que el tiempo de respuesta delate cuántos caracteres acertaron.
+function mismoSecreto(enviado: string, esperado: string) {
+  const a = Buffer.from(enviado);
+  const b = Buffer.from(esperado);
+  return a.length === b.length && timingSafeEqual(a, b);
+}
+
 type Cuadre = { estado: string; saldo_final: number } | null;
 type Sub = { endpoint: string; p256dh: string; auth: string };
 
@@ -18,13 +27,15 @@ type Sub = { endpoint: string; p256dh: string; auth: string };
  * Si el cuadre de hoy sigue abierto (o hay descuadre), envía push a todos los
  * suscriptores. No usa service-role: una función SECURITY DEFINER gateada por
  * secreto devuelve los datos.
+ *
+ * El secreto llega solo en la cabecera Authorization (así lo manda el cron de
+ * Vercel): en la URL quedaría guardado en registros e historiales.
  */
 export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET;
-  const url = new URL(req.url);
-  const provided =
-    req.headers.get("authorization")?.replace("Bearer ", "") || url.searchParams.get("key");
-  if (!secret || provided !== secret) {
+  const cabecera = req.headers.get("authorization") ?? "";
+  const enviado = cabecera.startsWith("Bearer ") ? cabecera.slice(7) : "";
+  if (!secret || !enviado || !mismoSecreto(enviado, secret)) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
