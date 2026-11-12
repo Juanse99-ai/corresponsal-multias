@@ -8,9 +8,9 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { puente, textoDelMensaje, urlDeCompensacion } from "../openclaw/corresponsal-puente/puente.js";
 
-const GRUPO = "120363320161907130@g.us";
-const DUENO = "+573003651525";
-const LUIS = "+599 9 681 3171";
+const GRUPO = "120363000000000000@g.us";
+const DUENO = "+573005550101";
+const LUIS = "+599 9 555 0199";
 
 type Gancho = (event: unknown, ctx: unknown) => unknown;
 
@@ -79,7 +79,7 @@ test("la foto del dueño en el grupo se reenvía con el token; las demás no", a
     const foto = [{ path: ruta, contentType: "image/jpeg", kind: "image" }];
 
     // De otro miembro: no se reenvía.
-    await recibido({ from: "x", content: "", media: foto, messageId: "A1" }, { conversationId: GRUPO, senderId: "+573144434480" });
+    await recibido({ from: "x", content: "", media: foto, messageId: "A1" }, { conversationId: GRUPO, senderId: "+573005550177" });
     // Del dueño en otro chat: no se reenvía.
     await recibido({ from: "x", content: "", media: foto, messageId: "A2" }, { conversationId: "573001112233@s.whatsapp.net", senderId: DUENO });
     // Del dueño, sin foto: nada.
@@ -89,7 +89,7 @@ test("la foto del dueño en el grupo se reenvía con el token; las demás no", a
     // Del dueño en el grupo, con foto: sí (con el remitente en formato de WhatsApp).
     await recibido(
       { from: "x", content: "", media: foto, messageId: "B1", timestamp: 1762805567 },
-      { conversationId: GRUPO, senderId: "573003651525@s.whatsapp.net" },
+      { conversationId: GRUPO, senderId: "573005550101@s.whatsapp.net" },
     );
     assert.equal(srv.recibidos.length, 1);
     assert.equal(srv.recibidos[0].auth, "Bearer secreto");
@@ -211,7 +211,7 @@ test("las fotos del Sr. Luis van con su texto a la entrada de compensaciones", a
 
     await recibido(
       { from: "x", content: "<media:image> 21.8 palos nuevo", media: foto, messageId: "L1", timestamp: 1762805567 },
-      { conversationId: GRUPO, senderId: "59996813171@s.whatsapp.net" },
+      { conversationId: GRUPO, senderId: "59995550199@s.whatsapp.net" },
     );
     // La del dueño sigue yendo a comprobantes, sin texto.
     await recibido(
@@ -230,6 +230,40 @@ test("las fotos del Sr. Luis van con su texto a la entrada de compensaciones", a
   }
 });
 
+test("las fotos de una operadora van a comprobantes, como las del dueño", async () => {
+  const srv = await servidorFalso();
+  try {
+    const dir = await mkdtemp(join(tmpdir(), "puente-"));
+    const ruta = join(dir, "tirilla.jpg");
+    await writeFile(ruta, Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3]));
+    // "311" está incompleto: no cuenta, o coincidiría con cualquier número.
+    const { ganchos, registro } = montar({
+      grupo: GRUPO,
+      dueno: DUENO,
+      luis: LUIS,
+      operadoras: ["+57 300 555 0142", "311"],
+      url: srv.url,
+      token: "secreto",
+    });
+    const recibido = ganchos.get("message_received")!;
+    const foto = [{ path: ruta, contentType: "image/jpeg", kind: "image" }];
+
+    await recibido(
+      { from: "x", content: "ya consigné", media: foto, messageId: "O1" },
+      { conversationId: GRUPO, senderId: "573005550142@s.whatsapp.net" },
+    );
+    // Otro miembro del grupo sigue sin reenviarse.
+    await recibido({ from: "x", content: "", media: foto, messageId: "O2" }, { conversationId: GRUPO, senderId: "+573005550311" });
+    assert.equal(srv.recibidos.length, 1);
+    assert.equal(srv.recibidos[0].ruta, "/api/agente/comprobante");
+    assert.match(srv.recibidos[0].cuerpo, /name="mensajeId"\r\n\r\nO1/);
+    assert.doesNotMatch(srv.recibidos[0].cuerpo, /name="texto"/);
+    assert.ok(registro.some((m) => m.includes("con 1 operadora.")));
+  } finally {
+    srv.cerrar();
+  }
+});
+
 test("sin config.luis, las fotos de Luis no se reenvían", async () => {
   const srv = await servidorFalso();
   try {
@@ -239,7 +273,7 @@ test("sin config.luis, las fotos de Luis no se reenvían", async () => {
     const { ganchos } = montar({ grupo: GRUPO, dueno: DUENO, url: srv.url, token: "secreto" });
     await ganchos.get("message_received")!(
       { from: "x", content: "3 palos", media: [{ path: ruta, contentType: "image/jpeg" }], messageId: "L2" },
-      { conversationId: GRUPO, senderId: "59996813171@s.whatsapp.net" },
+      { conversationId: GRUPO, senderId: "59995550199@s.whatsapp.net" },
     );
     assert.equal(srv.recibidos.length, 0);
   } finally {
@@ -250,6 +284,11 @@ test("sin config.luis, las fotos de Luis no se reenvían", async () => {
 test("el texto del mensaje sale limpio y la entrada de compensaciones al lado de la de comprobantes", () => {
   assert.equal(textoDelMensaje({ content: "<media:image>\n 10 palos   nuevo" }), "10 palos nuevo");
   assert.equal(textoDelMensaje({}), "");
+  // Foto sin texto: OpenClaw manda solo su encabezado, que no es un mensaje.
+  const encabezado = "[WhatsApp 120363000000000000@g.us +24h Thu 2026-11-12 09:27:45 GMT-5] Fulano De Tal (+5990000000):";
+  assert.equal(textoDelMensaje({ body: `${encabezado} <media:image>` }), "");
+  assert.equal(textoDelMensaje({ body: `${encabezado} 21.8 palos nuevo` }), "21.8 palos nuevo");
+  assert.equal(textoDelMensaje({ content: "130.000 ese neki: el de siempre" }), "130.000 ese neki: el de siempre");
   assert.equal(
     urlDeCompensacion("https://corresponsal-multias.vercel.app/api/agente/comprobante"),
     "https://corresponsal-multias.vercel.app/api/agente/compensacion",

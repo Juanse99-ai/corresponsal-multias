@@ -6,6 +6,7 @@ import {
   toleranciaDe,
   notaDePago,
   decidirCompensacion,
+  noEsCompensacion,
   type PagoLeido,
 } from "../lib/compensacion.ts";
 
@@ -71,6 +72,18 @@ test("si la suma no da los palos, se revisa", () => {
   assert.equal(d.accion, "revisar");
   assert.equal(d.motivo, "La suma no da los palos del mensaje");
   assert.equal(d.cuadra, false);
+});
+
+test("una foto sin pagos y sin palos no es una compensación", () => {
+  // Un pedido con la foto del número, o una foto sin texto que no muestra pagos.
+  assert.equal(noEsCompensacion([], "130.000 ese neki Glenni Sady"), true);
+  assert.equal(noEsCompensacion([], null), true);
+  assert.equal(noEsCompensacion([], ""), true);
+  // Dijo palos: quiso mandar una compensación aunque no se haya leído nada.
+  assert.equal(noEsCompensacion([], "3 palos nuevo"), false);
+  // Se leyó algún pago: se revisa, con o sin palos.
+  assert.equal(noEsCompensacion([pago(2_000_000)], ""), false);
+  assert.equal(noEsCompensacion([pago(2_000_000, { monto: null })], null), false);
 });
 
 test("sin palos en el texto, se revisa", () => {

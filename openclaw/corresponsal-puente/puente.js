@@ -6,12 +6,13 @@
 //    queda como consignación del Sr. Luis; lo dudoso, pendiente con aviso.
 //    Las fotos que manda el Sr. Luis (config.luis) van con su texto ("21.8
 //    palos") a /api/agente/compensacion: son compensaciones.
+//    Las fotos de las operadoras (config.operadoras) van igual que las del dueño.
 // 2. Ningún mensaje de ese grupo llega al agente (before_dispatch lo reclama).
 // 3. Ningún envío hacia ese grupo sale (message_sending y reply_payload_sending
 //    lo cancelan). En el grupo hay clientes: el agente nunca habla ahí.
 //
 // Configuración en ~/.openclaw/openclaw.json, plugins.entries.corresponsal-puente.config:
-//   grupo, dueno, luis, url, urlCompensacion, token, diagnostico
+//   grupo, dueno, operadoras, luis, url, urlCompensacion, token, diagnostico
 //   (ver openclaw.plugin.json y README.md).
 import { readFile } from "node:fs/promises";
 
@@ -40,11 +41,19 @@ function enMs(t) {
 
 const espera = (ms) => new Promise((r) => setTimeout(r, ms));
 
-/** El texto del mensaje sin las marcas de adjunto que pone OpenClaw ("<media:image>"). */
+/**
+ * Encabezado que OpenClaw le pone al mensaje cuando la foto llega sin texto:
+ * "[WhatsApp 1203...@g.us +24h Thu 2026-11-12 09:27:45 GMT-5] Nombre (+599...):".
+ * No lo escribió nadie y trae el nombre y el número: no va a la app.
+ */
+const ENCABEZADO = /^\s*\[WhatsApp\b[^\]]*\]\s*(?:[^:]{0,120}:)?/i;
+
+/** El texto del mensaje sin las marcas de adjunto ("<media:image>") ni el encabezado que pone OpenClaw. */
 export function textoDelMensaje(event) {
   const t = event?.content ?? event?.body ?? event?.text ?? "";
   return String(typeof t === "string" ? t : "")
     .replace(/<media:[^>]*>/gi, "")
+    .replace(ENCABEZADO, "")
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, 300);
@@ -71,6 +80,11 @@ export const puente = {
     const grupo = String(cfg.grupo ?? "").trim();
     const dueno = soloDigitos(cfg.dueno);
     const luis = soloDigitos(cfg.luis);
+    // Operadoras del punto: sus fotos son comprobantes, como las del dueño.
+    // Un número incompleto coincidiría con cualquiera: se ignora.
+    const operadoras = (Array.isArray(cfg.operadoras) ? cfg.operadoras : [])
+      .map(soloDigitos)
+      .filter((n) => n.length >= 10);
     const url = String(cfg.url ?? "").trim();
     const urlComp = String(cfg.urlCompensacion ?? "").trim() || urlDeCompensacion(url);
     const token = String(cfg.token ?? "").trim();
@@ -115,7 +129,7 @@ export const puente = {
       { priority: 1000 },
     );
 
-    // ---- 3. Reenvío de las fotos del dueño ----
+    // ---- 3. Reenvío de las fotos del dueño, las operadoras y el Sr. Luis ----
     if (!url || !token || !dueno) {
       log.error?.("[corresponsal-puente] Falta config.url, config.token o config.dueno: no se reenvían fotos (el bloqueo sí está activo).");
       return;
@@ -200,7 +214,8 @@ export const puente = {
       }
 
       const deLuis = esNumero(remitente, luis);
-      if (!deLuis && !esNumero(remitente, dueno)) return;
+      const delPunto = esNumero(remitente, dueno) || operadoras.some((n) => esNumero(remitente, n));
+      if (!deLuis && !delPunto) return;
       const destino = deLuis ? urlComp : url;
       const texto = deLuis ? textoDelMensaje(event) : null;
       if (event?.mediaStagingPending) {
@@ -224,7 +239,8 @@ export const puente = {
     });
 
     log.info?.(
-      `[corresponsal-puente] Activo: bloqueo del grupo y reenvío de fotos${luis ? " (y compensaciones del Sr. Luis)" : ""}.`,
+      `[corresponsal-puente] Activo: bloqueo del grupo y reenvío de fotos${luis ? " (y compensaciones del Sr. Luis)" : ""}` +
+        `${operadoras.length ? `, con ${operadoras.length} ${operadoras.length === 1 ? "operadora" : "operadoras"}` : ""}.`,
     );
   },
 };

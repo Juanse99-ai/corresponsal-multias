@@ -81,6 +81,16 @@ export function toleranciaDe(texto: string | null | undefined): number {
   return Math.min(TOLERANCIA_PALOS, (1_000_000 / 10 ** decimales) / 2);
 }
 
+/**
+ * La foto no es una compensación: no muestra ningún pago y el texto no habla
+ * de palos. Luis también manda al grupo pedidos ("130.000 a ese Nequi") con la
+ * foto del número (12 nov 2026). Con palos en el texto se revisa aunque no se
+ * lea nada: ahí sí quiso mandar una compensación.
+ */
+export function noEsCompensacion(pagos: PagoLeido[], texto: string | null | undefined): boolean {
+  return pagos.length === 0 && palosEnPesos(texto) === null;
+}
+
 const HORA = /^([01]\d|2[0-3]):[0-5]\d/;
 
 const NOMBRE_FORMATO: Record<string, string> = {

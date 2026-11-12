@@ -5,7 +5,7 @@ import { crearClienteAdmin } from "@/lib/supabase/admin";
 import { SOPORTES_BUCKET } from "@/lib/queries";
 import { lecturaDisponible } from "@/lib/leer-comprobante";
 import { leerCompensacion, type LecturaCompensacion } from "@/lib/leer-compensacion";
-import { decidirCompensacion, CONTEXTO_COMPENSACION, type DecisionCompensacion } from "@/lib/compensacion";
+import { decidirCompensacion, noEsCompensacion, CONTEXTO_COMPENSACION, type DecisionCompensacion } from "@/lib/compensacion";
 import { avisarAdmins } from "@/lib/avisos";
 import { tokenValido, diaBogota, horaBogota } from "@/lib/agente";
 import { formatCOP, formatFecha } from "@/lib/format";
@@ -25,6 +25,10 @@ export const maxDuration = 60;
  * Cuenta del Sr. Luis ("Por confirmar"), con aviso a los administradores; con
  * "1", lo que cuadra con los palos y no tiene dudas se guarda solo. La
  * decisión está en lib/compensacion.ts (probada en test/).
+ *
+ * Luis también manda fotos que no son pagos (un pedido con el número de un
+ * Nequi): si la foto no muestra pagos y el texto no dice palos, se descarta
+ * sin aviso. La foto sigue en WhatsApp.
  *
  * Cuerpo multipart (misma clave que /api/agente/comprobante):
  * - foto: la imagen (jpeg, png, webp o gif; hasta 10 MB)
@@ -151,7 +155,21 @@ export async function POST(req: Request) {
     return aConfirmar("No se pudo leer la foto", null);
   }
 
-  // 3. Decidir. Se consultan el día y los comprobantes de la última semana.
+  const pagos = resultado.hay_pagos ? resultado.pagos : [];
+
+  // 3. Lo que no es una compensación no llega a "Por confirmar".
+  if (noEsCompensacion(pagos, texto)) {
+    await Promise.all([
+      sb.storage.from(SOPORTES_BUCKET).remove([path]),
+      sb.from("corr_soportes").delete().eq("id", soporte.id),
+    ]);
+    refrescar();
+    const ms = tiempos();
+    console.info(`Agente, compensación: descartada (sin pagos ni palos), total ${ms.total} ms, lectura ${ms.lectura ?? "-"} ms`);
+    return NextResponse.json({ ok: true, resultado: "descartada", motivo: "La foto no muestra pagos", ms });
+  }
+
+  // 4. Decidir. Se consultan el día y los comprobantes de la última semana.
   const [{ data: cuadre }, { data: recientes }] = await Promise.all([
     sb.from("corr_cuadres").select("estado").eq("fecha", dia).maybeSingle(),
     sb.from("corr_compensaciones_luis").select("nota").gte("fecha", diasAntes(dia, DIAS_REPETIDOS)),
@@ -159,7 +177,6 @@ export async function POST(req: Request) {
   const comprobantesRegistrados = (recientes ?? [])
     .map((r) => r.nota?.match(/comprobante (\S+)/i)?.[1] ?? "")
     .filter(Boolean);
-  const pagos = resultado.hay_pagos ? resultado.pagos : [];
   const decision = decidirCompensacion(pagos, texto, dia, horaMensaje, {
     automatico: process.env.COMPENSACIONES_AUTO?.trim() === "1",
     diaCerrado: cuadre?.estado === "cerrado",
@@ -174,7 +191,7 @@ export async function POST(req: Request) {
 
   if (decision.accion === "revisar") return aConfirmar(decision.motivo, decision);
 
-  // 4. Guardar las compensaciones y quitar la foto, que ya cumplió.
+  // 5. Guardar las compensaciones y quitar la foto, que ya cumplió.
   const { error: insErr } = await sb
     .from("corr_compensaciones_luis")
     .insert(decision.filas.map((f) => ({ ...f, created_by: null })));
