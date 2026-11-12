@@ -168,6 +168,11 @@
   solo. Luis también manda al grupo fotos que no son pagos (pedidos con el
   número de un Nequi): si la foto no muestra pagos y el texto no dice palos
   (`noEsCompensacion`), se descarta sin aviso (12 nov 2026, lo aprobó el dueño).
+  La cola se vuelve a pasar por esa regla al abrir la Cuenta del Sr. Luis
+  (`pendienteQueNoEs`; borra `lib/compensacion-cola.ts` con `after`): lo que
+  llegó antes de un cambio de regla no se queda pegado. La entrada también
+  quita el encabezado de OpenClaw del texto (`textoDeLuis`), por si el puente
+  del Mac no está actualizado.
 - **Resumen de las 7** (11 nov 2026, lo pidió el dueño): `app/api/agente/resumen/route.ts`
   (GET, solo lectura, misma `AGENTE_TOKEN`) devuelve en texto para WhatsApp lo
   de `lib/resumen-diario.ts`: cuadre de ayer, consignaciones y saldo del Sr.

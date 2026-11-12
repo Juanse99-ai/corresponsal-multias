@@ -5,7 +5,7 @@ import { crearClienteAdmin } from "@/lib/supabase/admin";
 import { SOPORTES_BUCKET } from "@/lib/queries";
 import { lecturaDisponible } from "@/lib/leer-comprobante";
 import { leerCompensacion, type LecturaCompensacion } from "@/lib/leer-compensacion";
-import { decidirCompensacion, noEsCompensacion, CONTEXTO_COMPENSACION, type DecisionCompensacion } from "@/lib/compensacion";
+import { decidirCompensacion, noEsCompensacion, textoDeLuis, CONTEXTO_COMPENSACION, type DecisionCompensacion } from "@/lib/compensacion";
 import { avisarAdmins } from "@/lib/avisos";
 import { tokenValido, diaBogota, horaBogota } from "@/lib/agente";
 import { formatCOP, formatFecha } from "@/lib/format";
@@ -77,7 +77,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "La foto pesa demasiado" }, { status: 413 });
   }
 
-  const texto = String(form.get("texto") ?? "").trim().slice(0, 300) || null;
+  // Sin el encabezado de OpenClaw, por si el puente del Mac no está actualizado.
+  const texto = textoDeLuis(String(form.get("texto") ?? ""))?.slice(0, 300) ?? null;
   const mensajeId = String(form.get("mensajeId") ?? "").slice(0, 120) || null;
   const enviadoNum = Number(form.get("enviado"));
   const enviadoMs = Number.isFinite(enviadoNum) && enviadoNum > 0 ? enviadoNum : Date.now();

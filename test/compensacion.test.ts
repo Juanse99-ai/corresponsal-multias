@@ -7,6 +7,8 @@ import {
   notaDePago,
   decidirCompensacion,
   noEsCompensacion,
+  pendienteQueNoEs,
+  textoDeLuis,
   type PagoLeido,
 } from "../lib/compensacion.ts";
 
@@ -84,6 +86,30 @@ test("una foto sin pagos y sin palos no es una compensación", () => {
   // Se leyó algún pago: se revisa, con o sin palos.
   assert.equal(noEsCompensacion([pago(2_000_000)], ""), false);
   assert.equal(noEsCompensacion([pago(2_000_000, { monto: null })], null), false);
+});
+
+test("el encabezado de OpenClaw no es un mensaje de Luis", () => {
+  const encabezado = "[WhatsApp 120363000000000000@g.us +24h Thu 2026-11-12 09:27:45 GMT-5] Fulano De Tal (+5990000000):";
+  assert.equal(textoDeLuis(encabezado), null);
+  assert.equal(textoDeLuis(`${encabezado} 21.8 palos nuevo`), "21.8 palos nuevo");
+  assert.equal(textoDeLuis("130.000 ese neki: el de siempre"), "130.000 ese neki: el de siempre");
+  assert.equal(textoDeLuis("  3   palos "), "3 palos");
+  assert.equal(textoDeLuis(null), null);
+});
+
+test("la cola por confirmar se vuelve a pasar por la regla", () => {
+  const encabezado = "[WhatsApp 120363000000000000@g.us +24h Thu 2026-11-12 09:27:45 GMT-5] Fulano De Tal (+5990000000):";
+  const decision = { accion: "revisar", motivo: "No se leyó ningún pago", filas: [], suma: 0, palos: null, cuadra: false };
+  // Las dos que se colaron el 12 nov: un contacto de WhatsApp sin texto y un pedido.
+  assert.equal(pendienteQueNoEs({ tipo: "compensacion", texto: encabezado, pagos: [], decision }), true);
+  assert.equal(pendienteQueNoEs({ tipo: "compensacion", texto: "130.000 ese neki Glenni Sady", pagos: [], decision }), true);
+  // Dijo palos o se leyó algún pago: se queda.
+  assert.equal(pendienteQueNoEs({ texto: "3 palos", pagos: [], decision }), false);
+  assert.equal(pendienteQueNoEs({ texto: null, pagos: [pago(2_000_000)], decision }), false);
+  // La lectura falló o no se hizo: no se sabe qué es, se queda.
+  assert.equal(pendienteQueNoEs({ tipo: "compensacion", texto: null, horaMensaje: "09:27" }), false);
+  assert.equal(pendienteQueNoEs(null), false);
+  assert.equal(pendienteQueNoEs([]), false);
 });
 
 test("sin palos en el texto, se revisa", () => {

@@ -19,7 +19,7 @@ import { formatCOP, formatHora } from "@/lib/format";
 import { TRANSICION } from "@/lib/movimiento";
 import { cn } from "@/lib/utils";
 import type { SoporteConUrl } from "@/lib/queries";
-import { toleranciaDe, type DecisionCompensacion, type FilaCompensacion } from "@/lib/compensacion";
+import { textoDeLuis, toleranciaDe, type DecisionCompensacion, type FilaCompensacion } from "@/lib/compensacion";
 import { confirmarCompensacionFoto } from "@/app/(app)/luis/actions";
 import { eliminarSoporte } from "@/app/(app)/cuadre/actions";
 
@@ -31,7 +31,9 @@ interface DatosCompensacion {
 }
 
 function datosDe(s: SoporteConUrl): DatosCompensacion {
-  return s.datos && typeof s.datos === "object" && !Array.isArray(s.datos) ? (s.datos as DatosCompensacion) : {};
+  const d = s.datos && typeof s.datos === "object" && !Array.isArray(s.datos) ? (s.datos as DatosCompensacion) : {};
+  // Las que llegaron por un puente viejo traen el encabezado de OpenClaw como texto.
+  return { ...d, texto: textoDeLuis(d.texto) };
 }
 
 /** Los pagos leídos de la foto; si no se leyó ninguno, un renglón en blanco para escribirlo. */

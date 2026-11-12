@@ -91,6 +91,33 @@ export function noEsCompensacion(pagos: PagoLeido[], texto: string | null | unde
   return pagos.length === 0 && palosEnPesos(texto) === null;
 }
 
+/**
+ * Encabezado que OpenClaw le pone al mensaje cuando la foto llega sin texto:
+ * "[WhatsApp 1203...@g.us +24h Thu 2026-11-12 09:27:45 GMT-5] Nombre (+599...):".
+ * El puente ya lo quita, pero un puente sin actualizar lo sigue mandando.
+ */
+const ENCABEZADO_OPENCLAW = /^\s*\[WhatsApp\b[^\]]*\]\s*(?:[^:]{0,120}:)?/i;
+
+/** Lo que de verdad escribió Luis con la foto: sin ese encabezado. null si no escribió nada. */
+export function textoDeLuis(texto: string | null | undefined): string | null {
+  return String(texto ?? "").replace(ENCABEZADO_OPENCLAW, "").replace(/\s+/g, " ").trim() || null;
+}
+
+/**
+ * Una foto que quedó por confirmar y que con la regla de hoy no habría
+ * entrado: ya se leyó, no mostró ningún pago y el texto no dice palos. La cola
+ * se vuelve a pasar por la regla al abrir la Cuenta del Sr. Luis (12 nov 2026:
+ * dos contactos de WhatsApp llegaron antes de que la regla estuviera publicada).
+ * Si la lectura falló o no se hizo (sin `decision`), la foto se queda.
+ * @param datos lo que guardó la entrada del agente en corr_soportes.datos
+ */
+export function pendienteQueNoEs(datos: unknown): boolean {
+  if (!datos || typeof datos !== "object" || Array.isArray(datos)) return false;
+  const d = datos as { texto?: unknown; pagos?: unknown; decision?: unknown };
+  if (!d.decision || !Array.isArray(d.pagos)) return false;
+  return noEsCompensacion(d.pagos as PagoLeido[], textoDeLuis(typeof d.texto === "string" ? d.texto : null));
+}
+
 const HORA = /^([01]\d|2[0-3]):[0-5]\d/;
 
 const NOMBRE_FORMATO: Record<string, string> = {
