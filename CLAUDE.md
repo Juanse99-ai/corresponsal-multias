@@ -159,7 +159,11 @@
   el monto exacto. La foto queda en `corr_soportes` con contexto `luis-comp`
   y la lectura en `datos`; se confirma en "Por confirmar" de la Cuenta del Sr.
   Luis (`components/luis/compensaciones-por-confirmar.tsx`,
-  `confirmarCompensacionFoto`). Sin `COMPENSACIONES_AUTO=1` en Vercel todo queda
+  `confirmarCompensacionFoto`). Ahí es un solo renglón recogido (cuántas
+  fotos y cuánto suman) que abre una ventana con la foto grande al lado de los
+  pagos leídos (12 nov 2026, lo pidió el dueño: limpio, poco texto, botones de
+  ícono y con animaciones). Excepciones que pidió para esa ventana: registrar
+  es solo el chulo, y los pagos entran de a poco (20 ms). Sin `COMPENSACIONES_AUTO=1` en Vercel todo queda
   por confirmar; con él, lo que cuadra con los palos y no tiene dudas se guarda
   solo. Luis también manda al grupo fotos que no son pagos (pedidos con el
   número de un Nequi): si la foto no muestra pagos y el texto no dice palos
