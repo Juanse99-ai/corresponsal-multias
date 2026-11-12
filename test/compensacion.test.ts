@@ -7,6 +7,8 @@ import {
   notaDePago,
   decidirCompensacion,
   noEsCompensacion,
+  pendienteQueNoEs,
+  textoDeLuis,
   type PagoLeido,
 } from "../lib/compensacion.ts";
 
@@ -84,6 +86,65 @@ test("una foto sin pagos y sin palos no es una compensación", () => {
   // Se leyó algún pago: se revisa, con o sin palos.
   assert.equal(noEsCompensacion([pago(2_000_000)], ""), false);
   assert.equal(noEsCompensacion([pago(2_000_000, { monto: null })], null), false);
+});
+
+test("los millones se aceptan dichos de varias maneras", () => {
+  assert.equal(palosEnPesos("21.8 millones nuevo"), 21_800_000);
+  assert.equal(palosEnPesos("21,8 Millones"), 21_800_000);
+  assert.equal(palosEnPesos("1 millón"), 1_000_000);
+  assert.equal(palosEnPesos("1 millon"), 1_000_000);
+  assert.equal(palosEnPesos("3 barras"), 3_000_000);
+  assert.equal(palosEnPesos("2 melones"), 2_000_000);
+  assert.equal(palosEnPesos("21.8 mill"), 21_800_000);
+  assert.equal(palosEnPesos("21.8M nuevo"), 21_800_000);
+  assert.equal(palosEnPesos("21,8 MM"), 21_800_000);
+  assert.equal(palosEnPesos("21.800.000 nuevo"), 21_800_000);
+  assert.equal(palosEnPesos("van 1.800.002"), 1_800_002);
+  // No son millones: miles, un pedido chico, una m suelta, una hora.
+  assert.equal(palosEnPesos("130 mil a ese neki"), null);
+  assert.equal(palosEnPesos("130.000 ese neki Glenni Sady"), null);
+  assert.equal(palosEnPesos("3 metros"), null);
+  assert.equal(palosEnPesos("a las 9 de la mañana"), null);
+  assert.equal(palosEnPesos("llámame al 3001234567"), null);
+});
+
+test("la tolerancia sigue a cómo se escribió el número", () => {
+  assert.equal(toleranciaDe("21.8 millones"), 50_000);
+  assert.equal(toleranciaDe("3 barras"), 100_000);
+  assert.equal(toleranciaDe("21.800.000"), 1_000);
+  const d = decidirCompensacion([pago(10_000_000), pago(11_800_002)], "21.800.000 nuevo", DIA, null, AUTO);
+  assert.equal(d.cuadra, true);
+  assert.equal(d.accion, "guardar");
+});
+
+test("una foto sin pagos que dice millones no se descarta", () => {
+  assert.equal(noEsCompensacion([], "21.8 millones nuevo"), false);
+  assert.equal(noEsCompensacion([], "21.800.000"), false);
+  assert.equal(noEsCompensacion([], "130 mil a ese neki"), true);
+});
+
+test("el encabezado de OpenClaw no es un mensaje de Luis", () => {
+  const encabezado = "[WhatsApp 120363000000000000@g.us +24h Thu 2026-11-12 09:27:45 GMT-5] Fulano De Tal (+5990000000):";
+  assert.equal(textoDeLuis(encabezado), null);
+  assert.equal(textoDeLuis(`${encabezado} 21.8 palos nuevo`), "21.8 palos nuevo");
+  assert.equal(textoDeLuis("130.000 ese neki: el de siempre"), "130.000 ese neki: el de siempre");
+  assert.equal(textoDeLuis("  3   palos "), "3 palos");
+  assert.equal(textoDeLuis(null), null);
+});
+
+test("la cola por confirmar se vuelve a pasar por la regla", () => {
+  const encabezado = "[WhatsApp 120363000000000000@g.us +24h Thu 2026-11-12 09:27:45 GMT-5] Fulano De Tal (+5990000000):";
+  const decision = { accion: "revisar", motivo: "No se leyó ningún pago", filas: [], suma: 0, palos: null, cuadra: false };
+  // Las dos que se colaron el 12 nov: un contacto de WhatsApp sin texto y un pedido.
+  assert.equal(pendienteQueNoEs({ tipo: "compensacion", texto: encabezado, pagos: [], decision }), true);
+  assert.equal(pendienteQueNoEs({ tipo: "compensacion", texto: "130.000 ese neki Glenni Sady", pagos: [], decision }), true);
+  // Dijo palos o se leyó algún pago: se queda.
+  assert.equal(pendienteQueNoEs({ texto: "3 palos", pagos: [], decision }), false);
+  assert.equal(pendienteQueNoEs({ texto: null, pagos: [pago(2_000_000)], decision }), false);
+  // La lectura falló o no se hizo: no se sabe qué es, se queda.
+  assert.equal(pendienteQueNoEs({ tipo: "compensacion", texto: null, horaMensaje: "09:27" }), false);
+  assert.equal(pendienteQueNoEs(null), false);
+  assert.equal(pendienteQueNoEs([]), false);
 });
 
 test("sin palos en el texto, se revisa", () => {

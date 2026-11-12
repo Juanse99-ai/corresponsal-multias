@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { after } from "next/server";
 import { hoyISO, formatFechaLarga } from "@/lib/format";
 import { getConsignacionesLuis, getCompensacionesLuis, getSaldoLuisAcumulado, getSoportes } from "@/lib/queries";
 import { LuisManager } from "@/components/luis/luis-manager";
@@ -6,7 +7,8 @@ import { SoportesSection } from "@/components/cuadre/soportes-section";
 import { ComprobantesLector } from "@/components/luis/comprobantes-lector";
 import { LuisEnVivo } from "@/components/luis/luis-en-vivo";
 import { CompensacionesPorConfirmar } from "@/components/luis/compensaciones-por-confirmar";
-import { CONTEXTO_COMPENSACION } from "@/lib/compensacion";
+import { CONTEXTO_COMPENSACION, pendienteQueNoEs } from "@/lib/compensacion";
+import { descartarPendientes } from "@/lib/compensacion-cola";
 import { leerComprobantesDelDia, agregarConsignacionesDesdeFotos } from "@/app/(app)/luis/actions";
 import { PageHeader, CifraCabecera } from "@/components/shell/page-header";
 import { ReporteLuisButton } from "@/components/luis/reporte-luis";
@@ -27,7 +29,7 @@ export default async function LuisPage({
   const sp = await searchParams;
   const fecha = sp.fecha && ISO.test(sp.fecha) ? sp.fecha : hoyISO();
 
-  const [consignaciones, compensaciones, acumuladoAyer, soportes, porConfirmar] = await Promise.all([
+  const [consignaciones, compensaciones, acumuladoAyer, soportes, enCola] = await Promise.all([
     getConsignacionesLuis(fecha),
     getCompensacionesLuis(fecha),
     getSaldoLuisAcumulado(fecha, false),
@@ -35,6 +37,12 @@ export default async function LuisPage({
     // Compensaciones que Luis mandó al grupo y esperan confirmación (app/api/agente/compensacion).
     getSoportes(fecha, CONTEXTO_COMPENSACION),
   ]);
+
+  // La cola se vuelve a pasar por la regla de hoy: lo que ya no entraría (sin
+  // pagos ni palos) no se muestra y se borra después de responder.
+  const sobran = enCola.filter((f) => pendienteQueNoEs(f.datos));
+  const porConfirmar = sobran.length > 0 ? enCola.filter((f) => !sobran.includes(f)) : enCola;
+  if (sobran.length > 0) after(() => descartarPendientes(sobran.map((f) => ({ id: f.id, path: f.path }))));
 
   // El saldo acumulado (lo que el punto le debe al Sr. Luis): la cifra de la cabecera.
   const totalComp = compensaciones.reduce((s, c) => s + c.monto, 0);
