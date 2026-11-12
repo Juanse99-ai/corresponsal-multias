@@ -161,7 +161,9 @@
   Luis (`components/luis/compensaciones-por-confirmar.tsx`,
   `confirmarCompensacionFoto`). Sin `COMPENSACIONES_AUTO=1` en Vercel todo queda
   por confirmar; con él, lo que cuadra con los palos y no tiene dudas se guarda
-  solo.
+  solo. Luis también manda al grupo fotos que no son pagos (pedidos con el
+  número de un Nequi): si la foto no muestra pagos y el texto no dice palos
+  (`noEsCompensacion`), se descarta sin aviso (12 nov 2026, lo aprobó el dueño).
 - **Resumen de las 7** (11 nov 2026, lo pidió el dueño): `app/api/agente/resumen/route.ts`
   (GET, solo lectura, misma `AGENTE_TOKEN`) devuelve en texto para WhatsApp lo
   de `lib/resumen-diario.ts`: cuadre de ayer, consignaciones y saldo del Sr.

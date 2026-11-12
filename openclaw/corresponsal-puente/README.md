@@ -17,6 +17,10 @@ App Corresponsal, sin IA de por medio y sin escribir nunca en el grupo.
 - **Ningún envío hacia el grupo sale** (`message_sending` y
   `reply_payload_sending` lo cancelan). En el grupo hay clientes.
 
+Los números de teléfono y el ID del grupo que aparecen en este archivo son
+inventados: los reales viven solo en `~/.openclaw/openclaw.json` del Mac. Al
+copiar un comando, cambia los de ejemplo por los reales.
+
 Probado con un OpenClaw simulado en `test/corresponsal-puente.test.ts` y
 cargado en un OpenClaw 2026.11.3 real (`plugins inspect --runtime`: estado
 `loaded`, los 4 ganchos registrados, sin diagnósticos). Sin WhatsApp de por
@@ -48,10 +52,11 @@ OpenClaw avisa que el plugin viene de una carpeta local y no de ClawHub: es
 normal, el código es este. `--force` confirma esa carpeta y
 `--accept-capabilities` acepta lo que declara (no pide permisos extra).
 
-Configurarlo (cambia `TU_TOKEN` por el `AGENTE_TOKEN` de Vercel):
+Configurarlo (cambia `TU_TOKEN` por el `AGENTE_TOKEN` de Vercel, y el grupo y
+el número por los reales):
 
 ```bash
-openclaw config set plugins.entries.corresponsal-puente.config '{"grupo":"120363320161907130@g.us","dueno":"+573003651525","url":"https://corresponsal-multias.vercel.app/api/agente/comprobante","token":"TU_TOKEN","diagnostico":true}' --strict-json
+openclaw config set plugins.entries.corresponsal-puente.config '{"grupo":"120363000000000000@g.us","dueno":"+573005550101","url":"https://corresponsal-multias.vercel.app/api/agente/comprobante","token":"TU_TOKEN","diagnostico":true}' --strict-json
 openclaw config set channels.whatsapp.pluginHooks.messageReceived true
 openclaw gateway restart
 openclaw plugins inspect corresponsal-puente --runtime --json
@@ -66,8 +71,8 @@ El grupo estaba apagado (`groupPolicy: "disabled"`). Para que el puente vea
 las fotos, OpenClaw tiene que admitir los mensajes del dueño en ese grupo:
 
 ```bash
-openclaw config set channels.whatsapp.groups '{"120363320161907130@g.us":{"requireMention":false,"tools":{"deny":["group:runtime","group:fs"]}}}' --strict-json
-openclaw config set channels.whatsapp.groupAllowFrom '["+573003651525"]' --strict-json
+openclaw config set channels.whatsapp.groups '{"120363000000000000@g.us":{"requireMention":false,"tools":{"deny":["group:runtime","group:fs"]}}}' --strict-json
+openclaw config set channels.whatsapp.groupAllowFrom '["+573005550101"]' --strict-json
 openclaw config set channels.whatsapp.groupPolicy "allowlist"
 openclaw gateway restart
 ```
@@ -104,7 +109,7 @@ que imprime. No pasa por la IA ni gasta del plan de Claude.
 Crearla (una sola vez, después de copiar la carpeta actualizada):
 
 ```bash
-openclaw automations create "0 7 * * *" --tz America/Bogota --exact --name "Resumen de las 7" --command-argv "[\"$(command -v node)\", \"$HOME/openclaw-plugins/corresponsal-puente/resumen.js\"]" --announce --channel whatsapp --to "+573003651525"
+openclaw automations create "0 7 * * *" --tz America/Bogota --exact --name "Resumen de las 7" --command-argv "[\"$(command -v node)\", \"$HOME/openclaw-plugins/corresponsal-puente/resumen.js\"]" --announce --channel whatsapp --to "+573005550101"
 ```
 
 Probarla sin esperar a las 7 (usa el id que muestra `openclaw automations list`):
@@ -130,8 +135,8 @@ número con "must not have additional properties: luis". Después:
 
 ```bash
 openclaw gateway restart
-openclaw config set plugins.entries.corresponsal-puente.config.luis '"+59996813171"' --strict-json
-openclaw config set channels.whatsapp.groupAllowFrom '["+573003651525","+59996813171"]' --strict-json
+openclaw config set plugins.entries.corresponsal-puente.config.luis '"+59995550199"' --strict-json
+openclaw config set channels.whatsapp.groupAllowFrom '["+573005550101","+59995550199"]' --strict-json
 openclaw gateway restart
 ```
 
@@ -143,14 +148,19 @@ grupo. El agente igual no los procesa ni contesta: el plugin los reclama antes.
 Queda encendido cuando el registro dice "Activo: bloqueo del grupo y reenvío
 de fotos (y compensaciones del Sr. Luis)".
 
-Mientras `COMPENSACIONES_AUTO` no esté en `1` en Vercel, todas quedan en "Por
+Luis también manda al grupo fotos que no son pagos (un pedido con el número de
+un Nequi). Si la foto no muestra ningún pago y el texto no dice palos, la app
+la descarta y no avisa: en el registro sale `descartada (La foto no muestra
+pagos)`. Si era una compensación y la foto no se leyó, súbela a mano.
+
+Mientras `COMPENSACIONES_AUTO` no esté en `1` en Vercel, las demás quedan en "Por
 confirmar" y llega un aviso al celular del admin. Cuando ya se vea que lee
 bien (una semana), se crea `COMPENSACIONES_AUTO=1` en Vercel y se vuelve a
 desplegar: desde ahí lo que cuadra con los palos y no tiene dudas se guarda
 solo, y lo demás sigue quedando por confirmar.
 
 Si una foto de Luis no llega, mira el registro con `diagnostico` encendido: la
-línea dice en qué terminan los dígitos del remitente. Si no termina en 3171,
+línea dice en qué terminan los dígitos del remitente. Si no termina en lo mismo que el número de Luis,
 WhatsApp está mandando otro identificador y hay que ajustar `config.luis`.
 
 ## Operadoras
@@ -161,13 +171,13 @@ consignación del Sr. Luis o para revisar.
 
 Primero actualiza la carpeta (ver "Actualizarlo") y reinicia el gateway; si no,
 OpenClaw rechaza la opción con "must not have additional properties:
-operadoras". Después (el número de ejemplo es inventado; en `groupAllowFrom`
-van los que ya estaban más el de la operadora):
+operadoras". Después (en `groupAllowFrom` van los que ya estaban más el de la
+operadora):
 
 ```bash
 openclaw gateway restart
 openclaw config set plugins.entries.corresponsal-puente.config.operadoras '["+573005550142"]' --strict-json
-openclaw config set channels.whatsapp.groupAllowFrom '["NUMERO_DEL_DUENO","NUMERO_DE_LUIS","+573005550142"]' --strict-json
+openclaw config set channels.whatsapp.groupAllowFrom '["+573005550101","+59995550199","+573005550142"]' --strict-json
 openclaw gateway restart
 ```
 
