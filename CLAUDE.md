@@ -4,27 +4,41 @@
 - **Usa Node 22**, no el default (Node 16 rompe Next 16):
   `export PATH="$HOME/.nvm/versions/node/v22.21.0/bin:$PATH"`
 - `npm run dev` (puerto 3000). Build: `npm run build`. Typecheck: `npx tsc --noEmit`.
-- El preview MCP debe usar el wrapper `.claude/dev.sh` (fija Node 22).
+  Pruebas: `npm test` (node:test, sin framework extra).
+- El preview MCP usa el wrapper `.claude/dev.sh` (fija Node 22). Ese archivo y
+  `.claude/settings.json` son locales de cada máquina y no van al repo.
 
 ## Supabase (compartido con el taller)
 - Proyecto Supabase: `hpndvrjjizzkusuuhefb` (el mismo "App Gestion Taller").
 - **Todas las tablas del corresponsal van con prefijo `corr_`** y RLS propio, para
   no tocar las tablas del taller (clientes, trabajos, etc.).
 - Auth es compartido (mismo pool `auth.users`). Roles del corresponsal en
-  `corr_profiles.rol` (`admin` | `operador`).
-- No habilites RLS en tablas del taller: las tienen desactivadas a propósito y
-  romperlas afecta la otra app.
+  `corr_profiles.rol` (`admin` | `operador`). Tener sesión NO basta: entra quien
+  tiene perfil activo (`corr_es_miembro()`).
+- Las tablas del taller y de las otras apps de la base son de esas apps: el
+  corresponsal no las usa, no las abre y no les cambia permisos.
+
+## Seguridad (no negociable)
+- **RLS obligatorio en toda tabla nueva**, con sus políticas en la misma
+  migración y su archivo de rollback (`*.down.sql`).
+- **Nunca `using (true)` / `with check (true)` para `authenticated`**: siempre
+  `public.corr_es_miembro()` o `public.corr_is_admin()`.
+- **Cero credenciales, tokens o datos personales en archivos del repo**: ni en
+  código, ni en comentarios, ni en documentación. Los ejemplos van inventados.
+- Las migraciones aplicadas a mano en la base también se guardan en
+  `supabase/migrations/`, con la versión con que quedaron aplicadas
+  (`<version>_<nombre>.sql`, ver `supabase/README.md`).
+- Cabeceras de seguridad (CSP, X-Frame-Options, HSTS...) en `next.config.ts`.
+  Un recurso de otro dominio (script, imagen, conexión) se agrega ahí o el
+  navegador lo bloquea. El cron solo acepta el secreto en `Authorization`.
 
 ## Lógica del cuadre (lib/cuadre.ts)
 - `SALDO FINAL = total_tirilla − (sr_luis + nequis + bancolombia + recaudos
   + prestamos_consignaciones)`. Solo cuadra lo ELECTRÓNICO (lo que pasó por
-  Bancolombia). Verificado contra los 15 días cerrados: da cero en los 13 que
-  cerraron cuadrados. La versión anterior de esta línea (con compensado,
-  efectivo_consignaciones y retiros_cash restando) era incorrecta: solo daba
-  cero en 2 de 15.
+  Bancolombia). No metas `compensado`, `efectivo_consignaciones` ni
+  `retiros_cash` en esta resta: esa versión era incorrecta.
 - `compensado` NO resta del saldo final: solo del arqueo de caja físico
-  (`efectivoEsperadoCaja`). Comprobado con el 2026-06-25, único día cerrado con
-  compensado ($2.575.000): cerró en cero con la fórmula de arriba.
+  (`efectivoEsperadoCaja`).
 - `efectivo_consignaciones` y `retiros_cash` son columnas MUERTAS: existen en
   `corr_cuadres`, se guardan siempre en 0 y no tienen campo ni efecto.
 - `sr_luis` es autoritativo del servidor (suma de `corr_consignaciones_luis` del día);
@@ -42,7 +56,7 @@
   es de cada persona (no hay clave compartida: se perderían la bitácora, el
   `created_by` y los roles). Verificar, cambiar (pide la actual) y contar
   intentos van DENTRO de Postgres con las filas bloqueadas (`corr_caja_verificar`,
-  `corr_caja_cambiar_clave`, bcrypt; migraciones 0005 y 0006): 5 malas
+  `corr_caja_cambiar_clave`, bcrypt; migraciones `20261111051846` a `20261111053313`): 5 malas
   bloquean 5 min doblando hasta 60, con 10 queda bloqueada hasta que el admin
   la borre, y el equipo desde 15 malas. Claves obvias rechazadas en
   `lib/caja.ts` (probado). Tablas `corr_claves` y `corr_equipos`
@@ -184,7 +198,7 @@
   a las 7:00 Bogotá y manda lo que imprime al chat del dueño (sin IA).
 - **Cuenta del Sr. Luis en vivo** (11 nov 2026): `components/luis/luis-en-vivo.tsx`
   escucha con Supabase Realtime los cambios del día en `corr_consignaciones_luis`,
-  `corr_compensaciones_luis` y `corr_soportes` (migración 0007, aplicada) y
+  `corr_compensaciones_luis` y `corr_soportes` (migración `20261111175533_luis_en_vivo`) y
   refresca la pantalla con `useNavegacion().refresh()`; también al volver a la
   app. Sin Realtime, revisa cada 20 s mientras se ve. Los DELETE no llegan con
   filtro por fecha (limitación de Realtime): los borra quien está en la app.

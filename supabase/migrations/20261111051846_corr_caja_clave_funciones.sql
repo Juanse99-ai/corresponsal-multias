@@ -79,8 +79,3 @@ revoke all on function public.corr_caja_poner_clave(uuid, text) from public, ano
 revoke all on function public.corr_caja_verificar(text, uuid, text) from public, anon, authenticated;
 grant execute on function public.corr_caja_poner_clave(uuid, text) to service_role;
 grant execute on function public.corr_caja_verificar(text, uuid, text) to service_role;
-
--- Segunda barrera: además de RLS sin políticas, sin permisos de tabla para el
--- navegador (anon y authenticated).
-revoke all on table public.corr_claves from anon, authenticated;
-revoke all on table public.corr_equipos from anon, authenticated;
