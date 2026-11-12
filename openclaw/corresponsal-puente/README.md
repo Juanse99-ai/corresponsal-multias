@@ -7,6 +7,8 @@ App Corresponsal, sin IA de por medio y sin escribir nunca en el grupo.
   `/api/agente/comprobante`. La app la lee con su lector de tirillas y decide
   (opción A): lo seguro queda como consignación del Sr. Luis; lo dudoso queda
   pendiente en "Llenar desde fotos" del día y avisa al celular del admin.
+- Las fotos de **las operadoras** (`config.operadoras`) van igual que las del
+  dueño.
 - Cada foto que **el Sr. Luis** manda en el grupo (con `config.luis`) se envía
   con su texto ("21.8 palos nuevo") a `/api/agente/compensacion`. La app lee
   los pagos de la foto y los deja en "Por confirmar" de la Cuenta del Sr. Luis,
@@ -150,6 +152,27 @@ solo, y lo demás sigue quedando por confirmar.
 Si una foto de Luis no llega, mira el registro con `diagnostico` encendido: la
 línea dice en qué terminan los dígitos del remitente. Si no termina en 3171,
 WhatsApp está mandando otro identificador y hay que ajustar `config.luis`.
+
+## Operadoras
+
+Las fotos que manda una operadora del punto en el grupo se tratan igual que las
+del dueño: van a `/api/agente/comprobante` y la app decide si quedan como
+consignación del Sr. Luis o para revisar.
+
+Primero actualiza la carpeta (ver "Actualizarlo") y reinicia el gateway; si no,
+OpenClaw rechaza la opción con "must not have additional properties:
+operadoras". Después (el número de ejemplo es inventado; en `groupAllowFrom`
+van los que ya estaban más el de la operadora):
+
+```bash
+openclaw gateway restart
+openclaw config set plugins.entries.corresponsal-puente.config.operadoras '["+573005550142"]' --strict-json
+openclaw config set channels.whatsapp.groupAllowFrom '["NUMERO_DEL_DUENO","NUMERO_DE_LUIS","+573005550142"]' --strict-json
+openclaw gateway restart
+```
+
+Queda encendido cuando el registro dice "... con 1 operadora." Un número con
+menos de 10 dígitos se ignora.
 
 ## Actualizarlo
 
