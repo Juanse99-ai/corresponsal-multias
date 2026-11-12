@@ -59,26 +59,50 @@ export interface DecisionCompensacion {
 }
 
 /**
- * "21.8 palos nuevo" -> 21.800.000. Acepta coma o punto decimal ("21,8") y
- * "palo" en singular ("1 palo"). Devuelve null si el texto no dice palos.
+ * Las maneras de decir millones que se aceptan después del número: palos,
+ * barras, melones, millones, millón, mill (12 nov 2026, el dueño preguntó qué
+ * pasaba si Luis decía "millones" en vez de "palos"). "mil" no: son miles.
  */
-export function palosEnPesos(texto: string | null | undefined): number | null {
-  const m = String(texto ?? "").match(/(\d+(?:[.,]\d+)?)\s*palos?\b/i);
-  if (!m) return null;
-  const n = Number(m[1].replace(",", "."));
-  if (!Number.isFinite(n) || n <= 0) return null;
-  return Math.round(n * 1_000_000);
+const EN_MILLONES = /(\d+(?:[.,]\d+)?)\s*(?:palos?|barras?|mel[oó]n(?:es)?|mill[oó]n(?:es)?|millones|mill)(?![a-záéíóúñ])/i;
+/** "21.8M" o "21,8 MM": la M va en mayúscula para no confundirla con otra palabra. */
+const EN_M = /(\d+(?:[.,]\d+)?)\s*M{1,2}(?![A-Za-záéíóúñ])/;
+/** El monto completo en pesos, de un millón para arriba: "21.800.000". */
+const EN_PESOS = /(?<![\d.,])(\d{1,3}(?:\.\d{3}){2,})(?![\d.,]*\d)/;
+
+/** El monto del texto de Luis y cuánto puede diferir de la suma leída. */
+function montoDelTexto(texto: string | null | undefined): { pesos: number; tolerancia: number } | null {
+  const t = String(texto ?? "");
+  const m = t.match(EN_MILLONES) ?? t.match(EN_M);
+  if (m) {
+    const n = Number(m[1].replace(",", "."));
+    if (!Number.isFinite(n) || n <= 0) return null;
+    // "3 palos" está redondeado al millón y "21.8" a la décima, pero nunca más
+    // de 100.000 (un dígito mal leído casi siempre pasa de ahí).
+    const decimales = m[1].split(/[.,]/)[1]?.length ?? 0;
+    return { pesos: Math.round(n * 1_000_000), tolerancia: Math.min(TOLERANCIA_PALOS, 1_000_000 / 10 ** decimales / 2) };
+  }
+  const p = t.match(EN_PESOS);
+  if (p) {
+    const pesos = Number(p[1].replace(/\./g, ""));
+    // Escrito al peso: solo se perdonan los redondeos de centavos.
+    if (Number.isFinite(pesos) && pesos >= 1_000_000) return { pesos, tolerancia: 1_000 };
+  }
+  return null;
 }
 
 /**
- * Diferencia que se acepta según cómo escribió Luis el número: "3 palos" está
- * redondeado al millón y "21.8" a la décima, pero nunca más de 100.000 (un
- * dígito mal leído casi siempre pasa de ahí).
+ * "21.8 palos nuevo" -> 21.800.000. Acepta coma o punto decimal ("21,8"),
+ * singular ("1 palo"), los otros nombres de millones ("21.8 millones",
+ * "3 barras", "21.8M") y el monto completo ("21.800.000"). Devuelve null si el
+ * texto no dice cuánto.
  */
+export function palosEnPesos(texto: string | null | undefined): number | null {
+  return montoDelTexto(texto)?.pesos ?? null;
+}
+
+/** Diferencia que se acepta entre la suma leída y lo que escribió Luis. */
 export function toleranciaDe(texto: string | null | undefined): number {
-  const m = String(texto ?? "").match(/\d+(?:[.,](\d+))?\s*palos?\b/i);
-  const decimales = m?.[1]?.length ?? 0;
-  return Math.min(TOLERANCIA_PALOS, (1_000_000 / 10 ** decimales) / 2);
+  return montoDelTexto(texto)?.tolerancia ?? TOLERANCIA_PALOS;
 }
 
 /**

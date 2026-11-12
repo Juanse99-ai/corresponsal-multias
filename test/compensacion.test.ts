@@ -88,6 +88,41 @@ test("una foto sin pagos y sin palos no es una compensación", () => {
   assert.equal(noEsCompensacion([pago(2_000_000, { monto: null })], null), false);
 });
 
+test("los millones se aceptan dichos de varias maneras", () => {
+  assert.equal(palosEnPesos("21.8 millones nuevo"), 21_800_000);
+  assert.equal(palosEnPesos("21,8 Millones"), 21_800_000);
+  assert.equal(palosEnPesos("1 millón"), 1_000_000);
+  assert.equal(palosEnPesos("1 millon"), 1_000_000);
+  assert.equal(palosEnPesos("3 barras"), 3_000_000);
+  assert.equal(palosEnPesos("2 melones"), 2_000_000);
+  assert.equal(palosEnPesos("21.8 mill"), 21_800_000);
+  assert.equal(palosEnPesos("21.8M nuevo"), 21_800_000);
+  assert.equal(palosEnPesos("21,8 MM"), 21_800_000);
+  assert.equal(palosEnPesos("21.800.000 nuevo"), 21_800_000);
+  assert.equal(palosEnPesos("van 1.800.002"), 1_800_002);
+  // No son millones: miles, un pedido chico, una m suelta, una hora.
+  assert.equal(palosEnPesos("130 mil a ese neki"), null);
+  assert.equal(palosEnPesos("130.000 ese neki Glenni Sady"), null);
+  assert.equal(palosEnPesos("3 metros"), null);
+  assert.equal(palosEnPesos("a las 9 de la mañana"), null);
+  assert.equal(palosEnPesos("llámame al 3001234567"), null);
+});
+
+test("la tolerancia sigue a cómo se escribió el número", () => {
+  assert.equal(toleranciaDe("21.8 millones"), 50_000);
+  assert.equal(toleranciaDe("3 barras"), 100_000);
+  assert.equal(toleranciaDe("21.800.000"), 1_000);
+  const d = decidirCompensacion([pago(10_000_000), pago(11_800_002)], "21.800.000 nuevo", DIA, null, AUTO);
+  assert.equal(d.cuadra, true);
+  assert.equal(d.accion, "guardar");
+});
+
+test("una foto sin pagos que dice millones no se descarta", () => {
+  assert.equal(noEsCompensacion([], "21.8 millones nuevo"), false);
+  assert.equal(noEsCompensacion([], "21.800.000"), false);
+  assert.equal(noEsCompensacion([], "130 mil a ese neki"), true);
+});
+
 test("el encabezado de OpenClaw no es un mensaje de Luis", () => {
   const encabezado = "[WhatsApp 120363000000000000@g.us +24h Thu 2026-11-12 09:27:45 GMT-5] Fulano De Tal (+5990000000):";
   assert.equal(textoDeLuis(encabezado), null);

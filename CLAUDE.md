@@ -168,7 +168,9 @@
   solo. Luis también manda al grupo fotos que no son pagos (pedidos con el
   número de un Nequi): si la foto no muestra pagos y el texto no dice palos
   (`noEsCompensacion`), se descarta sin aviso (12 nov 2026, lo aprobó el dueño).
-  La cola se vuelve a pasar por esa regla al abrir la Cuenta del Sr. Luis
+  "Palos" también se entiende dicho como millones, millón, barras, melones,
+  mill o M ("21.8M"), y el monto completo ("21.800.000", tolerancia de $1.000);
+  "mil" no (son miles). La cola se vuelve a pasar por esa regla al abrir la Cuenta del Sr. Luis
   (`pendienteQueNoEs`; borra `lib/compensacion-cola.ts` con `after`): lo que
   llegó antes de un cambio de regla no se queda pegado. La entrada también
   quita el encabezado de OpenClaw del texto (`textoDeLuis`), por si el puente
