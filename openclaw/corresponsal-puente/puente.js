@@ -14,7 +14,9 @@
 // Configuración en ~/.openclaw/openclaw.json, plugins.entries.corresponsal-puente.config:
 //   grupo, dueno, operadoras, luis, url, urlCompensacion, token, diagnostico
 //   (ver openclaw.plugin.json y README.md).
-import { readFile } from "node:fs/promises";
+import { appendFile, readFile } from "node:fs/promises";
+import { homedir } from "node:os";
+import { join } from "node:path";
 
 const soloDigitos = (s) => String(s ?? "").replace(/\D/g, "");
 
@@ -40,6 +42,33 @@ function enMs(t) {
 }
 
 const espera = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Bandeja de mensajes para las operadoras (12 nov 2026): el puente anota aquí
+ * cómo quedó cada foto que mandó una operadora y `operadoras.js` (una tarea de
+ * OpenClaw) se los manda por WhatsApp. El puente no escribe directo: así el
+ * envío pasa por la misma vía probada del resumen.
+ */
+export function rutaBandeja() {
+  return join(process.env.OPENCLAW_HOME ?? join(homedir(), ".openclaw"), "corresponsal-operadoras.jsonl");
+}
+
+const pesos = (n) => "$" + Math.round(Math.abs(Number(n) || 0)).toLocaleString("es-CO");
+
+/** Lo que se le dice a la operadora según lo que respondió la app (null si nada). */
+export function mensajeParaOperadora(cuerpo) {
+  if (!cuerpo) return "Tu foto no llegó a la app. Súbela a mano.";
+  if (cuerpo.resultado === "guardado") {
+    const c = cuerpo.consignacion ?? {};
+    const hora = typeof c.hora === "string" && c.hora ? ` de las ${c.hora.slice(0, 5)}` : "";
+    return `Consignación registrada: ${pesos(c.monto)}${hora}. No hay que subirla a mano.`;
+  }
+  if (cuerpo.resultado === "revisar") {
+    const motivo = String(cuerpo.motivo ?? "").replace(/\.$/, "");
+    return `Tu foto quedó por revisar${motivo ? ` (${motivo})` : ""}. No la mandes otra vez.`;
+  }
+  return null;
+}
 
 /**
  * Encabezado que OpenClaw le pone al mensaje cuando la foto llega sin texto:
@@ -135,7 +164,7 @@ export const puente = {
       return;
     }
 
-    async function enviar(foto, tipo, mensajeId, enviado, destino, texto) {
+    async function enviar(foto, tipo, mensajeId, enviado, destino, texto, quien) {
       const datos = await readFile(foto.path);
       const que = destino === urlComp ? "Compensación" : "Foto";
       for (let intento = 1; intento <= 3; intento++) {
@@ -144,6 +173,7 @@ export const puente = {
           form.append("foto", new Blob([datos], { type: tipo }), `comprobante.${tipo.split("/")[1]}`);
           if (mensajeId) form.append("mensajeId", mensajeId);
           if (texto) form.append("texto", texto);
+          if (quien) form.append("quien", quien);
           if (enviado) form.append("enviado", String(enviado));
           const res = await fetch(destino, {
             method: "POST",
@@ -160,7 +190,7 @@ export const puente = {
               `[corresponsal-puente] La app publicada no tiene la entrada del agente (redirige a ${res.headers.get("location") ?? "otra página"}). ` +
                 "Revisa en Vercel que producción tenga la última versión de main. Sube esta foto a mano.",
             );
-            return;
+            return null;
           }
           const cuerpo = await res.json().catch(() => ({}));
           if (res.ok) {
@@ -169,25 +199,25 @@ export const puente = {
             log.info?.(
               `[corresponsal-puente] ${que} ${mensajeId ?? ""}: ${cuerpo.resultado ?? "ok"}${cuerpo.motivo ? ` (${cuerpo.motivo})` : ""}${tiempo}`,
             );
-            return;
+            return cuerpo;
           }
           if (res.status === 401) {
             log.error?.(
               "[corresponsal-puente] La app no aceptó la clave: config.token del plugin no coincide con AGENTE_TOKEN de Vercel " +
                 "(o falta volver a desplegar después de cambiarla). Sube esta foto a mano.",
             );
-            return;
+            return null;
           }
           if (res.status === 503) {
             log.error?.(
               "[corresponsal-puente] La entrada del agente está apagada: falta AGENTE_TOKEN o SUPABASE_SERVICE_ROLE_KEY en Vercel. Sube esta foto a mano.",
             );
-            return;
+            return null;
           }
           // 4xx no se arregla reintentando (token malo, foto rara).
           if (res.status < 500) {
             log.error?.(`[corresponsal-puente] La app rechazó la foto (${res.status}): ${cuerpo.error ?? ""}`);
-            return;
+            return null;
           }
           log.warn?.(`[corresponsal-puente] La app respondió ${res.status}, intento ${intento} de 3.`);
         } catch (e) {
@@ -196,6 +226,18 @@ export const puente = {
         if (intento < 3) await espera(intento * 5_000);
       }
       log.error?.(`[corresponsal-puente] No se pudo entregar la foto ${mensajeId ?? ""}. Súbela a mano en la app.`);
+      return null;
+    }
+
+    /** Deja en la bandeja el mensaje para la operadora que mandó la foto. */
+    async function anotarParaOperadora(numero, cuerpo) {
+      const texto = mensajeParaOperadora(cuerpo);
+      if (!texto) return;
+      try {
+        await appendFile(rutaBandeja(), JSON.stringify({ para: numero, texto, ts: Date.now() }) + "\n");
+      } catch (e) {
+        log.warn?.(`[corresponsal-puente] No se pudo anotar el aviso para la operadora: ${e?.message ?? e}`);
+      }
     }
 
     api.on("message_received", async (event, ctx) => {
@@ -214,7 +256,9 @@ export const puente = {
       }
 
       const deLuis = esNumero(remitente, luis);
-      const delPunto = esNumero(remitente, dueno) || operadoras.some((n) => esNumero(remitente, n));
+      const operadora = esNumero(remitente, dueno) ? null : operadoras.find((n) => esNumero(remitente, n)) ?? null;
+      const deOperadora = operadora !== null;
+      const delPunto = esNumero(remitente, dueno) || deOperadora;
       if (!deLuis && !delPunto) return;
       const destino = deLuis ? urlComp : url;
       const texto = deLuis ? textoDelMensaje(event) : null;
@@ -230,11 +274,13 @@ export const puente = {
         .filter((f) => f.tipo && typeof f.m?.path === "string" && f.m.path);
       for (const f of fotos) {
         const id = mensajeId ? (fotos.length > 1 ? `${mensajeId}-${f.i}` : mensajeId) : null;
+        let cuerpo = null;
         try {
-          await enviar(f.m, f.tipo, id, enviado, destino, texto);
+          cuerpo = await enviar(f.m, f.tipo, id, enviado, destino, texto, deLuis ? null : deOperadora ? "operadora" : "dueno");
         } catch (e) {
           log.error?.(`[corresponsal-puente] No se pudo leer la foto del disco: ${e?.message ?? e}`);
         }
+        if (operadora && !deLuis) await anotarParaOperadora(operadora, cuerpo);
       }
     });
 

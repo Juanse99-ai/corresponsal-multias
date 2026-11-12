@@ -6,7 +6,11 @@ import { createServer } from "node:http";
 import { mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { puente, textoDelMensaje, urlDeCompensacion } from "../openclaw/corresponsal-puente/puente.js";
+import { puente, textoDelMensaje, urlDeCompensacion, mensajeParaOperadora, rutaBandeja } from "../openclaw/corresponsal-puente/puente.js";
+import { repartir, textoOperadora } from "../openclaw/corresponsal-puente/operadoras.js";
+import { readFile as leer } from "node:fs/promises";
+import { leerEstado, urlAvisos } from "../openclaw/corresponsal-puente/avisos.js";
+import { urlCierre } from "../openclaw/corresponsal-puente/cierre.js";
 
 const GRUPO = "120363000000000000@g.us";
 const DUENO = "+573005550101";
@@ -94,6 +98,7 @@ test("la foto del dueño en el grupo se reenvía con el token; las demás no", a
     assert.equal(srv.recibidos.length, 1);
     assert.equal(srv.recibidos[0].auth, "Bearer secreto");
     assert.match(srv.recibidos[0].cuerpo, /name="mensajeId"\r\n\r\nB1/);
+    assert.match(srv.recibidos[0].cuerpo, /name="quien"\r\n\r\ndueno\r\n/);
     // Segundos convertidos a milisegundos.
     assert.match(srv.recibidos[0].cuerpo, /name="enviado"\r\n\r\n1762805567000/);
     assert.match(srv.recibidos[0].cuerpo, /Content-Type: image\/jpeg/i);
@@ -232,6 +237,8 @@ test("las fotos del Sr. Luis van con su texto a la entrada de compensaciones", a
 
 test("las fotos de una operadora van a comprobantes, como las del dueño", async () => {
   const srv = await servidorFalso();
+  const antes = process.env.OPENCLAW_HOME;
+  process.env.OPENCLAW_HOME = await mkdtemp(join(tmpdir(), "openclaw-"));
   try {
     const dir = await mkdtemp(join(tmpdir(), "puente-"));
     const ruta = join(dir, "tirilla.jpg");
@@ -258,9 +265,18 @@ test("las fotos de una operadora van a comprobantes, como las del dueño", async
     assert.equal(srv.recibidos[0].ruta, "/api/agente/comprobante");
     assert.match(srv.recibidos[0].cuerpo, /name="mensajeId"\r\n\r\nO1/);
     assert.doesNotMatch(srv.recibidos[0].cuerpo, /name="texto"/);
+    // La app sabe que la mandó una operadora, para avisarle a ella.
+    assert.match(srv.recibidos[0].cuerpo, /name="quien"\r\n\r\noperadora\r\n/);
     assert.ok(registro.some((m) => m.includes("con 1 operadora.")));
+    // Y queda anotado lo que se le dirá a ella por WhatsApp (solo a ella).
+    const bandeja = (await leer(rutaBandeja(), "utf8")).trim().split("\n").map((l) => JSON.parse(l));
+    assert.equal(bandeja.length, 1);
+    assert.equal(bandeja[0].para, "573005550142");
+    assert.match(bandeja[0].texto, /^Consignación registrada/);
   } finally {
     srv.cerrar();
+    if (antes === undefined) delete process.env.OPENCLAW_HOME;
+    else process.env.OPENCLAW_HOME = antes;
   }
 });
 
@@ -293,4 +309,46 @@ test("el texto del mensaje sale limpio y la entrada de compensaciones al lado de
     urlDeCompensacion("https://corresponsal-multias.vercel.app/api/agente/comprobante"),
     "https://corresponsal-multias.vercel.app/api/agente/compensacion",
   );
+});
+
+test("los avisos y el cierre viven al lado de la entrada de comprobantes", () => {
+  const url = "https://x.app/api/agente/comprobante";
+  assert.equal(urlAvisos(url, null), "https://x.app/api/agente/avisos");
+  assert.equal(urlAvisos(url, "2026-11-12T15:00:00.000Z"), "https://x.app/api/agente/avisos?desde=2026-11-12T15%3A00%3A00.000Z");
+  assert.equal(urlCierre(url), "https://x.app/api/agente/cierre");
+});
+
+test("el estado de los avisos se lee sin romperse", () => {
+  assert.equal(leerEstado('{"hasta":"2026-11-12T15:00:00.000Z"}'), "2026-11-12T15:00:00.000Z");
+  assert.equal(leerEstado(""), null);
+  assert.equal(leerEstado("no es json"), null);
+  assert.equal(leerEstado('{"hasta":"ayer"}'), null);
+});
+
+test("lo que se le dice a la operadora según cómo quedó su foto", () => {
+  assert.equal(
+    mensajeParaOperadora({ resultado: "guardado", consignacion: { monto: 635000, hora: "10:12:00" } }),
+    "Consignación registrada: $635.000 de las 10:12. No hay que subirla a mano.",
+  );
+  assert.equal(
+    mensajeParaOperadora({ resultado: "revisar", motivo: "No se leyó la hora." }),
+    "Tu foto quedó por revisar (No se leyó la hora). No la mandes otra vez.",
+  );
+  assert.equal(mensajeParaOperadora({ resultado: "ya_recibida" }), null);
+  assert.equal(mensajeParaOperadora(null), "Tu foto no llegó a la app. Súbela a mano.");
+});
+
+test("cada operadora recibe solo lo suyo y lo demás vuelve a la bandeja", () => {
+  const bandeja = [
+    JSON.stringify({ para: "573005550142", texto: "Uno", ts: 1 }),
+    JSON.stringify({ para: "573005550999", texto: "De otra", ts: 2 }),
+    "línea rota",
+    JSON.stringify({ para: "573005550142", texto: "Dos", ts: 3 }),
+  ].join("\n");
+  const { para, otras } = repartir(bandeja, "+57 300 555 0142");
+  assert.deepEqual(para, ["Uno", "Dos"]);
+  assert.equal(otras.length, 1);
+  assert.match(otras[0], /De otra/);
+  assert.equal(textoOperadora(para), "*Corresponsal*\nUno\nDos");
+  assert.equal(textoOperadora([]), "");
 });

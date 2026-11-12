@@ -3,14 +3,11 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { timingSafeEqual } from "node:crypto";
 import webpush from "web-push";
+import { mensajeCierre } from "@/lib/avisos-texto";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/config";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-function fmtCOP(n: number) {
-  return "$" + Math.round(Math.abs(n)).toLocaleString("es-CO");
-}
 
 // Compara sin que el tiempo de respuesta delate cuántos caracteres acertaron.
 function mismoSecreto(enviado: string, esperado: string) {
@@ -46,24 +43,10 @@ export async function GET(req: Request) {
   }
 
   const cuadre = (data.cuadre ?? null) as Cuadre;
-  const cerrado = cuadre?.estado === "cerrado";
-  const descuadre = cuadre ? Math.round(cuadre.saldo_final) !== 0 : false;
 
-  let title = "";
-  let body = "";
-  if (!cerrado) {
-    title = "Cierra el cuadre de hoy";
-    body = descuadre
-      ? `El día sigue abierto y hay un descuadre de ${fmtCOP(cuadre!.saldo_final)}. Revísalo y ciérralo.`
-      : "El día sigue abierto. Cuando tengas la tirilla, cuádralo y ciérralo.";
-  } else if (descuadre) {
-    title = "Descuadre del día";
-    body = `El cuadre quedó con un ${cuadre!.saldo_final < 0 ? "sobrante" : "faltante"} de ${fmtCOP(
-      cuadre!.saldo_final,
-    )} sin justificar.`;
-  } else {
-    return NextResponse.json({ ok: true, enviados: 0, motivo: "todo cuadrado" });
-  }
+  const mensaje = mensajeCierre(cuadre);
+  if (!mensaje) return NextResponse.json({ ok: true, enviados: 0, motivo: "todo cuadrado" });
+  const { title, body } = mensaje;
 
   const subs = (data.subs ?? []) as Sub[];
   if (subs.length === 0) {

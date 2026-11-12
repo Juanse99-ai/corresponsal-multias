@@ -3,17 +3,33 @@ import webpush from "web-push";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/database.types";
 
+type Aviso = { title: string; body: string; url: string; tag: string };
+
 /**
  * Aviso push solo a los administradores (los teléfonos con avisos activados de
  * quien tiene rol `admin`). Lo usa la entrada del agente para los comprobantes
- * que quedan por revisar. Necesita el cliente con llave de servicio: las llaves
- * VAPID y las suscripciones no se leen con la sesión de nadie.
+ * que quedan por revisar.
+ */
+export function avisarAdmins(sb: SupabaseClient<Database>, aviso: Aviso): Promise<number> {
+  return avisarRol(sb, "admin", aviso);
+}
+
+/**
+ * Aviso push a las operadoras activas (12 nov 2026): les confirma lo que pasó
+ * con la foto que mandaron al grupo, sin escribirles por WhatsApp desde el
+ * número del dueño.
+ */
+export function avisarOperadoras(sb: SupabaseClient<Database>, aviso: Aviso): Promise<number> {
+  return avisarRol(sb, "operador", aviso);
+}
+
+/**
+ * Manda el aviso a los teléfonos con avisos activados de quien tiene ese rol.
+ * Necesita el cliente con llave de servicio: las llaves VAPID y las
+ * suscripciones no se leen con la sesión de nadie.
  * Nunca lanza: si el aviso falla, el comprobante igual quedó guardado o pendiente.
  */
-export async function avisarAdmins(
-  sb: SupabaseClient<Database>,
-  aviso: { title: string; body: string; url: string; tag: string },
-): Promise<number> {
+async function avisarRol(sb: SupabaseClient<Database>, rol: "admin" | "operador", aviso: Aviso): Promise<number> {
   try {
     const { data: config } = await sb
       .from("corr_app_config")
@@ -24,8 +40,8 @@ export async function avisarAdmins(
     const privada = llave("vapid_private");
     if (!publica || !privada) return 0;
 
-    const { data: admins } = await sb.from("corr_profiles").select("id").eq("rol", "admin");
-    const ids = (admins ?? []).map((a) => a.id);
+    const { data: personas } = await sb.from("corr_profiles").select("id").eq("rol", rol).eq("activo", true);
+    const ids = (personas ?? []).map((a) => a.id);
     if (ids.length === 0) return 0;
 
     const { data: subs } = await sb
@@ -51,7 +67,7 @@ export async function avisarAdmins(
     );
     return enviados;
   } catch (e) {
-    console.error("Aviso a admins:", e);
+    console.error(`Aviso a ${rol}:`, e);
     return 0;
   }
 }
