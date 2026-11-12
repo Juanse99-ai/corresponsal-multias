@@ -159,6 +159,16 @@ costo: es WhatsApp normal, no la API de pago, y estas tareas no usan IA.
 - El recordatorio de cierre también le puede llegar: es otra tarea de
   `cierre.js` con su número.
 
+OpenClaw solo escribe por privado a quien está en `channels.whatsapp.allowFrom`,
+así que la operadora va ahí. Eso también la dejaría hablar con el agente: el
+puente reclama sus mensajes privados antes (`before_dispatch`), igual que los
+del grupo, y no deben marcarse como leídos en el teléfono del dueño:
+
+```bash
+openclaw config set channels.whatsapp.sendReadReceipts false
+openclaw config set channels.whatsapp.allowFrom '["+573005550101","+573005550142"]' --strict-json
+```
+
 ```bash
 openclaw automations create "*/5 7-21 * * *" --tz America/Bogota --exact --name "Avisos a la operadora" --command-argv "[\"$(command -v node)\", \"$HOME/openclaw-plugins/corresponsal-puente/operadoras.js\", \"+573005550142\"]" --announce --channel whatsapp --to "+573005550142"
 openclaw automations create "55 16 * * *" --tz America/Bogota --exact --name "Cierre a la operadora" --command-argv "[\"$(command -v node)\", \"$HOME/openclaw-plugins/corresponsal-puente/cierre.js\"]" --announce --channel whatsapp --to "+573005550142"

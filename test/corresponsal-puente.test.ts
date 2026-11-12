@@ -352,3 +352,17 @@ test("cada operadora recibe solo lo suyo y lo demás vuelve a la bandeja", () =>
   assert.equal(textoOperadora(para), "*Corresponsal*\nUno\nDos");
   assert.equal(textoOperadora([]), "");
 });
+
+test("lo que una operadora le escribe al dueño por privado no llega al agente", () => {
+  const { ganchos } = montar({ grupo: GRUPO, operadoras: ["+57 300 555 0142"] });
+  const despacho = ganchos.get("before_dispatch")!;
+  // Su chat privado, como lo nombre WhatsApp u OpenClaw.
+  assert.deepEqual(despacho({ from: "573005550142@s.whatsapp.net" }, { conversationId: "573005550142@s.whatsapp.net" }), { handled: true });
+  assert.deepEqual(despacho({ from: "+573005550142" }, { senderId: "+573005550142" }), { handled: true });
+  // El dueño en su propio chat y cualquier otra persona siguen igual.
+  assert.equal(despacho({ from: "+573005550101" }, { conversationId: "573005550101@s.whatsapp.net", senderId: "+573005550101" }), undefined);
+  assert.equal(despacho({ from: "+573001112233" }, { senderId: "+573001112233" }), undefined);
+  // Sin operadoras configuradas no se reclama nada.
+  const sin = montar({ grupo: GRUPO }).ganchos.get("before_dispatch")!;
+  assert.equal(sin({ from: "+573005550142" }, { senderId: "+573005550142" }), undefined);
+});
