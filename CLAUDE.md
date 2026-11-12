@@ -202,7 +202,11 @@
   OpenClaw no manda nada. A las operadoras (el dueño lo pidió aun saliendo de
   su número): el puente anota cómo quedó cada foto suya en
   `~/.openclaw/corresponsal-operadoras.jsonl` y `operadoras.js <número>` se lo
-  manda cada 5 min; también les llega `cierre.js`. Y notificación de la app
+  manda cada 5 min; también les llega `cierre.js`. Para escribirles, OpenClaw
+  pide que estén en `channels.whatsapp.allowFrom`: el puente reclama sus
+  privados en `before_dispatch` (el agente no les contesta) y
+  `sendReadReceipts` va en false (no se marcan como leídos en el teléfono del
+  dueño). Y notificación de la app
   (`avisarOperadoras`): el puente manda `quien=operadora`.
 - **Resumen de las 7** (11 nov 2026, lo pidió el dueño): `app/api/agente/resumen/route.ts`
   (GET, solo lectura, misma `AGENTE_TOKEN`) devuelve en texto para WhatsApp lo

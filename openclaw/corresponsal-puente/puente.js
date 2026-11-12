@@ -149,11 +149,22 @@ export const puente = {
       { priority: 1000 },
     );
 
-    // ---- 2. El agente no procesa nada del grupo ----
+    // Chat privado con una operadora (12 nov 2026): está en allowFrom solo para
+    // que le lleguen los avisos; lo que ella le escriba al dueño no es para el agente.
+    const esPrivadoDeOperadora = (...valores) =>
+      operadoras.length > 0 &&
+      valores.some(
+        (v) => typeof v === "string" && !v.includes("@g.us") && operadoras.some((n) => esNumero(v, n)),
+      );
+
+    // ---- 2. El agente no procesa nada del grupo ni los privados de las operadoras ----
     api.on(
       "before_dispatch",
       (event, ctx) => {
         if (esDelGrupo(ctx?.conversationId, ctx?.sessionKey, event?.sessionKey)) return { handled: true };
+        if (esPrivadoDeOperadora(ctx?.senderId, event?.senderId, event?.from, ctx?.conversationId)) {
+          return { handled: true };
+        }
       },
       { priority: 1000 },
     );
