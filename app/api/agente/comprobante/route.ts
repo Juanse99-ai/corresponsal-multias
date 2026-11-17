@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { crearClienteAdmin } from "@/lib/supabase/admin";
 import { SOPORTES_BUCKET } from "@/lib/queries";
 import { leerComprobante, lecturaDisponible, type Comprobante } from "@/lib/leer-comprobante";
-import { decidirComprobante } from "@/lib/comprobante-auto";
+import { decidirComprobante, yaRegistradaIgual } from "@/lib/comprobante-auto";
 import { fechaDeTirilla } from "@/lib/fecha-tirilla";
 import { avisarAdmins, avisarOperadoras } from "@/lib/avisos";
 import { tokenValido, diaBogota } from "@/lib/agente";
@@ -143,11 +143,10 @@ export async function POST(req: Request) {
     sb.from("corr_soportes").update({ datos: leido }).eq("id", soporte.id),
     sb.from("corr_cuadres").select("estado").eq("fecha", fecha).maybeSingle(),
     typeof leido.monto === "number" && leido.hora
-      ? sb.from("corr_consignaciones_luis").select("hora").eq("fecha", fecha).eq("monto", leido.monto)
-      : Promise.resolve({ data: [] as { hora: string | null }[] }),
+      ? sb.from("corr_consignaciones_luis").select("hora, nota").eq("fecha", fecha).eq("monto", leido.monto)
+      : Promise.resolve({ data: [] as { hora: string | null; nota: string | null }[] }),
   ]);
-  const yaRegistrada =
-    !!leido.hora && (iguales ?? []).some((r) => (r.hora ?? "").slice(0, 5) === leido.hora!.slice(0, 5));
+  const yaRegistrada = yaRegistradaIgual(leido, iguales ?? []);
   const decision = decidirComprobante(leido, dia, { diaCerrado: cuadre?.estado === "cerrado", yaRegistrada });
   if (decision.accion === "revisar") return aRevisar(decision.motivo, leido);
 

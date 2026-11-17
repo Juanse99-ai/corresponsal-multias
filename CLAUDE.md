@@ -215,6 +215,16 @@
   `corresponsal-reintento` (respaldo en `~/.openclaw/corresponsal-respaldo`);
   se pierde al actualizar OpenClaw y el puente avisa (`estadoReintento`). Y notificación de la app
   (`avisarOperadoras`): el puente manda `quien=operadora`.
+- **Latido del puente** (17 nov 2026, lo pidió el dueño): el puente hace POST a
+  `app/api/agente/latido` cada 5 min (guarda `puente_latido` y
+  `puente_reintento` en `corr_app_config`). Un pg_cron de Supabase
+  (`corr_latido_puente`, migración `20261117120000`) llama cada 5 min a
+  `app/api/cron/latido` con `cron_secret`; `lib/latido.ts` decide: sin latido
+  más de 15 min de 7 a. m. a 9 p. m. avisa una vez a admins y operadoras por
+  notificación de la app (no por WhatsApp, que es lo caído) y avisa cuando vuelve.
+- **Repetidas por recibo** (17 nov 2026): la nota de la consignación lleva
+  "recibo N" y `yaRegistradaIgual` compara el recibo; sin recibo (o contra
+  consignaciones viejas sin él), por monto y hora como antes.
 - **Resumen de las 7** (11 nov 2026, lo pidió el dueño): `app/api/agente/resumen/route.ts`
   (GET, solo lectura, misma `AGENTE_TOKEN`) devuelve en texto para WhatsApp lo
   de `lib/resumen-diario.ts`: cuadre de ayer, consignaciones y saldo del Sr.
