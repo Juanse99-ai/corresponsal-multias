@@ -14,6 +14,7 @@ import {
   mensajeParaOperadora,
   rutaBandeja,
   fotosSinDescargar,
+  estadoReintento,
 } from "../openclaw/corresponsal-puente/puente.js";
 import { repartir, textoOperadora } from "../openclaw/corresponsal-puente/operadoras.js";
 import { readFile as leer } from "node:fs/promises";
@@ -426,4 +427,13 @@ test("una foto de la operadora que no se descargó no se pierde en silencio", as
     if (antes === undefined) delete process.env.OPENCLAW_HOME;
     else process.env.OPENCLAW_HOME = antes;
   }
+});
+
+test("se sabe si el reintento de descarga sigue puesto en OpenClaw", () => {
+  const conReintento = "// corresponsal-reintento\nsaveInboundMedia(await downloadInboundMedia(msg))";
+  const sinReintento = "saveInboundMedia(await downloadInboundMedia(msg))";
+  assert.equal(estadoReintento([conReintento, "otro archivo"]), "puesto");
+  assert.equal(estadoReintento([sinReintento]), "falta");
+  assert.equal(estadoReintento([]), "desconocido");
+  assert.equal(estadoReintento(["nada que ver"]), "desconocido");
 });

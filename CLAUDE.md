@@ -210,7 +210,10 @@
   archivo, "[whatsapp attachment unavailable]"; pasó el 17 nov 2026 con una de
   Lucy), el puente no la reenvía pero lo anota en la bandeja para quien la
   mandó y para el dueño (tarea "Avisos del puente"). Nunca se pide reenviar
-  fotos al grupo: ahí hay clientes. Y notificación de la app
+  fotos al grupo: ahí hay clientes. Además, en el Mac se le puso a OpenClaw
+  un reintento de descarga (3, 10 y 30 s) en su módulo de WhatsApp, marcado
+  `corresponsal-reintento` (respaldo en `~/.openclaw/corresponsal-respaldo`);
+  se pierde al actualizar OpenClaw y el puente avisa (`estadoReintento`). Y notificación de la app
   (`avisarOperadoras`): el puente manda `quien=operadora`.
 - **Resumen de las 7** (11 nov 2026, lo pidió el dueño): `app/api/agente/resumen/route.ts`
   (GET, solo lectura, misma `AGENTE_TOKEN`) devuelve en texto para WhatsApp lo

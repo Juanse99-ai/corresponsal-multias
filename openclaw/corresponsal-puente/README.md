@@ -179,6 +179,12 @@ en la hoja Tú.
 
 ### Fotos que no se pudieron descargar
 
+OpenClaw baja cada foto de WhatsApp una sola vez. En el Mac del dueño se le
+agregó a mano un reintento (a los 3, 10 y 30 s) en su módulo de WhatsApp,
+marcado `corresponsal-reintento`, con el original respaldado en
+`~/.openclaw/corresponsal-respaldo`. Una actualización de OpenClaw lo borra: el
+puente lo revisa al arrancar y, si falta, le avisa al dueño una vez.
+
 A veces OpenClaw no logra bajar la foto de WhatsApp (en el registro sale
 `fetch failed` y el mensaje llega como "[whatsapp attachment unavailable]").
 Esa foto no llega a la app, pero no se pierde en silencio: el puente le avisa
