@@ -413,7 +413,7 @@ export const puente = {
       if (ya.trim() === "falta") return;
       await anotar(
         dueno,
-        "OpenClaw se actualizó y se perdió el reintento de descarga de fotos. Si una foto falla al bajar, no se vuelve a intentar. Pídele a Claude que lo vuelva a poner.",
+        "OpenClaw se actualizó y se perdió el reintento de descarga de fotos. Si una foto falla al bajar, no se vuelve a intentar. Para volver a ponerlo: node reintento.js (en la carpeta del plugin) y openclaw gateway restart.",
       );
       await writeFile(marca, "falta").catch(() => {});
     })().catch((e) => log.warn?.(`[corresponsal-puente] No se pudo revisar el reintento: ${e?.message ?? e}`));
