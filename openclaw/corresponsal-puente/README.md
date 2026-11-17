@@ -177,6 +177,25 @@ openclaw automations create "55 16 * * *" --tz America/Bogota --exact --name "Ci
 Además la app les manda una notificación (sin WhatsApp) si activan los avisos
 en la hoja Tú.
 
+### Fotos que no se pudieron descargar
+
+OpenClaw baja cada foto de WhatsApp una sola vez. En el Mac del dueño se le
+agregó a mano un reintento (a los 3, 10 y 30 s) en su módulo de WhatsApp,
+marcado `corresponsal-reintento`, con el original respaldado en
+`~/.openclaw/corresponsal-respaldo`. Una actualización de OpenClaw lo borra: el
+puente lo revisa al arrancar y, si falta, le avisa al dueño una vez.
+
+A veces OpenClaw no logra bajar la foto de WhatsApp (en el registro sale
+`fetch failed` y el mensaje llega como "[whatsapp attachment unavailable]").
+Esa foto no llega a la app, pero no se pierde en silencio: el puente le avisa
+al dueño (y a la operadora que la mandó) por la misma bandeja. Nunca se pide
+reenviarla al grupo: ahí hay clientes. Para que al dueño le lleguen esos avisos hace falta una tarea
+de `operadoras.js` con su número:
+
+```bash
+openclaw automations create "*/5 7-21 * * *" --tz America/Bogota --exact --name "Avisos del puente" --command-argv "[\"$(command -v node)\", \"$HOME/openclaw-plugins/corresponsal-puente/operadoras.js\", \"+573005550101\"]" --announce --channel whatsapp --to "+573005550101"
+```
+
 ## Compensaciones del Sr. Luis
 
 Las fotos de pagos que manda el Sr. Luis (app de Bancolombia, tirilla Redeban

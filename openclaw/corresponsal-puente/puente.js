@@ -14,7 +14,7 @@
 // Configuración en ~/.openclaw/openclaw.json, plugins.entries.corresponsal-puente.config:
 //   grupo, dueno, operadoras, luis, url, urlCompensacion, token, diagnostico
 //   (ver openclaw.plugin.json y README.md).
-import { appendFile, readFile } from "node:fs/promises";
+import { appendFile, readFile, readdir, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
@@ -54,6 +54,60 @@ export function rutaBandeja() {
 }
 
 const pesos = (n) => "$" + Math.round(Math.abs(Number(n) || 0)).toLocaleString("es-CO");
+
+/** Hora (HH:MM) de un instante en Bogotá. */
+export function horaBogota(ms) {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: "America/Bogota",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(new Date(ms));
+}
+
+/**
+ * Cuántas fotos del mensaje no se pudieron descargar (17 nov 2026: a una foto
+ * de Lucy le falló la descarga en OpenClaw, "fetch failed", llegó como
+ * "[whatsapp attachment unavailable]" sin archivo y el puente la saltó sin
+ * decir nada). Cuenta las imágenes sin archivo, el mensaje aún sin descargar y
+ * el aviso de adjunto no disponible.
+ */
+export function fotosSinDescargar(event) {
+  const media = Array.isArray(event?.media) ? event.media : [];
+  if (event?.mediaStagingPending) return Math.max(media.length, 1);
+  const sinArchivo = media.filter((m) => tipoDeFoto(m) && !(typeof m?.path === "string" && m.path)).length;
+  if (sinArchivo > 0) return sinArchivo;
+  const texto = String(event?.content ?? event?.body ?? event?.text ?? "");
+  const conArchivo = media.filter((m) => typeof m?.path === "string" && m.path).length;
+  return /attachment unavailable/i.test(texto) && conArchivo === 0 ? 1 : 0;
+}
+
+/**
+ * ¿Sigue puesto el reintento de descarga de fotos dentro de OpenClaw? (17 nov
+ * 2026: OpenClaw baja cada foto una sola vez; se le agregó a mano un reintento
+ * marcado "corresponsal-reintento" y una actualización lo borra.)
+ * @param textos los archivos del módulo de WhatsApp que descargan fotos
+ * @returns "puesto", "falta" o "desconocido" (no se encontró el módulo)
+ */
+export function estadoReintento(textos) {
+  const descargan = textos.filter((t) => t.includes("downloadInboundMedia("));
+  if (descargan.length === 0) return "desconocido";
+  return descargan.every((t) => t.includes("corresponsal-reintento")) ? "puesto" : "falta";
+}
+
+/** Lee los archivos del módulo de WhatsApp de OpenClaw instalado. */
+async function archivosWhatsApp(base) {
+  const proyectos = join(base, "npm", "projects");
+  const textos = [];
+  for (const p of await readdir(proyectos).catch(() => [])) {
+    if (!p.startsWith("openclaw-whatsapp")) continue;
+    const dir = join(proyectos, p, "node_modules", "@openclaw", "whatsapp", "dist", ".setup");
+    for (const f of await readdir(dir).catch(() => [])) {
+      if (f.endsWith(".mjs")) textos.push(await readFile(join(dir, f), "utf8").catch(() => ""));
+    }
+  }
+  return textos;
+}
 
 /** Lo que se le dice a la operadora según lo que respondió la app (null si nada). */
 export function mensajeParaOperadora(cuerpo) {
@@ -240,15 +294,35 @@ export const puente = {
       return null;
     }
 
-    /** Deja en la bandeja el mensaje para la operadora que mandó la foto. */
-    async function anotarParaOperadora(numero, cuerpo) {
-      const texto = mensajeParaOperadora(cuerpo);
-      if (!texto) return;
+    /** Deja un mensaje en la bandeja; una tarea de OpenClaw (operadoras.js) se lo manda a ese número. */
+    async function anotar(numero, texto) {
+      if (!numero || !texto) return;
       try {
         await appendFile(rutaBandeja(), JSON.stringify({ para: numero, texto, ts: Date.now() }) + "\n");
       } catch (e) {
-        log.warn?.(`[corresponsal-puente] No se pudo anotar el aviso para la operadora: ${e?.message ?? e}`);
+        log.warn?.(`[corresponsal-puente] No se pudo anotar un aviso: ${e?.message ?? e}`);
       }
+    }
+
+    /** Deja en la bandeja el mensaje para la operadora que mandó la foto. */
+    function anotarParaOperadora(numero, cuerpo) {
+      return anotar(numero, mensajeParaOperadora(cuerpo));
+    }
+
+    /**
+     * Una foto que no se pudo descargar: se le avisa al dueño (y a la operadora
+     * que la mandó). Nunca se pide reenviarla al grupo: ahí hay clientes.
+     */
+    async function avisarFotoPerdida({ cuantas, deLuis, operadora, enviado }) {
+      const hora = horaBogota(enviado ?? Date.now());
+      const fotos = cuantas === 1 ? "una foto" : `${cuantas} fotos`;
+      const de = deLuis ? " del Sr. Luis" : operadora ? ` de la operadora que termina en ${operadora.slice(-4)}` : " tuya";
+      log.error?.(`[corresponsal-puente] No se pudo descargar ${fotos}${de} de las ${hora}: no se reenvió a la app.`);
+      if (operadora) {
+        await anotar(operadora, `Tu foto de las ${hora} no se pudo leer sola. No la mandes otra vez al grupo: ya le avisé a Juan.`);
+      }
+      const que = "Regístrala a mano en la app desde la foto del grupo.";
+      await anotar(dueno, `No se pudo descargar ${fotos}${de} de las ${hora}. ${que}`);
     }
 
     api.on("message_received", async (event, ctx) => {
@@ -273,9 +347,11 @@ export const puente = {
       if (!deLuis && !delPunto) return;
       const destino = deLuis ? urlComp : url;
       const texto = deLuis ? textoDelMensaje(event) : null;
-      if (event?.mediaStagingPending) {
-        log.warn?.("[corresponsal-puente] La foto todavía no se había descargado; no se reenvió. Súbela a mano si no aparece.");
-        return;
+      // Fotos que OpenClaw no pudo descargar: no se reenvían, pero nunca en silencio.
+      const perdidas = fotosSinDescargar(event);
+      if (perdidas > 0) {
+        await avisarFotoPerdida({ cuantas: perdidas, deLuis, operadora, enviado: enMs(event?.timestamp) });
+        if (event?.mediaStagingPending) return;
       }
 
       const mensajeId = event?.messageId ?? ctx?.messageId ?? null;
@@ -294,6 +370,28 @@ export const puente = {
         if (operadora && !deLuis) await anotarParaOperadora(operadora, cuerpo);
       }
     });
+
+    // Si una actualización de OpenClaw quitó el reintento de fotos, el dueño se
+    // entera una vez (no en cada recarga del plugin).
+    (async () => {
+      const base = process.env.OPENCLAW_HOME ?? join(homedir(), ".openclaw");
+      const estado = estadoReintento(await archivosWhatsApp(base));
+      const marca = join(base, "corresponsal-reintento-avisado");
+      if (estado === "puesto") {
+        log.info?.("[corresponsal-puente] Reintento de descarga de fotos: puesto.");
+        await writeFile(marca, "").catch(() => {});
+        return;
+      }
+      if (estado !== "falta") return;
+      log.error?.("[corresponsal-puente] OpenClaw ya no tiene el reintento de descarga de fotos (¿se actualizó?).");
+      const ya = await readFile(marca, "utf8").catch(() => "");
+      if (ya.trim() === "falta") return;
+      await anotar(
+        dueno,
+        "OpenClaw se actualizó y se perdió el reintento de descarga de fotos. Si una foto falla al bajar, no se vuelve a intentar. Pídele a Claude que lo vuelva a poner.",
+      );
+      await writeFile(marca, "falta").catch(() => {});
+    })().catch((e) => log.warn?.(`[corresponsal-puente] No se pudo revisar el reintento: ${e?.message ?? e}`));
 
     log.info?.(
       `[corresponsal-puente] Activo: bloqueo del grupo y reenvío de fotos${luis ? " (y compensaciones del Sr. Luis)" : ""}` +
