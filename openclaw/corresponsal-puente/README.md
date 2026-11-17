@@ -185,6 +185,20 @@ horario de trabajo (7 a. m. a 9 p. m.) pasan 15 minutos sin latido, la app les
 manda una notificación a admins y operadoras: el Mac se durmió, se quedó sin
 internet o WhatsApp se desconectó. Cuando vuelve, avisa que volvió.
 
+### Mac despierto
+
+Si el Mac se duerme, el puente se cae. `despierto.sh` lo mantiene despierto de
+7 a. m. a 9 p. m. con `caffeinate`; lo lanza un LaunchAgent a las 7:00 y al
+iniciar sesión:
+
+```bash
+sed "s#RUTA#$HOME/openclaw-plugins/corresponsal-puente#" ~/openclaw-plugins/corresponsal-puente/com.corresponsal.despierto.plist > ~/Library/LaunchAgents/com.corresponsal.despierto.plist
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.corresponsal.despierto.plist
+```
+
+Con la tapa cerrada el Mac igual se duerme (salvo con pantalla externa y
+cargador), y con poca batería se apaga: déjalo abierto y conectado.
+
 ### Fotos que no se pudieron descargar
 
 OpenClaw baja cada foto de WhatsApp una sola vez. En el Mac del dueño se le
