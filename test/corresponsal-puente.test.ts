@@ -24,6 +24,8 @@ import { urlCierre } from "../openclaw/corresponsal-puente/cierre.js";
 // Nada de estas pruebas escribe en el ~/.openclaw de verdad: la bandeja de
 // avisos va a una carpeta temporal (una prueba la escribía en la real).
 process.env.OPENCLAW_HOME = mkdtempSync(join(tmpdir(), "openclaw-pruebas-"));
+// El latido le hablaría al servidor falso de cada prueba y descuadraría los conteos.
+process.env.CORRESPONSAL_SIN_LATIDO = "1";
 
 const GRUPO = "120363000000000000@g.us";
 const DUENO = "+573005550101";

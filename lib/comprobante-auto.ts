@@ -17,6 +17,8 @@ export interface LecturaTirilla {
   hora: string | null;
   transaccion: string | null;
   titular: string | null;
+  /** Número de recibo de la tirilla: único por transacción. */
+  recibo?: string | null;
   seguro: boolean;
 }
 
@@ -34,16 +36,41 @@ export type Decision =
 const HORA = /^([01]\d|2[0-3]):[0-5]\d/;
 
 /** Lo que se guarda como nota: qué fue y para quién (igual que la carga desde fotos). */
-export function notaDeLectura(l: Pick<LecturaTirilla, "transaccion" | "titular">): string | null {
-  const partes = [l.transaccion, l.titular].filter(Boolean);
+export function notaDeLectura(l: Pick<LecturaTirilla, "transaccion" | "titular" | "recibo">): string | null {
+  const recibo = soloDigitos(l.recibo);
+  const partes = [l.transaccion, l.titular, recibo ? `recibo ${recibo}` : null].filter(Boolean);
   return partes.length > 0 ? partes.join(", ").slice(0, 200) : null;
+}
+
+const soloDigitos = (s: string | null | undefined) => String(s ?? "").replace(/\D/g, "");
+
+/**
+ * ¿Ya está registrada esta misma tirilla? (17 nov 2026, lo pidió el dueño:
+ * dos consignaciones iguales en el mismo minuto no son la misma). Con número de
+ * recibo se compara el recibo, que es único por transacción. Las consignaciones
+ * guardadas antes de anotar el recibo (sin "recibo" en la nota), y las tirillas
+ * sin recibo legible, se comparan como antes: mismo monto y misma hora.
+ * @param iguales consignaciones del Sr. Luis del mismo día y el mismo monto
+ */
+export function yaRegistradaIgual(
+  l: Pick<LecturaTirilla, "hora" | "recibo">,
+  iguales: { hora: string | null; nota: string | null }[],
+): boolean {
+  const recibo = soloDigitos(l.recibo);
+  const hora = (l.hora ?? "").slice(0, 5);
+  const mismaHora = (r: { hora: string | null }) => !!hora && (r.hora ?? "").slice(0, 5) === hora;
+  return iguales.some((r) => {
+    const reciboGuardado = (r.nota ?? "").match(/recibo (\d+)/)?.[1];
+    if (recibo && reciboGuardado) return reciboGuardado === recibo;
+    return mismaHora(r);
+  });
 }
 
 /**
  * @param l lectura de la tirilla
  * @param dia día del mensaje en Bogotá (YYYY-MM-DD)
  * @param opciones.diaCerrado el cuadre de ese día ya se cerró
- * @param opciones.yaRegistrada hay una consignación del Sr. Luis con el mismo día, monto y hora
+ * @param opciones.yaRegistrada la misma tirilla ya está registrada (`yaRegistradaIgual`)
  */
 export function decidirComprobante(
   l: LecturaTirilla,

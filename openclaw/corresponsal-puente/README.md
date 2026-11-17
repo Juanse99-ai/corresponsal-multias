@@ -177,6 +177,14 @@ openclaw automations create "55 16 * * *" --tz America/Bogota --exact --name "Ci
 Además la app les manda una notificación (sin WhatsApp) si activan los avisos
 en la hoja Tú.
 
+### Latido
+
+Cada 5 minutos el puente le avisa a la app que sigue vivo
+(`/api/agente/latido`). Supabase revisa cada 5 minutos (pg_cron) y, si en
+horario de trabajo (7 a. m. a 9 p. m.) pasan 15 minutos sin latido, la app les
+manda una notificación a admins y operadoras: el Mac se durmió, se quedó sin
+internet o WhatsApp se desconectó. Cuando vuelve, avisa que volvió.
+
 ### Fotos que no se pudieron descargar
 
 OpenClaw baja cada foto de WhatsApp una sola vez. En el Mac del dueño se le

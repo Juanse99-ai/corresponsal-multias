@@ -1,7 +1,7 @@
 // Pruebas de la decisión de los comprobantes que llegan solos (lib/comprobante-auto.ts).
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { decidirComprobante, type LecturaTirilla } from "../lib/comprobante-auto.ts";
+import { decidirComprobante, notaDeLectura, yaRegistradaIgual, type LecturaTirilla } from "../lib/comprobante-auto.ts";
 
 const DIA = "2026-11-10";
 const LIBRE = { diaCerrado: false, yaRegistrada: false };
@@ -66,4 +66,24 @@ test("día cerrado o una igual ya registrada va a revisión", () => {
 test("sin titular ni tipo la nota queda vacía", () => {
   const d = decidirComprobante({ ...buena, transaccion: null, titular: null }, DIA, LIBRE);
   assert.equal(d.accion === "guardar" && d.fila.nota, null);
+});
+
+test("la nota guarda el número de recibo", () => {
+  assert.equal(notaDeLectura({ transaccion: "Consignación", titular: "ANA", recibo: "No. 004512" }), "Consignación, ANA, recibo 004512");
+  assert.equal(notaDeLectura({ transaccion: "Consignación", titular: "ANA", recibo: null }), "Consignación, ANA");
+});
+
+test("dos consignaciones iguales en el mismo minuto no son la misma si el recibo cambia", () => {
+  const otra = [{ hora: "10:55:00", nota: "Consignación, ANA, recibo 111" }];
+  // Mismo monto y minuto, recibo distinto: es otra transacción.
+  assert.equal(yaRegistradaIgual({ hora: "10:55", recibo: "222" }, otra), false);
+  // Mismo recibo: es la misma tirilla, aunque la hora se haya leído distinta.
+  assert.equal(yaRegistradaIgual({ hora: "10:57", recibo: "111" }, otra), true);
+  // Sin recibo legible: como antes, por la hora.
+  assert.equal(yaRegistradaIgual({ hora: "10:55", recibo: null }, otra), true);
+  assert.equal(yaRegistradaIgual({ hora: "10:56", recibo: null }, otra), false);
+  // Consignaciones de antes (sin recibo en la nota): por la hora.
+  const vieja = [{ hora: "10:55:00", nota: "Consignación, ANA" }];
+  assert.equal(yaRegistradaIgual({ hora: "10:55", recibo: "222" }, vieja), true);
+  assert.equal(yaRegistradaIgual({ hora: "10:57", recibo: "222" }, vieja), false);
 });

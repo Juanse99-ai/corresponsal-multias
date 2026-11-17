@@ -371,11 +371,36 @@ export const puente = {
       }
     });
 
+    // Latido (17 nov 2026): cada 5 minutos la app se entera de que el puente
+    // sigue vivo; si deja de llegar en horario, avisa a todos (app/api/cron/latido).
+    // Al recargar el plugin se apaga el latido anterior para no duplicarlo.
+    const urlLatido = String(url).replace(/\/comprobante\/?$/, "/latido");
+    let estadoUltimo = "desconocido";
+    const latir = async () => {
+      if (process.env.CORRESPONSAL_SIN_LATIDO === "1") return; // solo en las pruebas
+      try {
+        await fetch(urlLatido, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ reintento: estadoUltimo }),
+          redirect: "manual",
+          signal: AbortSignal.timeout(20_000),
+        });
+      } catch (e) {
+        log.warn?.(`[corresponsal-puente] El latido no llegó a la app: ${e?.message ?? e}`);
+      }
+    };
+    clearInterval(globalThis.__corresponsalLatido);
+    globalThis.__corresponsalLatido = setInterval(latir, 5 * 60_000);
+    globalThis.__corresponsalLatido.unref?.();
+
     // Si una actualización de OpenClaw quitó el reintento de fotos, el dueño se
     // entera una vez (no en cada recarga del plugin).
     (async () => {
       const base = process.env.OPENCLAW_HOME ?? join(homedir(), ".openclaw");
       const estado = estadoReintento(await archivosWhatsApp(base));
+      estadoUltimo = estado;
+      await latir();
       const marca = join(base, "corresponsal-reintento-avisado");
       if (estado === "puesto") {
         log.info?.("[corresponsal-puente] Reintento de descarga de fotos: puesto.");
