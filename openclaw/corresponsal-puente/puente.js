@@ -282,20 +282,19 @@ export const puente = {
       return anotar(numero, mensajeParaOperadora(cuerpo));
     }
 
-    /** Una foto que no se pudo descargar: se le pide a quien la mandó y se le avisa al dueño. */
+    /**
+     * Una foto que no se pudo descargar: se le avisa al dueño (y a la operadora
+     * que la mandó). Nunca se pide reenviarla al grupo: ahí hay clientes.
+     */
     async function avisarFotoPerdida({ cuantas, deLuis, operadora, enviado }) {
       const hora = horaBogota(enviado ?? Date.now());
       const fotos = cuantas === 1 ? "una foto" : `${cuantas} fotos`;
       const de = deLuis ? " del Sr. Luis" : operadora ? ` de la operadora que termina en ${operadora.slice(-4)}` : " tuya";
       log.error?.(`[corresponsal-puente] No se pudo descargar ${fotos}${de} de las ${hora}: no se reenvió a la app.`);
       if (operadora) {
-        await anotar(operadora, `Tu foto de las ${hora} no se pudo descargar. Mándala otra vez al grupo.`);
+        await anotar(operadora, `Tu foto de las ${hora} no se pudo leer sola. No la mandes otra vez al grupo: ya le avisé a Juan.`);
       }
-      const que = deLuis
-        ? "Pídele que la mande otra vez o súbela a mano."
-        : operadora
-          ? "Ya le pedí que la mande otra vez."
-          : "Mándala otra vez al grupo.";
+      const que = "Regístrala a mano en la app desde la foto del grupo.";
       await anotar(dueno, `No se pudo descargar ${fotos}${de} de las ${hora}. ${que}`);
     }
 

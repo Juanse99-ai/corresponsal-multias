@@ -418,9 +418,9 @@ test("una foto de la operadora que no se descargó no se pierde en silencio", as
     const bandeja = (await leer(rutaBandeja(), "utf8")).trim().split("\n").map((l) => JSON.parse(l));
     assert.equal(bandeja.length, 2);
     assert.equal(bandeja[0].para, "573005550142");
-    assert.equal(bandeja[0].texto, "Tu foto de las 10:56 no se pudo descargar. Mándala otra vez al grupo.");
+    assert.equal(bandeja[0].texto, "Tu foto de las 10:56 no se pudo leer sola. No la mandes otra vez al grupo: ya le avisé a Juan.");
     assert.equal(bandeja[1].para, "573005550101");
-    assert.equal(bandeja[1].texto, "No se pudo descargar una foto de la operadora que termina en 0142 de las 10:56. Ya le pedí que la mande otra vez.");
+    assert.equal(bandeja[1].texto, "No se pudo descargar una foto de la operadora que termina en 0142 de las 10:56. Regístrala a mano en la app desde la foto del grupo.");
   } finally {
     srv.cerrar();
     if (antes === undefined) delete process.env.OPENCLAW_HOME;

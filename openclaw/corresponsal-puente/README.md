@@ -181,9 +181,9 @@ en la hoja Tú.
 
 A veces OpenClaw no logra bajar la foto de WhatsApp (en el registro sale
 `fetch failed` y el mensaje llega como "[whatsapp attachment unavailable]").
-Esa foto no llega a la app, pero no se pierde en silencio: el puente le pide a
-quien la mandó que la reenvíe (si es operadora) y le avisa al dueño, por la
-misma bandeja. Para que al dueño le lleguen esos avisos hace falta una tarea
+Esa foto no llega a la app, pero no se pierde en silencio: el puente le avisa
+al dueño (y a la operadora que la mandó) por la misma bandeja. Nunca se pide
+reenviarla al grupo: ahí hay clientes. Para que al dueño le lleguen esos avisos hace falta una tarea
 de `operadoras.js` con su número:
 
 ```bash

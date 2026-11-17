@@ -209,7 +209,8 @@
   dueño). Si OpenClaw no logra descargar una foto (`fotosSinDescargar`: sin
   archivo, "[whatsapp attachment unavailable]"; pasó el 17 nov 2026 con una de
   Lucy), el puente no la reenvía pero lo anota en la bandeja para quien la
-  mandó y para el dueño (tarea "Avisos del puente"). Y notificación de la app
+  mandó y para el dueño (tarea "Avisos del puente"). Nunca se pide reenviar
+  fotos al grupo: ahí hay clientes. Y notificación de la app
   (`avisarOperadoras`): el puente manda `quien=operadora`.
 - **Resumen de las 7** (11 nov 2026, lo pidió el dueño): `app/api/agente/resumen/route.ts`
   (GET, solo lectura, misma `AGENTE_TOKEN`) devuelve en texto para WhatsApp lo
