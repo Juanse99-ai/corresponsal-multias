@@ -55,6 +55,33 @@ export function rutaBandeja() {
 
 const pesos = (n) => "$" + Math.round(Math.abs(Number(n) || 0)).toLocaleString("es-CO");
 
+/** Hora (HH:MM) de un instante en Bogotá. */
+export function horaBogota(ms) {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: "America/Bogota",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(new Date(ms));
+}
+
+/**
+ * Cuántas fotos del mensaje no se pudieron descargar (17 nov 2026: a una foto
+ * de Lucy le falló la descarga en OpenClaw, "fetch failed", llegó como
+ * "[whatsapp attachment unavailable]" sin archivo y el puente la saltó sin
+ * decir nada). Cuenta las imágenes sin archivo, el mensaje aún sin descargar y
+ * el aviso de adjunto no disponible.
+ */
+export function fotosSinDescargar(event) {
+  const media = Array.isArray(event?.media) ? event.media : [];
+  if (event?.mediaStagingPending) return Math.max(media.length, 1);
+  const sinArchivo = media.filter((m) => tipoDeFoto(m) && !(typeof m?.path === "string" && m.path)).length;
+  if (sinArchivo > 0) return sinArchivo;
+  const texto = String(event?.content ?? event?.body ?? event?.text ?? "");
+  const conArchivo = media.filter((m) => typeof m?.path === "string" && m.path).length;
+  return /attachment unavailable/i.test(texto) && conArchivo === 0 ? 1 : 0;
+}
+
 /** Lo que se le dice a la operadora según lo que respondió la app (null si nada). */
 export function mensajeParaOperadora(cuerpo) {
   if (!cuerpo) return "Tu foto no llegó a la app. Súbela a mano.";
@@ -240,15 +267,36 @@ export const puente = {
       return null;
     }
 
-    /** Deja en la bandeja el mensaje para la operadora que mandó la foto. */
-    async function anotarParaOperadora(numero, cuerpo) {
-      const texto = mensajeParaOperadora(cuerpo);
-      if (!texto) return;
+    /** Deja un mensaje en la bandeja; una tarea de OpenClaw (operadoras.js) se lo manda a ese número. */
+    async function anotar(numero, texto) {
+      if (!numero || !texto) return;
       try {
         await appendFile(rutaBandeja(), JSON.stringify({ para: numero, texto, ts: Date.now() }) + "\n");
       } catch (e) {
-        log.warn?.(`[corresponsal-puente] No se pudo anotar el aviso para la operadora: ${e?.message ?? e}`);
+        log.warn?.(`[corresponsal-puente] No se pudo anotar un aviso: ${e?.message ?? e}`);
       }
+    }
+
+    /** Deja en la bandeja el mensaje para la operadora que mandó la foto. */
+    function anotarParaOperadora(numero, cuerpo) {
+      return anotar(numero, mensajeParaOperadora(cuerpo));
+    }
+
+    /** Una foto que no se pudo descargar: se le pide a quien la mandó y se le avisa al dueño. */
+    async function avisarFotoPerdida({ cuantas, deLuis, operadora, enviado }) {
+      const hora = horaBogota(enviado ?? Date.now());
+      const fotos = cuantas === 1 ? "una foto" : `${cuantas} fotos`;
+      const de = deLuis ? " del Sr. Luis" : operadora ? ` de la operadora que termina en ${operadora.slice(-4)}` : " tuya";
+      log.error?.(`[corresponsal-puente] No se pudo descargar ${fotos}${de} de las ${hora}: no se reenvió a la app.`);
+      if (operadora) {
+        await anotar(operadora, `Tu foto de las ${hora} no se pudo descargar. Mándala otra vez al grupo.`);
+      }
+      const que = deLuis
+        ? "Pídele que la mande otra vez o súbela a mano."
+        : operadora
+          ? "Ya le pedí que la mande otra vez."
+          : "Mándala otra vez al grupo.";
+      await anotar(dueno, `No se pudo descargar ${fotos}${de} de las ${hora}. ${que}`);
     }
 
     api.on("message_received", async (event, ctx) => {
@@ -273,9 +321,11 @@ export const puente = {
       if (!deLuis && !delPunto) return;
       const destino = deLuis ? urlComp : url;
       const texto = deLuis ? textoDelMensaje(event) : null;
-      if (event?.mediaStagingPending) {
-        log.warn?.("[corresponsal-puente] La foto todavía no se había descargado; no se reenvió. Súbela a mano si no aparece.");
-        return;
+      // Fotos que OpenClaw no pudo descargar: no se reenvían, pero nunca en silencio.
+      const perdidas = fotosSinDescargar(event);
+      if (perdidas > 0) {
+        await avisarFotoPerdida({ cuantas: perdidas, deLuis, operadora, enviado: enMs(event?.timestamp) });
+        if (event?.mediaStagingPending) return;
       }
 
       const mensajeId = event?.messageId ?? ctx?.messageId ?? null;

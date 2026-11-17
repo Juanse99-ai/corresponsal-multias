@@ -4,13 +4,25 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { mkdtemp, writeFile } from "node:fs/promises";
+import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { puente, textoDelMensaje, urlDeCompensacion, mensajeParaOperadora, rutaBandeja } from "../openclaw/corresponsal-puente/puente.js";
+import {
+  puente,
+  textoDelMensaje,
+  urlDeCompensacion,
+  mensajeParaOperadora,
+  rutaBandeja,
+  fotosSinDescargar,
+} from "../openclaw/corresponsal-puente/puente.js";
 import { repartir, textoOperadora } from "../openclaw/corresponsal-puente/operadoras.js";
 import { readFile as leer } from "node:fs/promises";
 import { leerEstado, urlAvisos } from "../openclaw/corresponsal-puente/avisos.js";
 import { urlCierre } from "../openclaw/corresponsal-puente/cierre.js";
+
+// Nada de estas pruebas escribe en el ~/.openclaw de verdad: la bandeja de
+// avisos va a una carpeta temporal (una prueba la escribía en la real).
+process.env.OPENCLAW_HOME = mkdtempSync(join(tmpdir(), "openclaw-pruebas-"));
 
 const GRUPO = "120363000000000000@g.us";
 const DUENO = "+573005550101";
@@ -117,7 +129,7 @@ test("una foto todavía sin descargar no se manda vacía", async () => {
       { conversationId: GRUPO, senderId: DUENO },
     );
     assert.equal(srv.recibidos.length, 0);
-    assert.ok(registro.some((m) => m.includes("todavía no se había descargado")));
+    assert.ok(registro.some((m) => m.includes("No se pudo descargar una foto tuya")));
   } finally {
     srv.cerrar();
   }
@@ -365,4 +377,53 @@ test("lo que una operadora le escribe al dueño por privado no llega al agente",
   // Sin operadoras configuradas no se reclama nada.
   const sin = montar({ grupo: GRUPO }).ganchos.get("before_dispatch")!;
   assert.equal(sin({ from: "+573005550142" }, { senderId: "+573005550142" }), undefined);
+});
+
+test("se cuentan las fotos que OpenClaw no pudo descargar", () => {
+  // Así llegó la de Lucy el 17 nov: la imagen sin archivo y el aviso en el texto.
+  assert.equal(fotosSinDescargar({ body: "[whatsapp attachment unavailable]", media: [{ contentType: "image/jpeg" }] }), 1);
+  assert.equal(fotosSinDescargar({ body: "[whatsapp attachment unavailable]" }), 1);
+  assert.equal(fotosSinDescargar({ mediaStagingPending: true, media: [] }), 1);
+  // Una foto buena no cuenta; un mensaje sin fotos tampoco.
+  assert.equal(fotosSinDescargar({ media: [{ contentType: "image/jpeg", path: "/tmp/x.jpg" }] }), 0);
+  assert.equal(fotosSinDescargar({ body: "listo" }), 0);
+});
+
+test("una foto de la operadora que no se descargó no se pierde en silencio", async () => {
+  const srv = await servidorFalso();
+  const antes = process.env.OPENCLAW_HOME;
+  process.env.OPENCLAW_HOME = await mkdtemp(join(tmpdir(), "openclaw-"));
+  try {
+    const { ganchos, registro } = montar({
+      grupo: GRUPO,
+      dueno: DUENO,
+      operadoras: ["+57 300 555 0142"],
+      url: srv.url,
+      token: "secreto",
+    });
+    await ganchos.get("message_received")!(
+      {
+        from: "x",
+        body: "[whatsapp attachment unavailable]",
+        media: [{ contentType: "image/jpeg" }],
+        messageId: "P1",
+        timestamp: Date.UTC(2026, 10, 17, 15, 56) / 1000,
+      },
+      { conversationId: GRUPO, senderId: "573005550142@s.whatsapp.net" },
+    );
+    // No se manda nada a la app (no hay foto)...
+    assert.equal(srv.recibidos.length, 0);
+    // ...pero queda en el registro y en la bandeja, para ella y para el dueño.
+    assert.ok(registro.some((m) => m.includes("No se pudo descargar una foto de la operadora que termina en 0142 de las 10:56")));
+    const bandeja = (await leer(rutaBandeja(), "utf8")).trim().split("\n").map((l) => JSON.parse(l));
+    assert.equal(bandeja.length, 2);
+    assert.equal(bandeja[0].para, "573005550142");
+    assert.equal(bandeja[0].texto, "Tu foto de las 10:56 no se pudo descargar. Mándala otra vez al grupo.");
+    assert.equal(bandeja[1].para, "573005550101");
+    assert.equal(bandeja[1].texto, "No se pudo descargar una foto de la operadora que termina en 0142 de las 10:56. Ya le pedí que la mande otra vez.");
+  } finally {
+    srv.cerrar();
+    if (antes === undefined) delete process.env.OPENCLAW_HOME;
+    else process.env.OPENCLAW_HOME = antes;
+  }
 });

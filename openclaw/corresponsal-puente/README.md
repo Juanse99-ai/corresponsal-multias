@@ -177,6 +177,19 @@ openclaw automations create "55 16 * * *" --tz America/Bogota --exact --name "Ci
 Además la app les manda una notificación (sin WhatsApp) si activan los avisos
 en la hoja Tú.
 
+### Fotos que no se pudieron descargar
+
+A veces OpenClaw no logra bajar la foto de WhatsApp (en el registro sale
+`fetch failed` y el mensaje llega como "[whatsapp attachment unavailable]").
+Esa foto no llega a la app, pero no se pierde en silencio: el puente le pide a
+quien la mandó que la reenvíe (si es operadora) y le avisa al dueño, por la
+misma bandeja. Para que al dueño le lleguen esos avisos hace falta una tarea
+de `operadoras.js` con su número:
+
+```bash
+openclaw automations create "*/5 7-21 * * *" --tz America/Bogota --exact --name "Avisos del puente" --command-argv "[\"$(command -v node)\", \"$HOME/openclaw-plugins/corresponsal-puente/operadoras.js\", \"+573005550101\"]" --announce --channel whatsapp --to "+573005550101"
+```
+
 ## Compensaciones del Sr. Luis
 
 Las fotos de pagos que manda el Sr. Luis (app de Bancolombia, tirilla Redeban

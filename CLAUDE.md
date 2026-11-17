@@ -206,7 +206,10 @@
   pide que estén en `channels.whatsapp.allowFrom`: el puente reclama sus
   privados en `before_dispatch` (el agente no les contesta) y
   `sendReadReceipts` va en false (no se marcan como leídos en el teléfono del
-  dueño). Y notificación de la app
+  dueño). Si OpenClaw no logra descargar una foto (`fotosSinDescargar`: sin
+  archivo, "[whatsapp attachment unavailable]"; pasó el 17 nov 2026 con una de
+  Lucy), el puente no la reenvía pero lo anota en la bandeja para quien la
+  mandó y para el dueño (tarea "Avisos del puente"). Y notificación de la app
   (`avisarOperadoras`): el puente manda `quien=operadora`.
 - **Resumen de las 7** (11 nov 2026, lo pidió el dueño): `app/api/agente/resumen/route.ts`
   (GET, solo lectura, misma `AGENTE_TOKEN`) devuelve en texto para WhatsApp lo
