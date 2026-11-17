@@ -20,6 +20,8 @@ import { repartir, textoOperadora } from "../openclaw/corresponsal-puente/operad
 import { readFile as leer } from "node:fs/promises";
 import { leerEstado, urlAvisos } from "../openclaw/corresponsal-puente/avisos.js";
 import { urlCierre } from "../openclaw/corresponsal-puente/cierre.js";
+import { conReintento, ORIGINAL } from "../openclaw/corresponsal-puente/reintento.js";
+import { parcheDeMudanza } from "../openclaw/corresponsal-puente/exportar-config.js";
 
 // Nada de estas pruebas escribe en el ~/.openclaw de verdad: la bandeja de
 // avisos va a una carpeta temporal (una prueba la escribía en la real).
@@ -438,4 +440,31 @@ test("se sabe si el reintento de descarga sigue puesto en OpenClaw", () => {
   assert.equal(estadoReintento([sinReintento]), "falta");
   assert.equal(estadoReintento([]), "desconocido");
   assert.equal(estadoReintento(["nada que ver"]), "desconocido");
+});
+
+test("el reintento se pone una sola vez y solo donde está el bloque original", () => {
+  const modulo = `function antes() {}\n${ORIGINAL}\nfunction despues() {}`;
+  const nuevo = conReintento(modulo);
+  assert.equal(typeof nuevo, "string");
+  assert.ok((nuevo as string).includes("corresponsal-reintento"));
+  assert.ok(!(nuevo as string).includes(ORIGINAL));
+  assert.ok((nuevo as string).includes("esperas = [3e3, 1e4, 3e4]"));
+  // Ya puesto: no se toca. Con finales de línea de Windows también se encuentra.
+  assert.equal(conReintento(nuevo as string), "ya");
+  assert.equal(typeof conReintento(modulo.replace(/\n/g, "\r\n")), "string");
+  // OpenClaw cambió su código: no se adivina.
+  assert.equal(conReintento("otra cosa"), null);
+});
+
+test("la mudanza lleva el puente y lo de WhatsApp, nada más", () => {
+  const parche = parcheDeMudanza({
+    gateway: { port: 18789, auth: { token: "del-gateway" } },
+    plugins: { entries: { "corresponsal-puente": { config: { url: "https://x.app/api/agente/comprobante", token: "t", grupo: "g@g.us" } } } },
+    channels: { whatsapp: { allowFrom: ["+573005550101"], groupPolicy: "allowlist", accounts: { otro: {} } } },
+  });
+  assert.deepEqual(parche, {
+    plugins: { entries: { "corresponsal-puente": { enabled: true, config: { url: "https://x.app/api/agente/comprobante", token: "t", grupo: "g@g.us" } } } },
+    channels: { whatsapp: { allowFrom: ["+573005550101"], groupPolicy: "allowlist" } },
+  });
+  assert.throws(() => parcheDeMudanza({}), /No encontré/);
 });

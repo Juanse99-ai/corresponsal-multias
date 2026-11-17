@@ -201,11 +201,17 @@ cargador), y con poca batería se apaga: déjalo abierto y conectado.
 
 ### Fotos que no se pudieron descargar
 
-OpenClaw baja cada foto de WhatsApp una sola vez. En el Mac del dueño se le
-agregó a mano un reintento (a los 3, 10 y 30 s) en su módulo de WhatsApp,
+OpenClaw baja cada foto de WhatsApp una sola vez. `reintento.js` le agrega
+un reintento (a los 3, 10 y 30 s) en su módulo de WhatsApp,
 marcado `corresponsal-reintento`, con el original respaldado en
 `~/.openclaw/corresponsal-respaldo`. Una actualización de OpenClaw lo borra: el
-puente lo revisa al arrancar y, si falta, le avisa al dueño una vez.
+puente lo revisa al arrancar y, si falta, le avisa al dueño una vez. Para
+volver a ponerlo:
+
+```bash
+node ~/openclaw-plugins/corresponsal-puente/reintento.js
+openclaw gateway restart
+```
 
 A veces OpenClaw no logra bajar la foto de WhatsApp (en el registro sale
 `fetch failed` y el mensaje llega como "[whatsapp attachment unavailable]").
@@ -278,6 +284,77 @@ openclaw gateway restart
 
 Queda encendido cuando el registro dice "... con 1 operadora." Un número con
 menos de 10 dígitos se ignora.
+
+## Mudar el puente a un PC con Windows
+
+Un PC de escritorio que queda prendido en el local es mejor que un portátil.
+OpenClaw corre en Windows (instalador de PowerShell; arranca solo con una
+tarea programada). No se copia la sesión de WhatsApp del Mac (OpenClaw avisa
+que puede desincronizarse): se vincula de nuevo con el QR y se lleva la
+configuración del puente.
+
+**Solo un equipo puede tener el puente encendido.** Con dos, cada foto entra
+dos veces. Se prepara el PC con el Mac trabajando y el cambio se hace en un
+rato sin movimiento.
+
+### En el Mac (antes)
+
+```bash
+node ~/openclaw-plugins/corresponsal-puente/exportar-config.js ~/Desktop/corresponsal-config.json5
+openclaw automations list
+```
+
+`corresponsal-config.json5` lleva la clave del agente: pásalo al PC en una
+memoria USB y bórralo de los dos lados al terminar. Anota las tareas que salen
+en la lista (nombre, horario, script y número) para crearlas igual en el PC.
+
+### En el PC (preparar, sin vincular WhatsApp todavía)
+
+En PowerShell:
+
+```powershell
+iwr -useb https://openclaw.ai/install.ps1 | iex
+openclaw --version
+mkdir $HOME\openclaw-plugins
+cd $HOME\openclaw-plugins
+git clone --depth 1 https://github.com/Juanse99-ai/corresponsal-multias tmp
+Copy-Item -Recurse tmp\openclaw\corresponsal-puente .
+Remove-Item -Recurse -Force tmp
+openclaw plugins install --link --force --accept-capabilities $HOME\openclaw-plugins\corresponsal-puente
+openclaw config patch --file D:\corresponsal-config.json5
+```
+
+(`D:` es la memoria USB.) Energía: que no se duerma nunca con corriente y que
+Windows Update no reinicie en horario de trabajo:
+
+```powershell
+powercfg /change standby-timeout-ac 0
+powercfg /change hibernate-timeout-ac 0
+```
+
+En Configuración, Windows Update, Opciones avanzadas, Horas activas: de 6 a. m.
+a 10 p. m.
+
+### El cambio
+
+1. En el Mac: `openclaw gateway stop`. En el celular, WhatsApp, Dispositivos
+   vinculados: cierra la sesión del Mac.
+2. En el PC: `openclaw channels login --channel whatsapp` y escanea el QR con
+   el celular. Luego `openclaw gateway restart`.
+3. En el PC: `node $HOME\openclaw-plugins\corresponsal-puente\reintento.js` y otra
+   vez `openclaw gateway restart` (el reintento de fotos; el módulo de WhatsApp
+   existe recién después de vincular).
+4. En el PC: crea las tareas de la lista del Mac con `openclaw automations add`,
+   cambiando las rutas por las del PC (`$HOME\openclaw-plugins\corresponsal-puente\...`)
+   y el `node` por el que dice `(Get-Command node).Source`.
+5. Prueba: manda un comprobante al grupo. En
+   `openclaw logs --follow | Select-String corresponsal-puente` deben salir
+   "Reintento de descarga de fotos: puesto" y "Foto ...: guardado".
+6. En el Mac, para que no quede nada encendido:
+   `launchctl bootout gui/$(id -u)/com.corresponsal.despierto`.
+
+El latido confirma el cambio: si en 15 minutos el PC no lo manda, llega el
+aviso de que el puente no responde.
 
 ## Actualizarlo
 
