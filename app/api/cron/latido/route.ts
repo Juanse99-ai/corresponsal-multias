@@ -19,7 +19,7 @@ const hhmm = (iso: string) =>
 
 /**
  * Vigía del puente (lib/latido.ts). La llama cada 5 minutos un pg_cron de
- * Supabase (migración 20261117120000_corr_latido_puente) con el secreto del
+ * Supabase (migración 20261117190858_corr_latido_puente) con el secreto del
  * cron (`corr_app_config.cron_secret`) en Authorization. Si el puente lleva
  * más de 15 minutos sin latido en horario de trabajo, avisa a admins y
  * operadoras con una notificación de la app; cuando vuelve, avisa que volvió.

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Mantiene despierto el Mac de 7 a. m. a 9 p. m. (despierto.sh). Se copia a
+     ~/Library/LaunchAgents/ cambiando RUTA por la carpeta del plugin. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.corresponsal.despierto</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>RUTA/despierto.sh</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>7</integer>
+    <key>Minute</key>
+    <integer>0</integer>
+  </dict>
+</dict>
+</plist>
