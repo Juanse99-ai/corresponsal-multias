@@ -222,6 +222,12 @@
   `app/api/cron/latido` con `cron_secret`; `lib/latido.ts` decide: sin latido
   más de 15 min de 7 a. m. a 9 p. m. avisa una vez a admins y operadoras por
   notificación de la app (no por WhatsApp, que es lo caído) y avisa cuando vuelve.
+- **Vigilante de OpenClaw** (18 nov 2026): en el Mac,
+  `openclaw/corresponsal-puente/vigilante.sh` (LaunchAgent
+  `com.corresponsal.vigilante`, cada 5 min de 7 a. m. a 9 p. m.) enciende
+  OpenClaw si su servicio no está corriendo. Para apagarlo a propósito, antes
+  `touch ~/.openclaw/corresponsal-pausa`. OpenClaw no procesa los mensajes que
+  llegaron mientras estuvo apagado: esas fotos se cargan con "Llenar desde fotos".
 - **Repetidas por recibo** (17 nov 2026): la nota de la consignación lleva
   "recibo N" y `yaRegistradaIgual` compara el recibo; sin recibo (o contra
   consignaciones viejas sin él), por monto y hora como antes.
