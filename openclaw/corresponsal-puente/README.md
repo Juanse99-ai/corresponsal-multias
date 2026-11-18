@@ -206,7 +206,11 @@ y no volvió a arrancar: a la mañana siguiente no entró ninguna foto, y
 OpenClaw no procesa lo que llegó mientras estuvo apagado (hubo que cargarlas a
 mano con "Llenar desde fotos"). `vigilante.sh` revisa cada 5 minutos, de 7
 a. m. a 9 p. m., que el servicio de OpenClaw esté corriendo y, si no, lo
-enciende (registro en `~/.openclaw/logs/corresponsal-vigilante.log`):
+enciende (registro en `~/.openclaw/logs/corresponsal-vigilante.log`). Si
+OpenClaw corre pero WhatsApp está desconectado y hay internet en dos revisiones
+seguidas, lo reinicia (18 nov 2026: tras una caída de internet el canal quedó
+detenido sin reintentar, aunque el internet volvió). Sin internet no hace nada:
+ahí OpenClaw sigue intentando solo.
 
 ```bash
 sed "s#RUTA#$HOME/openclaw-plugins/corresponsal-puente#" ~/openclaw-plugins/corresponsal-puente/com.corresponsal.vigilante.plist > ~/Library/LaunchAgents/com.corresponsal.vigilante.plist

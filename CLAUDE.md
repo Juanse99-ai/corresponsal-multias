@@ -225,7 +225,8 @@
 - **Vigilante de OpenClaw** (18 nov 2026): en el Mac,
   `openclaw/corresponsal-puente/vigilante.sh` (LaunchAgent
   `com.corresponsal.vigilante`, cada 5 min de 7 a. m. a 9 p. m.) enciende
-  OpenClaw si su servicio no está corriendo. Para apagarlo a propósito, antes
+  OpenClaw si su servicio no está corriendo, y lo reinicia si WhatsApp sigue
+  desconectado con internet en dos revisiones seguidas. Para apagarlo a propósito, antes
   `touch ~/.openclaw/corresponsal-pausa`. OpenClaw no procesa los mensajes que
   llegaron mientras estuvo apagado: esas fotos se cargan con "Llenar desde fotos".
 - **Repetidas por recibo** (17 nov 2026): la nota de la consignación lleva
