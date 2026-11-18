@@ -229,6 +229,10 @@
   desconectado con internet en dos revisiones seguidas. Para apagarlo a propósito, antes
   `touch ~/.openclaw/corresponsal-pausa`. OpenClaw no procesa los mensajes que
   llegaron mientras estuvo apagado: esas fotos se cargan con "Llenar desde fotos".
+- **Reporte de cierre** (18 nov 2026, lo pidió el dueño): la operadora manda al
+  grupo una captura del cierre del Sr. Luis (lista de consignaciones con total).
+  El lector la marca `es_reporte` y la entrada del agente la descarta
+  (`esReporteDeCierre`: reporte y no tirilla); antes quedaba "para revisar".
 - **Repetidas por recibo** (17 nov 2026): la nota de la consignación lleva
   "recibo N" y `yaRegistradaIgual` compara el recibo; sin recibo (o contra
   consignaciones viejas sin él), por monto y hora como antes.
