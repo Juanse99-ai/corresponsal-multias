@@ -199,6 +199,30 @@ launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.corresponsal.despier
 Con la tapa cerrada el Mac igual se duerme (salvo con pantalla externa y
 cargador), y con poca batería se apaga: déjalo abierto y conectado.
 
+### Vigilante de OpenClaw
+
+El 17 nov a las 9:01 p. m. OpenClaw quedó apagado con `openclaw gateway stop`
+y no volvió a arrancar: a la mañana siguiente no entró ninguna foto, y
+OpenClaw no procesa lo que llegó mientras estuvo apagado (hubo que cargarlas a
+mano con "Llenar desde fotos"). `vigilante.sh` revisa cada 5 minutos, de 7
+a. m. a 9 p. m., que el servicio de OpenClaw esté corriendo y, si no, lo
+enciende (registro en `~/.openclaw/logs/corresponsal-vigilante.log`):
+
+```bash
+sed "s#RUTA#$HOME/openclaw-plugins/corresponsal-puente#" ~/openclaw-plugins/corresponsal-puente/com.corresponsal.vigilante.plist > ~/Library/LaunchAgents/com.corresponsal.vigilante.plist
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.corresponsal.vigilante.plist
+```
+
+**Para apagar OpenClaw a propósito** (mudanza, mantenimiento) primero crea la
+pausa, o el vigilante lo vuelve a encender en 5 minutos:
+
+```bash
+touch ~/.openclaw/corresponsal-pausa
+openclaw gateway stop
+```
+
+Para reanudar: `rm ~/.openclaw/corresponsal-pausa` y `openclaw gateway start`.
+
 ### Fotos que no se pudieron descargar
 
 OpenClaw baja cada foto de WhatsApp una sola vez. `reintento.js` le agrega
@@ -337,7 +361,7 @@ a 10 p. m.
 
 ### El cambio
 
-1. En el Mac: `openclaw gateway stop`. En el celular, WhatsApp, Dispositivos
+1. En el Mac: `touch ~/.openclaw/corresponsal-pausa` y `openclaw gateway stop`. En el celular, WhatsApp, Dispositivos
    vinculados: cierra la sesión del Mac.
 2. En el PC: `openclaw channels login --channel whatsapp` y escanea el QR con
    el celular. Luego `openclaw gateway restart`.
@@ -351,7 +375,8 @@ a 10 p. m.
    `openclaw logs --follow | Select-String corresponsal-puente` deben salir
    "Reintento de descarga de fotos: puesto" y "Foto ...: guardado".
 6. En el Mac, para que no quede nada encendido:
-   `launchctl bootout gui/$(id -u)/com.corresponsal.despierto`.
+   `launchctl bootout gui/$(id -u)/com.corresponsal.despierto` y
+   `launchctl bootout gui/$(id -u)/com.corresponsal.vigilante`.
 
 El latido confirma el cambio: si en 15 minutos el PC no lo manda, llega el
 aviso de que el puente no responde.
