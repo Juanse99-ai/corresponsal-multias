@@ -3,7 +3,8 @@
 # 9:01 p. m. OpenClaw quedó apagado con "openclaw gateway stop" y no volvió a
 # arrancar; esa mañana no entró ninguna foto del grupo. Cada 5 minutos, de
 # 7 a. m. a 9 p. m., revisa si el servicio de OpenClaw está corriendo y, si no,
-# lo enciende. Lo lanza el LaunchAgent com.corresponsal.vigilante.
+# lo enciende. Si corre pero WhatsApp está desconectado y hay internet en dos
+# revisiones seguidas, lo reinicia. Lo lanza el LaunchAgent com.corresponsal.vigilante.
 #
 # Para apagar OpenClaw a propósito (mudanza, mantenimiento) sin que el
 # vigilante lo vuelva a encender, crea el archivo de pausa:
@@ -20,8 +21,33 @@ if [ "$hora" -lt 7 ] || [ "$hora" -ge 21 ]; then exit 0; fi
 if [ -e "$BASE/corresponsal-pausa" ]; then exit 0; fi
 
 estado=$(launchctl print "gui/$(id -u)/${VIGILANTE_SERVICIO:-ai.openclaw.gateway}" 2>/dev/null | awk -F'= ' '/^\tstate = /{print $2; exit}')
+MARCA="$BASE/corresponsal-vigilante-whatsapp"
 if [ "$estado" = "running" ]; then
-  [ -n "$VIGILANTE_SOLO_REVISAR" ] && echo "OpenClaw está corriendo: no hago nada."
+  # OpenClaw corre, pero ¿WhatsApp está conectado? (18 nov 2026: tras una caída
+  # de internet el canal quedó "stopped" sin reintentar, aunque el internet volvió.)
+  canal=$(${VIGILANTE_ESTADO_CANAL:-openclaw channels status} 2>/dev/null | grep -i "whatsapp default" | head -1)
+  # ", connected," y no "disconnected": la segunda contiene la primera.
+  if [ -z "$canal" ] || echo "$canal" | grep -Eq '(^|, )connected(,|$)'; then
+    rm -f "$MARCA"
+    [ -n "$VIGILANTE_SOLO_REVISAR" ] && echo "OpenClaw está corriendo y WhatsApp conectado: no hago nada."
+    exit 0
+  fi
+  # Sin internet no sirve reiniciar: OpenClaw sigue intentando solo.
+  if ! curl -s -o /dev/null --max-time 10 "${VIGILANTE_PRUEBA_URL:-https://web.whatsapp.com}"; then
+    [ -n "$VIGILANTE_SOLO_REVISAR" ] && echo "WhatsApp desconectado pero no hay internet: espero."
+    exit 0
+  fi
+  # Con internet y WhatsApp caído en dos revisiones seguidas (unos 5 minutos), se reinicia.
+  if [ ! -e "$MARCA" ]; then
+    [ -n "$VIGILANTE_SOLO_REVISAR" ] && echo "WhatsApp desconectado con internet: si sigue así en la próxima revisión, reinicio." && exit 0
+    touch "$MARCA"
+    anotar "WhatsApp desconectado con internet; reviso de nuevo en 5 minutos."
+    exit 0
+  fi
+  [ -n "$VIGILANTE_SOLO_REVISAR" ] && echo "WhatsApp sigue desconectado con internet: reiniciaría OpenClaw." && exit 0
+  rm -f "$MARCA"
+  anotar "WhatsApp seguía desconectado con internet; reinicio OpenClaw."
+  if openclaw gateway restart >> "$REGISTRO" 2>&1; then anotar "Reiniciado."; else anotar "No se pudo reiniciar (código $?)."; fi
   exit 0
 fi
 
