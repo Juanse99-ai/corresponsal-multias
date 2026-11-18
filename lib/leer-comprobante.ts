@@ -18,6 +18,12 @@ export type MimeImagen = (typeof MIMES)[number];
 export const comprobanteSchema = z.object({
   /** false si la foto no es una tirilla de transacción. */
   es_comprobante: z.boolean(),
+  /**
+   * true si la imagen es un reporte o cierre: una lista de varias
+   * consignaciones con horas y un total (el que Lucy le manda al Sr. Luis al
+   * final del día). No es una tirilla y se descarta sin revisar (18 nov 2026).
+   */
+  es_reporte: z.boolean(),
   /** Pesos enteros, sin centavos. "$266.000,00" -> 266000. */
   monto: z.number().nullable(),
   /** "YYYY-MM-DD" tomado de la tirilla. */
@@ -55,6 +61,7 @@ Reglas que no puedes romper:
 - No adivines. Si un dígito del monto o de la hora no se distingue con certeza, pon seguro en false.
 - Nunca confundas el monto con el número de recibo, el RRN, la aprobación, el terminal ni el número de cuenta.
 - Si la foto no es una tirilla de transacción, pon es_comprobante en false y todo lo demás en null.
+- es_reporte va en true solo si la imagen es un reporte o cierre: una lista o tabla de varias consignaciones (horas y montos) con un total, por ejemplo una captura de pantalla de una app. Una tirilla de papel nunca es reporte. En ese caso es_comprobante va en false.
 - Si la transacción no dice que fue exitosa, pon seguro en false.
 - Un campo que no aparezca en la tirilla va en null; no lo inventes.`;
 

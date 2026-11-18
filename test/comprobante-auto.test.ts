@@ -1,7 +1,7 @@
 // Pruebas de la decisión de los comprobantes que llegan solos (lib/comprobante-auto.ts).
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { decidirComprobante, notaDeLectura, yaRegistradaIgual, type LecturaTirilla } from "../lib/comprobante-auto.ts";
+import { decidirComprobante, esReporteDeCierre, notaDeLectura, yaRegistradaIgual, type LecturaTirilla } from "../lib/comprobante-auto.ts";
 
 const DIA = "2026-11-10";
 const LIBRE = { diaCerrado: false, yaRegistrada: false };
@@ -86,4 +86,12 @@ test("dos consignaciones iguales en el mismo minuto no son la misma si el recibo
   const vieja = [{ hora: "10:55:00", nota: "Consignación, ANA" }];
   assert.equal(yaRegistradaIgual({ hora: "10:55", recibo: "222" }, vieja), true);
   assert.equal(yaRegistradaIgual({ hora: "10:57", recibo: "222" }, vieja), false);
+});
+
+test("el reporte de cierre se reconoce y una tirilla nunca lo es", () => {
+  assert.equal(esReporteDeCierre({ es_comprobante: false, es_reporte: true }), true);
+  // Si el lector duda (dice que es tirilla y reporte a la vez), no se descarta.
+  assert.equal(esReporteDeCierre({ es_comprobante: true, es_reporte: true }), false);
+  assert.equal(esReporteDeCierre({ es_comprobante: false, es_reporte: false }), false);
+  assert.equal(esReporteDeCierre({ es_comprobante: false }), false);
 });

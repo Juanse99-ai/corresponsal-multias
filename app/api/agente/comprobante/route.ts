@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { crearClienteAdmin } from "@/lib/supabase/admin";
 import { SOPORTES_BUCKET } from "@/lib/queries";
 import { leerComprobante, lecturaDisponible, type Comprobante } from "@/lib/leer-comprobante";
-import { decidirComprobante, yaRegistradaIgual } from "@/lib/comprobante-auto";
+import { decidirComprobante, esReporteDeCierre, yaRegistradaIgual } from "@/lib/comprobante-auto";
 import { fechaDeTirilla } from "@/lib/fecha-tirilla";
 import { avisarAdmins, avisarOperadoras } from "@/lib/avisos";
 import { tokenValido, diaBogota } from "@/lib/agente";
@@ -135,6 +135,17 @@ export async function POST(req: Request) {
     return aRevisar("No se pudo leer la foto", null);
   }
   const leido = resultado;
+
+  // El cierre que la operadora le manda al Sr. Luis no es una tirilla: se descarta.
+  if (esReporteDeCierre(leido)) {
+    await Promise.all([
+      sb.storage.from(SOPORTES_BUCKET).remove([path]),
+      sb.from("corr_soportes").delete().eq("id", soporte.id),
+    ]);
+    const ms = tiempos();
+    console.info(`Agente, comprobante: descartada (reporte de cierre), total ${ms.total} ms, lectura ${ms.lectura ?? "-"} ms`);
+    return NextResponse.json({ ok: true, resultado: "descartada", motivo: "Es un reporte de cierre, no una tirilla", ms });
+  }
 
   // 3. Decidir (lib/comprobante-auto.ts). Guardar la lectura en el soporte (la
   // revisión en la app no vuelve a pagarla) y consultar el día van a la vez.

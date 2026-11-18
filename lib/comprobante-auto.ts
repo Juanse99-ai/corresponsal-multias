@@ -12,6 +12,8 @@ import { fechaDeTirilla } from "./fecha-tirilla.ts";
 /** Lo que devuelve el lector (lib/leer-comprobante.ts), solo los campos que usa la decisión. */
 export interface LecturaTirilla {
   es_comprobante: boolean;
+  /** La imagen es un reporte o cierre (lista de consignaciones con total), no una tirilla. */
+  es_reporte?: boolean;
   monto: number | null;
   fecha: string | null;
   hora: string | null;
@@ -95,4 +97,14 @@ export function decidirComprobante(
     accion: "guardar",
     fila: { fecha: f.fecha, monto: l.monto, hora: l.hora.slice(0, 5), nota: notaDeLectura(l) },
   };
+}
+
+/**
+ * La foto es el reporte de cierre que la operadora le manda al Sr. Luis (una
+ * lista de consignaciones con su total), no una tirilla: se descarta sin
+ * dejarla para revisar (18 nov 2026, lo pidió el dueño). Solo si el lector
+ * dice las dos cosas: que es un reporte y que no es una tirilla.
+ */
+export function esReporteDeCierre(l: Pick<LecturaTirilla, "es_comprobante" | "es_reporte">): boolean {
+  return l.es_reporte === true && !l.es_comprobante;
 }
