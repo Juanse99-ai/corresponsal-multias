@@ -3,7 +3,7 @@
 // corre una tarea programada de OpenClaw cada 5 minutos con el número de la
 // operadora (`node operadoras.js +57...`), y OpenClaw le manda lo que este
 // script imprime. Si no hay nada para ella, no imprime nada y no se manda nada.
-// OpenClaw está vinculado al WhatsApp del dueño: el mensaje le llega desde ese
+// OpenClaw está vinculado al WhatsApp del taller: el mensaje le llega desde ese
 // número, por eso empieza con "Corresponsal".
 //
 // Lee la bandeja que llena el puente (~/.openclaw/corresponsal-operadoras.jsonl):

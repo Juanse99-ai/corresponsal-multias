@@ -22,6 +22,11 @@
       "url": { "type": "string", "description": "Entrada de la app: https://.../api/agente/comprobante" },
       "urlCompensacion": { "type": "string", "description": "Entrada de compensaciones. Si falta, se usa la de url cambiando /comprobante por /compensacion" },
       "token": { "type": "string", "description": "El mismo AGENTE_TOKEN configurado en Vercel" },
+      "nombres": {
+        "type": "object",
+        "additionalProperties": { "type": "string" },
+        "description": "Nombre de cada operadora para el resumen del grupo, por los últimos 4 dígitos de su número: {\"0142\": \"Ana\"}"
+      },
       "diagnostico": { "type": "boolean", "description": "Escribe en el registro lo que ve de cada mensaje del grupo (sin contenido)" }
     }
   }
