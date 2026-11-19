@@ -148,8 +148,11 @@ Probarlas sin esperar: `node ~/openclaw-plugins/corresponsal-puente/avisos.js`
 
 ### A las operadoras
 
-OpenClaw está vinculado al WhatsApp del dueño: lo que le llegue a una operadora
-sale desde ese número (por eso el mensaje empieza con *Corresponsal*). No tiene
+OpenClaw está vinculado al WhatsApp del taller (desde el 18 nov 2026; antes
+iba en el del dueño): lo que le llegue a una operadora o al dueño sale desde
+ese número. El dueño escribe al agente desde su propio celular, al chat del
+taller; `selfChatMode` va en `false` para que nadie con el celular del taller
+le dé órdenes (por eso el mensaje empieza con *Corresponsal*). No tiene
 costo: es WhatsApp normal, no la API de pago, y estas tareas no usan IA.
 
 - Cuando una operadora manda una foto al grupo, el puente anota cómo quedó
@@ -162,7 +165,7 @@ costo: es WhatsApp normal, no la API de pago, y estas tareas no usan IA.
 OpenClaw solo escribe por privado a quien está en `channels.whatsapp.allowFrom`,
 así que la operadora va ahí. Eso también la dejaría hablar con el agente: el
 puente reclama sus mensajes privados antes (`before_dispatch`), igual que los
-del grupo, y no deben marcarse como leídos en el teléfono del dueño:
+del grupo, y no deben marcarse como leídos en el teléfono del taller:
 
 ```bash
 openclaw config set channels.whatsapp.sendReadReceipts false
@@ -282,10 +285,7 @@ un Nequi). Si la foto no muestra ningún pago y el texto no dice palos, la app
 la descarta y no avisa: en el registro sale `descartada (La foto no muestra
 pagos)`. Si era una compensación y la foto no se leyó, súbela a mano.
 
-Mientras `COMPENSACIONES_AUTO` no esté en `1` en Vercel, las demás quedan en "Por
-confirmar" y llega un aviso al celular del admin. Cuando ya se vea que lee
-bien (una semana), se crea `COMPENSACIONES_AUTO=1` en Vercel y se vuelve a
-desplegar: desde ahí lo que cuadra con los palos y no tiene dudas se guarda
+`COMPENSACIONES_AUTO=1` está en Vercel desde el 18 nov 2026. Lo que cuadra con los palos y no tiene dudas se guarda
 solo, y lo demás sigue quedando por confirmar.
 
 Si una foto de Luis no llega, mira el registro con `diagnostico` encendido: la
@@ -365,10 +365,10 @@ a 10 p. m.
 
 ### El cambio
 
-1. En el Mac: `touch ~/.openclaw/corresponsal-pausa` y `openclaw gateway stop`. En el celular, WhatsApp, Dispositivos
+1. En el Mac: `touch ~/.openclaw/corresponsal-pausa` y `openclaw gateway stop`. En el celular del taller, WhatsApp, Dispositivos
    vinculados: cierra la sesión del Mac.
 2. En el PC: `openclaw channels login --channel whatsapp` y escanea el QR con
-   el celular. Luego `openclaw gateway restart`.
+   el celular del taller. Luego `openclaw gateway restart`.
 3. En el PC: `node $HOME\openclaw-plugins\corresponsal-puente\reintento.js` y otra
    vez `openclaw gateway restart` (el reintento de fotos; el módulo de WhatsApp
    existe recién después de vincular).

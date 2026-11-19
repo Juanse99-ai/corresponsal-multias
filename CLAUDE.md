@@ -177,8 +177,9 @@
   fotos y cuánto suman) que abre una ventana con la foto grande al lado de los
   pagos leídos (12 nov 2026, lo pidió el dueño: limpio, poco texto, botones de
   ícono y con animaciones). Excepciones que pidió para esa ventana: registrar
-  es solo el chulo, y los pagos entran de a poco (20 ms). Sin `COMPENSACIONES_AUTO=1` en Vercel todo queda
-  por confirmar; con él, lo que cuadra con los palos y no tiene dudas se guarda
+  es solo el chulo, y los pagos entran de a poco (20 ms). `COMPENSACIONES_AUTO=1` está en Vercel
+  desde el 18 nov 2026 (lo pidió el dueño); sin él todo quedaría por
+  confirmar. Con él, lo que cuadra con los palos y no tiene dudas se guarda
   solo. Luis también manda al grupo fotos que no son pagos (pedidos con el
   número de un Nequi): si la foto no muestra pagos y el texto no dice palos
   (`noEsCompensacion`), se descarta sin aviso (12 nov 2026, lo aprobó el dueño).
@@ -190,9 +191,11 @@
   quita el encabezado de OpenClaw del texto (`textoDeLuis`), por si el puente
   del Mac no está actualizado.
 - **Avisos por WhatsApp** (12 nov 2026, lo pidió el dueño): dos tareas de
-  OpenClaw tipo comando, como el resumen, al chat del dueño consigo mismo
-  (OpenClaw está vinculado a su WhatsApp: lo que mande a otro chat sale desde
-  su número).
+  OpenClaw tipo comando, como el resumen, al chat del dueño. Desde el 18 nov
+  2026 OpenClaw está vinculado al WhatsApp del taller (no al del dueño, que lo
+  pidió así): todo lo que manda sale desde el número del taller, y
+  `selfChatMode` está apagado para que nadie con el celular del taller le dé
+  órdenes al agente.
   `openclaw/corresponsal-puente/avisos.js` cada 15 min pide a
   `app/api/agente/avisos?desde=` las fotos que dejó el agente por revisar
   (`created_by` vacío; el motivo de los comprobantes queda en
