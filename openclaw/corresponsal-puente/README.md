@@ -150,9 +150,9 @@ Probarlas sin esperar: `node ~/openclaw-plugins/corresponsal-puente/avisos.js`
 
 OpenClaw está vinculado al WhatsApp del taller (desde el 18 nov 2026; antes
 iba en el del dueño): lo que le llegue a una operadora o al dueño sale desde
-ese número. El dueño escribe al agente desde su propio celular, al chat del
-taller; `selfChatMode` va en `false` para que nadie con el celular del taller
-le dé órdenes (por eso el mensaje empieza con *Corresponsal*). No tiene
+ese número (por eso el mensaje empieza con *Corresponsal*). El dueño escribe
+al agente desde su propio celular, al chat del taller; `selfChatMode` va en
+`false` para que nadie con el celular del taller le dé órdenes. No tiene
 costo: es WhatsApp normal, no la API de pago, y estas tareas no usan IA.
 
 - Cuando una operadora manda una foto al grupo, el puente anota cómo quedó
