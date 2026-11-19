@@ -218,6 +218,13 @@
   `corresponsal-reintento` (respaldo en `~/.openclaw/corresponsal-respaldo`);
   se pierde al actualizar OpenClaw y el puente avisa (`estadoReintento`). Y notificación de la app
   (`avisarOperadoras`): el puente manda `quien=operadora`.
+- **Resumen del grupo** (19 nov 2026, lo pidió el dueño): el puente anota cada
+  mensaje del dueño, las operadoras y el Sr. Luis (foto con su resultado, o
+  texto) en `~/.openclaw/corresponsal-grupo.jsonl`; nunca lo de los clientes del
+  grupo. `openclaw/corresponsal-puente/grupo.js` (tarea de OpenClaw a las 6:00
+  p. m. al chat del dueño) arma el resumen del día y guarda solo 7 días. Si no
+  llegó nada lo dice, para notar que el puente dejó de ver el grupo. Nombres de
+  las operadoras en `config.nombres` (local, no en el repo).
 - **Latido del puente** (17 nov 2026, lo pidió el dueño): el puente hace POST a
   `app/api/agente/latido` cada 5 min (guarda `puente_latido` y
   `puente_reintento` en `corr_app_config`). Un pg_cron de Supabase

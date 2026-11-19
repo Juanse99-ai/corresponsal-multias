@@ -180,6 +180,27 @@ openclaw automations create "55 16 * * *" --tz America/Bogota --exact --name "Ci
 Además la app les manda una notificación (sin WhatsApp) si activan los avisos
 en la hoja Tú.
 
+### Resumen del grupo
+
+A las 6:00 p. m. le llega al dueño lo que pasó hoy en el grupo: cuántas fotos
+llegaron y cómo quedaron (por persona y con lo registrado), las compensaciones
+del Sr. Luis, lo que quedó por revisar, las fotos que no se pudieron descargar y
+lo que escribieron. Si no llegó nada, también lo dice: así se nota si el puente
+dejó de ver el grupo.
+
+El puente anota cada mensaje del dueño, las operadoras y el Sr. Luis en
+`~/.openclaw/corresponsal-grupo.jsonl` (nada de los clientes del grupo) y
+`grupo.js` arma el mensaje y deja solo los últimos 7 días. Los nombres de las
+operadoras salen de `config.nombres` (por los últimos 4 dígitos); sin eso dice
+"Operadora …0142".
+
+```bash
+openclaw config set plugins.entries.corresponsal-puente.config.nombres '{"0142":"Ana"}' --strict-json
+openclaw automations create "0 18 * * *" --tz America/Bogota --exact --name "Resumen del grupo" --command-argv "[\"$(command -v node)\", \"$HOME/openclaw-plugins/corresponsal-puente/grupo.js\"]" --announce --channel whatsapp --to "+573005550101"
+```
+
+Probarlo sin esperar: `node ~/openclaw-plugins/corresponsal-puente/grupo.js`.
+
 ### Latido
 
 Cada 5 minutos el puente le avisa a la app que sigue vivo

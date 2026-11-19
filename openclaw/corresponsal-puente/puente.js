@@ -53,6 +53,24 @@ export function rutaBandeja() {
   return join(process.env.OPENCLAW_HOME ?? join(homedir(), ".openclaw"), "corresponsal-operadoras.jsonl");
 }
 
+/**
+ * Diario del grupo (19 nov 2026, lo pidió el dueño): el puente anota aquí cada
+ * mensaje del dueño, las operadoras y el Sr. Luis (fotos con su resultado y
+ * textos) y `grupo.js` arma con eso el resumen del día. Nada de los clientes
+ * del grupo se anota.
+ */
+export function rutaDiario() {
+  return join(process.env.OPENCLAW_HOME ?? join(homedir(), ".openclaw"), "corresponsal-grupo.jsonl");
+}
+
+/** Quién mandó el mensaje, como se lee en el resumen. */
+export function nombreDe({ deLuis, operadora }, nombres) {
+  if (deLuis) return "Sr. Luis";
+  if (!operadora) return "Tú";
+  const n = nombres && typeof nombres === "object" ? nombres[operadora.slice(-4)] : null;
+  return typeof n === "string" && n.trim() ? n.trim() : `Operadora …${operadora.slice(-4)}`;
+}
+
 const pesos = (n) => "$" + Math.round(Math.abs(Number(n) || 0)).toLocaleString("es-CO");
 
 /** Hora (HH:MM) de un instante en Bogotá. */
@@ -172,6 +190,7 @@ export const puente = {
     const urlComp = String(cfg.urlCompensacion ?? "").trim() || urlDeCompensacion(url);
     const token = String(cfg.token ?? "").trim();
     const diagnostico = cfg.diagnostico === true;
+    const nombres = cfg.nombres;
 
     if (!grupo) {
       log.error?.("[corresponsal-puente] Falta config.grupo: el puente no hace nada.");
@@ -325,6 +344,15 @@ export const puente = {
       await anotar(dueno, `No se pudo descargar ${fotos}${de} de las ${hora}. ${que}`);
     }
 
+    /** Anota un mensaje del grupo en el diario del día. */
+    async function anotarDia(datos) {
+      try {
+        await appendFile(rutaDiario(), JSON.stringify({ ts: Date.now(), ...datos }) + "\n");
+      } catch (e) {
+        log.warn?.(`[corresponsal-puente] No se pudo anotar en el diario del grupo: ${e?.message ?? e}`);
+      }
+    }
+
     api.on("message_received", async (event, ctx) => {
       if (!esDelGrupo(ctx?.conversationId, ctx?.sessionKey, event?.sessionKey, event?.from)) return;
 
@@ -346,11 +374,18 @@ export const puente = {
       const delPunto = esNumero(remitente, dueno) || deOperadora;
       if (!deLuis && !delPunto) return;
       const destino = deLuis ? urlComp : url;
-      const texto = deLuis ? textoDelMensaje(event) : null;
+      const textoLimpio = textoDelMensaje(event);
+      const texto = deLuis ? textoLimpio : null;
+      const quien = nombreDe({ deLuis, operadora }, nombres);
+      const enviadoMs = enMs(event?.timestamp) ?? Date.now();
+      if (textoLimpio && !/attachment unavailable/i.test(textoLimpio)) {
+        await anotarDia({ ts: enviadoMs, quien, tipo: "texto", texto: textoLimpio.slice(0, 200) });
+      }
       // Fotos que OpenClaw no pudo descargar: no se reenvían, pero nunca en silencio.
       const perdidas = fotosSinDescargar(event);
       if (perdidas > 0) {
         await avisarFotoPerdida({ cuantas: perdidas, deLuis, operadora, enviado: enMs(event?.timestamp) });
+        await anotarDia({ ts: enviadoMs, quien, tipo: "perdida", cuantas: perdidas });
         if (event?.mediaStagingPending) return;
       }
 
@@ -367,6 +402,14 @@ export const puente = {
         } catch (e) {
           log.error?.(`[corresponsal-puente] No se pudo leer la foto del disco: ${e?.message ?? e}`);
         }
+        await anotarDia({
+          ts: enviadoMs,
+          quien,
+          tipo: deLuis ? "compensacion" : "foto",
+          resultado: cuerpo?.resultado ?? "no_llego",
+          motivo: typeof cuerpo?.motivo === "string" ? cuerpo.motivo : null,
+          monto: deLuis ? (cuerpo?.suma ?? null) : (cuerpo?.consignacion?.monto ?? null),
+        });
         if (operadora && !deLuis) await anotarParaOperadora(operadora, cuerpo);
       }
     });
