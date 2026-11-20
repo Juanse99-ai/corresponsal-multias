@@ -4,7 +4,6 @@ import { useState, useTransition } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
 import { CaretLeft, CaretRight, Check, Plus, Receipt, Trash, Warning, X } from "@phosphor-icons/react/dist/ssr";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { Badge } from "@/components/ui/badge";
@@ -94,7 +93,10 @@ export function CompensacionesPorConfirmar({ fotos }: { fotos: SoporteConUrl[] }
             exit={{ opacity: 0, height: 0 }}
             transition={TRANSICION}
           >
-            <Card className="mt-5 p-0">
+            {/* Franja en el relleno de la acción principal (negro en Claro, hueso en
+                Noche): es lo único de la pantalla que pide hacer algo. Aire abajo
+                para que no se pegue al resumen del día. */}
+            <div className="pt-5 pb-7">
               <button
                 type="button"
                 onClick={() => setAbierta(true)}
@@ -103,18 +105,31 @@ export function CompensacionesPorConfirmar({ fotos }: { fotos: SoporteConUrl[] }
                     ? "Revisar 1 foto del Sr. Luis por confirmar"
                     : `Revisar ${pendientes.length} fotos del Sr. Luis por confirmar`
                 }
-                className="flex w-full items-center gap-3 rounded-[inherit] px-4 py-3 text-left outline-none transition-colors duration-[var(--dur-1)] hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-solid sm:px-5"
+                className="flex w-full items-center gap-3 rounded-3xl bg-primary px-4 py-3.5 text-left text-primary-foreground shadow-primario outline-none transition-[background-color,transform] duration-[140ms] ease-ios hover:bg-primary/92 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent focus-visible:outline-solid active:scale-[0.99] sm:gap-4 sm:px-5 dark:border dark:border-white/20"
               >
-                <span className="tnum grid size-9 shrink-0 place-items-center rounded-full bg-warn-bg text-body font-semibold text-warn-fg">
+                <span className="tnum grid size-10 shrink-0 place-items-center rounded-full bg-primary-foreground/14 text-title font-semibold">
                   {pendientes.length}
                 </span>
-                <span className="flex-1 text-title font-semibold whitespace-nowrap text-text">Por confirmar</span>
-                {total > 0 && <AnimatedMoney value={total} desdeCero={false} className="min-w-0 truncate text-title font-semibold text-text" />}
-                <span aria-hidden className="grid shrink-0 place-items-center rounded-full text-text-2 sm:size-9 sm:bg-surface-2">
-                  <CaretRight size={16} weight="bold" />
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="truncate text-title font-semibold">
+                    {pendientes.length === 1 ? "1 foto del Sr. Luis por revisar" : `${pendientes.length} fotos del Sr. Luis por revisar`}
+                  </span>
+                  {total > 0 && (
+                    <span className="flex items-baseline gap-1 truncate text-body text-primary-foreground/70">
+                      <AnimatedMoney value={total} desdeCero={false} className="tnum" />
+                      <span>sin registrar</span>
+                    </span>
+                  )}
+                </span>
+                <span
+                  aria-hidden
+                  className="inline-flex h-9 shrink-0 items-center gap-1 rounded-full bg-primary-foreground pr-2.5 pl-2.5 text-body font-semibold text-primary sm:pl-4"
+                >
+                  <span className="hidden sm:inline">Revisar</span>
+                  <CaretRight size={15} weight="bold" />
                 </span>
               </button>
-            </Card>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
